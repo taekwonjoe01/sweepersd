@@ -14,6 +14,8 @@ import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.List;
+
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -25,7 +27,8 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = ActivityDetectionService.class.getSimpleName();
 
-    private int mConfidenceThreshold = 100; // TODO: make this adjustable
+    private int mMaxConfidenceThreshold = 90; // TODO: make this adjustable
+    private int mMinConfidenceThreshold = 40;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -38,29 +41,34 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
         if (intent != null) {
             if (ActivityRecognitionResult.hasResult(intent)) {
                 ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
-                DetectedActivity detectedActivity = result.getMostProbableActivity();
 
-                handleActivity(detectedActivity);
+                handleActivity(result);
             }
         }
     }
 
-    private void handleActivity(DetectedActivity activity) {
-        Log.d(TAG, "Activity detected: " + getActivityString(activity.getType()) + " conf:"
-                + activity.getConfidence());
-        if (activity.getConfidence() >= mConfidenceThreshold) {
-            Log.d(TAG, "Activity confidence meets threshold.");
-            if (activity.getType() == DetectedActivity.ON_FOOT &&
-                    SweeperSDApplication.getmDetectedActivity().getType() ==
-                            DetectedActivity.IN_VEHICLE) {
+    private void handleActivity(ActivityRecognitionResult result) {
+        List<DetectedActivity> activities = result.getProbableActivities();
+        int drivingActivity = 0;
+        int onFootActivity = 0;
+        for (DetectedActivity activity : activities) {
+            if (activity.getType() == DetectedActivity.IN_VEHICLE) {
+                drivingActivity = activity.getConfidence();
+            } else if (activity.getType() == DetectedActivity.ON_FOOT) {
+                onFootActivity = activity.getConfidence();
+            }
+        }
+        long currentTime = System.currentTimeMillis();
+        long timeSinceDriving = currentTime - SweeperSDApplication.getDrivingTimestamp();
+        if (onFootActivity >= mMaxConfidenceThreshold && timeSinceDriving < 60000L &&
+                drivingActivity < mMinConfidenceThreshold) {
+            long timeSinceLastPark = currentTime - SweeperSDApplication.getParkedTimestamp();
+            if (timeSinceLastPark > 60000L) {
                 handleParkDetected();
             }
-            /*if (SweeperSDApplication.getmDetectedActivity() != null &&
-                    activity.getType() != SweeperSDApplication.getmDetectedActivity().getType()) {
-                Log.d(TAG, "handleParkDetected");
-                handleParkDetected();
-            }*/
-            SweeperSDApplication.setDetectedActivity(activity);
+        }
+        if (drivingActivity >= mMaxConfidenceThreshold) {
+            SweeperSDApplication.setDrivingTimestamp(currentTime);
         }
     }
 
@@ -87,12 +95,16 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
     }
 
     private void handleParkDetected() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
+        if (!mGoogleApiClient.isConnecting() || !mGoogleApiClient.isConnected()) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+            mGoogleApiClient.connect();
+        } else if (mGoogleApiClient.isConnected()) {
+            findParkedLocation();
+        }
     }
 
     @Override
@@ -103,8 +115,18 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "onConnected");
+        findParkedLocation();
+        mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(TAG, "onConnectionFailed");
+    }
+
+    private void findParkedLocation() {
         SweeperSDApplication.setParkedLocation(LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient));
+                mGoogleApiClient), System.currentTimeMillis());
         if (SweeperSDApplication.getParkedLocation() != null) {
             Intent notificationIntent = new Intent(this, MapsActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -126,11 +148,5 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
                     getSystemService(NOTIFICATION_SERVICE);
             notificationManager.notify(0, builder.build());
         }
-        mGoogleApiClient.disconnect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(TAG, "onConnectionFailed");
     }
 }

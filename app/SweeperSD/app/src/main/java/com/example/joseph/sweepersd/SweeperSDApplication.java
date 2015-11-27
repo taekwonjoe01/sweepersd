@@ -3,28 +3,32 @@ package com.example.joseph.sweepersd;
 import android.app.Application;
 import android.location.Location;
 
-import com.google.android.gms.location.DetectedActivity;
-
 /**
  * Created by joseph on 11/25/15.
  */
 public class SweeperSDApplication extends Application {
     private static Location mParkedLocation;
-    private static DetectedActivity mDetectedActivity;
+    private static long mParkedTimestamp = 0L;
+    private static long mDrivingTimestamp = 0L;
 
     public static Location getParkedLocation() {
         return mParkedLocation;
     }
 
-    public static synchronized void setParkedLocation(Location location) {
+    public static Long getParkedTimestamp() {
+        return mParkedTimestamp;
+    }
+
+    public static synchronized void setParkedLocation(Location location, long timestamp) {
         mParkedLocation = location;
+        mParkedTimestamp = timestamp;
     }
 
-    public static DetectedActivity getmDetectedActivity() {
-        return mDetectedActivity;
+    public static synchronized void setDrivingTimestamp(long timestamp) {
+        mDrivingTimestamp = timestamp;
     }
 
-    public static synchronized void setDetectedActivity(DetectedActivity activity) {
-        mDetectedActivity = activity;
+    public static long getDrivingTimestamp() {
+        return mDrivingTimestamp;
     }
 }
