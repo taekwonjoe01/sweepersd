@@ -7,6 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -22,6 +24,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationServices;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class SweeperService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener{
@@ -57,6 +64,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private volatile boolean mIsDriving = false;
     private volatile boolean mIsParked = false;
     private volatile Location mParkedLocation;
+    private volatile List<Address> mParkedAddresses = new ArrayList<Address>();
 
     public SweeperService() {
     }
@@ -103,6 +111,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         try {
+            // TODO: only request location updates when we're driving.
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
                     5f, this);
         } catch (SecurityException e) {
@@ -192,6 +201,10 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         public boolean isParked() {
             return mIsParked;
         }
+
+        public List<Address> getLastKnownParkingAddresses() {
+            return mParkedAddresses;
+        }
     }
 
     private void handleActivityUpdate() {
@@ -209,7 +222,37 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     private void handleParkDetected() {
         mParkedLocation = mLocation;
+
+        mParkedAddresses = getAddressesForLocation();
+
+        // TODO: SharedPreferences for handling whether or not user wants an update every parking
+        // event or only if we park in a bad location.
         sendParkedNotification();
+        // TODO: Checking the parked location with the database to know if we're in a no parking
+        // zone.
+    }
+
+    private List<Address> getAddressesForLocation() {
+        long start = System.nanoTime();
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        List<Address> addresses = new ArrayList<>();
+
+        if (mParkedLocation != null) {
+            try {
+                addresses = geocoder.getFromLocation(
+                        mParkedLocation.getLatitude(),
+                        mParkedLocation.getLongitude(),
+                        10);
+            } catch (IOException ioException) {
+                // Catch network or other I/O problems.
+            } catch (IllegalArgumentException illegalArgumentException) {
+                // Catch invalid latitude or longitude values.
+            }
+        }
+        long end = System.nanoTime();
+        Log.d(TAG, "getting Address took: " + (end - start) / 1000000 + "ms");
+        return addresses;
     }
 
     private void sendParkedNotification() {

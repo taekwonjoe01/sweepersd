@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Address;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -31,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mIsParkedText;
     private TextView mIsDrivingText;
 
+    private TextView mAddresses;
+
     private Handler mActivityHandler;
     private Runnable mRunnable;
 
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         mUnknownText = (TextView) findViewById(R.id.unknownConfidenceText);
         mIsParkedText = (TextView) findViewById(R.id.isParkedText);
         mIsDrivingText = (TextView) findViewById(R.id.isDrivingText);
+        mAddresses = (TextView) findViewById(R.id.addresses);
 
         mLaunchMapsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,6 +166,19 @@ public class MainActivity extends AppCompatActivity {
                 mUnknownText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_UNKNOWN));
                 mIsParkedText.setText("" + mServiceBinder.isParked());
                 mIsDrivingText.setText("" + mServiceBinder.isDriving());
+
+                String a = "";
+                for (Address address : mServiceBinder.getLastKnownParkingAddresses()) {
+                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                        a += address.getAddressLine(i) + ", ";
+                    }
+                    a += "\n";
+                    Log.d(TAG, address.toString());
+                    String street = address.getThoroughfare();
+                    String housenumber = address.getFeatureName();
+                    String city = address.getLocality();
+                }
+                mAddresses.setText(a);
             }
             mActivityHandler.postDelayed(mRunnable, 33);
         }
