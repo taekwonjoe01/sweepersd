@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -25,23 +26,40 @@ import com.google.android.gms.location.LocationServices;
 public class SweeperService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener{
     private static final String TAG = SweeperService.class.getSimpleName();
+    private static final int DRIVING_CONFIDENCE = 85;
+    private static final int NOT_DRIVING_CONFIDENCE = 20;
+    public static final String CONFIDENCE_VEHICLE = "CONFIDENCE_VEHICLE";
+    public static final String CONFIDENCE_FOOT = "CONFIDENCE_FOOT";
+    public static final String CONFIDENCE_BICYCLE = "CONFIDENCE_BICYCLE";
+    public static final String CONFIDENCE_WALKING = "CONFIDENCE_WALKING";
+    public static final String CONFIDENCE_RUNNING = "CONFIDENCE_RUNNING";
+    public static final String CONFIDENCE_TILTING = "CONFIDENCE_TILTING";
+    public static final String CONFIDENCE_STILL = "CONFIDENCE_STILL";
+    public static final String CONFIDENCE_UNKNOWN = "CONFIDENCE_UNKNOWN";
 
     private GoogleApiClient mClient;
     private LocationManager mLocationManager;
-
     private boolean mIsConnected = false;
     private boolean mIsStarted = false;
-    private boolean mIsDriving = false;
-    private boolean mIsParked = false;
-    private boolean mHandledPark = false;
-
     private Location mLocation;
     private long mLocationTimestamp;
 
+    private final IBinder mBinder = new SweeperBinder();
+
+    private volatile int mInVehicleConfidence;
+    private volatile int mOnFootConfidence;
+    private volatile int mStillConfidence;
+    private volatile int mUnknownConfidence;
+    private volatile int mOnBicycleConfidence;
+    private volatile int mWalkingConfidence;
+    private volatile int mRunningConfidence;
+    private volatile int mTiltingConfidence;
+    private volatile boolean mIsDriving = false;
+    private volatile boolean mIsParked = false;
+    private volatile Location mParkedLocation;
+
     public SweeperService() {
     }
-
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -128,12 +146,75 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
+    }
+
+    public class SweeperBinder extends Binder {
+        public int getConfidence(String confidence) {
+            int result = -1;
+            switch (confidence) {
+                case CONFIDENCE_BICYCLE:
+                    result = mOnBicycleConfidence;
+                    break;
+                case CONFIDENCE_FOOT:
+                    result = mOnFootConfidence;
+                    break;
+                case CONFIDENCE_RUNNING:
+                    result = mRunningConfidence;
+                    break;
+                case CONFIDENCE_WALKING:
+                    result = mWalkingConfidence;
+                    break;
+                case CONFIDENCE_STILL:
+                    result = mStillConfidence;
+                    break;
+                case CONFIDENCE_TILTING:
+                    result = mTiltingConfidence;
+                    break;
+                case CONFIDENCE_UNKNOWN:
+                    result = mUnknownConfidence;
+                    break;
+                case CONFIDENCE_VEHICLE:
+                    result = mInVehicleConfidence;
+                    break;
+            }
+            return result;
+        }
+
+        public Location getLastKnownParkingLocation() {
+            return mParkedLocation;
+        }
+
+        public boolean isDriving() {
+            return mIsDriving;
+        }
+
+        public boolean isParked() {
+            return mIsParked;
+        }
+    }
+
+    private void handleActivityUpdate() {
+        if (mInVehicleConfidence > DRIVING_CONFIDENCE) {
+            mIsDriving = true;
+            mIsParked = false;
+        } else if (mInVehicleConfidence < NOT_DRIVING_CONFIDENCE) {
+            if (mIsDriving) {
+                mIsParked = true;
+                handleParkDetected();
+            }
+            mIsDriving = false;
+        }
     }
 
     private void handleParkDetected() {
-        SweeperSDApplication.setParkedLocation(mLocation, System.currentTimeMillis());
-        if (mLocation != null) {
+        mParkedLocation = mLocation;
+        sendParkedNotification();
+    }
+
+    private void sendParkedNotification() {
+        // TODO: hard coded strings, Notification builder cleanup and nicer
+        if (mParkedLocation != null) {
             String message = "You just parked!";
             if ((System.currentTimeMillis() - mLocation.getTime()) > 60000) {
                 message += " Cannot find location!";
@@ -141,7 +222,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             Intent notificationIntent = new Intent(this, MapsActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            notificationIntent.putExtra("location", SweeperSDApplication.getParkedLocation());
+            notificationIntent.putExtra("location", mParkedLocation);
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
                     notificationIntent, 0);
@@ -188,20 +269,16 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             if (ActivityDetectionService.ACTION_ACTIVITY_UPDATE.equals(action)) {
                 Bundle extras = intent.getExtras();
                 if (extras != null) {
-                    int vehicleConfidence = extras.getInt(
-                            ActivityDetectionService.CONFIDENCE_VEHICLE);
+                    mInVehicleConfidence = extras.getInt(CONFIDENCE_VEHICLE);
+                    mStillConfidence = extras.getInt(CONFIDENCE_STILL);
+                    mWalkingConfidence = extras.getInt(CONFIDENCE_WALKING);
+                    mRunningConfidence = extras.getInt(CONFIDENCE_RUNNING);
+                    mTiltingConfidence = extras.getInt(CONFIDENCE_TILTING);
+                    mUnknownConfidence = extras.getInt(CONFIDENCE_UNKNOWN);
+                    mOnBicycleConfidence = extras.getInt(CONFIDENCE_BICYCLE);
+                    mOnFootConfidence = extras.getInt(CONFIDENCE_FOOT);
 
-
-                    if (vehicleConfidence > 85) {
-                        mIsDriving = true;
-                        mIsParked = false;
-                    } else if (vehicleConfidence < 20) {
-                        if (mIsDriving) {
-                            mIsParked = true;
-                            handleParkDetected();
-                        }
-                        mIsDriving = false;
-                    }
+                    handleActivityUpdate();
                 }
             }
         }
