@@ -41,7 +41,7 @@
             android:name=".ActivityDetectionService"
             android:exported="false" />
         <service
-            android:name=".InitializeService"
+            android:name=".SweeperService"
             android:enabled="true"
             android:exported="false" />
         <!--

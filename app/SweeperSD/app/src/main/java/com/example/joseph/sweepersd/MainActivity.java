@@ -46,11 +46,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent activityIntent = new Intent(MainActivity.this, MapsActivity.class);
+                activityIntent.putExtra("location", SweeperSDApplication.getParkedLocation());
                 startActivity(activityIntent);
             }
         });
 
-        Intent serviceIntent = new Intent(this, InitializeService.class);
+        Intent serviceIntent = new Intent(this, SweeperService.class);
         startService(serviceIntent);
 
         mActivityHandler = new Handler(getMainLooper());

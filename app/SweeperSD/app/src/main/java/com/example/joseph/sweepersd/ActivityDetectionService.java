@@ -1,23 +1,12 @@
 package com.example.joseph.sweepersd;
 
-import android.Manifest;
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.LocationServices;
 
 import java.util.List;
 
@@ -28,14 +17,18 @@ import java.util.List;
  * <p/>
  * TODO: Customize class - update intent actions and extra parameters.
  */
-public class ActivityDetectionService extends IntentService implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class ActivityDetectionService extends IntentService {
     private static final String TAG = ActivityDetectionService.class.getSimpleName();
-
-    private int mMaxConfidenceThreshold = 90; // TODO: make this adjustable
-    private int mMinConfidenceThreshold = 40;
-
-    private GoogleApiClient mGoogleApiClient;
+    public static final String ACTION_ACTIVITY_UPDATE =
+            "com.example.joseph.sweepersd.ACTION_ACTIVITY_UPDATE";
+    public static final String CONFIDENCE_VEHICLE = "CONFIDENCE_VEHICLE";
+    public static final String CONFIDENCE_FOOT = "CONFIDENCE_FOOT";
+    public static final String CONFIDENCE_BICYCLE = "CONFIDENCE_BICYCLE";
+    public static final String CONFIDENCE_WALKING = "CONFIDENCE_WALKING";
+    public static final String CONFIDENCE_RUNNING = "CONFIDENCE_RUNNING";
+    public static final String CONFIDENCE_TILTING = "CONFIDENCE_TILTING";
+    public static final String CONFIDENCE_STILL = "CONFIDENCE_STILL";
+    public static final String CONFIDENCE_UNKNOWN = "CONFIDENCE_UNKNOWN";
 
     public ActivityDetectionService() {
         super("ActivityDetectionService");
@@ -101,19 +94,19 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
         SweeperSDApplication.setRunningConfidence(runningConfidence);
         SweeperSDApplication.setUnknownConfidence(unknownConfidence);
 
+        Bundle bundle = new Bundle();
+        bundle.putInt(CONFIDENCE_BICYCLE, bicycleConfidence);
+        bundle.putInt(CONFIDENCE_VEHICLE, vehicleConfidence);
+        bundle.putInt(CONFIDENCE_WALKING, walkingConfidence);
+        bundle.putInt(CONFIDENCE_FOOT, footConfidence);
+        bundle.putInt(CONFIDENCE_RUNNING, runningConfidence);
+        bundle.putInt(CONFIDENCE_STILL, stillConfidence);
+        bundle.putInt(CONFIDENCE_UNKNOWN, unknownConfidence);
+        bundle.putInt(CONFIDENCE_TILTING, tiltingConfidence);
 
-        long currentTime = System.currentTimeMillis();
-        /*long timeSinceDriving = currentTime - SweeperSDApplication.getDrivingTimestamp();
-        if (timeSinceDriving < 60000L &&
-                vehicleConfidence < mMinConfidenceThreshold) {
-            long timeSinceLastPark = currentTime - SweeperSDApplication.getParkedTimestamp();
-            if (timeSinceLastPark > 60000L) {
-                handleParkDetected();
-            }
-        }*/
-        if (vehicleConfidence >= mMaxConfidenceThreshold) {
-            SweeperSDApplication.setDrivingTimestamp(currentTime);
-        }
+        Intent intent = new Intent(ACTION_ACTIVITY_UPDATE);
+        intent.putExtras(bundle);
+        sendBroadcast(intent);
 
 
         if (SweeperSDApplication.getVehicleConfidence() > 85) {
@@ -129,116 +122,7 @@ public class ActivityDetectionService extends IntentService implements GoogleApi
         }
     }
 
-    private String getActivityString(int type) {
-        switch (type) {
-            case DetectedActivity.IN_VEHICLE:
-                return "In Vehicle";
-            case DetectedActivity.ON_BICYCLE:
-                return "On Bicycle";
-            case DetectedActivity.ON_FOOT:
-                return "On Foot";
-            case DetectedActivity.WALKING:
-                return "Walking";
-            case DetectedActivity.STILL:
-                return "Still";
-            case DetectedActivity.TILTING:
-                return "Tilting";
-            case DetectedActivity.RUNNING:
-                return "Running";
-            case DetectedActivity.UNKNOWN:
-                return "Unknown";
-        }
-        return "N/A";
-    }
-
     private void handleParkDetected() {
         SweeperSDApplication.setParkingDetected(true);
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
-        /*if (!mGoogleApiClient.isConnecting() || !mGoogleApiClient.isConnected()) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-            mGoogleApiClient.connect();
-        } else if (mGoogleApiClient.isConnected()) {
-            findParkedLocation();
-        }*/
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "onConnectionSuspended");
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(TAG, "onConnected");
-        findParkedLocation();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(TAG, "onConnectionFailed");
-    }
-
-    private LocationManager mLocationManager;
-    private void findParkedLocation() {
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-                    0, this);
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-        SweeperSDApplication.setParkedLocation(LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient), System.currentTimeMillis());
-        if (SweeperSDApplication.getParkedLocation() != null) {
-            Intent notificationIntent = new Intent(this, MapsActivity.class);
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            notificationIntent.putExtra("location", SweeperSDApplication.getParkedLocation());
-
-            PendingIntent intent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
-
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(android.R.drawable.ic_notification_overlay)
-                    .setContentTitle("lambda")
-                    .setContentText("You just parked!")
-                    .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
-                    .setContentIntent(intent);
-
-            NotificationManager notificationManager = (NotificationManager)
-                    getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(0, builder.build());
-        }
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
     }
 }

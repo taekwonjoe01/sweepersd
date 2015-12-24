@@ -1,0 +1,350 @@
+
+Street Sweeping Schedule as of November 24, 2013
+Council District 9
+Street Name
+Block Range
+Limits
+Schedule
+Additional Schedule
+33RD ST
+3900 - 3999
+UNIVERSITY AV - LINCOLN AV
+Posted (7am - 10am), WS 2nd & 4th Mon, ES 2nd & 4th Tue
+33RD ST
+4000 - 4099
+LINCOLN AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Mon, ES 2nd & 4th Tue
+33RD ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Mon, ES 2nd & 4th Tue
+33RD ST
+4200 - 4249
+ORANGE AV - BRAMSON PL
+Posted (8am - 11am), ES Mon, WS Thu
+33RD ST
+4250 - 4299
+BRAMSON PL - EL CAJON BL
+Posted (8am - 11am), ES Mon, WS Thu
+34TH ST
+4000 - 4099
+LINCOLN AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+34TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+34TH ST
+4200 - 4299
+ORANGE AV - EL CAJON BL
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+35TH ST
+200 - 271
+TOMPKINS ST - L ST
+Not Posted, Both Sides 2nd Fri
+35TH ST
+272 - 299
+L ST - K ST
+Not Posted, Both Sides 2nd Fri
+35TH ST
+300 - 399
+K ST - J ST
+Not Posted, Both Sides 2nd Fri
+35TH ST
+3600 - 3699
+BEGIN - LANDIS ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+35TH ST
+3700 - 3799
+LANDIS ST - WIGHTMAN ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+35TH ST
+3800 - 3999
+WIGHTMAN ST - UNIVERSITY AV
+Posted (8am - 11am), WS Mon, ES Thu
+35TH ST
+400 - 449
+J ST - END
+Not Posted, Both Sides 2nd Fri
+35TH ST
+4000 - 4099
+UNIVERSITY AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+35TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+35TH ST
+4200 - 4299
+ORANGE AV - EL CAJON BL
+Posted (8am - 11am), WS Mon, ES Thu
+36TH ST
+100 - 199
+TOMPKINS ST - L ST
+Not Posted, Both Sides 2nd Fri
+36TH ST
+100 - 199
+DURANT ST - IMPERIAL AV
+Not Posted, Both Sides 2nd Fri
+36TH ST
+200 - 299
+L ST - K ST
+Not Posted, Both Sides 2nd Fri
+36TH ST
+200 - 299
+IMPERIAL AV - K ST
+Not Posted, Both Sides 2nd Fri
+36TH ST
+300 - 399
+K ST - J ST
+Not Posted, Both Sides 2nd Fri
+36TH ST
+3400 - 3599
+MYRTLE AV - DWIGHT ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+3600 - 3699
+DWIGHT ST - LANDIS ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+3700 - 3799
+LANDIS ST - WIGHTMAN ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+3800 - 3999
+WIGHTMAN ST - UNIVERSITY AV
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+400 - 499
+J ST - ISLAND AV
+Not Posted, Both Sides 2nd Fri
+36TH ST
+4000 - 4099
+UNIVERSITY AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+4200 - 4299
+ORANGE AV - EL CAJON BL
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+36TH ST
+500 - 599
+ISLAND AV - MARKET ST
+Not Posted, Both Sides 2nd Fri
+37TH ST
+3500 - 3599
+MYRTLE AV - DWIGHT ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+37TH ST
+3600 - 3699
+DWIGHT ST - LANDIS ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+37TH ST
+3700 - 3799
+LANDIS ST - WIGHTMAN ST
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+37TH ST
+3800 - 3999
+WIGHTMAN ST - UNIVERSITY AV
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+37TH ST
+4000 - 4099
+UNIVERSITY AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+37TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+37TH ST
+4200 - 4299
+ORANGE AV - EL CAJON BL
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+38TH ST
+1000 - 1099
+BROADWAY - C ST
+Not Posted, Both Sides 1st Mon
+38TH ST
+1300 - 1399
+BEGIN - ASH ST
+Not Posted, Both Sides 2nd Mon
+City of San Diego - Storm Water Dept, Street Sweeping Section
+1 of  57
+Last Updated November 24, 2013
+Street Sweeping Schedule as of November 24, 2013
+Council District 9
+Street Name
+Block Range
+Limits
+Schedule
+Additional Schedule
+38TH ST
+1400 - 1499
+ASH ST - BEECH ST
+Not Posted, Both Sides 2nd Mon
+38TH ST
+1500 - 1549
+BEECH ST - CEDAR ST
+Not Posted, Both Sides 2nd Mon
+38TH ST
+2900 - 3099
+QUINCE ST - REDWOOD ST
+Not Posted, Both Sides Odd Month 3rd Thu
+38TH ST
+3100 - 3299
+REDWOOD ST - THORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+38TH ST
+3600 - 3689
+DWIGHT ST - END
+Not Posted, Both Sides 2nd Tue
+38TH ST
+3702 - 3799
+BEGIN - WIGHTMAN ST
+Not Posted, Both Sides 2nd Tue
+38TH ST
+3800 - 3999
+WIGHTMAN ST - UNIVERSITY AV
+Posted (7am - 10am), WS 2nd & 4th Mon, ES 2nd & 4th Tue
+38TH ST
+4000 - 4099
+UNIVERSITY AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Mon, ES 2nd & 4th Tue
+38TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Mon, ES 2nd & 4th Tue
+39TH ST
+1700 - 1999
+MIDVALE DR - ROWAN ST
+Not Posted, Both Sides 2nd Mon
+39TH ST
+2000 - 2039
+ROWAN ST - GATEWAY DR
+Not Posted, Both Sides 2nd Mon
+39TH ST
+2040 - 2099
+GATEWAY DR - WESTGATE PL
+Not Posted, Both Sides 2nd Mon
+39TH ST
+2100 - 2239
+WESTGATE PL - MIDVALE DR
+Not Posted, Both Sides 2nd Mon
+39TH ST
+2240 - 2299
+MIDVALE DR - JUNIPER ST
+Not Posted, Both Sides 2nd Mon
+39TH ST
+2300 - 2408
+JUNIPER ST - SYCAMORE DR
+Not Posted, Both Sides 2nd Mon
+39TH ST
+2800 - 2999
+BEGIN - QUINCE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+39TH ST
+3000 - 3099
+QUINCE ST - REDWOOD ST
+Not Posted, Both Sides Odd Month 3rd Thu
+39TH ST
+3100 - 3299
+REDWOOD ST - THORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+39TH ST
+3300 - 3499
+THORN ST - MYRTLE AV
+Not Posted, Both Sides Odd Month 3rd Thu
+39TH ST
+3500 - 3599
+MYRTLE AV - END
+Not Posted, Both Sides Odd Month 3rd Thu
+39TH ST
+3800 - 3999
+WIGHTMAN ST - UNIVERSITY AV
+Posted (7am - 10am), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+39TH ST
+4000 - 4099
+UNIVERSITY AV - POLK AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+39TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+39TH ST
+4200 - 4299
+ORANGE AV - EL CAJON BL
+Posted (10am - 1pm), WS 2nd & 4th Tue, ES 2nd & 4th Mon
+39TH ST
+800 - 899
+F ST - HILLTOP DR
+Not Posted, Both Sides 1st Mon
+39TH ST
+900 - 999
+HILLTOP DR - BROADWAY
+Not Posted, Both Sides 1st Mon
+40TH ST
+1000 - 1099
+BROADWAY - C ST
+Not Posted, Both Sides 1st Mon
+40TH ST
+2900 - 2999
+BEGIN - QUINCE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+40TH ST
+3000 - 3099
+BEGIN - REDWOOD ST
+Not Posted, Both Sides Odd Month 3rd Thu
+40TH ST
+3100 - 3299
+REDWOOD ST - THORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+40TH ST
+3300 - 3499
+THORN ST - MYRTLE AV
+Not Posted, Both Sides Odd Month 3rd Thu
+40TH ST
+3500 - 3669
+MYRTLE AV - DWIGHT ST
+Not Posted, Both Sides Odd Month 3rd Thu
+40TH ST
+3700 - 3799
+LANDIS ST - WIGHTMAN ST
+Posted (8am - 11am), ES Mon, WS Thu
+40TH ST
+3800 - 3999
+WIGHTMAN ST - UNIVERSITY AV
+Posted (8am - 11am), ES Mon, WS Thu
+40TH ST
+4100 - 4199
+POLK AV - ORANGE AV
+Posted (8am - 11am), ES Mon, WS Thu
+40TH ST
+4200 - 4299
+ORANGE AV - EL CAJON BL
+Posted (8am - 11am), ES Mon, WS Thu
+40TH ST
+600 - 799
+MARKET ST - F ST
+Not Posted, Both Sides 1st Mon
+40TH ST
+800 - 899
+F ST - HILLTOP DR
+Not Posted, Both Sides 1st Mon
+40TH ST
+900 - 999
+HILLTOP DR - BROADWAY
+Not Posted, Both Sides 1st Mon
+41ST ST
+1000 - 1099
+BROADWAY - C ST
+Not Posted, Both Sides 1st Mon
+41ST ST
+3100 - 3299
+REDWOOD ST - THORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+City of San Diego - Storm Water Dept, Street Sweeping Section
+2 of  57
+Last Updated November 24, 2013
+

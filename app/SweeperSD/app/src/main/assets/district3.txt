@@ -1,0 +1,334 @@
+
+Street Sweeping Schedule as of November 24, 2013
+Council District 3
+Street Name
+Block Range
+Limits
+Schedule
+Additional Schedule
+01ST AV
+100 - 499
+HARBOR DR - ISLAND AV
+Posted (3am - 6am), ES Thu, WS Fri
+01ST AV
+1000 - 1099
+BROADWAY - C ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+1100 - 1199
+C ST - W B ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+1200 - 1299
+W B ST - A ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+1300 - 1399
+A ST - ASH ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+1400 - 1499
+ASH ST - BEECH ST
+Posted (2am - 6am), WS Wed, ES Thu
+01ST AV
+1500 - 1609
+BEECH ST - CEDAR ST
+Posted (2am - 6am), WS Wed, ES Thu
+01ST AV
+1610 - 1799
+CEDAR ST - ELM ST
+Posted (2am - 6am), WS Wed, ES Thu
+01ST AV
+1800 - 1899
+ELM ST - FIR ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+1900 - 1999
+FIR ST - GRAPE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2000 - 2099
+GRAPE ST - HAWTHORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2100 - 2199
+HAWTHORN ST - IVY ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2200 - 2299
+IVY ST - JUNIPER ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2300 - 2399
+JUNIPER ST - KALMIA ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2400 - 2499
+KALMIA ST - LAUREL ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2500 - 2599
+LAUREL ST - MAPLE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2600 - 2699
+MAPLE ST - NUTMEG ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2700 - 2899
+NUTMEG ST - W PALM ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+2900 - 2999
+W PALM ST - QUINCE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3000 - 3099
+QUINCE ST - REDWOOD ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3100 - 3199
+REDWOOD ST - SPRUCE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3200 - 3299
+SPRUCE ST - THORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3300 - 3399
+THORN ST - UPAS ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3400 - 3499
+UPAS ST - W WALNUT AV
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3500 - 3599
+W WALNUT AV - BROOKES AV
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3600 - 3699
+BROOKES AV - PENNSYLVANIA AV
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3700 - 3799
+PENNSYLVANIA AV - ROBINSON AV
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+3800 - 3899
+ROBINSON AV - UNIVERSITY AV
+Not Posted, Both Sides Tue
+01ST AV
+3900 - 3999
+UNIVERSITY AV - W WASHINGTON ST
+Not Posted, Both Sides Tue
+01ST AV
+4000 - 4099
+W WASHINGTON ST - LEWIS ST
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+4100 - 4149
+LEWIS ST - MONTECITO WY
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+4150 - 4199
+MONTECITO WY - ARBOR DR
+Not Posted, Both Sides Odd Month 3rd Thu
+01ST AV
+500 - 599
+ISLAND AV - MARKET ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+600 - 699
+MARKET ST - G ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+700 - 799
+G ST - W F ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+800 - 899
+W F ST - W E ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+01ST AV
+900 - 999
+W E ST - BROADWAY
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+02ND AV
+1000 - 1099
+BROADWAY - C ST
+Posted (3am - 6am), Both Sides Tue & Thu
+02ND AV
+1300 - 1399
+A ST - ASH ST
+Posted (3am - 6am), NS Mon,Wed & Fri; SS Tue & Thu
+City of San Diego - Storm Water Dept, Street Sweeping Section
+1 of  92
+Last Updated November 24, 2013
+Street Sweeping Schedule as of November 24, 2013
+Council District 3
+Street Name
+Block Range
+Limits
+Schedule
+Additional Schedule
+02ND AV
+1400 - 1499
+ASH ST - BEECH ST
+Posted (2am - 6am), WS Wed, ES Thu
+02ND AV
+1500 - 1599
+BEECH ST - CEDAR ST
+Posted (2am - 6am), WS Wed, ES Thu
+02ND AV
+1600 - 1799
+CEDAR ST - ELM ST
+Posted (2am - 6am), WS Wed, ES Thu
+02ND AV
+1800 - 1899
+ELM ST - FIR ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+1900 - 1999
+FIR ST - GRAPE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2000 - 2099
+GRAPE ST - HAWTHORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2100 - 2199
+HAWTHORN ST - IVY ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2200 - 2299
+IVY ST - JUNIPER ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2300 - 2399
+JUNIPER ST - KALMIA ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2400 - 2499
+KALMIA ST - LAUREL ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2500 - 2599
+LAUREL ST - MAPLE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2600 - 2699
+MAPLE ST - NUTMEG ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2700 - 2799
+NUTMEG ST - END
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+2900 - 2999
+BEGIN - QUINCE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+3000 - 3099
+QUINCE ST - REDWOOD ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+3100 - 3199
+REDWOOD ST - SPRUCE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+3200 - 3299
+SPRUCE ST - THORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+3300 - 3399
+THORN ST - UPAS ST
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+3400 - 3499
+UPAS ST - WALNUT AV
+Not Posted, Both Sides Odd Month 3rd Thu
+02ND AV
+400 - 499
+J ST - ISLAND AV
+Posted (3am - 6am), ES Thu, WS Fri
+02ND AV
+500 - 599
+ISLAND AV - MARKET ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+02ND AV
+600 - 699
+MARKET ST - G ST
+Posted (3am - 6am), WS Mon,Wed,& Fri; ES Tue & Thu
+03RD AV
+1000 - 1099
+BROADWAY - C ST
+Posted (3am - 6am), NS Mon,Wed & Fri; SS Tue & Thu
+03RD AV
+1100 - 1199
+C ST - B ST
+Posted (3am - 6am), NS Mon,Wed & Fri; SS Tue & Thu
+03RD AV
+1200 - 1299
+B ST - A ST
+Posted (3am - 6am), NS Mon,Wed & Fri; SS Tue & Thu
+03RD AV
+1300 - 1399
+A ST - ASH ST
+Posted (3am - 6am), NS Mon,Wed & Fri; SS Tue & Thu
+03RD AV
+1400 - 1499
+ASH ST - BEECH ST
+Posted (2am - 6am), WS Wed, ES Thu
+03RD AV
+1500 - 1599
+BEECH ST - CEDAR ST
+Posted (2am - 6am), WS Wed, ES Thu
+03RD AV
+1600 - 1699
+CEDAR ST - DATE ST
+Posted (2am - 6am), WS Wed, ES Thu
+03RD AV
+1700 - 1799
+DATE ST - ELM ST
+Posted (2am - 6am), WS Wed, ES Thu
+03RD AV
+1800 - 1899
+ELM ST - FIR ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+1900 - 1999
+FIR ST - GRAPE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2000 - 2099
+GRAPE ST - HAWTHORN ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2100 - 2199
+HAWTHORN ST - IVY ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2200 - 2299
+IVY ST - JUNIPER ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2300 - 2399
+JUNIPER ST - KALMIA ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2400 - 2499
+KALMIA ST - LAUREL ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2500 - 2599
+LAUREL ST - MAPLE ST
+Not Posted, Both Sides Odd Month 3rd Thu
+03RD AV
+2600 - 2699
+MAPLE ST - NUTMEG ST
+Not Posted, Both Sides Odd Month 3rd Thu
+City of San Diego - Storm Water Dept, Street Sweeping Section
+2 of  92
+Last Updated November 24, 2013
+
