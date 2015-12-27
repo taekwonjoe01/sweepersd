@@ -25,7 +25,10 @@ import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -75,6 +78,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             IntentFilter filter = new IntentFilter();
             filter.addAction(ActivityDetectionService.ACTION_ACTIVITY_UPDATE);
             registerReceiver(receiver, filter);
+
+            loadDatabase();
 
             if (!mIsConnected) {
                 if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this)
@@ -205,6 +210,62 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         public List<Address> getLastKnownParkingAddresses() {
             return mParkedAddresses;
         }
+    }
+
+    private void loadDatabase() {
+        try {
+            for (int i = 1; i < 10; i++) {
+                String filename = "district" + i + ".txt";
+                InputStream is=getAssets().open(filename);
+                BufferedReader in=
+                        new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                String str;
+
+                while ((str=in.readLine()) != null) {
+                    String[] parsings = str.split("\t");
+                    if (parsings.length > 3) {
+                        Limit l = new Limit();
+                        l.street = parsings[0];
+                        l.range = parsings[1];
+                        l.limit = parsings[2];
+                        l.schedule = "";
+                        for (int j = 3; j < parsings.length; j++) {
+                            l.schedule += parsings[j];
+                        }
+                        if (!l.schedule.contains("Not Posted")) {
+                            mPostedLimits.add(l);
+                        }
+                        mLimits.add(l);
+                    } else {
+                        Log.e(TAG, "Parsed a bad line in " + filename);
+                    }
+                }
+
+                in.close();
+                is.close();
+            }
+
+        } catch (IOException e) {
+
+        }
+
+        Log.d(TAG, "Number of Limits posted: " + mPostedLimits.size());
+        Log.d(TAG, "Looking for Beryl St...");
+        for (Limit l : mPostedLimits) {
+            if (l.street.contains("BERYL")) {
+                Log.d(TAG, "Found BERYL!");
+            }
+        }
+    }
+
+    private List<Limit> mLimits = new ArrayList<>();
+    private List<Limit> mPostedLimits = new ArrayList<>();
+
+    private class Limit {
+        String street;
+        String range;
+        String limit;
+        String schedule;
     }
 
     private void handleActivityUpdate() {
