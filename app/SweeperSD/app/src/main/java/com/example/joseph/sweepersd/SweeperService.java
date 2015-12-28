@@ -48,6 +48,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     public static final String CONFIDENCE_TILTING = "CONFIDENCE_TILTING";
     public static final String CONFIDENCE_STILL = "CONFIDENCE_STILL";
     public static final String CONFIDENCE_UNKNOWN = "CONFIDENCE_UNKNOWN";
+    private static final int NOTIFICATION_PARKED_ID = 0;
+    private static final int NOTIFICATION_PARKED_LIMIT_ID = 1;
+    private static final int NOTIFICATION_PARKED_REDZONE_ID = 2;
 
     public enum GooglePlayConnectionStatus {
         DISCONNECTED, CONNECTING, CONNECTED, FAILED, SUSPENDED
@@ -344,8 +347,6 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     }
 
     private void handleParkDetected() {
-        mParkedLimit = null;
-
         long time = System.currentTimeMillis();
         if (time - mLocationTimestamp < 15000) {
             // TODO: Handle good data here.
@@ -354,16 +355,24 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             Log.w(TAG, "Current location hasn't been updated in more than 15 seconds! " +
                     "May be out of date!");
         }
-
+        mParkedLimit = null;
         mParkedLocation = mLocation;
 
         mParkedAddresses = getAddressesForLocation(mParkedLocation);
 
+        mParkedLimit = findLimitForAddresses(mParkedAddresses);
+
         // TODO: SharedPreferences for handling whether or not user wants an update every parking
         // event or only if we park in a bad location.
         sendParkedNotification();
+        if (mParkedLimit != null) {
+            sendParkedInLimitZoneNotification();
+        }
+    }
 
-        for (Address address : mParkedAddresses) {
+    private Limit findLimitForAddresses(List<Address> addresses) {
+        Limit result = null;
+        for (Address address : addresses) {
             String a = "";
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                 a += address.getAddressLine(i);
@@ -390,7 +399,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
                                     Limit minLimit = checkAddress(minNum, streetName);
                                     Limit maxLimit = checkAddress(maxNum, streetName);
-                                    mParkedLimit = (minLimit != null) ? minLimit :
+                                    result = (minLimit != null) ? minLimit :
                                             (maxLimit != null) ? maxLimit : null;
                                 } catch (NumberFormatException e) {
                                     Log.e(TAG, "Malformed Street numbers: " + streetNumber);
@@ -402,7 +411,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                             try {
                                 int num = Integer.parseInt(streetNumber);
                                 Limit l = checkAddress(num, streetName);
-                                mParkedLimit = (l != null) ? l : null;
+                                result = (l != null) ? l : null;
                             } catch (NumberFormatException e) {
                                 Log.e(TAG, "Malformed Street numbers: " + streetNumber);
                             }
@@ -417,6 +426,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                 Log.w(TAG, "City is not San Diego. Address is  " + a);
             }
         }
+        return result;
     }
 
     private Limit checkAddress(int houseNumber, String street) {
@@ -446,9 +456,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                         location.getLongitude(),
                         10);
             } catch (IOException ioException) {
-                // Catch network or other I/O problems.
+                // TODO: Catch network or other I/O problems.
             } catch (IllegalArgumentException illegalArgumentException) {
-                // Catch invalid latitude or longitude values.
+                // TODO: Catch invalid latitude or longitude values.
             }
         }
         long end = System.nanoTime();
@@ -460,9 +470,6 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         // TODO: hard coded strings, Notification builder cleanup and nicer
         if (mParkedLocation != null) {
             String message = "You just parked!";
-            if ((System.currentTimeMillis() - mLocation.getTime()) > 60000) {
-                message += " Cannot find location!";
-            }
             Intent notificationIntent = new Intent(this, MapsActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -480,7 +487,57 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
             NotificationManager notificationManager = (NotificationManager)
                     getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(0, builder.build());
+            notificationManager.notify(NOTIFICATION_PARKED_ID, builder.build());
+        }
+    }
+
+    private void sendParkedInLimitZoneNotification() {
+        // TODO: hard coded strings, Notification builder cleanup and nicer
+        if (mParkedLocation != null) {
+            String message = "You just parked in a street sweeping zone!";
+            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            notificationIntent.putExtra("location", mParkedLocation);
+
+            PendingIntent intent = PendingIntent.getActivity(this, 0,
+                    notificationIntent, 0);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(android.R.drawable.ic_notification_overlay)
+                    .setContentTitle("lambda")
+                    .setContentText(message)
+                    .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+                    .setContentIntent(intent);
+
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(NOTIFICATION_PARKED_LIMIT_ID, builder.build());
+        }
+    }
+
+    private void sendParkedInRedZoneNotification() {
+        // TODO: hard coded strings, Notification builder cleanup and nicer
+        if (mParkedLocation != null) {
+            String message = "Your parking spot is scheduled for street sweeping!";
+            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            notificationIntent.putExtra("location", mParkedLocation);
+
+            PendingIntent intent = PendingIntent.getActivity(this, 0,
+                    notificationIntent, 0);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(android.R.drawable.ic_notification_overlay)
+                    .setContentTitle("lambda")
+                    .setContentText(message)
+                    .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+                    .setContentIntent(intent);
+
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(NOTIFICATION_PARKED_REDZONE_ID, builder.build());
         }
     }
 
