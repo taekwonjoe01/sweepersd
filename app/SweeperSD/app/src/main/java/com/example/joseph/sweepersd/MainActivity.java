@@ -109,7 +109,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity
                 mIsDrivingText.setText("" + mService.isDriving());
 
                 String a = "";
-                for (Address address : mService.getLastKnownParkingAddresses()) {
+                for (Address address : mService.getCurrentAddresses()) {
                     for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                         a += address.getAddressLine(i) + ", ";
                     }
@@ -178,10 +177,20 @@ public class MainActivity extends AppCompatActivity
                     String housenumber = address.getFeatureName();
                     String city = address.getLocality();
                 }
-                a += "\n\n";
+                a += "\n";
                 String schedule = mService.getCurrentParkedSchedule();
                 if (schedule != null) {
                     a += schedule;
+                }
+                a += "\n";
+                for (Address address : mService.getLastKnownParkingAddresses()) {
+                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                        a += address.getAddressLine(i) + ", ";
+                    }
+                    a += "\n";
+                    String street = address.getThoroughfare();
+                    String housenumber = address.getFeatureName();
+                    String city = address.getLocality();
                 }
                 mAddresses.setText(a);
             }

@@ -75,6 +75,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private volatile boolean mIsParked = false;
     private volatile Location mParkedLocation;
     private volatile List<Address> mParkedAddresses = new ArrayList<>();
+    private volatile List<Address> mCurrentLocationAddresses = new ArrayList<>();
     private volatile Limit mParkedLimit;
 
     private List<Limit> mLimits = new ArrayList<>();
@@ -128,6 +129,10 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     public List<Address> getLastKnownParkingAddresses() {
         return mParkedAddresses;
+    }
+
+    public List<Address> getCurrentAddresses() {
+        return mCurrentLocationAddresses;
     }
 
     public String getCurrentParkedSchedule() {
@@ -212,6 +217,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     @Override
     public void onLocationChanged(Location location) {
         mLocation = location;
+
+        mCurrentLocationAddresses = getAddressesForLocation(mLocation);
     }
 
     /*
@@ -336,7 +343,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         mParkedLocation = mLocation;
 
-        mParkedAddresses = getAddressesForLocation();
+        mParkedAddresses = getAddressesForLocation(mParkedLocation);
 
         // TODO: SharedPreferences for handling whether or not user wants an update every parking
         // event or only if we park in a bad location.
@@ -375,17 +382,17 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return result;
     }
 
-    private List<Address> getAddressesForLocation() {
+    private List<Address> getAddressesForLocation(Location location) {
         long start = System.nanoTime();
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
         List<Address> addresses = new ArrayList<>();
 
-        if (mParkedLocation != null) {
+        if (location != null) {
             try {
                 addresses = geocoder.getFromLocation(
-                        mParkedLocation.getLatitude(),
-                        mParkedLocation.getLongitude(),
+                        location.getLatitude(),
+                        location.getLongitude(),
                         10);
             } catch (IOException ioException) {
                 // Catch network or other I/O problems.
