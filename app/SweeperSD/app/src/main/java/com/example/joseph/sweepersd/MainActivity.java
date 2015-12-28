@@ -14,7 +14,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements SweeperService.SweeperServiceListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private boolean mIsBound = false;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler mActivityHandler;
     private Runnable mRunnable;
 
-    private SweeperService.SweeperBinder mServiceBinder;
+    private SweeperService mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mIsBound) {
                     Intent activityIntent = new Intent(MainActivity.this, MapsActivity.class);
-                    activityIntent.putExtra("location", mServiceBinder.getLastKnownParkingLocation());
+                    activityIntent.putExtra("location", mService.getLastKnownParkingLocation());
                     startActivity(activityIntent);
                 }
                 // TODO what if we're not bound?
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "Service is connected!");
-            mServiceBinder = (SweeperService.SweeperBinder) service;
+            mService = ((SweeperService.SweeperBinder)service).getService(MainActivity.this);
             mIsBound = true;
         }
 
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putInt(SweeperService.CONFIDENCE_BICYCLE, 0);
         bundle.putInt(SweeperService.CONFIDENCE_VEHICLE, vehicleConf);
         bundle.putInt(SweeperService.CONFIDENCE_WALKING, 0);
-        bundle.putInt(SweeperService.CONFIDENCE_FOOT, 0);
+        bundle.putInt(SweeperService.CONFIDENCE_FOOT, 40);
         bundle.putInt(SweeperService.CONFIDENCE_RUNNING, 0);
         bundle.putInt(SweeperService.CONFIDENCE_STILL, 0);
         bundle.putInt(SweeperService.CONFIDENCE_UNKNOWN, 0);
@@ -156,31 +157,40 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             if (mIsBound) {
-                mVehicleText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_VEHICLE));
-                mBicycleText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_BICYCLE));
-                mWalkingText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_WALKING));
-                mRunningText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_RUNNING));
-                mOnFootText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_FOOT));
-                mStillText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_STILL));
-                mTiltingText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_TILTING));
-                mUnknownText.setText("" + mServiceBinder.getConfidence(SweeperService.CONFIDENCE_UNKNOWN));
-                mIsParkedText.setText("" + mServiceBinder.isParked());
-                mIsDrivingText.setText("" + mServiceBinder.isDriving());
+                mVehicleText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_VEHICLE));
+                mBicycleText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_BICYCLE));
+                mWalkingText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_WALKING));
+                mRunningText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_RUNNING));
+                mOnFootText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_FOOT));
+                mStillText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_STILL));
+                mTiltingText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_TILTING));
+                mUnknownText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_UNKNOWN));
+                mIsParkedText.setText("" + mService.isParked());
+                mIsDrivingText.setText("" + mService.isDriving());
 
                 String a = "";
-                for (Address address : mServiceBinder.getLastKnownParkingAddresses()) {
+                for (Address address : mService.getLastKnownParkingAddresses()) {
                     for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                         a += address.getAddressLine(i) + ", ";
                     }
                     a += "\n";
-                    Log.d(TAG, address.toString());
                     String street = address.getThoroughfare();
                     String housenumber = address.getFeatureName();
                     String city = address.getLocality();
+                }
+                a += "\n\n";
+                String schedule = mService.getCurrentParkedSchedule();
+                if (schedule != null) {
+                    a += schedule;
                 }
                 mAddresses.setText(a);
             }
             mActivityHandler.postDelayed(mRunnable, 33);
         }
+    }
+
+    @Override
+    public void onGooglePlayConnectionStatusUpdated(SweeperService.GooglePlayConnectionStatus status) {
+
     }
 }

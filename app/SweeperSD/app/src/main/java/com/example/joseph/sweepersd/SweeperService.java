@@ -38,6 +38,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private static final String TAG = SweeperService.class.getSimpleName();
     private static final int DRIVING_CONFIDENCE = 85;
     private static final int NOT_DRIVING_CONFIDENCE = 20;
+    private static final int FOOT_CONFIDENCE = 30;
     public static final String CONFIDENCE_VEHICLE = "CONFIDENCE_VEHICLE";
     public static final String CONFIDENCE_FOOT = "CONFIDENCE_FOOT";
     public static final String CONFIDENCE_BICYCLE = "CONFIDENCE_BICYCLE";
@@ -47,12 +48,18 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     public static final String CONFIDENCE_STILL = "CONFIDENCE_STILL";
     public static final String CONFIDENCE_UNKNOWN = "CONFIDENCE_UNKNOWN";
 
+    public enum GooglePlayConnectionStatus {
+        DISCONNECTED, CONNECTING, CONNECTED, FAILED, SUSPENDED
+    }
+
+    private volatile GooglePlayConnectionStatus mConnectionStatus =
+            GooglePlayConnectionStatus.DISCONNECTED;
     private GoogleApiClient mClient;
     private LocationManager mLocationManager;
+    private SweeperServiceListener mListener;
     private boolean mIsConnected = false;
     private boolean mIsStarted = false;
     private Location mLocation;
-    private long mLocationTimestamp;
 
     private final IBinder mBinder = new SweeperBinder();
 
@@ -67,148 +74,200 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private volatile boolean mIsDriving = false;
     private volatile boolean mIsParked = false;
     private volatile Location mParkedLocation;
-    private volatile List<Address> mParkedAddresses = new ArrayList<Address>();
+    private volatile List<Address> mParkedAddresses = new ArrayList<>();
+    private volatile Limit mParkedLimit;
+
+    private List<Limit> mLimits = new ArrayList<>();
+    private List<Limit> mPostedLimits = new ArrayList<>();
 
     public SweeperService() {
+    }
+
+    public int getConfidence(String confidence) {
+        int result = -1;
+        switch (confidence) {
+            case CONFIDENCE_BICYCLE:
+                result = mOnBicycleConfidence;
+                break;
+            case CONFIDENCE_FOOT:
+                result = mOnFootConfidence;
+                break;
+            case CONFIDENCE_RUNNING:
+                result = mRunningConfidence;
+                break;
+            case CONFIDENCE_WALKING:
+                result = mWalkingConfidence;
+                break;
+            case CONFIDENCE_STILL:
+                result = mStillConfidence;
+                break;
+            case CONFIDENCE_TILTING:
+                result = mTiltingConfidence;
+                break;
+            case CONFIDENCE_UNKNOWN:
+                result = mUnknownConfidence;
+                break;
+            case CONFIDENCE_VEHICLE:
+                result = mInVehicleConfidence;
+                break;
+        }
+        return result;
+    }
+
+    public Location getLastKnownParkingLocation() {
+        return mParkedLocation;
+    }
+
+    public boolean isDriving() {
+        return mIsDriving;
+    }
+
+    public boolean isParked() {
+        return mIsParked;
+    }
+
+    public List<Address> getLastKnownParkingAddresses() {
+        return mParkedAddresses;
+    }
+
+    public String getCurrentParkedSchedule() {
+        if (mParkedLimit == null) {
+            return null;
+        }
+        return mParkedLimit.schedule;
+    }
+
+    public GooglePlayConnectionStatus getConnectionStatus() {
+        return mConnectionStatus;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!mIsStarted) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(ActivityDetectionService.ACTION_ACTIVITY_UPDATE);
-            registerReceiver(receiver, filter);
-
             loadDatabase();
 
-            if (!mIsConnected) {
-                if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this)
-                        == ConnectionResult.SUCCESS) {
-                    mClient = new GoogleApiClient.Builder(this)
-                            .addApi(ActivityRecognition.API)
-                            .addApi(LocationServices.API)
-                            .addConnectionCallbacks(this)
-                            .addOnConnectionFailedListener(this)
-                            .build();
-                    mClient.connect();
-                }
-            }
-            // TODO: What if google play services is not available?
-
-            mIsStarted = true;
+            connectToGooglePlayServices();
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /*
+    GoogleApi.ConnectionCallbacks
+     */
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "onConnected");
-        mIsConnected = true;
+
+        changeConnectionStatus(GooglePlayConnectionStatus.CONNECTED);
+
+        // Register IntentFilter for receiving activity updates from the ActivityDetection
+        // IntentService.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ActivityDetectionService.ACTION_ACTIVITY_UPDATE);
+        registerReceiver(mActivityDetectorReceiver, filter);
+
+        // Register the ActivityDetectionService for activity updates. That service will just
+        // forward that data to the mActivityDetectorReceiver.
         Intent intent = new Intent(this, ActivityDetectionService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mClient, 0,
                 pendingIntent);
 
         mLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mClient);
 
+        // Request Location Updates
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         try {
             // TODO: only request location updates when we're driving.
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
                     5f, this);
         } catch (SecurityException e) {
-
+            // TODO: What happens here.
         }
     }
 
+    /*
+    GoogleApi.ConnectionCallbacks
+     */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed");
-        mIsConnected = false;
+        changeConnectionStatus(GooglePlayConnectionStatus.FAILED);
     }
 
+    /*
+    GoogleApi.ConnectionCallbacks
+     */
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "onConnectionSuspended");
-        mIsConnected = false;
+        changeConnectionStatus(GooglePlayConnectionStatus.SUSPENDED);
     }
 
-
-
+    /*
+    LocationListener Callback
+     */
     @Override
     public void onLocationChanged(Location location) {
         mLocation = location;
     }
 
+    /*
+    LocationListener Callback
+     */
     @Override
     public void onProviderEnabled(String provider) {
-
+        // TODO
     }
 
+    /*
+    LocationListener Callback
+     */
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+        // TODO
     }
 
+    /*
+    LocationListener Callback
+     */
     @Override
     public void onProviderDisabled(String provider) {
-
+        // TODO
     }
 
+    /**
+     * @param intent
+     * @return SweeperBinder if google play services is available. Otherwise returns null.
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
     public class SweeperBinder extends Binder {
-        public int getConfidence(String confidence) {
-            int result = -1;
-            switch (confidence) {
-                case CONFIDENCE_BICYCLE:
-                    result = mOnBicycleConfidence;
-                    break;
-                case CONFIDENCE_FOOT:
-                    result = mOnFootConfidence;
-                    break;
-                case CONFIDENCE_RUNNING:
-                    result = mRunningConfidence;
-                    break;
-                case CONFIDENCE_WALKING:
-                    result = mWalkingConfidence;
-                    break;
-                case CONFIDENCE_STILL:
-                    result = mStillConfidence;
-                    break;
-                case CONFIDENCE_TILTING:
-                    result = mTiltingConfidence;
-                    break;
-                case CONFIDENCE_UNKNOWN:
-                    result = mUnknownConfidence;
-                    break;
-                case CONFIDENCE_VEHICLE:
-                    result = mInVehicleConfidence;
-                    break;
-            }
-            return result;
+        public SweeperService getService(SweeperServiceListener listener) {
+            mListener = listener;
+            return SweeperService.this;
         }
+    }
 
-        public Location getLastKnownParkingLocation() {
-            return mParkedLocation;
-        }
+    private void connectToGooglePlayServices() {
+        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this)
+                == ConnectionResult.SUCCESS) {
+            mClient = new GoogleApiClient.Builder(this)
+                    .addApi(ActivityRecognition.API)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            mClient.connect();
 
-        public boolean isDriving() {
-            return mIsDriving;
-        }
-
-        public boolean isParked() {
-            return mIsParked;
-        }
-
-        public List<Address> getLastKnownParkingAddresses() {
-            return mParkedAddresses;
+            changeConnectionStatus(GooglePlayConnectionStatus.CONNECTING);
+        } else {
+            changeConnectionStatus(GooglePlayConnectionStatus.FAILED);
         }
     }
 
@@ -244,7 +303,6 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                 in.close();
                 is.close();
             }
-
         } catch (IOException e) {
 
         }
@@ -258,21 +316,13 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         }
     }
 
-    private List<Limit> mLimits = new ArrayList<>();
-    private List<Limit> mPostedLimits = new ArrayList<>();
-
-    private class Limit {
-        String street;
-        String range;
-        String limit;
-        String schedule;
-    }
-
     private void handleActivityUpdate() {
         if (mInVehicleConfidence > DRIVING_CONFIDENCE) {
             mIsDriving = true;
             mIsParked = false;
-        } else if (mInVehicleConfidence < NOT_DRIVING_CONFIDENCE) {
+        } else if (mInVehicleConfidence < NOT_DRIVING_CONFIDENCE &&
+                (mOnFootConfidence > FOOT_CONFIDENCE || mWalkingConfidence > FOOT_CONFIDENCE ||
+                mRunningConfidence > FOOT_CONFIDENCE)) {
             if (mIsDriving) {
                 mIsParked = true;
                 handleParkDetected();
@@ -282,6 +332,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     }
 
     private void handleParkDetected() {
+        mParkedLimit = null;
+
         mParkedLocation = mLocation;
 
         mParkedAddresses = getAddressesForLocation();
@@ -289,8 +341,38 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         // TODO: SharedPreferences for handling whether or not user wants an update every parking
         // event or only if we park in a bad location.
         sendParkedNotification();
-        // TODO: Checking the parked location with the database to know if we're in a no parking
-        // zone.
+
+        for (Address address : mParkedAddresses) {
+            String street = address.getThoroughfare();
+            String housenumber = address.getFeatureName();
+            String city = address.getLocality();
+            if (housenumber != null && street != null && city != null) {
+                if (city.contains("San Diego")) {
+                    mParkedLimit = checkAddress(housenumber, street);
+                } else {
+                    Log.w(TAG, "City is not San Diego. City is " + city);
+                }
+            }
+        }
+    }
+
+    private Limit checkAddress(String houseNumber, String street) {
+        Log.d(TAG, "housenumber: " + houseNumber + " street " + street);
+        Limit result = null;
+        for (Limit l : mPostedLimits) {
+            if (l.street.toLowerCase().contains(street.toLowerCase())) {
+                String[] rangeParsings = l.range.split("-");
+                int minRange = Integer.parseInt(rangeParsings[0].trim());
+                int maxRange = Integer.parseInt(rangeParsings[1].trim());
+
+                int num = Integer.parseInt(houseNumber.trim());
+                if (num >= minRange && num <= maxRange) {
+                    result = l;
+                    Log.d(TAG, "THIS HOUSE IS IN LIMIT RANGE");
+                }
+            }
+        }
+        return result;
     }
 
     private List<Address> getAddressesForLocation() {
@@ -366,9 +448,17 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return "N/A";
     }
 
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+    private void changeConnectionStatus(GooglePlayConnectionStatus status) {
+        mConnectionStatus = status;
+        if (mListener != null) {
+            mListener.onGooglePlayConnectionStatusUpdated(status);
+        }
+    }
+
+    private final BroadcastReceiver mActivityDetectorReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Received activity update!");
             String action = intent.getAction();
             if (ActivityDetectionService.ACTION_ACTIVITY_UPDATE.equals(action)) {
                 Bundle extras = intent.getExtras();
@@ -387,4 +477,15 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             }
         }
     };
+
+    public interface SweeperServiceListener {
+        void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
+    }
+
+    private class Limit {
+        String street;
+        String range;
+        String limit;
+        String schedule;
+    }
 }
