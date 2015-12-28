@@ -59,7 +59,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private LocationManager mLocationManager;
     private SweeperServiceListener mListener;
     private boolean mIsStarted = false;
-    private Location mLocation;
+
+    private volatile Location mLocation;
+    private volatile long mLocationTimestamp = Long.MAX_VALUE;
 
     private final IBinder mBinder = new SweeperBinder();
 
@@ -186,8 +188,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         try {
             // TODO: only request location updates when we're driving.
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-                    5f, this);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,
+                    0, this);
         } catch (SecurityException e) {
             // TODO: What happens here.
         }
@@ -216,6 +218,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
      */
     @Override
     public void onLocationChanged(Location location) {
+        mLocationTimestamp = System.currentTimeMillis();
         mLocation = location;
 
         mCurrentLocationAddresses = getAddressesForLocation(mLocation);
@@ -340,6 +343,15 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     private void handleParkDetected() {
         mParkedLimit = null;
+
+        long time = System.currentTimeMillis();
+        if (time - mLocationTimestamp < 15000) {
+            // TODO: Handle good data here.
+        } else {
+            // TODO: What if the location is more than 15 seconds old?
+            Log.w(TAG, "Current location hasn't been updated in more than 15 seconds! " +
+                    "May be out of date!");
+        }
 
         mParkedLocation = mLocation;
 
