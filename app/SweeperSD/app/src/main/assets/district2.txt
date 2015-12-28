@@ -3653,7 +3653,7 @@ VEGA ST 	1200 - 1299 	NAPLES ST - SAVANNAH ST 	Not Posted, Both Sides Odd Month 
 VENICE ST 	1490 - 1549 	SAVOY CR - ORCHARD AV 	Not Posted, Both Sides Even Month 4th Wed
 VENICE ST 	1550 - 1599 	ORCHARD AV - DEL MAR AV 	Not Posted, Both Sides Even Month 4th Wed
 VENICE ST 	1600 - 1649 	DEL MAR AV - CORONADO AV 	Not Posted, Both Sides Even Month 4th Wed
-VENICE ST 	1650 - 16 9 	CORONADO AV - SANTA CRUZ AV 	Not Posted, Both Sides Even Month 4th Wed
+VENICE ST 	1650 - 1699 	CORONADO AV - SANTA CRUZ AV 	Not Posted, Both Sides Even Month 4th Wed
 VENICE ST 	1700 - 1749 	SANTA CRUZ AV - DEL MONTE AV 	Not Posted, Both Sides Even Month 4th Wed
 VENICE ST 	1750 - 1799 	DEL MONTE AV - NARRAGANSETT AV 	Not Posted, Both Sides Even Month 4th Wed
 VENICE ST 	1800 - 1849 	NARRAGANSETT AV - NIAGARA AV 	Not Posted, Both Sides Even Month 4th Wed

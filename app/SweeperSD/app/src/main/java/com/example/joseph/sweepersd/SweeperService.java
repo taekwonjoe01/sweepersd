@@ -295,7 +295,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                     if (parsings.length > 3) {
                         Limit l = new Limit();
                         l.street = parsings[0];
-                        l.range = parsings[1];
+                        String[] rangeParsings = parsings[1].split("-");
+                        l.range[0] = Integer.parseInt(rangeParsings[0].trim());
+                        l.range[1] = Integer.parseInt(rangeParsings[1].trim());
                         l.limit = parsings[2];
                         l.schedule = "";
                         for (int j = 3; j < parsings.length; j++) {
@@ -362,30 +364,67 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         sendParkedNotification();
 
         for (Address address : mParkedAddresses) {
-            String street = address.getThoroughfare();
-            String housenumber = address.getFeatureName();
-            String city = address.getLocality();
-            if (housenumber != null && street != null && city != null) {
-                if (city.contains("San Diego")) {
-                    mParkedLimit = checkAddress(housenumber, street);
+            String a = "";
+            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                a += address.getAddressLine(i);
+            }
+            a = a.toLowerCase();
+            // TODO: This should check more dynamically the city.
+            if (a.contains("ca") && a.contains("san diego")) {
+                String[] split = a.split(",");
+                if (split.length > 1) {
+                    String streetAddress = split[0];
+                    String[] streetAddressParsings = streetAddress.split(" ");
+                    if (streetAddressParsings.length > 1) {
+                        String streetNumber = streetAddressParsings[0];
+                        String streetName = "";
+                        for (int j = 1; j < streetAddressParsings.length; j++) {
+                            streetName += streetAddressParsings[j];
+                        }
+                        if (streetNumber.contains("-")) {
+                            String[] streetNumberParsings = streetNumber.split("-");
+                            if (streetNumberParsings.length == 2) {
+                                try {
+                                    int minNum = Integer.parseInt(streetNumberParsings[0]);
+                                    int maxNum = Integer.parseInt(streetNumberParsings[1]);
+
+                                    Limit minLimit = checkAddress(minNum, streetName);
+                                    Limit maxLimit = checkAddress(maxNum, streetName);
+                                    mParkedLimit = (minLimit != null) ? minLimit :
+                                            (maxLimit != null) ? maxLimit : null;
+                                } catch (NumberFormatException e) {
+                                    Log.e(TAG, "Malformed Street numbers: " + streetNumber);
+                                }
+                            } else {
+                                Log.e(TAG, "Malformed Street numbers: " + streetNumber);
+                            }
+                        } else {
+                            try {
+                                int num = Integer.parseInt(streetNumber);
+                                Limit l = checkAddress(num, streetName);
+                                mParkedLimit = (l != null) ? l : null;
+                            } catch (NumberFormatException e) {
+                                Log.e(TAG, "Malformed Street numbers: " + streetNumber);
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Malformed street address " + streetAddress);
+                    }
                 } else {
-                    Log.w(TAG, "City is not San Diego. City is " + city);
+                    Log.e(TAG, "Malformed address" + a);
                 }
+            } else {
+                Log.w(TAG, "City is not San Diego. Address is  " + a);
             }
         }
     }
 
-    private Limit checkAddress(String houseNumber, String street) {
-        Log.d(TAG, "housenumber: " + houseNumber + " street " + street);
+    private Limit checkAddress(int houseNumber, String street) {
+        Log.d(TAG, "houseNumber: " + houseNumber + " street " + street);
         Limit result = null;
         for (Limit l : mPostedLimits) {
-            if (l.street.toLowerCase().contains(street.toLowerCase())) {
-                String[] rangeParsings = l.range.split("-");
-                int minRange = Integer.parseInt(rangeParsings[0].trim());
-                int maxRange = Integer.parseInt(rangeParsings[1].trim());
-
-                int num = Integer.parseInt(houseNumber.trim());
-                if (num >= minRange && num <= maxRange) {
+            if (l.street.toLowerCase().contains(street)) {
+                if (houseNumber >= l.range[0] && houseNumber <= l.range[1]) {
                     result = l;
                     Log.d(TAG, "THIS HOUSE IS IN LIMIT RANGE");
                 }
@@ -503,7 +542,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     private class Limit {
         String street;
-        String range;
+        int[] range = new int[2];
         String limit;
         String schedule;
     }
