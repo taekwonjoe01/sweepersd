@@ -38,6 +38,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private static final String TAG = SweeperService.class.getSimpleName();
     private static final int DRIVING_CONFIDENCE = 85;
     private static final int NOT_DRIVING_CONFIDENCE = 20;
+    // TODO: Add threshold meter for controlling when these notifications happen.
     private static final int FOOT_CONFIDENCE = 30;
     public static final String CONFIDENCE_VEHICLE = "CONFIDENCE_VEHICLE";
     public static final String CONFIDENCE_FOOT = "CONFIDENCE_FOOT";
@@ -57,7 +58,6 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private GoogleApiClient mClient;
     private LocationManager mLocationManager;
     private SweeperServiceListener mListener;
-    private boolean mIsConnected = false;
     private boolean mIsStarted = false;
     private Location mLocation;
 
