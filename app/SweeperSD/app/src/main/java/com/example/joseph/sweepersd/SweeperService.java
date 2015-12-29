@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -157,6 +158,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             loadDatabase();
 
             connectToGooglePlayServices();
+
+            mIsStarted = true;
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -192,7 +195,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         try {
             // TODO: only request location updates when we're driving.
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,
-                    0, this);
+                    5f, this);
         } catch (SecurityException e) {
             // TODO: What happens here.
         }
@@ -329,6 +332,11 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                 Log.d(TAG, "Found BERYL!");
             }
         }
+
+        for (Limit l : mPostedLimits) {
+            Log.d(TAG, "Checking " + l.schedule);
+            getDateForLimit(l);
+        }
     }
 
     private void handleActivityUpdate() {
@@ -375,7 +383,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         for (Address address : addresses) {
             String a = "";
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                a += address.getAddressLine(i);
+                a += address.getAddressLine(i) + ",";
             }
             a = a.toLowerCase();
             // TODO: This should check more dynamically the city.
@@ -388,8 +396,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                         String streetNumber = streetAddressParsings[0];
                         String streetName = "";
                         for (int j = 1; j < streetAddressParsings.length; j++) {
-                            streetName += streetAddressParsings[j];
+                            streetName += " " + streetAddressParsings[j];
                         }
+                        streetName = streetName.trim();
                         if (streetNumber.contains("-")) {
                             String[] streetNumberParsings = streetNumber.split("-");
                             if (streetNumberParsings.length == 2) {
@@ -420,7 +429,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                         Log.e(TAG, "Malformed street address " + streetAddress);
                     }
                 } else {
-                    Log.e(TAG, "Malformed address" + a);
+                    Log.e(TAG, "Malformed address " + a);
                 }
             } else {
                 Log.w(TAG, "City is not San Diego. Address is  " + a);
@@ -592,6 +601,102 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             }
         }
     };
+
+    private void getDateForLimit(Limit limit) {
+        String first = "1st";
+        String second = "2nd";
+        String third = "3rd";
+        String fourth = "4th";
+
+        String monday = "Mon";
+        String tuesday = "Tue";
+        String wednesday = "Wed";
+        String thursday = "Thu";
+        String friday = "Fri";
+        String saturday = "Sat";
+        String sunday = "Sun";
+
+        for (int i = 1; i < 8; i++) {
+            String day = getDayStringForDay(i);
+            if (limit.schedule.contains(day)) {
+                if (limit.schedule.contains(first)) {
+                    Log.d(TAG, "first " + day);
+                }
+                if (limit.schedule.contains(second)) {
+                    Log.d(TAG, "second " + day);
+                }
+                if (limit.schedule.contains(third)) {
+                    Log.d(TAG, "third " + day);
+                }
+                if (limit.schedule.contains(fourth)) {
+                    Log.d(TAG, "fourth " + day);
+                }
+                Log.d(TAG, "Contains " + day);
+            }
+        }
+
+        /*Calendar c = Calendar.getInstance(TimeZone.getDefault());
+        int day = c.get(Calendar.DAY_OF_WEEK);
+        String today = getDayStringForDay(day);
+        String tomorrow = getDayStringForDay((day % 7) + 1 );
+        // TODO: SharedPreference for setting time buffer of warnings
+        if (limit.schedule.contains(today)) {
+            int dayInMonth = c.get(Calendar.DAY_OF_MONTH);
+            if (limit.schedule.contains(first) && dayInMonth < 8) {
+                Log.d(TAG, "Today on the first " + today);
+            } else if (limit.schedule.contains(second) && dayInMonth > 7 && dayInMonth < 15) {
+                Log.d(TAG, "Today on the second " + today);
+            } else if (limit.schedule.contains(third) && dayInMonth > 14 && dayInMonth < 22) {
+                Log.d(TAG, "Today on the third " + today);
+            } else if (limit.schedule.contains(fourth) && dayInMonth > 21 && dayInMonth < 29) {
+                Log.d(TAG, "Today on the fourth " + today);
+            } else {
+                Log.d(TAG, "Today any " + tomorrow);
+            }
+        } else if (limit.schedule.contains(tomorrow)) {
+            int dayInMonth = c.get(Calendar.DAY_OF_MONTH) + 1;
+            if (limit.schedule.contains(first) && dayInMonth < 8) {
+                Log.d(TAG, "Tomorrow on the first " + tomorrow);
+            } else if (limit.schedule.contains(second) && dayInMonth > 7 && dayInMonth < 15) {
+                Log.d(TAG, "Tomorrow on the second " + tomorrow);
+            } else if (limit.schedule.contains(third) && dayInMonth > 14 && dayInMonth < 22) {
+                Log.d(TAG, "Tomorrow on the third " + tomorrow);
+            } else if (limit.schedule.contains(fourth) && dayInMonth > 21 && dayInMonth < 29) {
+                Log.d(TAG, "Tomorrow on the fourth " + tomorrow);
+            } else {
+                Log.d(TAG, "Tomorrow any " + tomorrow);
+            }
+        }*/
+    }
+
+    private String getDayStringForDay(int day) {
+        String result = null;
+        switch (day) {
+            case Calendar.SUNDAY:
+                result = "Sun";
+                break;
+            case Calendar.MONDAY:
+                result = "Mon";
+                break;
+            case Calendar.TUESDAY:
+                result = "Tue";
+                break;
+            case Calendar.WEDNESDAY:
+                result = "Wed";
+                break;
+            case Calendar.THURSDAY:
+                result = "Thu";
+                break;
+            case Calendar.FRIDAY:
+                result = "Fri";
+                break;
+            case Calendar.SATURDAY:
+                result = "Sat";
+                break;
+
+        }
+        return result;
+    }
 
     public interface SweeperServiceListener {
         void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
