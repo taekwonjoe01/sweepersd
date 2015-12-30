@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class SweeperService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener{
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = SweeperService.class.getSimpleName();
     private static final int DRIVING_CONFIDENCE = 85;
     private static final int NOT_DRIVING_CONFIDENCE = 20;
@@ -164,6 +164,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return super.onStartCommand(intent, flags, startId);
     }
 
+    private PendingIntent mActivityRecognitionIntent;
     /*
     GoogleApi.ConnectionCallbacks
      */
@@ -182,23 +183,13 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         // Register the ActivityDetectionService for activity updates. That service will just
         // forward that data to the mActivityDetectorReceiver.
         Intent intent = new Intent(this, ActivityDetectionService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent,
+        mActivityRecognitionIntent = PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mClient, 0,
-                pendingIntent);
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mClient, 30000,
+                mActivityRecognitionIntent);
 
         mLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mClient);
-
-        // Request Location Updates
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        try {
-            // TODO: only request location updates when we're driving.
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,
-                    5f, this);
-        } catch (SecurityException e) {
-            // TODO: What happens here.
-        }
     }
 
     /*
@@ -341,12 +332,39 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     private void handleActivityUpdate() {
         if (mInVehicleConfidence > DRIVING_CONFIDENCE) {
+            if (!mIsDriving) {
+                // Request Location Updates
+                mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                try {
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,
+                            5f, this);
+                } catch (SecurityException e) {
+                    // TODO: What happens here.
+                }
+
+                // Speed up activity detection updates
+                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mClient,
+                        mActivityRecognitionIntent);
+                ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mClient, 1000,
+                        mActivityRecognitionIntent);
+            }
             mIsDriving = true;
             mIsParked = false;
         } else if (mInVehicleConfidence < NOT_DRIVING_CONFIDENCE &&
                 (mOnFootConfidence > FOOT_CONFIDENCE || mWalkingConfidence > FOOT_CONFIDENCE ||
                 mRunningConfidence > FOOT_CONFIDENCE)) {
             if (mIsDriving) {
+                try {
+                    mLocationManager.removeUpdates(this);
+                } catch (SecurityException e) {
+                    // TODO: What happens here.
+                }
+
+                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mClient,
+                        mActivityRecognitionIntent);
+                ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mClient, 30000,
+                        mActivityRecognitionIntent);
+
                 mIsParked = true;
                 handleParkDetected();
             }
