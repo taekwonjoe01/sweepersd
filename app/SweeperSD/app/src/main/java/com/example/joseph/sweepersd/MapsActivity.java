@@ -1,9 +1,11 @@
 package com.example.joseph.sweepersd;
 
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,6 +19,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+    private static final String TAG = MapsActivity.class.getSimpleName();
 
     private GoogleMap mMap;
     private Location mParkedLocation;
@@ -40,8 +43,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(0);
+        notificationManager.cancel(1);
+        notificationManager.cancel(2);
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent");
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            mParkedLocation = (Location) bundle.get("location");
+        }
+    }
 
     /**
      * Manipulates the map once available.

@@ -503,7 +503,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             notificationIntent.putExtra("location", mParkedLocation);
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
+                    notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                     .setSmallIcon(android.R.drawable.ic_notification_overlay)
@@ -528,7 +528,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             notificationIntent.putExtra("location", mParkedLocation);
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
+                    notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                     .setSmallIcon(android.R.drawable.ic_notification_overlay)
@@ -553,7 +553,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             notificationIntent.putExtra("location", mParkedLocation);
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
+                    notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                     .setSmallIcon(android.R.drawable.ic_notification_overlay)
