@@ -450,7 +450,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                     "May be out of date!");
         }
         mParkedLimit = null;
-        mParkedLocation = mLocation;
+        mParkedLocation = mLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mClient);
 
         mParkedAddresses = getAddressesForLocation(mParkedLocation);
 
@@ -460,7 +461,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         // event or only if we park in a bad location.
         sendParkedNotification();
         if (mParkedLimit != null) {
-            sendParkedInLimitZoneNotification();
+            //sendParkedInLimitZoneNotification();
 
             List<GregorianCalendar> days = getSweepingDaysForLimit(mParkedLimit);
             GregorianCalendar today = new GregorianCalendar();
