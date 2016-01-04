@@ -501,7 +501,7 @@ ARAGON DR 	4800 - 4849 	SERRANO PL - EL CAJON BL 	Not Posted, Both Sides Even Mo
 ARAGON DR 	4850 - 4899 	EL CAJON BL - END 	Not Posted, Both Sides Even Month 4th Tue	
 ARAGON WY 	4300 - 4399 	ROLANDO BL - ARAGON DR 	Not Posted, Both Sides Even Month 4th Tue	
 ARBOR VITAE ST 	4100 - 4103 	MANZANITA DR - SNOWDROP ST 	Not Posted, Both Sides Odd Month 4th Tue	
-ARBOR VITAE ST 	4104 - 4199 	SNOWDROP ST - MANZANITA DR 	Not Po ted, Both Sides Odd Month 4th Tue	
+ARBOR VITAE ST 	4104 - 4199 	SNOWDROP ST - MANZANITA DR 	Not Posted, Both Sides Odd Month 4th Tue
 ARENDO DR 	4400 - 4449 	LORCA DR - ESTELLE ST 	Not Posted, Both Sides 2nd Mon	
 ARENDO DR 	4450 - 4499 	ESTELLE ST - ESTELLE ST 	Not Posted, Both Sides 2nd Mon	
 ARGOS DR 	4300 - 4349 	HART DR - HART DR 	Not Posted, Both Sides 4th Mon	

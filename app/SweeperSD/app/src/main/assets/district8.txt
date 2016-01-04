@@ -2272,7 +2272,7 @@ W CALLE PRIMERA 	100 - 129 	CALLE PRIMERA - VIA DE SAN YSIDRO 	Not Posted, Both 
 W CALLE PRIMERA 	130 - 429 	VIA DE SAN YSIDRO - VIA SEGUNDO 	Not Posted, Both Sides Wed	
 W CALLE PRIMERA 	430 - 529 	VIA SEGUNDO - VIA TERCERO 	Not Posted, Both Sides Wed	
 W HALL AV 	100 - 109 	HALL AV - CYPRESS DR 	Not Posted, Both Sides Odd Month 3rd Fri	
-W HALL AV 	110 - 199 	CYPRESS DR - COTTONWOOD RD 	N t Posted, Both Sides Odd Month 3rd Fri	
+W HALL AV 	110 - 199 	CYPRESS DR - COTTONWOOD RD 	Not Posted, Both Sides Odd Month 3rd Fri
 W SAN YSIDRO BL 	0 - 0 	VIA SUSPIRO - END 	Not Posted, Both Sides Odd Month 3rd Fri	
 W SAN YSIDRO BL 	100 - 109 	E SAN YSIDRO BL - VIA DE SAN YSIDRO 	Posted (12am - 3am), Both Sides Wed	
 W SAN YSIDRO BL 	110 - 119 	VIA DE SAN YSIDRO - CYPRESS DR 	Not Posted, Both Sides Wed	

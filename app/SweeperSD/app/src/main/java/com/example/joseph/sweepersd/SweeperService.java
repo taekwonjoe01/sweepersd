@@ -14,6 +14,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -30,9 +31,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class SweeperService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -86,6 +90,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     private List<Limit> mLimits = new ArrayList<>();
     private List<Limit> mPostedLimits = new ArrayList<>();
+
+    private Handler mHandler = new Handler();
 
     public SweeperService() {
     }
@@ -145,7 +151,11 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         if (mParkedLimit == null) {
             return null;
         }
-        return mParkedLimit.schedule;
+        String schedule = "";
+        for (String s : mParkedLimit.schedules) {
+            schedule += s;
+        }
+        return schedule;
     }
 
     public GooglePlayConnectionStatus getConnectionStatus() {
@@ -296,11 +306,18 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                         l.range[0] = Integer.parseInt(rangeParsings[0].trim());
                         l.range[1] = Integer.parseInt(rangeParsings[1].trim());
                         l.limit = parsings[2];
-                        l.schedule = "";
+                        l.schedules = new ArrayList<>();
+                        boolean acceptable = true;
                         for (int j = 3; j < parsings.length; j++) {
-                            l.schedule += parsings[j];
+                            l.schedules.add(parsings[j]);
+                            if (parsings[j].contains("Not Posted")) {
+                                acceptable = false;
+                            }
+                            if (!parsings[j].contains("Posted")) {
+                                acceptable = false;
+                            }
                         }
-                        if (!l.schedule.contains("Not Posted")) {
+                        if (acceptable) {
                             mPostedLimits.add(l);
                         }
                         mLimits.add(l);
@@ -325,8 +342,40 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         }
 
         for (Limit l : mPostedLimits) {
-            Log.d(TAG, "Checking " + l.schedule);
-            getDateForLimit(l);
+            Log.d(TAG, "Street: " + l.street);
+            String s = "";
+            for (String sc : l.schedules) {
+                s += sc;
+            }
+            Log.d(TAG, "Schedule: " + s);
+            for (String schedule : l.schedules) {
+                String timeString = getTimeString(schedule);
+                if (timeString == null) {
+                    Log.e(TAG, "Parse Error on " + l.street + " :: " + l.limit + " :: " + l.schedules);
+                } else {
+                    String[] parsings = timeString.split("-");
+                    int startTime = convertTimeStringToHour(parsings[0]);
+                    int endTime = convertTimeStringToHour(parsings[1]);
+                    if (startTime > -1 && endTime > -1) {
+                        List<GregorianCalendar> days = new ArrayList<>();
+                        for (int i = 0; i < l.schedules.size(); i++) {
+                            days.addAll(getSweepingDates(startTime, endTime, l.schedules.get(i)));
+                        }
+                        for (GregorianCalendar d : days) {
+                            Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
+                                    d.get(Calendar.DAY_OF_MONTH) + " (" +
+                                    d.get(Calendar.DAY_OF_WEEK) + ") time: " +
+                                    d.get(Calendar.HOUR));
+                        }
+                    } else {
+                        Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
+                    }
+                }
+            }
+            Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+
+            //getDateForLimit(l);
         }
     }
 
@@ -369,6 +418,25 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                 handleParkDetected();
             }
             mIsDriving = false;
+        } else if (mNotDrivingChecker == null) {
+            mNotDrivingChecker = new Runnable() {
+                @Override
+                public void run() {
+                    if (mInVehicleConfidence <= DRIVING_CONFIDENCE && !mIsParked) {
+                        mNotDrivingCounter++;
+                        if (mNotDrivingCounter < NOT_DRIVING_CHECK_COUNT) {
+                            mHandler.postDelayed(mNotDrivingChecker, NOT_DRIVING_CHECK_INTERVAL);
+                        } else {
+                            handleParkDetected();
+                            mNotDrivingCounter = 0;
+                            mNotDrivingChecker = null;
+                        }
+                    } else {
+                        mNotDrivingCounter = 0;
+                        mNotDrivingChecker = null;
+                    }
+                }
+            };
         }
     }
 
@@ -393,7 +461,53 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         sendParkedNotification();
         if (mParkedLimit != null) {
             sendParkedInLimitZoneNotification();
+
+            List<GregorianCalendar> days = getSweepingDaysForLimit(mParkedLimit);
+            GregorianCalendar today = new GregorianCalendar();
+
+            long timeUntilSweepingMs = Long.MAX_VALUE;
+            for (GregorianCalendar c : days) {
+                long msTilSweeping = c.getTime().getTime() - today.getTime().getTime();
+                if (msTilSweeping < 345600000) {
+                    timeUntilSweepingMs = Math.min(msTilSweeping, timeUntilSweepingMs);
+                }
+            }
+            if (timeUntilSweepingMs != Long.MAX_VALUE) {
+                // TODO: periodic updated checks on mLastParkedLocation
+                sendParkedInRedZoneNotification(timeUntilSweepingMs);
+            }
         }
+    }
+
+
+
+    private List<GregorianCalendar> getSweepingDaysForLimit(Limit l) {
+        List<GregorianCalendar> results = new ArrayList<>();
+        for (String schedule : mParkedLimit.schedules) {
+            String timeString = getTimeString(schedule);
+            if (timeString == null) {
+                Log.e(TAG, "Parse Error on " + mParkedLimit.street + " :: " + mParkedLimit.limit
+                        + " :: " + mParkedLimit.schedules);
+            } else {
+                String[] parsings = timeString.split("-");
+                int startTime = convertTimeStringToHour(parsings[0]);
+                int endTime = convertTimeStringToHour(parsings[1]);
+                if (startTime > -1 && endTime > -1) {
+                    for (int i = 0; i < l.schedules.size(); i++) {
+                        results.addAll(getSweepingDates(startTime, endTime, l.schedules.get(i)));
+                    }
+                    /*for (GregorianCalendar d : results) {
+                        Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
+                                d.get(Calendar.DAY_OF_MONTH) + " (" +
+                                d.get(Calendar.DAY_OF_WEEK) + ") time: " +
+                                d.get(Calendar.HOUR));
+                    }*/
+                } else {
+                    Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
+                }
+            }
+        }
+        return results;
     }
 
     private Limit findLimitForAddresses(List<Address> addresses) {
@@ -543,10 +657,13 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         }
     }
 
-    private void sendParkedInRedZoneNotification() {
+    private void sendParkedInRedZoneNotification(long msTilSweeping) {
         // TODO: hard coded strings, Notification builder cleanup and nicer
         if (mParkedLocation != null) {
-            String message = "Your parking spot is scheduled for street sweeping!";
+            long hoursUntilParking = msTilSweeping / 3600000;
+            long leftOverMinutes = (msTilSweeping % 3600000) / 60000;
+            String message = "Street Sweeping in "
+                    + hoursUntilParking + ":" + leftOverMinutes;
             Intent notificationIntent = new Intent(this, MapsActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -636,17 +753,17 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         for (int i = 1; i < 8; i++) {
             String day = getDayStringForDay(i);
-            if (limit.schedule.contains(day)) {
-                if (limit.schedule.contains(first)) {
+            if (limit.schedules.contains(day)) {
+                if (limit.schedules.contains(first)) {
                     Log.d(TAG, "first " + day);
                 }
-                if (limit.schedule.contains(second)) {
+                if (limit.schedules.contains(second)) {
                     Log.d(TAG, "second " + day);
                 }
-                if (limit.schedule.contains(third)) {
+                if (limit.schedules.contains(third)) {
                     Log.d(TAG, "third " + day);
                 }
-                if (limit.schedule.contains(fourth)) {
+                if (limit.schedules.contains(fourth)) {
                     Log.d(TAG, "fourth " + day);
                 }
                 Log.d(TAG, "Contains " + day);
@@ -658,33 +775,227 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         String today = getDayStringForDay(day);
         String tomorrow = getDayStringForDay((day % 7) + 1 );
         // TODO: SharedPreference for setting time buffer of warnings
-        if (limit.schedule.contains(today)) {
+        if (limit.schedules.contains(today)) {
             int dayInMonth = c.get(Calendar.DAY_OF_MONTH);
-            if (limit.schedule.contains(first) && dayInMonth < 8) {
+            if (limit.schedules.contains(first) && dayInMonth < 8) {
                 Log.d(TAG, "Today on the first " + today);
-            } else if (limit.schedule.contains(second) && dayInMonth > 7 && dayInMonth < 15) {
+            } else if (limit.schedules.contains(second) && dayInMonth > 7 && dayInMonth < 15) {
                 Log.d(TAG, "Today on the second " + today);
-            } else if (limit.schedule.contains(third) && dayInMonth > 14 && dayInMonth < 22) {
+            } else if (limit.schedules.contains(third) && dayInMonth > 14 && dayInMonth < 22) {
                 Log.d(TAG, "Today on the third " + today);
-            } else if (limit.schedule.contains(fourth) && dayInMonth > 21 && dayInMonth < 29) {
+            } else if (limit.schedules.contains(fourth) && dayInMonth > 21 && dayInMonth < 29) {
                 Log.d(TAG, "Today on the fourth " + today);
             } else {
                 Log.d(TAG, "Today any " + tomorrow);
             }
-        } else if (limit.schedule.contains(tomorrow)) {
+        } else if (limit.schedules.contains(tomorrow)) {
             int dayInMonth = c.get(Calendar.DAY_OF_MONTH) + 1;
-            if (limit.schedule.contains(first) && dayInMonth < 8) {
+            if (limit.schedules.contains(first) && dayInMonth < 8) {
                 Log.d(TAG, "Tomorrow on the first " + tomorrow);
-            } else if (limit.schedule.contains(second) && dayInMonth > 7 && dayInMonth < 15) {
+            } else if (limit.schedules.contains(second) && dayInMonth > 7 && dayInMonth < 15) {
                 Log.d(TAG, "Tomorrow on the second " + tomorrow);
-            } else if (limit.schedule.contains(third) && dayInMonth > 14 && dayInMonth < 22) {
+            } else if (limit.schedules.contains(third) && dayInMonth > 14 && dayInMonth < 22) {
                 Log.d(TAG, "Tomorrow on the third " + tomorrow);
-            } else if (limit.schedule.contains(fourth) && dayInMonth > 21 && dayInMonth < 29) {
+            } else if (limit.schedules.contains(fourth) && dayInMonth > 21 && dayInMonth < 29) {
                 Log.d(TAG, "Tomorrow on the fourth " + tomorrow);
             } else {
                 Log.d(TAG, "Tomorrow any " + tomorrow);
             }
         }*/
+    }
+
+    private String convertHourToTimeString(int hour) {
+        String suffix = hour > 12 ? "pm" : "am";
+        int result = hour > 12 ? (hour - 12) : hour;
+        return result + suffix;
+    }
+
+    /**
+     * Example: "7pm", "10am".
+     * @param time
+     * @return
+     */
+    private int convertTimeStringToHour(String time) {
+        int result = -1;
+        String t = time.trim().toLowerCase();
+        int base = 0;
+        if (t.contains("pm")) {
+            base = 12;
+        }
+        t = t.replace("pm", "");
+        t = t.replace("am", "");
+
+        try {
+            result = Integer.parseInt(t) + base;
+        } catch (NumberFormatException e) {
+            Log.d(TAG, "Failed to parse time from: " + time);
+        }
+        return result;
+    }
+
+    private String getTimeString(String schedule) {
+        String result = null;
+        String[] parsings = schedule.split("\\(");
+        for (int i = 1; i < parsings.length; i++) {
+            String p = parsings[i];
+            String[] parsings2 = p.split("\\)");
+            if (parsings2.length == 2) {
+                if (result != null) {
+                    String[] temp = parsings2[0].split("-");
+                    String[] temp2 = result.split("-");
+                    int startTime = convertTimeStringToHour(temp[0]);
+                    int endTime = convertTimeStringToHour(temp[1]);
+                    int startTime2 = convertTimeStringToHour(temp2[0]);
+                    int endTime2 = convertTimeStringToHour(temp2[1]);
+                    int minStart = Math.min(startTime, startTime2);
+                    int maxEnd = Math.max(endTime, endTime2);
+                    String startString = convertHourToTimeString(minStart);
+                    String endString = convertHourToTimeString(maxEnd);
+                    result = startString + " - " + endString;
+                } else {
+                    result = parsings2[0];
+                }
+            } else {
+                Log.w(TAG, "Failed to get time string from: " + schedule);
+            }
+        }
+        if (parsings.length == 2) {
+
+        } else {
+            Log.w(TAG, "Failed to get time string from: " + schedule);
+        }
+        return result;
+    }
+
+    private List<GregorianCalendar> getSweepingDates(int startTime, int endTime, String schedule) {
+        List<GregorianCalendar> results = new ArrayList<>();
+        String s = schedule.trim().toLowerCase();
+        s = s.replace(",", " ");
+        s = s.replace(";", " ");
+        s = s.replace("  ", " ");
+        s = s.trim();
+        List<String> words = new ArrayList<>(Arrays.asList(s.split(" ")));
+        for (int i = 0; i < words.size(); i++) {
+            String word = words.get(i);
+            int weekdayNumber = getDay(word);
+            if (weekdayNumber > 0) {
+                List<GregorianCalendar> potentialDays = new ArrayList<>();
+                List<GregorianCalendar> potentialResults = new ArrayList<>();
+                Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+
+                for (int j = 0; j < 28; j++) {
+                    int dow = calendar.get(Calendar.DAY_OF_WEEK);
+
+                    if (dow == weekdayNumber) {
+                        GregorianCalendar c = new GregorianCalendar(calendar.get(Calendar.YEAR),
+                                calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH),
+                                startTime, 0, 0);
+                        potentialDays.add(c);
+                    }
+
+                    calendar.add(Calendar.DATE, 1);
+                }
+
+                potentialResults.addAll(refineDays(words, i, potentialDays));
+                if (potentialResults.isEmpty()) {
+                    results.addAll(potentialDays);
+                } else {
+                    results.addAll(potentialResults);
+                }
+            }
+        }
+        return results;
+    }
+
+    private List<GregorianCalendar> refineDays(List<String> words, int index,
+                                               List<GregorianCalendar> unrefinedDays) {
+        List<GregorianCalendar> refinedDays = new ArrayList<>();
+        String prevWord = getPreviousWord(words, index);
+        if (prevWord != null) {
+            int prefix = getPrefix(prevWord);
+            if (prefix > 0) {
+                for (GregorianCalendar day : unrefinedDays) {
+                    int dom = day.get(Calendar.DAY_OF_MONTH);
+                    int p = dom - ((prefix - 1) * 7);
+                    if (p > 0 && p < 8) {
+                        refinedDays.add(day);
+                    }
+                }
+                refinedDays.addAll(refineDays(words, index - 1, unrefinedDays));
+            } else if (prevWord.equals("&")) {
+                refinedDays.addAll(refineDays(words, index - 1, unrefinedDays));
+            }
+        }
+        return refinedDays;
+    }
+
+    private String getPreviousWord(List<String> words, int position) {
+        String result = null;
+        if (position > 0) {
+            result = words.get(position - 1);
+        }
+        return result;
+    }
+
+    private int getPrefix(String word) {
+        final String first = "1st";
+        final String second = "2nd";
+        final String third = "3rd";
+        final String fourth = "4th";
+
+        int result = 0;
+        switch (word) {
+            case first:
+                result = 1;
+                break;
+            case second:
+                result = 2;
+                break;
+            case third:
+                result = 3;
+                break;
+            case fourth:
+                result = 4;
+                break;
+
+        }
+        return result;
+    }
+
+    private int getDay(String word) {
+        int result = 0;
+        final String monday = "mon";
+        final String tuesday = "tue";
+        final String wednesday = "wed";
+        final String thursday = "thu";
+        final String friday = "fri";
+        final String saturday = "sat";
+        final String sunday = "sun";
+        switch (word) {
+            case sunday:
+                result = Calendar.SUNDAY;
+                break;
+            case monday:
+                result = Calendar.MONDAY;
+                break;
+            case tuesday:
+                result = Calendar.TUESDAY;
+                break;
+            case wednesday:
+                result = Calendar.WEDNESDAY;
+                break;
+            case thursday:
+                result = Calendar.THURSDAY;
+                break;
+            case friday:
+                result = Calendar.FRIDAY;
+                break;
+            case saturday:
+                result = Calendar.SATURDAY;
+                break;
+
+        }
+        return result;
     }
 
     private String getDayStringForDay(int day) {
@@ -716,6 +1027,18 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return result;
     }
 
+    private int mNotDrivingCounter = 0;
+    private static final int NOT_DRIVING_CHECK_INTERVAL = 5000;
+    private static final int NOT_DRIVING_CHECK_COUNT = 60; // 5 minutes.
+
+    /**
+     * Class used to detect if the user is not driving over a period of 5 minutes. There is a case
+     * where the user might not get out of their car, but sit still for long periods of time. For
+     * the sake of this app, we will determine this is a condition in which we're parked. Since
+     * other activity detection won't trigger the parked condition, this is another check.
+     */
+    private Runnable mNotDrivingChecker;
+
     public interface SweeperServiceListener {
         void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
     }
@@ -724,6 +1047,6 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         String street;
         int[] range = new int[2];
         String limit;
-        String schedule;
+        List<String> schedules;
     }
 }
