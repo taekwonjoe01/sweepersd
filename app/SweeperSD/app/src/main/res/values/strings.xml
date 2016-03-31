@@ -1,4 +1,142 @@
 <resources>
     <string name="app_name">SweeperSD</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_debug">Debug Activity</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_redzone_warning_time">Redzone Warning Time</string>
+    <string-array name="pref_redzone_warning_titles">
+        <item>2 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>18 hours</item>
+        <item>24 hours</item>
+        <item>36 hours</item>
+        <item>2 days</item>
+        <item>3 days</item>
+        <item>5 days</item>
+        <item>7 days</item>
+        <item>14 days</item>
+        <item>21 days</item>
+        <item>31 days</item>
+    </string-array>
+    <string-array name="pref_redzone_warning_values">
+        <item>7200000</item>
+        <item>21600000</item>
+        <item>43200000</item>
+        <item>64800000</item>
+        <item>86400000</item>
+        <item>129600000</item>
+        <item>172800000</item>
+        <item>259200000</item>
+        <item>432000000</item>
+        <item>604800000</item>
+        <item>1209600000</item>
+        <item>1814400000</item>
+        <item>2678400000</item>
+    </string-array>
+
+    <!-- Advanced Settings -->
+    <string name="pref_header_advanced_settings">Advanced Settings</string>
+
+    <string name="pref_title_activity_update_frequency">Activity Update Frequency</string>
+    <string-array name="pref_activity_update_titles">
+        <item>1 second</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>20 seconds</item>
+        <item>30 seconds</item>
+        <item>45 seconds</item>
+    </string-array>
+    <string-array name="pref_activity_update_values">
+        <item>1000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>20000</item>
+        <item>30000</item>
+        <item>45000</item>
+    </string-array>
+
+    <string name="pref_title_activity_age">Valid Activity Age</string>
+    <string-array name="pref_activity_age_titles">
+        <item>10 seconds</item>
+        <item>20 seconds</item>
+        <item>30 seconds</item>
+        <item>40 seconds</item>
+        <item>60 seconds</item>
+        <item>80 seconds</item>
+        <item>100 seconds</item>
+        <item>120 seconds</item>
+    </string-array>
+    <string-array name="pref_activity_age_values">
+        <item>10000</item>
+        <item>20000</item>
+        <item>30000</item>
+        <item>40000</item>
+        <item>60000</item>
+        <item>80000</item>
+        <item>100000</item>
+        <item>120000</item>
+    </string-array>
+
+    <!-- These need to be kept up-to-date with final Strings in SettingsActivity.java -->
+    <string name="pref_key_driving_driving_threshold">STATUS_DRIVING_DRIVING_THRESHOLD</string>
+    <string name="pref_key_driving_parked_threshold">STATUS_DRIVING_PARKED_THRESHOLD</string>
+    <string name="pref_key_driving_deciding_driving_threshold">STATUS_DRIVING_DECIDING_DRIVING_THRESHOLD</string>
+    <string name="pref_key_driving_deciding_parked_threshold">STATUS_DRIVING_DECIDING_PARKED_THRESHOLD</string>
+    <string name="pref_key_parked_driving_threshold">STATUS_PARKED_DRIVING_THRESHOLD</string>
+    <string name="pref_key_parked_parked_threshold">STATUS_PARKED_PARKED_THRESHOLD</string>
+    <string name="pref_key_parked_deciding_driving_threshold">STATUS_PARKED_DECIDING_DRIVING_THRESHOLD</string>
+    <string name="pref_key_parked_deciding_parked_threshold">STATUS_PARKED_DECIDING_PARKED_THRESHOLD</string>
+    <string name="pref_key_age_valid">AGE_OF_VALID_STATUS</string>
+    <string name="pref_key_activity_update_rate">ACTIVITY_UPDATE_PERIOD</string>
+
+    <string name="pref_key_receive_park_notifications">NOTIFY_PARKED</string>
+    <string name="pref_key_redzone_warning_time">REDZONE_WARNING_TIME</string>
+
+    <!-- Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_receive_park_notifications">Notify When Parked</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="title_activity_deleteme">Settings</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+    <string name="title_activity_detetete">Settings</string>
+    <string name="title_activity_hhhh">Settings</string>
 </resources>

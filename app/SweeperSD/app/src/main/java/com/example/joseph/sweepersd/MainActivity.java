@@ -1,94 +1,83 @@
 package com.example.joseph.sweepersd;
 
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Address;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity
-        implements SweeperService.SweeperServiceListener {
+        implements SweeperService.SweeperServiceListener, OnMapReadyCallback {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private boolean mIsBound = false;
 
-    private Button mLaunchMapsButton;
-    private Button mSimulateButton;
-    private TextView mVehicleText;
-    private TextView mBicycleText;
-    private TextView mWalkingText;
-    private TextView mRunningText;
-    private TextView mOnFootText;
-    private TextView mStillText;
-    private TextView mTiltingText;
-    private TextView mUnknownText;
-    private TextView mIsParkedText;
-    private TextView mIsDrivingText;
-
-    private TextView mAddresses;
-
     private Handler mActivityHandler;
     private Runnable mRunnable;
+    private GoogleMap mMap;
 
     private SweeperService mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_notification, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_advanced_settings, true);
+
         setContentView(R.layout.activity_main);
 
-        mLaunchMapsButton = (Button) findViewById(R.id.launch_maps);
-        mSimulateButton = (Button) findViewById(R.id.simulate);
-        mVehicleText = (TextView) findViewById(R.id.vehicleConfidenceText);
-        mBicycleText = (TextView) findViewById(R.id.bicycleConfidenceText);
-        mWalkingText = (TextView) findViewById(R.id.walkingConfidenceText);
-        mRunningText = (TextView) findViewById(R.id.runningConfidenceText);
-        mOnFootText = (TextView) findViewById(R.id.footConfidenceText);
-        mStillText = (TextView) findViewById(R.id.stillConfidenceText);
-        mTiltingText = (TextView) findViewById(R.id.tiltingConfidenceText);
-        mUnknownText = (TextView) findViewById(R.id.unknownConfidenceText);
-        mIsParkedText = (TextView) findViewById(R.id.isParkedText);
-        mIsDrivingText = (TextView) findViewById(R.id.isDrivingText);
-        mAddresses = (TextView) findViewById(R.id.addresses);
-
-        mLaunchMapsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mIsBound) {
-                    Intent activityIntent = new Intent(MainActivity.this, MapsActivity.class);
-                    activityIntent.putExtra("location", mService.getLastKnownParkingLocation());
-                    startActivity(activityIntent);
-                }
-                // TODO what if we're not bound?
-            }
-        });
-
-        mSimulateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mActivityHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        sendSimulatedData(100);
-                        sendSimulatedData(10);
-                    }
-                }, 5000);
-            }
-        });
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         Intent serviceIntent = new Intent(this, SweeperService.class);
         startService(serviceIntent);
 
         mActivityHandler = new Handler(getMainLooper());
         mRunnable = new UpdateActivityRunnable();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_activity_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                return true;
+            case R.id.debugactivity:
+                startActivity(new Intent(MainActivity.this, DebugActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
     }
 
     @Override
@@ -114,6 +103,12 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         mActivityHandler.postDelayed(mRunnable, 33);
+
+        NotificationManager notificationManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(0);
+        notificationManager.cancel(1);
+        notificationManager.cancel(2);
     }
 
     @Override
@@ -122,12 +117,40 @@ public class MainActivity extends AppCompatActivity
         mActivityHandler.removeCallbacks(mRunnable);
     }
 
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        plotParkedLocations();
+    }
+
+    private void plotParkedLocations() {
+        if (mIsBound && mMap != null) {
+            for (Location location : mService.getPotentialParkingLocations()) {
+                // Add a marker in Sydney and move the camera
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(latLng).title("You parked here!"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
+            }
+        }
+    }
+
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "Service is connected!");
             mService = ((SweeperService.SweeperBinder)service).getService(MainActivity.this);
             mIsBound = true;
+            plotParkedLocations();
         }
 
         @Override
@@ -136,63 +159,10 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    private void sendSimulatedData(int vehicleConf) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(SweeperService.CONFIDENCE_BICYCLE, 0);
-        bundle.putInt(SweeperService.CONFIDENCE_VEHICLE, vehicleConf);
-        bundle.putInt(SweeperService.CONFIDENCE_WALKING, 0);
-        bundle.putInt(SweeperService.CONFIDENCE_FOOT, 40);
-        bundle.putInt(SweeperService.CONFIDENCE_RUNNING, 0);
-        bundle.putInt(SweeperService.CONFIDENCE_STILL, 0);
-        bundle.putInt(SweeperService.CONFIDENCE_UNKNOWN, 0);
-        bundle.putInt(SweeperService.CONFIDENCE_TILTING, 0);
-
-        Intent intent = new Intent(ActivityDetectionService.ACTION_ACTIVITY_UPDATE);
-        intent.putExtras(bundle);
-        sendBroadcast(intent);
-    }
-
     private class UpdateActivityRunnable implements Runnable {
         @Override
         public void run() {
             if (mIsBound) {
-                mVehicleText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_VEHICLE));
-                mBicycleText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_BICYCLE));
-                mWalkingText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_WALKING));
-                mRunningText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_RUNNING));
-                mOnFootText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_FOOT));
-                mStillText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_STILL));
-                mTiltingText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_TILTING));
-                mUnknownText.setText("" + mService.getConfidence(SweeperService.CONFIDENCE_UNKNOWN));
-                mIsParkedText.setText("" + mService.isParked());
-                mIsDrivingText.setText("" + mService.isDriving());
-
-                String a = "";
-                for (Address address : mService.getCurrentAddresses()) {
-                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                        a += address.getAddressLine(i) + ", ";
-                    }
-                    a += "\n";
-                    String street = address.getThoroughfare();
-                    String housenumber = address.getFeatureName();
-                    String city = address.getLocality();
-                }
-                a += "\n";
-                String schedule = mService.getCurrentParkedSchedule();
-                if (schedule != null) {
-                    a += schedule;
-                }
-                a += "\n";
-                for (Address address : mService.getLastKnownParkingAddresses()) {
-                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                        a += address.getAddressLine(i) + ", ";
-                    }
-                    a += "\n";
-                    String street = address.getThoroughfare();
-                    String housenumber = address.getFeatureName();
-                    String city = address.getLocality();
-                }
-                mAddresses.setText(a);
             }
             mActivityHandler.postDelayed(mRunnable, 33);
         }

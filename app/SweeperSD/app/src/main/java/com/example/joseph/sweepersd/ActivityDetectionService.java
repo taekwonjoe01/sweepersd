@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
-import com.google.android.gms.location.DetectedActivity;
-
-import java.util.List;
 
 
 /**
@@ -37,7 +34,7 @@ public class ActivityDetectionService extends IntentService {
     }
 
     private void handleActivity(ActivityRecognitionResult result) {
-        List<DetectedActivity> activities = result.getProbableActivities();
+        /*List<DetectedActivity> activities = result.getProbableActivities();
         int vehicleConfidence = 0;
         int footConfidence = 0;
         int bicycleConfidence = 0;
@@ -85,6 +82,15 @@ public class ActivityDetectionService extends IntentService {
         bundle.putInt(SweeperService.CONFIDENCE_STILL, stillConfidence);
         bundle.putInt(SweeperService.CONFIDENCE_UNKNOWN, unknownConfidence);
         bundle.putInt(SweeperService.CONFIDENCE_TILTING, tiltingConfidence);
+        bundle.putInt(SweeperService.MOST_LIKELY_ACTIVITY,
+                result.getMostProbableActivity().getType());
+
+
+        Intent intent = new Intent(ACTION_ACTIVITY_UPDATE);
+        intent.putExtras(bundle);
+        sendBroadcast(intent);*/
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(ParkDetectionManager.ACTIVITY_RECOGNITION_RESULT, result);
 
         Intent intent = new Intent(ACTION_ACTIVITY_UPDATE);
         intent.putExtras(bundle);

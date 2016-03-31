@@ -6,5 +6,6 @@ import android.app.Application;
  * Created by joseph on 11/25/15.
  */
 public class SweeperSDApplication extends Application {
-
+    public static volatile boolean needsCoarsePermission;
+    public static volatile boolean needsFinePermission;
 }
