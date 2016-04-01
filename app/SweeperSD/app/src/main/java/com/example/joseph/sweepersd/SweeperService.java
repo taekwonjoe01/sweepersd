@@ -26,6 +26,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -306,6 +307,26 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         mPostedLimits = LimitManager.getPostedLimits();
         Log.d(TAG, "mPostedLimits size " + mPostedLimits.size());
+
+        new Thread(){
+            @Override
+            public void run() {
+                for (Limit l : mPostedLimits) {
+                    String startAddress = l.getRange()[0] + " " + l.getStreet() + ", San Diego, CA";
+                    LatLng start = getLocationFromAddress(startAddress);
+                    String endAddress = l.getRange()[1] + " " + l.getStreet() + ", San Diego, CA";
+                    LatLng end = getLocationFromAddress(endAddress);
+                    l.setStartLatLng(start);
+                    l.setEndLatLng(end);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+        }.start();
+        Log.d(TAG, "finished loading database");
     }
 
     private void handleParkDetected() {
@@ -473,6 +494,29 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         long end = System.nanoTime();
         Log.d(TAG, "getting Address took: " + (end - start) / 1000000 + "ms");
         return addresses;
+    }
+
+    private LatLng getLocationFromAddress(String strAddress) {
+        Geocoder coder = new Geocoder(this);
+        List<Address> address;
+        LatLng result = null;
+
+        try {
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address != null && !address.isEmpty()) {
+                Address location = address.get(0);
+                location.getLatitude();
+                location.getLongitude();
+
+                result = new LatLng(location.getLatitude(), location.getLongitude());
+            } else {
+                Log.d(TAG, "No location for: " + strAddress);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     private void sendParkedNotification() {

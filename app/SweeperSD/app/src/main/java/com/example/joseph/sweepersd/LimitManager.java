@@ -82,12 +82,12 @@ public class LimitManager {
         }
 
         for (Limit l : mLoadedPostedLimits) {
-            Log.d(TAG, "Street: " + l.getStreet());
+            //Log.d(TAG, "Street: " + l.getStreet());
             String s = "";
             for (String sc : l.getSchedules()) {
                 s += sc;
             }
-            Log.d(TAG, "Schedule: " + s);
+            //Log.d(TAG, "Schedule: " + s);
             for (String schedule : l.getSchedules()) {
                 String timeString = getTimeString(schedule);
                 if (timeString == null) {
@@ -103,17 +103,17 @@ public class LimitManager {
                             days.addAll(getSweepingDates(startTime, endTime, l.getSchedules().get(i)));
                         }
                         for (GregorianCalendar d : days) {
-                            Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
+                            /*Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
                                     d.get(Calendar.DAY_OF_MONTH) + " (" +
                                     d.get(Calendar.DAY_OF_WEEK) + ") time: " +
-                                    d.get(Calendar.HOUR));
+                                    d.get(Calendar.HOUR));*/
                         }
                     } else {
                         Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
                     }
                 }
             }
-            Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            //Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
 
             //getDateForLimit(l);
