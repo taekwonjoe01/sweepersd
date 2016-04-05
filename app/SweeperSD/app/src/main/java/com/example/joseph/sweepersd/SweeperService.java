@@ -219,12 +219,10 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
      */
     @Override
     public void onPark() {
-        if (checkLocationPermissions()) {
-            try {
-                mLocationManager.removeUpdates(this);
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            }
+        try {
+            mLocationManager.removeUpdates(this);
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
 
         mPotentialParkedLocations.add(mLocation);
