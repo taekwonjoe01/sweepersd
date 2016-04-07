@@ -402,6 +402,7 @@ public class ParkDetectionManager implements GoogleApiClient.ConnectionCallbacks
                         mRecentActivityResults.clear();
                     }
 
+                    Log.d(TAG, "Activity update");
                     handleActivityUpdate(result);
 
                     notifyStatusUpdate();

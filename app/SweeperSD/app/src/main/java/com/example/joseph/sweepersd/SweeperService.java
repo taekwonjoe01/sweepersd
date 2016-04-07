@@ -62,33 +62,32 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private GoogleApiClient mClient;
     private LocationManager mLocationManager;
     private SweeperServiceListener mListener;
+    private DrivingStateListener mDrivingLocationListener;
     private boolean mIsStarted = false;
     private ParkDetectionManager mParkManager;
 
-    private volatile Location mLocation;
+    private volatile LocationDetails mLocationDetails;
     private volatile long mLocationTimestamp = Long.MAX_VALUE;
 
     private final IBinder mBinder = new SweeperBinder();
+    private boolean mIsBound = false;
 
     private volatile boolean mIsDriving = false;
-    private volatile boolean mIsParked = false;
 
     private List<Limit> mLimits = new ArrayList<>();
     private List<Limit> mPostedLimits = new ArrayList<>();
 
-    private List<Location> mPotentialParkedLocations = new ArrayList<>();
+    private List<LocationDetails> mPotentialParkedLocations = new ArrayList<>();
 
     private Handler mHandler = new Handler();
+
+    private long mRedzoneLimit = 64800000;
 
     public SweeperService() {
     }
 
     public int getConfidence(String confidence) {
         return mParkManager.getConfidence(confidence);
-    }
-
-    public List<Location> getPotentialParkingLocations() {
-        return mPotentialParkedLocations;
     }
 
     public ParkDetectionManager.Status getParkDetectionStatus() {
@@ -99,22 +98,43 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return mIsDriving;
     }
 
-    public boolean isParked() {
-        return mIsParked;
-    }
-
-    public List<Address> getParkingAddressesForLocation(Location location) {
-        List<Address> results = new ArrayList<>();
-        results = getAddressesForLocation(location);
-        return results;
-    }
-
     public GooglePlayConnectionStatus getConnectionStatus() {
         return mConnectionStatus;
     }
 
     public ParkDetectionManager.ParkDetectionSettings getParkDetectionSettings() {
         return mParkManager.getParkDetectionSettings();
+    }
+
+    public LocationDetails getCurrentLocationDetails() {
+        return mLocationDetails;
+    }
+
+    public List<LocationDetails> getParkedLocationDetails() {
+        return mPotentialParkedLocations;
+    }
+
+    public void registerLocationListener(DrivingStateListener listener) {
+        mDrivingLocationListener = listener;
+    }
+
+    public long getTimeUntilLimitMs(Limit limit) {
+        long timeUntilSweepingMs = Long.MAX_VALUE;
+        if (limit != null) {
+            List<GregorianCalendar> days = getSweepingDaysForLimit(limit);
+            GregorianCalendar today = new GregorianCalendar();
+
+            for (GregorianCalendar c : days) {
+                long msTilSweeping = c.getTime().getTime() - today.getTime().getTime();
+                Log.d(TAG, "msTilSweeping: " + msTilSweeping);
+                timeUntilSweepingMs = Math.min(msTilSweeping, timeUntilSweepingMs);
+            }
+        }
+        return timeUntilSweepingMs;
+    }
+
+    public long getRedzoneLimit() {
+        return mRedzoneLimit;
     }
 
     @Override
@@ -142,8 +162,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         mParkManager.startParkDetection(this, mClient);
 
-        mLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mClient);
+        mLocationDetails = getLocationDetailsForLocation(LocationServices.FusedLocationApi
+                .getLastLocation(mClient));
     }
 
     /*
@@ -170,7 +190,11 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     @Override
     public void onLocationChanged(Location location) {
         mLocationTimestamp = System.currentTimeMillis();
-        mLocation = location;
+        mLocationDetails = getLocationDetailsForLocation(location);
+
+        if (mDrivingLocationListener != null && isDriving()) {
+            mDrivingLocationListener.onLocationChanged(mLocationDetails);
+        }
     }
 
     /*
@@ -203,7 +227,16 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
      */
     @Override
     public IBinder onBind(Intent intent) {
+        mIsBound = true;
+        requestLocationUpdates();
         return mBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        mIsBound = false;
+        requestLocationUpdates();
+        return super.onUnbind(intent);
     }
 
     public class SweeperBinder extends Binder {
@@ -213,23 +246,42 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         }
     }
 
+    public class LocationDetails {
+        public Limit limit;
+        public Location location;
+        public List<Address> addresses;
+    }
+
+    public interface SweeperServiceListener {
+        void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
+        void onParked(List<LocationDetails> results);
+        void onDriving();
+    }
+
+    public interface DrivingStateListener {
+        void onLocationChanged(LocationDetails location);
+    }
+
+
     /**
      * Called when it is determined we are parked. This will only be called once per detected park
      * session.
      */
     @Override
     public void onPark() {
-        try {
-            mLocationManager.removeUpdates(this);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-
-        mPotentialParkedLocations.add(mLocation);
-
         mIsDriving = false;
-        mIsParked = true;
-        handleParkDetected();
+
+        stopLocationUpdates();
+
+        
+
+        mPotentialParkedLocations.add(mLocationDetails);
+
+        List<LocationDetails> results = handleParkingResults();
+
+        if (mListener != null) {
+            mListener.onParked(results);
+        }
     }
 
     /**
@@ -238,23 +290,43 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
      */
     @Override
     public void onDriving() {
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        try {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,
-                    5f, this);
-        } catch (SecurityException e) {
-            // TODO: What happens here.
-        }
+        mIsDriving = true;
+        requestLocationUpdates();
 
         mPotentialParkedLocations.clear();
 
-        mIsDriving = true;
-        mIsParked = false;
+
+        if (mListener != null) {
+            mListener.onDriving();
+        }
     }
 
     @Override
     public void onParkPossible() {
-        mPotentialParkedLocations.add(mLocation);
+        mPotentialParkedLocations.add(mLocationDetails);
+    }
+
+    private void requestLocationUpdates() {
+        if (mIsDriving) {
+            long minTime = mIsBound ? 250 : 2000;
+            mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            try {
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime,
+                        5f, this);
+            } catch (SecurityException e) {
+                // TODO: What happens here.
+            }
+        }
+    }
+
+    private void stopLocationUpdates() {
+        if (!mIsDriving) {
+            try {
+                mLocationManager.removeUpdates(this);
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private boolean checkLocationPermissions() {
@@ -303,46 +375,53 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         mLimits = LimitManager.loadLimits(this);
 
         mPostedLimits = LimitManager.getPostedLimits();
+        Limit sampleLimit = new Limit("beryl st", new int[]{1000,2000}, "cass st - dawes st",
+                new ArrayList<String>());
+        sampleLimit.getSchedules().add("Posted (10am - 1pm), SS 1st Tue, NS 1st Thur");
+        mPostedLimits.add(sampleLimit);
         Log.d(TAG, "mPostedLimits size " + mPostedLimits.size());
     }
 
-    private void handleParkDetected() {
-        long redzoneLimit = Long.parseLong(
+    private List<LocationDetails> handleParkingResults() {
+        mRedzoneLimit = Long.parseLong(
                 PreferenceManager.getDefaultSharedPreferences(this).getString(
                         SettingsActivity.PREF_KEY_REDZONE_WARNING_TIME, "64800000"));
-        Log.d(TAG, "redzone limit time " + redzoneLimit);
+        Log.d(TAG, "redzone limit time " + mRedzoneLimit);
         List<Limit> potentialParkingLimits = new ArrayList<>();
 
-        for (Location location : mPotentialParkedLocations) {
-
-            List<Address> addressesForLimit = getAddressesForLocation(location);
-            Log.d(TAG, "addressForLimit size " + addressesForLimit.size());
-
-            Limit limitForLocation = findLimitForAddresses(addressesForLimit);
-            if (limitForLocation != null) {
-                potentialParkingLimits.add(limitForLocation);
+        for (LocationDetails location : mPotentialParkedLocations) {
+            if (location.limit != null) {
+                potentialParkingLimits.add(location.limit);
             }
         }
+
+        // handle notifications
         Log.d(TAG, "potentialParkingLimits size " + potentialParkingLimits.size());
         sendParkedNotification();
 
         long timeUntilSweepingMs = Long.MAX_VALUE;
         for (Limit l : potentialParkingLimits) {
-            List<GregorianCalendar> days = getSweepingDaysForLimit(l);
-            GregorianCalendar today = new GregorianCalendar();
-
-            for (GregorianCalendar c : days) {
-                long msTilSweeping = c.getTime().getTime() - today.getTime().getTime();
-                Log.d(TAG, "msTilSweeping: " + msTilSweeping);
-                if (msTilSweeping < redzoneLimit) {
-                    timeUntilSweepingMs = Math.min(msTilSweeping, timeUntilSweepingMs);
-                }
-            }
+            timeUntilSweepingMs = Math.min(getTimeUntilLimitMs(l), timeUntilSweepingMs);
         }
         Log.d(TAG, "timeUntilSweepingMs " + timeUntilSweepingMs);
-        if (timeUntilSweepingMs != Long.MAX_VALUE) {
+        if (timeUntilSweepingMs < mRedzoneLimit) {
             sendParkedInRedZoneNotification(timeUntilSweepingMs);
         }
+
+        return mPotentialParkedLocations;
+    }
+
+    private LocationDetails getLocationDetailsForLocation(Location location) {
+        LocationDetails locationDetails = new LocationDetails();
+        locationDetails.location = location;
+
+        List<Address> addressesForLimit = getAddressesForLocation(location);
+        Log.d(TAG, "addressForLimit size " + addressesForLimit.size());
+        locationDetails.addresses = addressesForLimit;
+
+        locationDetails.limit = findLimitForAddresses(addressesForLimit);
+
+        return locationDetails;
     }
 
     private List<GregorianCalendar> getSweepingDaysForLimit(Limit l) {
@@ -357,16 +436,18 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
                 int startTime = LimitManager.convertTimeStringToHour(parsings[0]);
                 int endTime = LimitManager.convertTimeStringToHour(parsings[1]);
                 if (startTime > -1 && endTime > -1) {
+                    long sweepingEndedTime = ((endTime - startTime) * 3600000);
                     for (int i = 0; i < l.getSchedules().size(); i++) {
-                        results.addAll(LimitManager.getSweepingDates(startTime, endTime,
-                                l.getSchedules().get(i)));
+                        List<GregorianCalendar> sweepingDates = LimitManager.getSweepingDates(startTime, endTime,
+                                l.getSchedules().get(i));
+                        GregorianCalendar today = new GregorianCalendar();
+                        for (GregorianCalendar c : sweepingDates) {
+                            long valid = c.getTime().getTime() - today.getTime().getTime() + sweepingEndedTime;
+                            if (valid > 0) {
+                                results.add(c);
+                            }
+                        }
                     }
-                    /*for (GregorianCalendar d : results) {
-                        Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
-                                d.get(Calendar.DAY_OF_MONTH) + " (" +
-                                d.get(Calendar.DAY_OF_WEEK) + ") time: " +
-                                d.get(Calendar.HOUR));
-                    }*/
                 } else {
                     Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
                 }
@@ -481,11 +562,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         Log.d(TAG, "Sending parked notification? " + parkNotificationEnabled);
         if (parkNotificationEnabled && !mPotentialParkedLocations.isEmpty()) {
             String message = "You just parked!";
-            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            Intent notificationIntent = new Intent(this, MainActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            notificationIntent.putExtra("location", mPotentialParkedLocations.get(
-                    mPotentialParkedLocations.size() - 1));
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
                     notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -507,11 +586,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         // TODO: hard coded strings, Notification builder cleanup and nicer
         if (!mPotentialParkedLocations.isEmpty()) {
             String message = "You just parked in a street sweeping zone!";
-            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            Intent notificationIntent = new Intent(this, MainActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            notificationIntent.putExtra("location", mPotentialParkedLocations.get(
-                    mPotentialParkedLocations.size() - 1));
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
                     notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -538,11 +615,9 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             long leftOverHours = hoursUntilParking % 24;
             String message = "Street Sweeping in " + daysUntilSweeping + " days, "
                     + leftOverHours + " hours, and " + leftOverMinutes + " minutes.";
-            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            Intent notificationIntent = new Intent(this, MainActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            notificationIntent.putExtra("location", mPotentialParkedLocations.get(
-                    mPotentialParkedLocations.size() - 1));
 
             PendingIntent intent = PendingIntent.getActivity(this, 0,
                     notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -683,9 +758,5 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         }
         return result;
-    }
-
-    public interface SweeperServiceListener {
-        void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
     }
 }

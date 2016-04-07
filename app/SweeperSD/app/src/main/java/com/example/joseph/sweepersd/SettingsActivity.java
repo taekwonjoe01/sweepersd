@@ -323,4 +323,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity
     public void onGooglePlayConnectionStatusUpdated(SweeperService.GooglePlayConnectionStatus status) {
         // TODO
     }
+
+    @Override
+    public void onDriving() {
+
+    }
+
+    @Override
+    public void onParked(List<SweeperService.LocationDetails> results) {
+
+    }
 }

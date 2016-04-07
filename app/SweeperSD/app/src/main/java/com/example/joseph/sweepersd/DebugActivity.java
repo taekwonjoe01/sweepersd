@@ -77,10 +77,7 @@ public class DebugActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (mIsBound) {
-                    Intent activityIntent = new Intent(DebugActivity.this, MapsActivity.class);
-                    activityIntent.putExtra("location", mService.getPotentialParkingLocations().get(
-                            mService.getPotentialParkingLocations().size() - 1));
-                    startActivity(activityIntent);
+
                 }
                 // TODO what if we're not bound?
             }
@@ -187,7 +184,7 @@ public class DebugActivity extends AppCompatActivity
                 mTiltingText.setText("" + mService.getConfidence(ParkDetectionManager.CONFIDENCE_TILTING));
                 mUnknownText.setText("" + mService.getConfidence(ParkDetectionManager.CONFIDENCE_UNKNOWN));
                 mStatusText.setText("" + mService.getParkDetectionStatus().toString());
-                mServiceStatusText.setText("" + (mService.isDriving() ? "Driving" : mService.isParked() ? "Parked" : "Unknown"));
+                mServiceStatusText.setText("" + (mService.isDriving() ? "Driving" : "Parked"));
 
                 String a = "";
                 /*for (Address address : mService.getCurrentAddresses()) {
@@ -222,6 +219,16 @@ public class DebugActivity extends AppCompatActivity
 
     @Override
     public void onGooglePlayConnectionStatusUpdated(SweeperService.GooglePlayConnectionStatus status) {
+
+    }
+
+    @Override
+    public void onParked(List<SweeperService.LocationDetails> results) {
+
+    }
+
+    @Override
+    public void onDriving() {
 
     }
 }

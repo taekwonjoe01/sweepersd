@@ -239,6 +239,7 @@ public class LimitManager {
         final String tuesday = "tue";
         final String wednesday = "wed";
         final String thursday = "thu";
+        final String thursday2 = "thur";
         final String friday = "fri";
         final String saturday = "sat";
         final String sunday = "sun";
@@ -258,6 +259,9 @@ public class LimitManager {
             case thursday:
                 result = Calendar.THURSDAY;
                 break;
+            case thursday2:
+                result = Calendar.THURSDAY;
+                break;
             case friday:
                 result = Calendar.FRIDAY;
                 break;
@@ -271,6 +275,7 @@ public class LimitManager {
 
     private static List<GregorianCalendar> refineDays(List<String> words, int index,
                                                List<GregorianCalendar> unrefinedDays) {
+        Log.d(TAG, "refineDays called on index " + index);
         List<GregorianCalendar> refinedDays = new ArrayList<>();
         String prevWord = getPreviousWord(words, index);
         if (prevWord != null) {
