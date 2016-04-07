@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -151,9 +152,9 @@ public class MainActivity extends AppCompatActivity
 
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(0);
-        notificationManager.cancel(1);
-        notificationManager.cancel(2);
+        notificationManager.cancel(NotificationPresenter.NotificationType.PARKED.ordinal());
+        notificationManager.cancel(NotificationPresenter.NotificationType.REDZONE.ordinal());
+        notificationManager.cancel(NotificationPresenter.NotificationType.REDZONE_WARNING.ordinal());
     }
 
     @Override
@@ -186,12 +187,12 @@ public class MainActivity extends AppCompatActivity
             if (mService.isDriving()) {
                 mDrivingStatusText.setText("Driving");
 
-                SweeperService.LocationDetails location = mService.getCurrentLocationDetails();
+                LocationDetails location = mService.getCurrentLocationDetails();
 
                 if (location != null) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
                     mCurrentLocationUnknownDisplay.setVisibility(View.GONE);
-                    long timeUntilSweeping = mService.getTimeUntilLimitMs(location.limit);
+                    long timeUntilSweeping = LocationUtils.getMsUntilLimit(location.limit);
 
                     long hoursUntilParking = timeUntilSweeping / 3600000;
                     long leftOverMinutes = (timeUntilSweeping % 3600000) / 60000;
@@ -265,11 +266,11 @@ public class MainActivity extends AppCompatActivity
             } else {
                 mDrivingStatusText.setText("Parked");
 
-                List<SweeperService.LocationDetails> parkedLocations =
+                List<LocationDetails> parkedLocations =
                         mService.getParkedLocationDetails();
 
-                for (SweeperService.LocationDetails location : parkedLocations) {
-                    long timeUntilSweeping = mService.getTimeUntilLimitMs(
+                for (LocationDetails location : parkedLocations) {
+                    long timeUntilSweeping = LocationUtils.getMsUntilLimit(
                             location.limit);
 
                     if (timeUntilSweeping < 0) {
@@ -287,10 +288,10 @@ public class MainActivity extends AppCompatActivity
                 if (!parkedLocations.isEmpty()) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
                     mCurrentLocationUnknownDisplay.setVisibility(View.GONE);
-                    SweeperService.LocationDetails currentParkedLocation =
+                    LocationDetails currentParkedLocation =
                             parkedLocations.get(parkedLocations.size() - 1);
 
-                    long timeUntilSweeping = mService.getTimeUntilLimitMs(
+                    long timeUntilSweeping = LocationUtils.getMsUntilLimit(
                             currentParkedLocation.limit);
 
                     long hoursUntilParking = timeUntilSweeping / 3600000;
@@ -412,7 +413,7 @@ public class MainActivity extends AppCompatActivity
     SweeperServiceListener callback.
      */
     @Override
-    public void onParked(List<SweeperService.LocationDetails> results) {
+    public void onParked(List<LocationDetails> results) {
         updateUI();
     }
 
@@ -422,9 +423,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDriving() {
         updateUI();
-        mService.registerLocationListener(new SweeperService.DrivingStateListener() {
+        mService.registerDrivingLocationListener(new SweeperService.DrivingLocationListener() {
             @Override
-            public void onLocationChanged(SweeperService.LocationDetails location) {
+            public void onLocationChanged(LocationDetails location) {
                 updateUI();
             }
         });
