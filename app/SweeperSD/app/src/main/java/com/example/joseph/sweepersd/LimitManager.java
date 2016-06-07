@@ -100,7 +100,7 @@ public class LimitManager {
                     if (startTime > -1 && endTime > -1) {
                         List<GregorianCalendar> days = new ArrayList<>();
                         for (int i = 0; i < l.getSchedules().size(); i++) {
-                            days.addAll(getSweepingDates(startTime, endTime, l.getSchedules().get(i)));
+                            days.addAll(getSweepingDates(startTime, endTime, 28, l.getSchedules().get(i)));
                         }
                         for (GregorianCalendar d : days) {
                             Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
@@ -187,7 +187,7 @@ public class LimitManager {
         return result;
     }
 
-    public static List<GregorianCalendar> getSweepingDates(int startTime, int endTime, String schedule) {
+    public static List<GregorianCalendar> getSweepingDates(int startTime, int endTime, int maxDays, String schedule) {
         List<GregorianCalendar> results = new ArrayList<>();
         String s = schedule.trim().toLowerCase();
         s = s.replace(",", " ");
@@ -203,7 +203,7 @@ public class LimitManager {
                 List<GregorianCalendar> potentialResults = new ArrayList<>();
                 Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
 
-                for (int j = 0; j < 28; j++) {
+                for (int j = 0; j < maxDays; j++) {
                     int dow = calendar.get(Calendar.DAY_OF_WEEK);
 
                     if (dow == weekdayNumber) {

@@ -339,14 +339,17 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         Log.d(TAG, "potentialParkingLimits size " + potentialParkingLimits.size());
         NotificationPresenter.sendParkedNotificationIfEnabled(this);
 
-        long timeUntilSweepingMs = Long.MAX_VALUE;
+        long minTime = Long.MAX_VALUE;
         for (Limit l : potentialParkingLimits) {
-            timeUntilSweepingMs = Math.min(LocationUtils.getMsUntilLimit(l), timeUntilSweepingMs);
+            List<Long> timesUntilSweeping = LocationUtils.getTimesUntilLimit(l, 31);
+            for (Long time : timesUntilSweeping) {
+                minTime = Math.min(time, minTime);
+            }
         }
-        Log.d(TAG, "timeUntilSweepingMs " + timeUntilSweepingMs);
-        if (timeUntilSweepingMs < 0) {
+        Log.d(TAG, "timeUntilSweepingMs " + minTime);
+        if (minTime < 0) {
             NotificationPresenter.sendRedzoneNotification(this);
-        } else if (timeUntilSweepingMs < mRedzoneLimit) {
+        } else if (minTime < mRedzoneLimit) {
             NotificationPresenter.sendRedzoneWarningNotification(this);
         }
     }

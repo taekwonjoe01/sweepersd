@@ -21,22 +21,22 @@ import java.util.Locale;
 public class LocationUtils {
     private static final String TAG = LocationUtils.class.getSimpleName();
 
-    public static long getMsUntilLimit(Limit limit) {
-        long timeUntilSweepingMs = Long.MAX_VALUE;
+    public static List<Long> getTimesUntilLimit(Limit limit, int maxDays) {
+        List<Long> results = new ArrayList<>();
         if (limit != null) {
-            List<GregorianCalendar> days = getSweepingDaysForLimit(limit);
+            List<GregorianCalendar> days = getSweepingDaysForLimit(limit, maxDays);
             GregorianCalendar today = new GregorianCalendar();
 
             for (GregorianCalendar c : days) {
                 long msTilSweeping = c.getTime().getTime() - today.getTime().getTime();
                 Log.d(TAG, "msTilSweeping: " + msTilSweeping);
-                timeUntilSweepingMs = Math.min(msTilSweeping, timeUntilSweepingMs);
+                results.add(msTilSweeping);
             }
         }
-        return timeUntilSweepingMs;
+        return results;
     }
 
-    public static List<GregorianCalendar> getSweepingDaysForLimit(Limit l) {
+    public static List<GregorianCalendar> getSweepingDaysForLimit(Limit l, int maxDays) {
         List<GregorianCalendar> results = new ArrayList<>();
         for (String schedule : l.getSchedules()) {
             String timeString = LimitManager.getTimeString(schedule);
@@ -50,7 +50,7 @@ public class LocationUtils {
                 if (startTime > -1 && endTime > -1) {
                     long sweepingEndedTime = ((endTime - startTime) * 3600000);
                     for (int i = 0; i < l.getSchedules().size(); i++) {
-                        List<GregorianCalendar> sweepingDates = LimitManager.getSweepingDates(startTime, endTime,
+                        List<GregorianCalendar> sweepingDates = LimitManager.getSweepingDates(startTime, endTime, maxDays,
                                 l.getSchedules().get(i));
                         GregorianCalendar today = new GregorianCalendar();
                         for (GregorianCalendar c : sweepingDates) {
@@ -76,6 +76,7 @@ public class LocationUtils {
 
         if (location != null) {
             try {
+                geocoder.getFromLocation()
                 addresses = geocoder.getFromLocation(
                         location.getLatitude(),
                         location.getLongitude(),

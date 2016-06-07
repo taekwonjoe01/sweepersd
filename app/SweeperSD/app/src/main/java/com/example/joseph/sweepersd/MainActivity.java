@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity
                 if (location != null) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
                     mCurrentLocationUnknownDisplay.setVisibility(View.GONE);
-                    long timeUntilSweeping = LocationUtils.getMsUntilLimit(location.limit);
+                    long timeUntilSweeping = LocationUtils.getTimesUntilLimit(location.limit, 32).get(0);
 
                     long hoursUntilParking = timeUntilSweeping / 3600000;
                     long leftOverMinutes = (timeUntilSweeping % 3600000) / 60000;
@@ -270,8 +270,8 @@ public class MainActivity extends AppCompatActivity
                         mService.getParkedLocationDetails();
 
                 for (LocationDetails location : parkedLocations) {
-                    long timeUntilSweeping = LocationUtils.getMsUntilLimit(
-                            location.limit);
+                    long timeUntilSweeping = LocationUtils.getTimesUntilLimit(
+                            location.limit, 32).get(0);
 
                     if (timeUntilSweeping < 0) {
                         addMapMarker(location.location,
@@ -291,8 +291,8 @@ public class MainActivity extends AppCompatActivity
                     LocationDetails currentParkedLocation =
                             parkedLocations.get(parkedLocations.size() - 1);
 
-                    long timeUntilSweeping = LocationUtils.getMsUntilLimit(
-                            currentParkedLocation.limit);
+                    long timeUntilSweeping = LocationUtils.getTimesUntilLimit(
+                            currentParkedLocation.limit, 32).get(0);
 
                     long hoursUntilParking = timeUntilSweeping / 3600000;
                     long leftOverMinutes = (timeUntilSweeping % 3600000) / 60000;
