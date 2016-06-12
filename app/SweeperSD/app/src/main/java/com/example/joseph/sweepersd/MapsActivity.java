@@ -1,11 +1,16 @@
 package com.example.joseph.sweepersd;
 
-import android.app.NotificationManager;
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -14,48 +19,86 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     private static final String TAG = MapsActivity.class.getSimpleName();
 
+    public static final String LOCATION_KEY = "LOCATION_KEY";
+    public static final String RADIUS_KEY = "RADIUS_KEY";
+
+    private TextView mRadiusDisplay;
+    private SeekBar mRadiusSeekbar;
     private GoogleMap mMap;
-    private Location mParkedLocation;
 
     private GoogleApiClient mGoogleApiClient;
+
+    private Circle mMarkerRadius;
+
+    private Location mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            mParkedLocation = (Location) bundle.get("location");
-        }
+        mRadiusDisplay = (TextView) findViewById(R.id.radius_display);
+        mRadiusSeekbar = (SeekBar) findViewById(R.id.seekbar_radius);
 
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(0);
-        notificationManager.cancel(1);
-        notificationManager.cancel(2);
+        mRadiusDisplay.setText(String.format(getString(R.string.alarm_radius_string),
+                getRadiusForProgress(mRadiusSeekbar.getProgress())));
+        mRadiusSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mRadiusDisplay.setText(String.format(getString(R.string.alarm_radius_string),
+                        getRadiusForProgress(progress)));
+                mMarkerRadius.setRadius(getRadiusForProgress(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.d(TAG, "onNewIntent");
+     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_activity_maps, menu);
+        return true;
+    }
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            mParkedLocation = (Location) bundle.get("location");
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_done:
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra(LOCATION_KEY, mLocation);
+                returnIntent.putExtra(
+                        RADIUS_KEY, getRadiusForProgress(mRadiusSeekbar.getProgress()));
+                setResult(Activity.RESULT_OK,returnIntent);
+                finish();
+                return true;
         }
+        return false;
     }
 
     /**
@@ -71,29 +114,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        if (mParkedLocation != null) {
-            // Add a marker in Sydney and move the camera
-            LatLng location = new LatLng(mParkedLocation.getLatitude(), mParkedLocation.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(location).title("You parked here!"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 18f));
-        }
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
         mGoogleApiClient.connect();
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                if (mMarkerRadius != null) {
+                    mMarkerRadius.remove();
+                }
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                Location location = new Location("AddAlarmActivity");
+                location.setLatitude(marker.getPosition().latitude);
+                location.setLongitude(marker.getPosition().longitude);
+                setAlarmLocation(location);
+            }
+        });
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        if (mParkedLocation == null) {
-            Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),
-                    currentLocation.getLongitude()), 18f));
-        }
+        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        setAlarmLocation(currentLocation);
+
     }
 
     @Override
@@ -104,5 +159,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    private void setAlarmLocation(Location location) {
+        mMap.clear();
+
+        mLocation = location;
+
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .draggable(true));
+        mMarkerRadius = mMap.addCircle(new CircleOptions()
+                .center(latLng)
+                .radius(getRadiusForProgress(mRadiusSeekbar.getProgress()))
+                .strokeColor(Color.RED)
+                .fillColor(R.color.map_radius_fill));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
+    }
+
+    private int getRadiusForProgress(int progress) {
+        return 20 + progress * 2;
     }
 }

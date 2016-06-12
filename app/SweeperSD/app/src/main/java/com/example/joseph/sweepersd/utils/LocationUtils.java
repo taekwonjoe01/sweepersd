@@ -76,7 +76,7 @@ public class LocationUtils {
 
         if (location != null) {
             try {
-                geocoder.getFromLocation()
+                //geocoder.getFromLocation()
                 addresses = geocoder.getFromLocation(
                         location.getLatitude(),
                         location.getLongitude(),

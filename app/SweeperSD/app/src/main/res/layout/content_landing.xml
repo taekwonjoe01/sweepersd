@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/app_background">
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+
+            <Button
+                android:id="@+id/button_alarms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="30dp"
+                android:background="@drawable/button_landing_page"
+                android:text="@string/landing_button_alarms"
+                android:textColor="@android:color/white"
+                style="@android:style/TextAppearance.Medium"
+                android:padding="10dp"
+                android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:id="@+id/button_location_monitoring"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="30dp"
+                android:background="@drawable/button_landing_page"
+                android:text="@string/landing_button_automated"
+                android:textColor="@android:color/white"
+                style="@android:style/TextAppearance.Medium"
+                android:padding="10dp"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+</FrameLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:id="@+id/list_item_layout"
+    android:background="@drawable/button_landing_page">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+
+        <TextView
+            android:id="@+id/textview_alarm_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            style="@android:style/TextAppearance.Large"
+            android:textColor="@android:color/white"
+            android:text="1061 Beryl St" />
+
+        <TextView
+            android:id="@+id/textview_alarm_next_sweep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            style="@android:style/TextAppearance.Medium"
+            android:textColor="@android:color/white"
+            android:text="Tuesday, June 14th at 7:00a.m." />
+
+    </LinearLayout>
+
+</FrameLayout>
+

@@ -21,13 +21,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <receiver
@@ -60,14 +56,30 @@
 
         <activity
             android:name=".MapsActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".DebugActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".LandingActivity"
+            android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:label="@string/title_activity_settings" />
-        <activity android:name=".DebugActivity"
-            android:screenOrientation="portrait"></activity>
+            android:theme="@style/AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".alarms.AlarmViewActivity"
+            android:label="@string/title_activity_alarm"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
