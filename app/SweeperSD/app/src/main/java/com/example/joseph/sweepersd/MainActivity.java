@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,13 +15,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.utils.LocationUtils;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -180,14 +176,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateUI() {
-        if (mIsBound && mMap != null) {
+        /*if (mIsBound && mMap != null) {
             clearMap();
 
             // Setup the status
             if (mService.isDriving()) {
                 mDrivingStatusText.setText("Driving");
 
-                LocationDetails location = mService.getCurrentLocationDetails();
+                SweepingPosition location = mService.getCurrentLocationDetails();
 
                 if (location != null) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
@@ -266,10 +262,10 @@ public class MainActivity extends AppCompatActivity
             } else {
                 mDrivingStatusText.setText("Parked");
 
-                List<LocationDetails> parkedLocations =
+                List<SweepingPosition> parkedLocations =
                         mService.getParkedLocationDetails();
 
-                for (LocationDetails location : parkedLocations) {
+                for (SweepingPosition location : parkedLocations) {
                     long timeUntilSweeping = LocationUtils.getTimesUntilLimit(
                             location.limit, 32).get(0);
 
@@ -288,7 +284,7 @@ public class MainActivity extends AppCompatActivity
                 if (!parkedLocations.isEmpty()) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
                     mCurrentLocationUnknownDisplay.setVisibility(View.GONE);
-                    LocationDetails currentParkedLocation =
+                    SweepingPosition currentParkedLocation =
                             parkedLocations.get(parkedLocations.size() - 1);
 
                     long timeUntilSweeping = LocationUtils.getTimesUntilLimit(
@@ -362,7 +358,7 @@ public class MainActivity extends AppCompatActivity
                     mLimitScheduleText.setText("");
                 }
             }
-        }
+        }*/
     }
 
     private void addMapMarker(Location location, int resourceId) {
@@ -413,7 +409,7 @@ public class MainActivity extends AppCompatActivity
     SweeperServiceListener callback.
      */
     @Override
-    public void onParked(List<LocationDetails> results) {
+    public void onParked(List<SweepingPosition> results) {
         updateUI();
     }
 
@@ -425,7 +421,7 @@ public class MainActivity extends AppCompatActivity
         updateUI();
         mService.registerDrivingLocationListener(new SweeperService.DrivingLocationListener() {
             @Override
-            public void onLocationChanged(LocationDetails location) {
+            public void onLocationChanged(SweepingPosition location) {
                 updateUI();
             }
         });

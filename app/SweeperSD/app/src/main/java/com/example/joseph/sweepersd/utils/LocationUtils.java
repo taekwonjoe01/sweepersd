@@ -3,11 +3,11 @@ package com.example.joseph.sweepersd.utils;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.Limit;
 import com.example.joseph.sweepersd.LimitManager;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +34,73 @@ public class LocationUtils {
             }
         }
         return results;
+    }
+
+    public static List<LatLng> getLatLngsInRadius(LatLng latLng, int radius) {
+        double latitude = latLng.latitude;
+        double longitude = latLng.longitude;
+
+        double latitudeRadians = latLng.latitude * Math.PI / 180;
+        double longitudeRadians = latLng.longitude * Math.PI / 180;
+
+        // Set up "Constants"
+        double m1 = 111132.92;     // latitude calculation term 1
+        double m2 = -559.82;       // latitude calculation term 2
+        double m3 = 1.175;         // latitude calculation term 3
+        double m4 = -0.0023;       // latitude calculation term 4
+        double p1 = 111412.84;     // longitude calculation term 1
+        double p2 = -93.5;         // longitude calculation term 2
+        double p3 = 0.118;         // longitude calculation term 3
+
+        // Calculate the length of a degree of latitude and longitude in meters
+        double metersPerDegreeLat = m1 + (m2 * Math.cos(2 * latitudeRadians)) + (m3 * Math.cos(4 * latitudeRadians)) +
+                (m4 * Math.cos(6 * latitudeRadians));
+        double metersPerDegreeLng = (p1 * Math.cos(latitudeRadians)) + (p2 * Math.cos(3 * latitudeRadians)) +
+                (p3 * Math.cos(5 * latitudeRadians));
+
+        int meterStep = 10;
+        int numSteps = radius / meterStep;
+
+        List<LatLng> latLngs = new ArrayList<>();
+
+        for (int i = 0; i <= numSteps; i++) {
+            double lngLimit = ((double)radius) *
+                    Math.sin(Math.acos(((double)(i * meterStep)) / ((double)radius)));
+            double curLngMeters = 0;
+            while (curLngMeters < lngLimit) {
+                double newLat = latitude + ((i * meterStep) / metersPerDegreeLat);
+                double newLng = longitude + (curLngMeters / metersPerDegreeLng);
+                latLngs.add(new LatLng(newLat, newLng));
+                curLngMeters += meterStep;
+            }
+            curLngMeters = meterStep;
+            while (curLngMeters < lngLimit) {
+                double newLat = latitude + ((i * meterStep) / metersPerDegreeLat);
+                double newLng = longitude - (curLngMeters / metersPerDegreeLng);
+                latLngs.add(new LatLng(newLat, newLng));
+                curLngMeters += meterStep;
+            }
+        }
+        for (int i = 1; i <= numSteps; i++) {
+            double lngLimit = ((double)radius) *
+                    Math.sin(Math.acos(((double)(i * meterStep)) / ((double)radius)));
+            double curLngMeters = 0;
+            while (curLngMeters < lngLimit) {
+                double newLat = latitude - ((i * meterStep) / metersPerDegreeLat);
+                double newLng = longitude + (curLngMeters / metersPerDegreeLng);
+                latLngs.add(new LatLng(newLat, newLng));
+                curLngMeters += meterStep;
+            }
+            curLngMeters = meterStep;
+            while (curLngMeters < lngLimit) {
+                double newLat = latitude - ((i * meterStep) / metersPerDegreeLat);
+                double newLng = longitude - (curLngMeters / metersPerDegreeLng);
+                latLngs.add(new LatLng(newLat, newLng));
+                curLngMeters += meterStep;
+            }
+        }
+
+        return latLngs;
     }
 
     public static List<GregorianCalendar> getSweepingDaysForLimit(Limit l, int maxDays) {
@@ -68,18 +135,32 @@ public class LocationUtils {
         return results;
     }
 
-    public static List<Address> getAddressesForLocation(Context context, Location location) {
+    public static String getAddressForLatLnt(Context context, LatLng latLng) {
+        String result = null;
+        List<Address> addresses = getAddressesForLatLng(context, latLng);
+        if (addresses != null && !addresses.isEmpty()) {
+            Address first = addresses.get(0);
+            result = "";
+            for (int i = 0; i < first.getMaxAddressLineIndex(); i++) {
+                result += first.getAddressLine(i) + ",";
+            }
+            result = result.toLowerCase();
+        }
+        return result;
+    }
+
+    public static List<Address> getAddressesForLatLng(Context context, LatLng latLng) {
         long start = System.nanoTime();
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 
         List<Address> addresses = new ArrayList<>();
 
-        if (location != null) {
+        if (latLng != null) {
             try {
                 //geocoder.getFromLocation()
                 addresses = geocoder.getFromLocation(
-                        location.getLatitude(),
-                        location.getLongitude(),
+                        latLng.latitude,
+                        latLng.longitude,
                         10);
             } catch (IOException ioException) {
                 // TODO: Catch network or other I/O problems.
@@ -90,5 +171,86 @@ public class LocationUtils {
         long end = System.nanoTime();
         Log.d(TAG, "getting Address took: " + (end - start) / 1000000 + "ms");
         return addresses;
+    }
+
+    public static Limit findLimitForAddresses(List<Address> addresses) {
+        Limit result = null;
+        for (Address address : addresses) {
+            String a = "";
+            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                a += address.getAddressLine(i) + ",";
+            }
+            a = a.toLowerCase();
+            Log.d(TAG, "findLimitForAddress: " + a);
+            // TODO: This should check more dynamically the city.
+            findLimitForAddress(a);
+        }
+        return result;
+    }
+
+    public static Limit findLimitForAddress(String address) {
+        Limit result = null;
+        if (address.contains("ca") && address.contains("san diego")) {
+            String[] split = address.split(",");
+            if (split.length > 1) {
+                String streetAddress = split[0];
+                String[] streetAddressParsings = streetAddress.split(" ");
+                if (streetAddressParsings.length > 1) {
+                    String streetNumber = streetAddressParsings[0];
+                    String streetName = "";
+                    for (int j = 1; j < streetAddressParsings.length; j++) {
+                        streetName += " " + streetAddressParsings[j];
+                    }
+                    streetName = streetName.trim();
+                    if (streetNumber.contains("-")) {
+                        String[] streetNumberParsings = streetNumber.split("-");
+                        if (streetNumberParsings.length == 2) {
+                            try {
+                                int minNum = Integer.parseInt(streetNumberParsings[0]);
+                                int maxNum = Integer.parseInt(streetNumberParsings[1]);
+
+                                Limit minLimit = checkAddress(minNum, streetName);
+                                Limit maxLimit = checkAddress(maxNum, streetName);
+                                result = (minLimit != null) ? minLimit :
+                                        (maxLimit != null) ? maxLimit : null;
+                            } catch (NumberFormatException e) {
+                                Log.e(TAG, "Malformed Street numbers: " + streetNumber);
+                            }
+                        } else {
+                            Log.e(TAG, "Malformed Street numbers: " + streetNumber);
+                        }
+                    } else {
+                        try {
+                            int num = Integer.parseInt(streetNumber);
+                            Limit l = checkAddress(num, streetName);
+                            result = (l != null) ? l : null;
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, "Malformed Street numbers: " + streetNumber);
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Malformed street address " + streetAddress);
+                }
+            } else {
+                Log.e(TAG, "Malformed address " + address);
+            }
+        } else {
+            Log.w(TAG, "City is not San Diego. Address is  " + address);
+        }
+        return result;
+    }
+
+    private static Limit checkAddress(int houseNumber, String street) {
+        Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
+        Limit result = null;
+        for (Limit l : LimitManager.getPostedLimits()) {
+            if (l.getStreet().toLowerCase().contains(street)) {
+                if (houseNumber >= l.getRange()[0] && houseNumber <= l.getRange()[1]) {
+                    result = l;
+                    Log.d(TAG, "THIS HOUSE IS IN LIMIT RANGE");
+                }
+            }
+        }
+        return result;
     }
 }

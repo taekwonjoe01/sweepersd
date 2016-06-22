@@ -1,10 +1,5 @@
 package com.example.joseph.sweepersd.alarms;
 
-import android.content.Context;
-import android.location.Location;
-
-import com.example.joseph.sweepersd.LocationDetails;
-
 import java.util.List;
 
 /**
@@ -21,11 +16,10 @@ public class AlarmModel {
         return mAlarms;
     }
 
-    public Alarm createAndAddAlarm(Context context, Location location, int radius) {
-        LocationDetails locationDetails = LocationDetails.createFromLocation(context, location);
-        Alarm alarm = new Alarm(locationDetails);
-        mAlarms.add(alarm);
-        return alarm;
+    public void addAlarm(Alarm alarm) {
+        if (alarm != null) {
+            mAlarms.add(alarm);
+        }
     }
 
     public void removeAlarm(Alarm alarm) {

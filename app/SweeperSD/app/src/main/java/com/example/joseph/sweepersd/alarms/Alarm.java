@@ -1,8 +1,9 @@
 package com.example.joseph.sweepersd.alarms;
 
-import com.example.joseph.sweepersd.LocationDetails;
+import com.example.joseph.sweepersd.SweepingPosition;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -10,10 +11,10 @@ import java.util.List;
  * Data model for an Alarm.
  */
 public class Alarm {
-    private final LocationDetails mLocationDetails;
+    private final List<SweepingPosition> mSweepingPositions;
 
-    public Alarm(LocationDetails locationDetails) {
-        mLocationDetails = locationDetails;
+    public Alarm(List<SweepingPosition> sweepingPositions) {
+        mSweepingPositions = sweepingPositions;
     }
 
     /**
@@ -23,20 +24,29 @@ public class Alarm {
      */
     public GregorianCalendar getNextSweepingDate() {
         GregorianCalendar result = null;
-
-        List<GregorianCalendar> sweepingDays = LocationUtils.getSweepingDaysForLimit(
-                mLocationDetails.limit, 31);
-        if (!sweepingDays.isEmpty()) {
-            result = sweepingDays.get(0);
+        for (SweepingPosition pos : mSweepingPositions) {
+            List<GregorianCalendar> sweepingDays = LocationUtils.getSweepingDaysForLimit(
+                    pos.getLimit(), 31);
+            if (!sweepingDays.isEmpty()) {
+                GregorianCalendar potentialNew = sweepingDays.get(0);
+                if (result == null ||
+                        potentialNew.getTime().getTime() < result.getTime().getTime()) {
+                    result = potentialNew;
+                }
+            }
         }
         return result;
     }
 
     public List<GregorianCalendar> getNextSweepingDates(int maxDays) {
-        return LocationUtils.getSweepingDaysForLimit(mLocationDetails.limit, maxDays);
+        List<GregorianCalendar> result = new ArrayList<>();
+        for (SweepingPosition pos : mSweepingPositions) {
+            result.addAll(LocationUtils.getSweepingDaysForLimit(pos.getLimit(), maxDays));
+        }
+        return result;
     }
 
-    public LocationDetails getLocationDetails() {
-        return mLocationDetails;
+    public List<SweepingPosition> getSweepingPositions() {
+        return mSweepingPositions;
     }
 }

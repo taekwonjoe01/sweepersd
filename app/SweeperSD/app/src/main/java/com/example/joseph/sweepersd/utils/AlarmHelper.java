@@ -46,7 +46,7 @@ public class AlarmHelper {
                     List<String> schedulesList = Arrays.asList(schedules);
 
                     Limit newLimit = new Limit(street, rangeInt, limit, schedulesList);
-                    LocationDetails ld = LocationDetails.createFromLocation()
+                    SweepingPosition ld = SweepingPosition.createFromLocation()
                     Alarm newAlarm = new Alarm(newLimit);
                 }
 

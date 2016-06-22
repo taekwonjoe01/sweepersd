@@ -223,7 +223,7 @@ public class DebugActivity extends AppCompatActivity
     }
 
     @Override
-    public void onParked(List<LocationDetails> results) {
+    public void onParked(List<SweepingPosition> results) {
 
     }
 

@@ -94,6 +94,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 returnIntent.putExtra(LOCATION_KEY, mLocation);
                 returnIntent.putExtra(
                         RADIUS_KEY, getRadiusForProgress(mRadiusSeekbar.getProgress()));
+                returnIntent.putExtra(RADIUS_KEY,
+                        getRadiusForProgress(mRadiusSeekbar.getProgress()));
                 setResult(Activity.RESULT_OK,returnIntent);
                 finish();
                 return true;
@@ -166,16 +168,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mLocation = location;
 
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
         mMap.addMarker(new MarkerOptions()
-                .position(latLng)
+                .position(center)
                 .draggable(true));
         mMarkerRadius = mMap.addCircle(new CircleOptions()
-                .center(latLng)
+                .center(center)
                 .radius(getRadiusForProgress(mRadiusSeekbar.getProgress()))
                 .strokeColor(Color.RED)
                 .fillColor(R.color.map_radius_fill));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 18f));
     }
 
     private int getRadiusForProgress(int progress) {

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -23,11 +24,10 @@ public class AlarmViewActivity extends AppCompatActivity {
     private static final int CREATE_ALARM_CODE = 1;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private AlarmViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private AlarmViewItemDecoration mAlarmViewItemDecoration;
 
-    private AlarmModel mAlarmModel;
 
 
     @Override
@@ -59,7 +59,12 @@ public class AlarmViewActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
 
         List<Alarm> alarms = AlarmHelper.loadAlarms(this);
-        mAlarmModel = new AlarmModel(alarms);
+        mAdapter = new AlarmViewAdapter(this, new AlarmModel(alarms));
+
+        RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
+        if (animator instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+        }
     }
 
     @Override
@@ -71,8 +76,7 @@ public class AlarmViewActivity extends AppCompatActivity {
                 Location location = data.getParcelableExtra(MapsActivity.LOCATION_KEY);
                 int radius = data.getIntExtra(MapsActivity.RADIUS_KEY, 0);
 
-                mAlarmModel.createAndAddAlarm(AlarmViewActivity.this, location, radius);
-                mAdapter.notifyDataSetChanged();
+                mAdapter.createAlarm(location, radius);
                 break;
         }
     }
@@ -85,7 +89,6 @@ public class AlarmViewActivity extends AppCompatActivity {
     }
 
     private void setAdapter() {
-        mAdapter = new AlarmViewAdapter(mAlarmModel);
         mRecyclerView.setAdapter(mAdapter);
     }
 }

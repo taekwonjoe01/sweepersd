@@ -14,8 +14,6 @@ import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.utils.LocationUtils;
-import com.example.joseph.sweepersd.utils.SettingsUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -48,14 +46,14 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private boolean mIsStarted = false;
     private ParkDetectionManager mParkManager;
 
-    private volatile LocationDetails mLocationDetails;
+    private volatile SweepingPosition mSweepingPosition;
     private volatile long mLocationTimestamp = Long.MAX_VALUE;
 
     private final IBinder mBinder = new SweeperBinder();
 
     private volatile boolean mIsDriving = false;
 
-    private List<LocationDetails> mPotentialParkedLocations = new ArrayList<>();
+    private List<SweepingPosition> mPotentialParkedLocations = new ArrayList<>();
 
     private Handler mHandler = new Handler();
 
@@ -84,11 +82,11 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return mParkManager.getParkDetectionSettings();
     }
 
-    public LocationDetails getCurrentLocationDetails() {
-        return mLocationDetails;
+    public SweepingPosition getCurrentLocationDetails() {
+        return mSweepingPosition;
     }
 
-    public List<LocationDetails> getParkedLocationDetails() {
+    public List<SweepingPosition> getParkedLocationDetails() {
         return mPotentialParkedLocations;
     }
 
@@ -126,8 +124,8 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         mParkManager.startParkDetection(this, mClient);
 
-        mLocationDetails = LocationDetails.createFromLocation(this, LocationServices.FusedLocationApi
-                .getLastLocation(mClient));
+        /*mSweepingPosition = SweepingPosition.createFromLocation(this, LocationServices.FusedLocationApi
+                .getLastLocation(mClient));*/
     }
 
     /*
@@ -154,10 +152,10 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     @Override
     public void onLocationChanged(Location location) {
         mLocationTimestamp = System.currentTimeMillis();
-        mLocationDetails = LocationDetails.createFromLocation(this, location);
+        /*mSweepingPosition = SweepingPosition.createFromLocation(this, location);*/
 
         if (mDrivingLocationListener != null && isDriving()) {
-            mDrivingLocationListener.onLocationChanged(mLocationDetails);
+            mDrivingLocationListener.onLocationChanged(mSweepingPosition);
         }
     }
 
@@ -210,12 +208,12 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     public interface SweeperServiceListener {
         void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
-        void onParked(List<LocationDetails> results);
+        void onParked(List<SweepingPosition> results);
         void onDriving();
     }
 
     public interface DrivingLocationListener {
-        void onLocationChanged(LocationDetails location);
+        void onLocationChanged(SweepingPosition location);
     }
 
 
@@ -229,7 +227,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         stopLocationUpdates();
 
-        mPotentialParkedLocations.add(mLocationDetails);
+        mPotentialParkedLocations.add(mSweepingPosition);
 
         handleParkingResults(mPotentialParkedLocations);
 
@@ -257,7 +255,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     @Override
     public void onParkPossible() {
-        mPotentialParkedLocations.add(mLocationDetails);
+        mPotentialParkedLocations.add(mSweepingPosition);
     }
 
     private void requestLocationUpdates() {
@@ -324,12 +322,12 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
 
 
-    private void handleParkingResults(List<LocationDetails> parkingResults) {
-        mRedzoneLimit = SettingsUtils.getRedzoneLimit(this);
+    private void handleParkingResults(List<SweepingPosition> parkingResults) {
+        /*mRedzoneLimit = SettingsUtils.getRedzoneLimit(this);
         Log.d(TAG, "redzone limit time " + mRedzoneLimit);
         List<Limit> potentialParkingLimits = new ArrayList<>();
 
-        for (LocationDetails location : parkingResults) {
+        for (SweepingPosition location : parkingResults) {
             if (location.limit != null) {
                 potentialParkingLimits.add(location.limit);
             }
@@ -351,7 +349,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
             NotificationPresenter.sendRedzoneNotification(this);
         } else if (minTime < mRedzoneLimit) {
             NotificationPresenter.sendRedzoneWarningNotification(this);
-        }
+        }*/
     }
 
     private String getActivityString(int type) {
