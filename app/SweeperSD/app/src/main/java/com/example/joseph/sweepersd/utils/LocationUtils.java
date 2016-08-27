@@ -5,7 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.Limit;
+import com.example.joseph.sweepersd.limits.Limit;
 import com.example.joseph.sweepersd.LimitManager;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -105,7 +105,7 @@ public class LocationUtils {
 
     public static List<GregorianCalendar> getSweepingDaysForLimit(Limit l, int maxDays) {
         List<GregorianCalendar> results = new ArrayList<>();
-        for (String schedule : l.getSchedules()) {
+        /*for (String schedule : l.getSchedules()) {
             String timeString = LimitManager.getTimeString(schedule);
             if (timeString == null) {
                 Log.e(TAG, "Parse Error on " + l.getStreet() + " :: " + l.getLimit()
@@ -131,7 +131,7 @@ public class LocationUtils {
                     Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
                 }
             }
-        }
+        }*/
         return results;
     }
 

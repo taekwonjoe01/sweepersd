@@ -2,10 +2,8 @@ package com.example.joseph.sweepersd;
 
 import android.content.Context;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.example.joseph.sweepersd.limits.Limit;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -26,7 +24,7 @@ public class LimitManager {
         mLoadedLimits = new ArrayList<>();
         mLoadedPostedLimits = new ArrayList<>();
 
-        try {
+        /*try {
             for (int i = 1; i < 10; i++) {
                 String filename = "district" + i + ".txt";
                 InputStream is = context.getAssets().open(filename);
@@ -70,7 +68,7 @@ public class LimitManager {
             }
         } catch (IOException e) {
 
-        }
+        }*/
 
         //Log.d(TAG, "Number of Limits posted: " + mLoadedPostedLimits.size());
         //Log.d(TAG, "Looking for Beryl St...");
@@ -80,10 +78,10 @@ public class LimitManager {
             }
         }
 
-        for (Limit l : mLoadedPostedLimits) {
+        /*for (Limit l : mLoadedPostedLimits) {
             //Log.d(TAG, "Street: " + l.getStreet());
             String s = "";
-            for (String sc : l.getSchedules()) {
+            for (LimitSchedule sc : l.getSchedules()) {
                 s += sc;
             }
             //Log.d(TAG, "Schedule: " + s);
@@ -116,7 +114,7 @@ public class LimitManager {
 
 
             //getDateForLimit(l);
-        }
+        }*/
 
         return mLoadedLimits;
     }

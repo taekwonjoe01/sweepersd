@@ -11,7 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.Limit;
+import com.example.joseph.sweepersd.limits.Limit;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.SweepingPosition;
 import com.example.joseph.sweepersd.utils.LocationUtils;

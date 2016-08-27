@@ -2,7 +2,7 @@ package com.example.joseph.sweepersd.utils;
 
 import android.content.Context;
 
-import com.example.joseph.sweepersd.Limit;
+import com.example.joseph.sweepersd.limits.Limit;
 import com.example.joseph.sweepersd.SweepingPosition;
 import com.example.joseph.sweepersd.alarms.Alarm;
 import com.google.android.gms.maps.model.LatLng;
