@@ -1,7 +1,6 @@
 package com.example.joseph.sweepersd;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -62,7 +61,7 @@ public class LimitManager {
                         }
                         mLoadedLimits.add(l);
                     } else {
-                        Log.e(TAG, "Parsed a bad line in " + filename);
+                        //Log.e(TAG, "Parsed a bad line in " + filename);
                     }
                 }
 
@@ -73,26 +72,26 @@ public class LimitManager {
 
         }
 
-        Log.d(TAG, "Number of Limits posted: " + mLoadedPostedLimits.size());
-        Log.d(TAG, "Looking for Beryl St...");
+        //Log.d(TAG, "Number of Limits posted: " + mLoadedPostedLimits.size());
+        //Log.d(TAG, "Looking for Beryl St...");
         for (Limit l : mLoadedPostedLimits) {
             if (l.getStreet().contains("BERYL")) {
-                Log.d(TAG, "Found BERYL!");
+                //Log.d(TAG, "Found BERYL!");
             }
         }
 
         for (Limit l : mLoadedPostedLimits) {
-            Log.d(TAG, "Street: " + l.getStreet());
+            //Log.d(TAG, "Street: " + l.getStreet());
             String s = "";
             for (String sc : l.getSchedules()) {
                 s += sc;
             }
-            Log.d(TAG, "Schedule: " + s);
+            //Log.d(TAG, "Schedule: " + s);
             for (String schedule : l.getSchedules()) {
                 String timeString = getTimeString(schedule);
                 if (timeString == null) {
-                    Log.e(TAG, "Parse Error on " + l.getStreet() + " :: " + l.getLimit() + " :: "
-                            + l.getSchedules());
+                    //Log.e(TAG, "Parse Error on " + l.getStreet() + " :: " + l.getLimit() + " :: "
+                    //        + l.getSchedules());
                 } else {
                     String[] parsings = timeString.split("-");
                     int startTime = convertTimeStringToHour(parsings[0]);
@@ -103,17 +102,17 @@ public class LimitManager {
                             days.addAll(getSweepingDates(startTime, endTime, 28, l.getSchedules().get(i)));
                         }
                         for (GregorianCalendar d : days) {
-                            Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
-                                    d.get(Calendar.DAY_OF_MONTH) + " (" +
-                                    d.get(Calendar.DAY_OF_WEEK) + ") time: " +
-                                    d.get(Calendar.HOUR));
+                            //Log.d(TAG, "month: " + d.get(Calendar.MONTH) +" day: " +
+                            //        d.get(Calendar.DAY_OF_MONTH) + " (" +
+                            //        d.get(Calendar.DAY_OF_WEEK) + ") time: " +
+                            //        d.get(Calendar.HOUR));
                         }
                     } else {
-                        Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
+                        //Log.e(TAG, "StartTime or endTime was -1: " + startTime + " " + endTime);
                     }
                 }
             }
-            Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            //Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
 
             //getDateForLimit(l);
@@ -153,13 +152,13 @@ public class LimitManager {
                     result = parsings2[0];
                 }
             } else {
-                Log.w(TAG, "Failed to get time string from: " + schedule);
+                //Log.w(TAG, "Failed to get time string from: " + schedule);
             }
         }
         if (parsings.length == 2) {
 
         } else {
-            Log.w(TAG, "Failed to get time string from: " + schedule);
+            //Log.w(TAG, "Failed to get time string from: " + schedule);
         }
         return result;
     }
@@ -182,7 +181,7 @@ public class LimitManager {
         try {
             result = Integer.parseInt(t) + base;
         } catch (NumberFormatException e) {
-            Log.d(TAG, "Failed to parse time from: " + time);
+            //Log.d(TAG, "Failed to parse time from: " + time);
         }
         return result;
     }
@@ -275,7 +274,7 @@ public class LimitManager {
 
     private static List<GregorianCalendar> refineDays(List<String> words, int index,
                                                List<GregorianCalendar> unrefinedDays) {
-        Log.d(TAG, "refineDays called on index " + index);
+        //Log.d(TAG, "refineDays called on index " + index);
         List<GregorianCalendar> refinedDays = new ArrayList<>();
         String prevWord = getPreviousWord(words, index);
         if (prevWord != null) {

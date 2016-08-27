@@ -169,7 +169,7 @@ public class LocationUtils {
             }
         }
         long end = System.nanoTime();
-        Log.d(TAG, "getting Address took: " + (end - start) / 1000000 + "ms");
+        //Log.d(TAG, "getting Address took: " + (end - start) / 1000000 + "ms");
         return addresses;
     }
 
@@ -190,7 +190,7 @@ public class LocationUtils {
 
     public static Limit findLimitForAddress(String address) {
         Limit result = null;
-        if (address.contains("ca") && address.contains("san diego")) {
+        if (address != null && address.contains("ca") && address.contains("san diego")) {
             String[] split = address.split(",");
             if (split.length > 1) {
                 String streetAddress = split[0];
@@ -241,13 +241,12 @@ public class LocationUtils {
     }
 
     private static Limit checkAddress(int houseNumber, String street) {
-        Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
+        //Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
         Limit result = null;
         for (Limit l : LimitManager.getPostedLimits()) {
             if (l.getStreet().toLowerCase().contains(street)) {
                 if (houseNumber >= l.getRange()[0] && houseNumber <= l.getRange()[1]) {
                     result = l;
-                    Log.d(TAG, "THIS HOUSE IS IN LIMIT RANGE");
                 }
             }
         }

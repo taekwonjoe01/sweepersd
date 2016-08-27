@@ -59,7 +59,7 @@ public class AlarmViewActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
 
         List<Alarm> alarms = AlarmHelper.loadAlarms(this);
-        mAdapter = new AlarmViewAdapter(this, new AlarmModel(alarms));
+        mAdapter = new AlarmViewAdapter(this, new AlarmModel(this));
 
         RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {

@@ -8,18 +8,16 @@ import com.google.android.gms.maps.model.LatLng;
 public class SweepingPosition {
     private static final String TAG = SweepingPosition.class.getSimpleName();
 
-    private Limit mLimit;
-    private LatLng mLatLng;
+    private final LatLng mLatLng;
     private String mAddress;
 
-    public SweepingPosition(Limit limit, LatLng latLng, String address) {
-        mLimit = limit;
-        mLatLng = latLng;
-        mAddress = address;
+    public SweepingPosition(LatLng position) {
+        this(position, null);
     }
 
-    public Limit getLimit() {
-        return mLimit;
+    public SweepingPosition(LatLng position, String address) {
+        mLatLng = position;
+        mAddress = address;
     }
 
     public LatLng getLatLng() {
@@ -29,16 +27,4 @@ public class SweepingPosition {
     public String getAddress() {
         return mAddress;
     }
-
-    /*public static SweepingPosition createFromLocation(Context context, Location location) {
-        SweepingPosition sweepingPosition = new SweepingPosition();
-        sweepingPosition.location = location;
-
-        List<Address> addressesForLimit = LocationUtils.getAddressesForLatLng(context, location);
-        sweepingPosition.addresses = addressesForLimit;
-
-        sweepingPosition.limit = findLimitForAddresses(addressesForLimit);
-
-        return sweepingPosition;
-    }*/
 }
