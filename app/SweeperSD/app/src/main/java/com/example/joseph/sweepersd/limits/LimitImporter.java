@@ -40,7 +40,7 @@ public class LimitImporter {
                 is.close();
             }
         } catch (IOException e) {
-
+            Log.e(TAG, e.toString());
         }
 
         return limits;

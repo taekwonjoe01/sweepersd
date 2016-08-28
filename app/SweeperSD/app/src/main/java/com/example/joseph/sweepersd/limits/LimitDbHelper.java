@@ -1,5 +1,6 @@
 package com.example.joseph.sweepersd.limits;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -72,6 +73,14 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         mContext = context;
     }
 
+    public List<Limit> getAllLimits() {
+        return null;
+    }
+
+    public List<Limit> getLimitsForStreet(String street) {
+        return null;
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         loadImportedLimits(db);
@@ -99,6 +108,29 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_IMPORTED_LIMITS);
         db.execSQL(SQL_CREATE_IMPORTED_SCHEDULES);
 
+        getWritableDatabase();
+
         List<Limit> importedLimits = LimitImporter.importLimits(mContext);
+        for (Limit limit : importedLimits) {
+            ContentValues limitValues = new ContentValues();
+            limitValues.put(ImportedLimitEntry.COLUMN_STREET_NAME, limit.getStreet());
+            String range = limit.getRange()[0] + "-" + limit.getRange()[1];
+            limitValues.put(ImportedLimitEntry.COLUMN_RANGE, range);
+            limitValues.put(ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
+            // insert book
+            long id = db.insert(ImportedLimitEntry.TABLE_NAME, null, limitValues);
+
+            for (LimitSchedule schedule : limit.getSchedules()) {
+                ContentValues scheduleValues = new ContentValues();
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_LIMIT_ID, id);
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_START_TIME, schedule.getStartHour());
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_END_TIME, schedule.getEndHour());
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_DAY, schedule.getDay());
+
+                db.insert(ImportedScheduleEntry.TABLE_NAME, null, scheduleValues);
+            }
+        }
+
+        close();
     }
 }
