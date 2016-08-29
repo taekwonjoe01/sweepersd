@@ -13,7 +13,7 @@ public final class LimitDbReaderContract {
         public static final String TABLE_NAME = "imported_limits";
         public static final String COLUMN_STREET_NAME = "street_name";
         public static final String COLUMN_RANGE = "range";
-        public static final String COLUMN_LIMIT = "limit";
+        public static final String COLUMN_LIMIT = "limit_desc";
     }
 
     public static class ImportedScheduleEntry implements BaseColumns {
@@ -28,7 +28,7 @@ public final class LimitDbReaderContract {
         public static final String TABLE_NAME = "personal_limits";
         public static final String COLUMN_STREET_NAME = "street_name";
         public static final String COLUMN_RANGE = "range";
-        public static final String COLUMN_LIMIT = "limit";
+        public static final String COLUMN_LIMIT = "limit_desc";
     }
 
     public static class PersonalScheduleEntry implements BaseColumns {

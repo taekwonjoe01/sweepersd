@@ -4,6 +4,10 @@ import android.content.Context;
 
 import com.example.joseph.sweepersd.limits.Limit;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -17,14 +21,10 @@ import java.util.TimeZone;
 public class LimitManager {
     private static final String TAG = LimitManager.class.getSimpleName();
 
-    private static List<Limit> mLoadedLimits;
-    private static List<Limit> mLoadedPostedLimits;
-
     public static List<Limit> loadLimits(Context context) {
-        mLoadedLimits = new ArrayList<>();
-        mLoadedPostedLimits = new ArrayList<>();
+        List<Limit> results = new ArrayList<>();
 
-        /*try {
+        try {
             for (int i = 1; i < 10; i++) {
                 String filename = "district" + i + ".txt";
                 InputStream is = context.getAssets().open(filename);
@@ -52,12 +52,11 @@ public class LimitManager {
                             }
                         }
 
-                        Limit l = new Limit(parsings[0], range, parsings[2], schedules);
+                        Limit l = new Limit(parsings[0], range, parsings[2], null);
 
                         if (acceptable) {
-                            mLoadedPostedLimits.add(l);
+                            results.add(l);
                         }
-                        mLoadedLimits.add(l);
                     } else {
                         //Log.e(TAG, "Parsed a bad line in " + filename);
                     }
@@ -68,14 +67,6 @@ public class LimitManager {
             }
         } catch (IOException e) {
 
-        }*/
-
-        //Log.d(TAG, "Number of Limits posted: " + mLoadedPostedLimits.size());
-        //Log.d(TAG, "Looking for Beryl St...");
-        for (Limit l : mLoadedPostedLimits) {
-            if (l.getStreet().contains("BERYL")) {
-                //Log.d(TAG, "Found BERYL!");
-            }
         }
 
         /*for (Limit l : mLoadedPostedLimits) {
@@ -116,15 +107,15 @@ public class LimitManager {
             //getDateForLimit(l);
         }*/
 
-        return mLoadedLimits;
+        return results;
     }
 
     public static List<Limit> getLimits() {
-        return mLoadedLimits;
+        return null;
     }
 
     public static List<Limit> getPostedLimits() {
-        return mLoadedPostedLimits;
+        return null;
     }
 
     public static String getTimeString(String schedule) {

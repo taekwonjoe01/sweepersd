@@ -149,33 +149,25 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_IMPORTED_LIMITS);
         db.execSQL(SQL_CREATE_IMPORTED_SCHEDULES);
 
-        try {
-            DB_SEMAPHORE.acquire();
+        List<Limit> importedLimits = LimitImporter.importLimits(mContext);
+        for (Limit limit : importedLimits) {
+            ContentValues limitValues = new ContentValues();
+            limitValues.put(ImportedLimitEntry.COLUMN_STREET_NAME, limit.getStreet());
+            String range = limit.getRange()[0] + "-" + limit.getRange()[1];
+            limitValues.put(ImportedLimitEntry.COLUMN_RANGE, range);
+            limitValues.put(ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
+            // insert book
+            long id = db.insert(ImportedLimitEntry.TABLE_NAME, null, limitValues);
 
-            List<Limit> importedLimits = LimitImporter.importLimits(mContext);
-            for (Limit limit : importedLimits) {
-                ContentValues limitValues = new ContentValues();
-                limitValues.put(ImportedLimitEntry.COLUMN_STREET_NAME, limit.getStreet());
-                String range = limit.getRange()[0] + "-" + limit.getRange()[1];
-                limitValues.put(ImportedLimitEntry.COLUMN_RANGE, range);
-                limitValues.put(ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
-                // insert book
-                long id = db.insert(ImportedLimitEntry.TABLE_NAME, null, limitValues);
+            for (LimitSchedule schedule : limit.getSchedules()) {
+                ContentValues scheduleValues = new ContentValues();
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_LIMIT_ID, id);
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_START_TIME, schedule.getStartHour());
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_END_TIME, schedule.getEndHour());
+                scheduleValues.put(ImportedScheduleEntry.COLUMN_DAY, schedule.getDay());
 
-                for (LimitSchedule schedule : limit.getSchedules()) {
-                    ContentValues scheduleValues = new ContentValues();
-                    scheduleValues.put(ImportedScheduleEntry.COLUMN_LIMIT_ID, id);
-                    scheduleValues.put(ImportedScheduleEntry.COLUMN_START_TIME, schedule.getStartHour());
-                    scheduleValues.put(ImportedScheduleEntry.COLUMN_END_TIME, schedule.getEndHour());
-                    scheduleValues.put(ImportedScheduleEntry.COLUMN_DAY, schedule.getDay());
-
-                    db.insert(ImportedScheduleEntry.TABLE_NAME, null, scheduleValues);
-                }
+                db.insert(ImportedScheduleEntry.TABLE_NAME, null, scheduleValues);
             }
-        } catch (InterruptedException e) {
-
-        } finally {
-            DB_SEMAPHORE.release();
         }
     }
 
@@ -218,7 +210,12 @@ public class LimitDbHelper extends SQLiteOpenHelper {
 
             results.add(new Limit(
                     limitCursor.getString(1), r, limitCursor.getString(3), schedules));
+
+            limitCursor.moveToNext();
         }
+
+        limitCursor.close();
+
         return results;
     }
 
@@ -241,7 +238,7 @@ public class LimitDbHelper extends SQLiteOpenHelper {
                 ImportedLimitEntry._ID + SORT_ORDER_ASCENDING;
 
         Cursor scheduleCursor = db.query(
-                ImportedLimitEntry.TABLE_NAME,
+                ImportedScheduleEntry.TABLE_NAME,
                 scheduleProjection,
                 selection,
                 selectionArgs,
@@ -256,7 +253,12 @@ public class LimitDbHelper extends SQLiteOpenHelper {
             int day = scheduleCursor.getInt(4);
 
             schedules.add(new LimitSchedule(startTime, endTime, day));
+
+            scheduleCursor.moveToNext();
         }
+
+        scheduleCursor.close();
+
         return schedules;
     }
 }
