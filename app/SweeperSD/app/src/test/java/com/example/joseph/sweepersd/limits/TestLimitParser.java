@@ -217,5 +217,6 @@ public class TestLimitParser {
         String line2 = "04TH AV \t1500 - 1599 \tBEECH ST - CEDAR ST \tPosted (2am - 6am), WS Wed, ES Thu\t";
         Limit limit2 = LimitParser.buildLimitFromLine(line2);
         assertNotNull(limit2);
+        assertEquals("04th av", limit2.getStreet());
     }
 }

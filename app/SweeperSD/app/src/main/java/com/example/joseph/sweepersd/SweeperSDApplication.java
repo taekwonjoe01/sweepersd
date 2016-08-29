@@ -8,4 +8,6 @@ import android.app.Application;
 public class SweeperSDApplication extends Application {
     public static volatile boolean needsCoarsePermission;
     public static volatile boolean needsFinePermission;
+
+
 }

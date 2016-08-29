@@ -46,7 +46,9 @@ public class LimitParser {
                     }
                 }
                 if (!schedules.isEmpty()) {
-                    result = new Limit(parsings[0], range, parsings[2], schedules);
+                    String street = parsings[0].trim().toLowerCase();
+                    String limit = parsings[2].trim().toLowerCase();
+                    result = new Limit(street, range, limit, schedules);
                 }
             }
         }
