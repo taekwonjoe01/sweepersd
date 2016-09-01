@@ -11,9 +11,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.joseph.sweepersd.SweepingAddress;
 import com.example.joseph.sweepersd.limits.Limit;
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.SweepingPosition;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -28,14 +28,14 @@ import java.util.List;
  */
 public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.ViewHolder> {
     private final Context mContext;
-    private final AlarmModel mAlarmModel;
+    private final AlarmManager mAlarmManager;
     private final List<AlarmPresenter> mAlarmPresenters;
 
-    public AlarmViewAdapter(Context context, AlarmModel alarmModel) {
+    public AlarmViewAdapter(Context context, AlarmManager alarmManager) {
         mContext = context;
-        mAlarmModel = alarmModel;
+        mAlarmManager = alarmManager;
         mAlarmPresenters = new ArrayList<>();
-        for (Alarm alarm : mAlarmModel.getAlarms()) {
+        for (Alarm alarm : mAlarmManager.getAlarms()) {
             if (alarm.getSweepingPositions() == null) {
                 LoadingAddressesPresenter presenter = new LoadingAddressesPresenter(
                         mAlarmPresenters.size(), alarm);
@@ -77,7 +77,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 AlarmPresenter presenter = mAlarmPresenters.get(position);
                 presenter.setDeleted();
                 mAlarmPresenters.remove(presenter);
-                mAlarmModel.removeAlarm(presenter.alarm);
+                mAlarmManager.removeAlarm(presenter.alarm);
                 Toast.makeText(v.getContext(), "Delete alarm", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -93,20 +93,21 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
         int position = mAlarmPresenters.size();
 
-        Alarm newAlarm = new Alarm(System.currentTimeMillis()/1000, center, radius, null);
-        mAlarmModel.saveAlarm(newAlarm);
+        // TODO
+        /*Alarm newAlarm = new Alarm(System.currentTimeMillis()/1000, center, radius, null);
+        mAlarmManager.saveAlarm(newAlarm);
 
         LoadingAddressesPresenter presenter = new LoadingAddressesPresenter(position, newAlarm);
         mAlarmPresenters.add(presenter);
 
         LoadAlarmSweepingPositionsTask alarmTask =
                 new LoadAlarmSweepingPositionsTask(presenter, newAlarm);
-        alarmTask.execute();
+        alarmTask.execute();*/
 
         notifyDataSetChanged();
     }
 
-    public class LoadAlarmSweepingPositionsTask extends AsyncTask<Void, String, List<SweepingPosition>> {
+    public class LoadAlarmSweepingPositionsTask extends AsyncTask<Void, String, List<SweepingAddress>> {
         private Alarm mAlarm;
         private LoadingAddressesPresenter mAlarmPresenter;
 
@@ -116,14 +117,15 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
 
         @Override
-        protected List<SweepingPosition> doInBackground(Void... params) {
-            List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(mAlarm.getCenter(),
+        protected List<SweepingAddress> doInBackground(Void... params) {
+            // TODO
+            /*List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(mAlarm.getCenter(),
                     mAlarm.getRadius());
 
-            List<SweepingPosition> sweepingPositions = new ArrayList<>();
+            List<SweepingAddress> sweepingAddresses = new ArrayList<>();
 
             String centerAddress  = LocationUtils.getAddressForLatLnt(mContext, mAlarm.getCenter());
-            sweepingPositions.add(new SweepingPosition(mAlarm.getCenter(), centerAddress));
+            sweepingAddresses.add(new SweepingAddress(mAlarm.getCenter(), centerAddress));
             for (int i = 0; i < latLngs.size(); i++) {
                 LatLng latLng = latLngs.get(i);
 
@@ -135,10 +137,11 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 publishProgress(progressUpdate);
 
                 String address  = LocationUtils.getAddressForLatLnt(mContext, mAlarm.getCenter());
-                sweepingPositions.add(
-                        new SweepingPosition(latLng, address));
+                sweepingAddresses.add(
+                        new SweepingAddress(latLng, address));
             }
-            return sweepingPositions;
+            return sweepingAddresses;*/
+            return null;
         }
 
         @Override
@@ -148,24 +151,24 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
 
         @Override
-        protected void onPostExecute(List<SweepingPosition> sweepingPositions) {
-            if (!mAlarmPresenter.isDeleted && !isCancelled() && sweepingPositions != null) {
+        protected void onPostExecute(List<SweepingAddress> sweepingAddresses) {
+            if (!mAlarmPresenter.isDeleted && !isCancelled() && sweepingAddresses != null) {
                 LoadingLimitsPresenter newPresenter =
                         new LoadingLimitsPresenter(mAlarmPresenter.position, mAlarm);
                 mAlarmPresenters.remove(mAlarmPresenter.position);
                 mAlarmPresenters.add(mAlarmPresenter.position, newPresenter);
                 notifyItemChanged(mAlarmPresenter.position);
 
-                mAlarm.setSweepingPositions(sweepingPositions);
-                mAlarmModel.saveAlarm(mAlarm);
+                mAlarm.setSweepingAddresses(sweepingAddresses);
+                mAlarmManager.saveAlarm(mAlarm);
 
                 new LoadLimitsTask(newPresenter, mAlarm).execute();
             }
-            super.onPostExecute(sweepingPositions);
+            super.onPostExecute(sweepingAddresses);
         }
     }
 
-    public class LoadLimitsTask extends AsyncTask<Void, String, HashMap<SweepingPosition, Limit>> {
+    public class LoadLimitsTask extends AsyncTask<Void, String, HashMap<SweepingAddress, Limit>> {
         private final Alarm mAlarm;
         private LoadingLimitsPresenter mAlarmPresenter;
         private String mDescriptionResult;
@@ -176,10 +179,10 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
 
         @Override
-        protected HashMap<SweepingPosition, Limit> doInBackground(Void... params) {
-            HashMap<SweepingPosition, Limit> results = new HashMap<>();
+        protected HashMap<SweepingAddress, Limit> doInBackground(Void... params) {
+            HashMap<SweepingAddress, Limit> results = new HashMap<>();
             for (int i = 0; i < mAlarm.getSweepingPositions().size(); i++) {
-                SweepingPosition position = mAlarm.getSweepingPositions().get(i);
+                SweepingAddress position = mAlarm.getSweepingPositions().get(i);
 
                 if (mAlarmPresenter.isDeleted || isCancelled()) {
                     return null;
@@ -195,7 +198,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
 
             GregorianCalendar nextSweepingTime = null;
             for (int i = 0; i < mAlarm.getSweepingPositions().size(); i++) {
-                SweepingPosition position = mAlarm.getSweepingPositions().get(i);
+                SweepingAddress position = mAlarm.getSweepingPositions().get(i);
 
                 if (mAlarmPresenter.isDeleted || isCancelled()) {
                     return null;
@@ -230,7 +233,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
 
         @Override
-        protected void onPostExecute(HashMap<SweepingPosition, Limit> results) {
+        protected void onPostExecute(HashMap<SweepingAddress, Limit> results) {
             if (!mAlarmPresenter.isDeleted && !isCancelled() && results != null) {
                 LoadedAlarmPresenter newPresenter =
                         new LoadedAlarmPresenter(mAlarmPresenter.position, mAlarm, results,
@@ -311,9 +314,9 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     class LoadedAlarmPresenter extends AlarmPresenter {
         Alarm alarm;
         String description;
-        HashMap<SweepingPosition, Limit> limits;
+        HashMap<SweepingAddress, Limit> limits;
 
-        LoadedAlarmPresenter(int position, Alarm alarm, HashMap<SweepingPosition, Limit> limits,
+        LoadedAlarmPresenter(int position, Alarm alarm, HashMap<SweepingAddress, Limit> limits,
                              String description) {
             super(position, alarm);
             this.alarm = alarm;
@@ -370,9 +373,9 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
     }
 
-    /*private GregorianCalendar getNextSweepingDate(HashMap<SweepingPosition, Limit> limitsMap) {
+    /*private GregorianCalendar getNextSweepingDate(HashMap<SweepingAddress, Limit> limitsMap) {
         GregorianCalendar result = null;
-        for (SweepingPosition pos : mSweepingPositions) {
+        for (SweepingAddress pos : mSweepingPositions) {
             List<GregorianCalendar> sweepingDays = LocationUtils.getSweepingDaysForLimit(
                     LocationUtils.findLimitForAddress(pos.getAddress()), 31);
             if (!sweepingDays.isEmpty()) {
@@ -386,9 +389,9 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         return result;
     }
 
-    private List<GregorianCalendar> getNextSweepingDates(int maxDays, HashMap<SweepingPosition, Limit> limitsMap) {
+    private List<GregorianCalendar> getNextSweepingDates(int maxDays, HashMap<SweepingAddress, Limit> limitsMap) {
         List<GregorianCalendar> result = new ArrayList<>();
-        for (SweepingPosition pos : mSweepingPositions) {
+        for (SweepingAddress pos : mSweepingPositions) {
             result.addAll(LocationUtils.getSweepingDaysForLimit(
                     LocationUtils.findLimitForAddress(pos.getAddress()), maxDays));
         }

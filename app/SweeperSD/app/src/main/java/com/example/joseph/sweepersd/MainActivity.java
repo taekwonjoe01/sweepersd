@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity
             if (mService.isDriving()) {
                 mDrivingStatusText.setText("Driving");
 
-                SweepingPosition location = mService.getCurrentLocationDetails();
+                SweepingAddress location = mService.getCurrentLocationDetails();
 
                 if (location != null) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
@@ -262,10 +262,10 @@ public class MainActivity extends AppCompatActivity
             } else {
                 mDrivingStatusText.setText("Parked");
 
-                List<SweepingPosition> parkedLocations =
+                List<SweepingAddress> parkedLocations =
                         mService.getParkedLocationDetails();
 
-                for (SweepingPosition location : parkedLocations) {
+                for (SweepingAddress location : parkedLocations) {
                     long timeUntilSweeping = LocationUtils.getTimesUntilLimit(
                             location.limit, 32).get(0);
 
@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity
                 if (!parkedLocations.isEmpty()) {
                     mNoParkingLocationsDisplay.setVisibility(View.GONE);
                     mCurrentLocationUnknownDisplay.setVisibility(View.GONE);
-                    SweepingPosition currentParkedLocation =
+                    SweepingAddress currentParkedLocation =
                             parkedLocations.get(parkedLocations.size() - 1);
 
                     long timeUntilSweeping = LocationUtils.getTimesUntilLimit(
@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity
     SweeperServiceListener callback.
      */
     @Override
-    public void onParked(List<SweepingPosition> results) {
+    public void onParked(List<SweepingAddress> results) {
         updateUI();
     }
 
@@ -421,7 +421,7 @@ public class MainActivity extends AppCompatActivity
         updateUI();
         mService.registerDrivingLocationListener(new SweeperService.DrivingLocationListener() {
             @Override
-            public void onLocationChanged(SweepingPosition location) {
+            public void onLocationChanged(SweepingAddress location) {
                 updateUI();
             }
         });

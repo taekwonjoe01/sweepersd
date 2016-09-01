@@ -330,7 +330,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
     }
 
     @Override
-    public void onParked(List<SweepingPosition> results) {
+    public void onParked(List<SweepingAddress> results) {
 
     }
 }

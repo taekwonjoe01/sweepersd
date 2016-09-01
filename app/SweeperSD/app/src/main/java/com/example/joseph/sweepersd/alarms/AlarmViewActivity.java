@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.MapsActivity;
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.utils.AlarmHelper;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class AlarmViewActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
 
         List<Alarm> alarms = AlarmHelper.loadAlarms(this);
-        mAdapter = new AlarmViewAdapter(this, new AlarmModel(this));
+        mAdapter = new AlarmViewAdapter(this, new AlarmManager(this));
 
         RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {

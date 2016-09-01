@@ -47,14 +47,14 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private boolean mIsStarted = false;
     private ParkDetectionManager mParkManager;
 
-    private volatile SweepingPosition mSweepingPosition;
+    private volatile SweepingAddress mSweepingAddress;
     private volatile long mLocationTimestamp = Long.MAX_VALUE;
 
     private final IBinder mBinder = new SweeperBinder();
 
     private volatile boolean mIsDriving = false;
 
-    private List<SweepingPosition> mPotentialParkedLocations = new ArrayList<>();
+    private List<SweepingAddress> mPotentialParkedLocations = new ArrayList<>();
 
     private Handler mHandler = new Handler();
 
@@ -83,11 +83,11 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
         return mParkManager.getParkDetectionSettings();
     }
 
-    public SweepingPosition getCurrentLocationDetails() {
-        return mSweepingPosition;
+    public SweepingAddress getCurrentLocationDetails() {
+        return mSweepingAddress;
     }
 
-    public List<SweepingPosition> getParkedLocationDetails() {
+    public List<SweepingAddress> getParkedLocationDetails() {
         return mPotentialParkedLocations;
     }
 
@@ -125,7 +125,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         mParkManager.startParkDetection(this, mClient);
 
-        /*mSweepingPosition = SweepingPosition.createFromLocation(this, LocationServices.FusedLocationApi
+        /*mSweepingAddress = SweepingAddress.createFromLocation(this, LocationServices.FusedLocationApi
                 .getLastLocation(mClient));*/
     }
 
@@ -153,10 +153,10 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     @Override
     public void onLocationChanged(Location location) {
         mLocationTimestamp = System.currentTimeMillis();
-        /*mSweepingPosition = SweepingPosition.createFromLocation(this, location);*/
+        /*mSweepingAddress = SweepingAddress.createFromLocation(this, location);*/
 
         if (mDrivingLocationListener != null && isDriving()) {
-            mDrivingLocationListener.onLocationChanged(mSweepingPosition);
+            mDrivingLocationListener.onLocationChanged(mSweepingAddress);
         }
     }
 
@@ -209,12 +209,12 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     public interface SweeperServiceListener {
         void onGooglePlayConnectionStatusUpdated(GooglePlayConnectionStatus status);
-        void onParked(List<SweepingPosition> results);
+        void onParked(List<SweepingAddress> results);
         void onDriving();
     }
 
     public interface DrivingLocationListener {
-        void onLocationChanged(SweepingPosition location);
+        void onLocationChanged(SweepingAddress location);
     }
 
 
@@ -228,7 +228,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
         stopLocationUpdates();
 
-        mPotentialParkedLocations.add(mSweepingPosition);
+        mPotentialParkedLocations.add(mSweepingAddress);
 
         handleParkingResults(mPotentialParkedLocations);
 
@@ -256,7 +256,7 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
     @Override
     public void onParkPossible() {
-        mPotentialParkedLocations.add(mSweepingPosition);
+        mPotentialParkedLocations.add(mSweepingAddress);
     }
 
     private void requestLocationUpdates() {
@@ -323,12 +323,12 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
 
 
 
-    private void handleParkingResults(List<SweepingPosition> parkingResults) {
+    private void handleParkingResults(List<SweepingAddress> parkingResults) {
         /*mRedzoneLimit = SettingsUtils.getRedzoneLimit(this);
         Log.d(TAG, "redzone limit time " + mRedzoneLimit);
         List<Limit> potentialParkingLimits = new ArrayList<>();
 
-        for (SweepingPosition location : parkingResults) {
+        for (SweepingAddress location : parkingResults) {
             if (location.limit != null) {
                 potentialParkingLimits.add(location.limit);
             }

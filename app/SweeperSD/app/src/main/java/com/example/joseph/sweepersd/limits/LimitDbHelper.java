@@ -122,6 +122,30 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         return results;
     }
 
+    public Limit getLimitForId(int id) {
+        Limit result = null;
+        try {
+            DB_SEMAPHORE.acquire();
+
+            SQLiteDatabase db = this.getReadableDatabase();
+
+            String selection = ImportedLimitEntry._ID + " = ?";
+            String streetToLower = "" + id;
+            String[] selectionArgs = { streetToLower };
+
+            List<Limit> limits = getLimitsForSelection(db, selection, selectionArgs);
+            if (limits.size() > 0) {
+                result = limits.get(0);
+            }
+
+            db.close();
+            DB_SEMAPHORE.release();
+        } catch (InterruptedException e) {
+            result = null;
+        }
+        return result;
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         loadImportedLimits(db);
@@ -208,7 +232,7 @@ public class LimitDbHelper extends SQLiteOpenHelper {
 
             List<LimitSchedule> schedules = getLimitSchedulesForLimit(db, id);
 
-            results.add(new Limit(
+            results.add(new Limit((int) id,
                     limitCursor.getString(1), r, limitCursor.getString(3), schedules));
 
             limitCursor.moveToNext();
