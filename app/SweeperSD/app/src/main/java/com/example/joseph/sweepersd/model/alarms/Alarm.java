@@ -1,9 +1,9 @@
-package com.example.joseph.sweepersd.alarms;
+package com.example.joseph.sweepersd.model.alarms;
 
-import com.example.joseph.sweepersd.SweepingAddress;
-import com.example.joseph.sweepersd.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.Limit;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,6 +19,7 @@ public class Alarm {
     private HashMap<Integer, Limit> mUniqueLimits;
     private List<SweepingAddress> mSweepingAddresses;
 
+    // TODO make package protected.
     public Alarm(long createdTimestamp, long lastUpdatedTimestamp,  LatLng center, int radius,
                  List<SweepingAddress> sweepingAddresses) {
         mCreatedTimestamp = createdTimestamp;
@@ -26,6 +27,18 @@ public class Alarm {
         mCenter = center;
         mRadius = radius;
         setSweepingAddresses(sweepingAddresses);
+    }
+    // TODO make package protected.
+    public Alarm(Alarm other) {
+        this.mCreatedTimestamp = other.mCreatedTimestamp;
+        this.mLastUpdatedTimestamp = other.mLastUpdatedTimestamp;
+        this.mCenter = other.mCenter;
+        this.mRadius = other.mRadius;
+        List<SweepingAddress> addresses = new ArrayList<>();
+        for (SweepingAddress address : other.getSweepingAddresses()) {
+            addresses.add(new SweepingAddress(address));
+        }
+        setSweepingAddresses(addresses);
     }
 
     public long getCreatedTimestamp() {
@@ -44,12 +57,16 @@ public class Alarm {
         return mRadius;
     }
 
-    public List<SweepingAddress> getSweepingPositions() {
+    public List<SweepingAddress> getSweepingAddresses() {
         return mSweepingAddresses;
     }
 
     public void setSweepingAddresses(List<SweepingAddress> sweepingAddresses) {
-        mSweepingAddresses = sweepingAddresses;
+        if (sweepingAddresses == null) {
+            mSweepingAddresses = new ArrayList<>();
+        } else {
+            mSweepingAddresses = sweepingAddresses;
+        }
 
         mUniqueLimits = new HashMap<>();
         for (SweepingAddress address : mSweepingAddresses) {

@@ -1,15 +1,10 @@
-package com.example.joseph.sweepersd.limits;
+package com.example.joseph.sweepersd.model.limits;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.example.joseph.sweepersd.limits.LimitDbReaderContract.ImportedLimitEntry;
-import com.example.joseph.sweepersd.limits.LimitDbReaderContract.ImportedScheduleEntry;
-import com.example.joseph.sweepersd.limits.LimitDbReaderContract.PersonalLimitEntry;
-import com.example.joseph.sweepersd.limits.LimitDbReaderContract.PersonalScheduleEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,55 +26,70 @@ public class LimitDbHelper extends SQLiteOpenHelper {
     private static final String SORT_ORDER_DESCENDING = " DESC";
 
     private static final String SQL_CREATE_IMPORTED_LIMITS =
-            "CREATE TABLE " + ImportedLimitEntry.TABLE_NAME + " (" +
-                    ImportedLimitEntry._ID + " INTEGER PRIMARY KEY," +
-                    ImportedLimitEntry.COLUMN_STREET_NAME + TEXT_TYPE + COMMA_SEP +
-                    ImportedLimitEntry.COLUMN_RANGE + TEXT_TYPE + COMMA_SEP +
-                    ImportedLimitEntry.COLUMN_LIMIT + TEXT_TYPE + " )";
+            "CREATE TABLE " + LimitDbReaderContract.ImportedLimitEntry.TABLE_NAME + " (" +
+                    LimitDbReaderContract.ImportedLimitEntry._ID + " INTEGER PRIMARY KEY," +
+                    LimitDbReaderContract.ImportedLimitEntry.COLUMN_STREET_NAME + TEXT_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedLimitEntry.COLUMN_RANGE + TEXT_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedLimitEntry.COLUMN_LIMIT + TEXT_TYPE + " )";
 
     private static final String SQL_DELETE_IMPORTED_LIMITS =
-            "DROP TABLE IF EXISTS " + ImportedLimitEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + LimitDbReaderContract.ImportedLimitEntry.TABLE_NAME;
 
     private static final String SQL_CREATE_IMPORTED_SCHEDULES =
-            "CREATE TABLE " + ImportedScheduleEntry.TABLE_NAME + " (" +
-                    ImportedScheduleEntry._ID + " INTEGER PRIMARY KEY," +
-                    ImportedScheduleEntry.COLUMN_LIMIT_ID + INTEGER_TYPE + COMMA_SEP +
-                    ImportedScheduleEntry.COLUMN_START_TIME + INTEGER_TYPE + COMMA_SEP +
-                    ImportedScheduleEntry.COLUMN_END_TIME + INTEGER_TYPE + COMMA_SEP +
-                    ImportedScheduleEntry.COLUMN_DAY + INTEGER_TYPE + " )";
+            "CREATE TABLE " + LimitDbReaderContract.ImportedScheduleEntry.TABLE_NAME + " (" +
+                    LimitDbReaderContract.ImportedScheduleEntry._ID + " INTEGER PRIMARY KEY," +
+                    LimitDbReaderContract.ImportedScheduleEntry.COLUMN_LIMIT_ID + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedScheduleEntry.COLUMN_START_TIME + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedScheduleEntry.COLUMN_END_TIME + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedScheduleEntry.COLUMN_DAY + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedScheduleEntry.COLUMN_WEEK + INTEGER_TYPE + " )";
 
     private static final String SQL_DELETE_IMPORTED_SCHEDULES =
-            "DROP TABLE IF EXISTS " + ImportedScheduleEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + LimitDbReaderContract.ImportedScheduleEntry.TABLE_NAME;
 
     private static final String SQL_CREATE_PERSONAL_LIMITS =
-            "CREATE TABLE " + PersonalLimitEntry.TABLE_NAME + " (" +
-                    PersonalLimitEntry._ID + " INTEGER PRIMARY KEY," +
-                    PersonalLimitEntry.COLUMN_STREET_NAME + TEXT_TYPE + COMMA_SEP +
-                    PersonalLimitEntry.COLUMN_RANGE + TEXT_TYPE + COMMA_SEP +
-                    PersonalLimitEntry.COLUMN_LIMIT + TEXT_TYPE + " )";
+            "CREATE TABLE " + LimitDbReaderContract.PersonalLimitEntry.TABLE_NAME + " (" +
+                    LimitDbReaderContract.PersonalLimitEntry._ID + " INTEGER PRIMARY KEY," +
+                    LimitDbReaderContract.PersonalLimitEntry.COLUMN_STREET_NAME + TEXT_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.PersonalLimitEntry.COLUMN_RANGE + TEXT_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.PersonalLimitEntry.COLUMN_LIMIT + TEXT_TYPE + " )";
 
     private static final String SQL_DELETE_PERSONAL_LIMITS =
-            "DROP TABLE IF EXISTS " + PersonalLimitEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + LimitDbReaderContract.PersonalLimitEntry.TABLE_NAME;
 
     private static final String SQL_CREATE_PERSONAL_SCHEDULES =
-            "CREATE TABLE " + PersonalScheduleEntry.TABLE_NAME + " (" +
-                    PersonalScheduleEntry._ID + " INTEGER PRIMARY KEY," +
-                    PersonalScheduleEntry.COLUMN_LIMIT_ID + INTEGER_TYPE + COMMA_SEP +
-                    PersonalScheduleEntry.COLUMN_START_TIME + INTEGER_TYPE + COMMA_SEP +
-                    PersonalScheduleEntry.COLUMN_END_TIME + INTEGER_TYPE + COMMA_SEP +
-                    PersonalScheduleEntry.COLUMN_DAY + INTEGER_TYPE + " )";
+            "CREATE TABLE " + LimitDbReaderContract.PersonalScheduleEntry.TABLE_NAME + " (" +
+                    LimitDbReaderContract.PersonalScheduleEntry._ID + " INTEGER PRIMARY KEY," +
+                    LimitDbReaderContract.PersonalScheduleEntry.COLUMN_LIMIT_ID + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.PersonalScheduleEntry.COLUMN_START_TIME + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.PersonalScheduleEntry.COLUMN_END_TIME + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.PersonalScheduleEntry.COLUMN_DAY + INTEGER_TYPE + COMMA_SEP +
+                    LimitDbReaderContract.ImportedScheduleEntry.COLUMN_WEEK + INTEGER_TYPE + " )";
 
     private static final String SQL_DELETE_PERSONAL_SCHEDULES =
-            "DROP TABLE IF EXISTS " + PersonalScheduleEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + LimitDbReaderContract.PersonalScheduleEntry.TABLE_NAME;
 
     private static final Semaphore DB_SEMAPHORE = new Semaphore(1);
 
     private final Context mContext;
+    private final LimitImporter mLimitImporter;
 
+    public interface LimitImporter {
+        List<Limit> importLimits(Context context);
+    }
 
     public LimitDbHelper(Context context) {
+        this(context, null);
+    }
+
+    public LimitDbHelper(Context context, LimitImporter limitImporter) {
         super(context, DATABASE_NAME, null, VERSION);
         mContext = context;
+        if (limitImporter == null) {
+            mLimitImporter = new FileLimitImporter();
+        } else {
+            mLimitImporter = limitImporter;
+        }
     }
 
     public List<Limit> getAllLimits() {
@@ -107,7 +117,7 @@ public class LimitDbHelper extends SQLiteOpenHelper {
 
             SQLiteDatabase db = this.getReadableDatabase();
 
-            String selection = ImportedLimitEntry.COLUMN_STREET_NAME + " LIKE ?";
+            String selection = LimitDbReaderContract.ImportedLimitEntry.COLUMN_STREET_NAME + " LIKE ?";
             String streetToLower = street.toLowerCase();
             String[] selectionArgs = { streetToLower };
 
@@ -129,7 +139,7 @@ public class LimitDbHelper extends SQLiteOpenHelper {
 
             SQLiteDatabase db = this.getReadableDatabase();
 
-            String selection = ImportedLimitEntry._ID + " = ?";
+            String selection = LimitDbReaderContract.ImportedLimitEntry._ID + " = ?";
             String streetToLower = "" + id;
             String[] selectionArgs = { streetToLower };
 
@@ -173,24 +183,25 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_IMPORTED_LIMITS);
         db.execSQL(SQL_CREATE_IMPORTED_SCHEDULES);
 
-        List<Limit> importedLimits = LimitImporter.importLimits(mContext);
+        List<Limit> importedLimits = mLimitImporter.importLimits(mContext);
         for (Limit limit : importedLimits) {
             ContentValues limitValues = new ContentValues();
-            limitValues.put(ImportedLimitEntry.COLUMN_STREET_NAME, limit.getStreet());
+            limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_STREET_NAME, limit.getStreet());
             String range = limit.getRange()[0] + "-" + limit.getRange()[1];
-            limitValues.put(ImportedLimitEntry.COLUMN_RANGE, range);
-            limitValues.put(ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
+            limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_RANGE, range);
+            limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
             // insert book
-            long id = db.insert(ImportedLimitEntry.TABLE_NAME, null, limitValues);
+            long id = db.insert(LimitDbReaderContract.ImportedLimitEntry.TABLE_NAME, null, limitValues);
 
             for (LimitSchedule schedule : limit.getSchedules()) {
                 ContentValues scheduleValues = new ContentValues();
-                scheduleValues.put(ImportedScheduleEntry.COLUMN_LIMIT_ID, id);
-                scheduleValues.put(ImportedScheduleEntry.COLUMN_START_TIME, schedule.getStartHour());
-                scheduleValues.put(ImportedScheduleEntry.COLUMN_END_TIME, schedule.getEndHour());
-                scheduleValues.put(ImportedScheduleEntry.COLUMN_DAY, schedule.getDay());
+                scheduleValues.put(LimitDbReaderContract.ImportedScheduleEntry.COLUMN_LIMIT_ID, id);
+                scheduleValues.put(LimitDbReaderContract.ImportedScheduleEntry.COLUMN_START_TIME, schedule.getStartHour());
+                scheduleValues.put(LimitDbReaderContract.ImportedScheduleEntry.COLUMN_END_TIME, schedule.getEndHour());
+                scheduleValues.put(LimitDbReaderContract.ImportedScheduleEntry.COLUMN_DAY, schedule.getDay());
+                scheduleValues.put(LimitDbReaderContract.ImportedScheduleEntry.COLUMN_WEEK, schedule.getWeekNumber());
 
-                db.insert(ImportedScheduleEntry.TABLE_NAME, null, scheduleValues);
+                db.insert(LimitDbReaderContract.ImportedScheduleEntry.TABLE_NAME, null, scheduleValues);
             }
         }
     }
@@ -201,18 +212,18 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] limitProjection = {
-                ImportedLimitEntry._ID,
-                ImportedLimitEntry.COLUMN_STREET_NAME,
-                ImportedLimitEntry.COLUMN_RANGE,
-                ImportedLimitEntry.COLUMN_LIMIT
+                LimitDbReaderContract.ImportedLimitEntry._ID,
+                LimitDbReaderContract.ImportedLimitEntry.COLUMN_STREET_NAME,
+                LimitDbReaderContract.ImportedLimitEntry.COLUMN_RANGE,
+                LimitDbReaderContract.ImportedLimitEntry.COLUMN_LIMIT
         };
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder =
-                ImportedLimitEntry._ID + SORT_ORDER_ASCENDING;
+                LimitDbReaderContract.ImportedLimitEntry._ID + SORT_ORDER_ASCENDING;
 
         Cursor limitCursor = db.query(
-                ImportedLimitEntry.TABLE_NAME,                     // The table to query
+                LimitDbReaderContract.ImportedLimitEntry.TABLE_NAME,                     // The table to query
                 limitProjection,                               // The columns to return
                 selection,                                // The columns for the WHERE clause
                 selectionArgs,                            // The values for the WHERE clause
@@ -247,22 +258,23 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         List<LimitSchedule> schedules = new ArrayList<>();
 
         String[] scheduleProjection = {
-                ImportedScheduleEntry._ID,
-                ImportedScheduleEntry.COLUMN_LIMIT_ID,
-                ImportedScheduleEntry.COLUMN_START_TIME,
-                ImportedScheduleEntry.COLUMN_END_TIME,
-                ImportedScheduleEntry.COLUMN_DAY
+                LimitDbReaderContract.ImportedScheduleEntry._ID,
+                LimitDbReaderContract.ImportedScheduleEntry.COLUMN_LIMIT_ID,
+                LimitDbReaderContract.ImportedScheduleEntry.COLUMN_START_TIME,
+                LimitDbReaderContract.ImportedScheduleEntry.COLUMN_END_TIME,
+                LimitDbReaderContract.ImportedScheduleEntry.COLUMN_DAY,
+                LimitDbReaderContract.ImportedScheduleEntry.COLUMN_WEEK
         };
 
         // Filter results WHERE "title" = 'My Title'
-        String selection = ImportedScheduleEntry.COLUMN_LIMIT_ID + " = ?";
+        String selection = LimitDbReaderContract.ImportedScheduleEntry.COLUMN_LIMIT_ID + " = ?";
         String[] selectionArgs = { "" + limitId };
 
         String sortOrder =
-                ImportedLimitEntry._ID + SORT_ORDER_ASCENDING;
+                LimitDbReaderContract.ImportedLimitEntry._ID + SORT_ORDER_ASCENDING;
 
         Cursor scheduleCursor = db.query(
-                ImportedScheduleEntry.TABLE_NAME,
+                LimitDbReaderContract.ImportedScheduleEntry.TABLE_NAME,
                 scheduleProjection,
                 selection,
                 selectionArgs,
@@ -275,8 +287,9 @@ public class LimitDbHelper extends SQLiteOpenHelper {
             int startTime = scheduleCursor.getInt(2);
             int endTime = scheduleCursor.getInt(3);
             int day = scheduleCursor.getInt(4);
+            int week = scheduleCursor.getInt(5);
 
-            schedules.add(new LimitSchedule(startTime, endTime, day));
+            schedules.add(new LimitSchedule(startTime, endTime, day, week));
 
             scheduleCursor.moveToNext();
         }

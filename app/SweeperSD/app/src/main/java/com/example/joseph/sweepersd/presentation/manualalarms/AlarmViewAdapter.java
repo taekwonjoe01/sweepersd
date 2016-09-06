@@ -1,9 +1,8 @@
-package com.example.joseph.sweepersd.alarms;
+package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.content.Context;
-import android.location.Location;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,16 +10,14 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.SweepingAddress;
-import com.example.joseph.sweepersd.limits.Limit;
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.model.alarms.Alarm;
+import com.example.joseph.sweepersd.model.alarms.AlarmManager;
+import com.example.joseph.sweepersd.model.alarms.AlarmUpdateManager;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -34,17 +31,17 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     public AlarmViewAdapter(Context context, AlarmManager alarmManager) {
         mContext = context;
         mAlarmManager = alarmManager;
+        mAlarmManager.addAlarmChangeListener(mAlarmChangeListener);
         mAlarmPresenters = new ArrayList<>();
-        for (Alarm alarm : mAlarmManager.getAlarms()) {
-            if (alarm.getSweepingPositions() == null) {
-                LoadingAddressesPresenter presenter = new LoadingAddressesPresenter(
+        for (Long createdTimestamp : mAlarmManager.getAlarms()) {
+            Alarm alarm = mAlarmManager.getAlarm(createdTimestamp);
+            if (mAlarmManager.getUpdatingAlarms().contains(createdTimestamp)) {
+                UpdatingPresenter presenter = new UpdatingPresenter(
                         mAlarmPresenters.size(), alarm);
-                new LoadAlarmSweepingPositionsTask(presenter, alarm).execute();
                 mAlarmPresenters.add(presenter);
             } else {
-                LoadingLimitsPresenter presenter =
-                        new LoadingLimitsPresenter(mAlarmPresenters.size(), alarm);
-                new LoadLimitsTask(presenter, alarm).execute();
+                NonUpdatingAlarmPresenter presenter =
+                        new NonUpdatingAlarmPresenter(mAlarmPresenters.size(), alarm, "TODO");
                 mAlarmPresenters.add(presenter);
             }
         }
@@ -61,7 +58,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mAlarmAddress.setText(mAlarmPresenters.get(position).getTitle());
         holder.mNextSweeping.setText(mAlarmPresenters.get(position).getDescription());
 
@@ -74,10 +71,11 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         holder.mLongClickListener = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                AlarmPresenter presenter = mAlarmPresenters.get(position);
+                /*AlarmPresenter presenter = mAlarmPresenters.get(position);
                 presenter.setDeleted();
                 mAlarmPresenters.remove(presenter);
-                mAlarmManager.removeAlarm(presenter.alarm);
+                mAlarmManager.removeAlarm(presenter.alarm);*/
+                mAlarmManager.deleteAlarm(mAlarmPresenters.get(position).alarm.getCreatedTimestamp());
                 Toast.makeText(v.getContext(), "Delete alarm", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -89,29 +87,52 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         return mAlarmPresenters.size();
     }
 
-    public void createAlarm(Location location, int radius) {
-        LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
-        int position = mAlarmPresenters.size();
-
-        // TODO
-        /*Alarm newAlarm = new Alarm(System.currentTimeMillis()/1000, center, radius, null);
-        mAlarmManager.saveAlarm(newAlarm);
-
-        LoadingAddressesPresenter presenter = new LoadingAddressesPresenter(position, newAlarm);
-        mAlarmPresenters.add(presenter);
-
-        LoadAlarmSweepingPositionsTask alarmTask =
-                new LoadAlarmSweepingPositionsTask(presenter, newAlarm);
-        alarmTask.execute();*/
-
-        notifyDataSetChanged();
+    public void createAlarm(LatLng location, int radius) {
+        mAlarmManager.createAlarm(location, radius);
     }
 
-    public class LoadAlarmSweepingPositionsTask extends AsyncTask<Void, String, List<SweepingAddress>> {
-        private Alarm mAlarm;
-        private LoadingAddressesPresenter mAlarmPresenter;
+    private AlarmManager.AlarmChangeListener mAlarmChangeListener =
+            new AlarmManager.AlarmChangeListener() {
+        @Override
+        public void onAlarmUpdated(Long createdTimestamp) {
+            for (AlarmPresenter p : mAlarmPresenters) {
+                if (p.alarm.getCreatedTimestamp() == createdTimestamp) {
+                    p.alarm = mAlarmManager.getAlarm(createdTimestamp);
+                }
+            }
+            notifyDataSetChanged();
+        }
 
-        public LoadAlarmSweepingPositionsTask(LoadingAddressesPresenter alarmPresenter, Alarm alarm) {
+        @Override
+        public void onAlarmCreated(Long createdTimestamp) {
+            UpdatingPresenter presenter = new UpdatingPresenter(
+                    mAlarmPresenters.size(), mAlarmManager.getAlarm(createdTimestamp));
+            mAlarmPresenters.add(presenter);
+
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onAlarmDeleted(Long createdTimestamp) {
+            int position = -1;
+            for (int i = 0; i < mAlarmPresenters.size(); i++) {
+                AlarmPresenter p = mAlarmPresenters.get(i);
+                if (p.alarm.getCreatedTimestamp() == createdTimestamp) {
+                    position = i;
+                }
+            }
+            if (position > 0) {
+                mAlarmPresenters.remove(position);
+            }
+            notifyItemRemoved(position);
+        }
+    };
+
+    /*public class LoadAlarmSweepingPositionsTask extends AsyncTask<Void, String, List<SweepingAddress>> {
+        private Alarm mAlarm;
+        private UpdatingPresenter mAlarmPresenter;
+
+        public LoadAlarmSweepingPositionsTask(UpdatingPresenter alarmPresenter, Alarm alarm) {
             mAlarm = alarm;
             mAlarmPresenter = alarmPresenter;
         }
@@ -119,7 +140,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         @Override
         protected List<SweepingAddress> doInBackground(Void... params) {
             // TODO
-            /*List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(mAlarm.getCenter(),
+            List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(mAlarm.getCenter(),
                     mAlarm.getRadius());
 
             List<SweepingAddress> sweepingAddresses = new ArrayList<>();
@@ -140,7 +161,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 sweepingAddresses.add(
                         new SweepingAddress(latLng, address));
             }
-            return sweepingAddresses;*/
+            return sweepingAddresses;
             return null;
         }
 
@@ -160,15 +181,15 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 notifyItemChanged(mAlarmPresenter.position);
 
                 mAlarm.setSweepingAddresses(sweepingAddresses);
-                mAlarmManager.saveAlarm(mAlarm);
+                //mAlarmManager.saveAlarm(mAlarm);
 
-                new LoadLimitsTask(newPresenter, mAlarm).execute();
+                //new LoadLimitsTask(newPresenter, mAlarm).execute();
             }
             super.onPostExecute(sweepingAddresses);
         }
-    }
+    }*/
 
-    public class LoadLimitsTask extends AsyncTask<Void, String, HashMap<SweepingAddress, Limit>> {
+    /*public class LoadLimitsTask extends AsyncTask<Void, String, HashMap<SweepingAddress, Limit>> {
         private final Alarm mAlarm;
         private LoadingLimitsPresenter mAlarmPresenter;
         private String mDescriptionResult;
@@ -181,14 +202,14 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         @Override
         protected HashMap<SweepingAddress, Limit> doInBackground(Void... params) {
             HashMap<SweepingAddress, Limit> results = new HashMap<>();
-            for (int i = 0; i < mAlarm.getSweepingPositions().size(); i++) {
-                SweepingAddress position = mAlarm.getSweepingPositions().get(i);
+            for (int i = 0; i < mAlarm.getSweepingAddresses().size(); i++) {
+                SweepingAddress position = mAlarm.getSweepingAddresses().get(i);
 
                 if (mAlarmPresenter.isDeleted || isCancelled()) {
                     return null;
                 }
                 int progress =
-                        (int) (((double)i / (double)mAlarm.getSweepingPositions().size()) * 50);
+                        (int) (((double)i / (double)mAlarm.getSweepingAddresses().size()) * 50);
                 String progressUpdate = String.format("Loading limit information: %d%%", progress);
                 publishProgress(progressUpdate);
 
@@ -197,14 +218,14 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
             }
 
             GregorianCalendar nextSweepingTime = null;
-            for (int i = 0; i < mAlarm.getSweepingPositions().size(); i++) {
-                SweepingAddress position = mAlarm.getSweepingPositions().get(i);
+            for (int i = 0; i < mAlarm.getSweepingAddresses().size(); i++) {
+                SweepingAddress position = mAlarm.getSweepingAddresses().get(i);
 
                 if (mAlarmPresenter.isDeleted || isCancelled()) {
                     return null;
                 }
                 int progress =
-                     50 + (int) (((double)i / (double)mAlarm.getSweepingPositions().size()) * 50);
+                     50 + (int) (((double)i / (double)mAlarm.getSweepingAddresses().size()) * 50);
                 String progressUpdate = String.format("Finding next sweeping date: %d%%", progress);
                 publishProgress(progressUpdate);
 
@@ -235,8 +256,8 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         @Override
         protected void onPostExecute(HashMap<SweepingAddress, Limit> results) {
             if (!mAlarmPresenter.isDeleted && !isCancelled() && results != null) {
-                LoadedAlarmPresenter newPresenter =
-                        new LoadedAlarmPresenter(mAlarmPresenter.position, mAlarm, results,
+                NonUpdatingAlarmPresenter newPresenter =
+                        new NonUpdatingAlarmPresenter(mAlarmPresenter.position, mAlarm, results,
                                 mDescriptionResult);
                 mAlarmPresenters.remove(mAlarmPresenter.position);
                 mAlarmPresenters.add(mAlarmPresenter.position, newPresenter);
@@ -244,7 +265,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
             }
             super.onPostExecute(results);
         }
-    }
+    }*/
 
     abstract class AlarmPresenter {
         int position;
@@ -265,16 +286,23 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
     }
 
-    class LoadingAddressesPresenter extends AlarmPresenter {
-        String progress = "Loading addresses in radius: 0%";
+    class UpdatingPresenter extends AlarmPresenter implements
+            AlarmUpdateManager.AlarmProgressListener {
+        String progress = "Progress: 0%";
+        String title = null;
 
-        LoadingAddressesPresenter(int position, Alarm alarm) {
+        UpdatingPresenter(int position, Alarm alarm) {
             super(position, alarm);
+            mAlarmManager.addAlarmProgressListener(this);
+            setProgress(mAlarmManager.getProgressForAlarm(alarm.getCreatedTimestamp()));
         }
 
         @Override
         String getTitle() {
-            return "Initializing alarm...";
+            if (TextUtils.isEmpty(title)) {
+                title = LocationUtils.getAddressForLatLnt(mContext, this.alarm.getCenter());
+            }
+            return title;
         }
 
         @Override
@@ -282,51 +310,45 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
             return progress;
         }
 
-        void setProgress(String progress) {
-            this.progress = progress;
+        void setProgress(int progress) {
+            this.progress = String.format("Progress: %d%%", progress);
             notifyItemChanged(this.position);
-        }
-    }
-
-    class LoadingLimitsPresenter extends AlarmPresenter {
-        String progress = "Loading limit information: 0%";
-
-        LoadingLimitsPresenter(int position, Alarm alarm) {
-            super(position, alarm);
         }
 
         @Override
-        String getTitle() {
-            return this.alarm.getSweepingPositions().get(0).getAddress();
+        public void onAlarmUpdateComplete(long createdTimestamp) {
+            NonUpdatingAlarmPresenter newPresenter =
+                    new NonUpdatingAlarmPresenter(this.position, this.alarm, "TODO");
+            mAlarmPresenters.remove(this.position);
+            mAlarmPresenters.add(this.position, newPresenter);
+            notifyItemChanged(this.position);
         }
 
         @Override
-        String getDescription() {
-            return progress;
-        }
-
-        void setProgress(String progress) {
-            this.progress = progress;
-            notifyItemChanged(this.position);
+        public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
+            if (createdTimestamp == this.alarm.getCreatedTimestamp()) {
+                setProgress(progress);
+            }
         }
     }
 
-    class LoadedAlarmPresenter extends AlarmPresenter {
+    class NonUpdatingAlarmPresenter extends AlarmPresenter {
         Alarm alarm;
         String description;
-        HashMap<SweepingAddress, Limit> limits;
+        String title;
 
-        LoadedAlarmPresenter(int position, Alarm alarm, HashMap<SweepingAddress, Limit> limits,
-                             String description) {
+        NonUpdatingAlarmPresenter(int position, Alarm alarm, String description) {
             super(position, alarm);
             this.alarm = alarm;
-            this.limits = limits;
             this.description = description;
         }
 
         @Override
         String getTitle() {
-            return this.alarm.getSweepingPositions().get(0).getAddress();
+            if (TextUtils.isEmpty(title)) {
+                title = LocationUtils.getAddressForLatLnt(mContext, this.alarm.getCenter());
+            }
+            return title;
         }
 
         @Override

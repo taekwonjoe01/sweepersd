@@ -5,8 +5,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.limits.Limit;
-import com.example.joseph.sweepersd.LimitManager;
+import com.example.joseph.sweepersd.model.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -173,7 +173,7 @@ public class LocationUtils {
         return addresses;
     }
 
-    public static Limit findLimitForAddresses(List<Address> addresses) {
+    /*public static Limit findLimitForAddresses(List<Address> addresses) {
         Limit result = null;
         for (Address address : addresses) {
             String a = "";
@@ -186,9 +186,9 @@ public class LocationUtils {
             findLimitForAddress(a);
         }
         return result;
-    }
+    }*/
 
-    public static Limit findLimitForAddress(String address) {
+    public static Limit findLimitForAddress(LimitDbHelper limitHelper, String address) {
         Limit result = null;
         if (address != null && address.contains("ca") && address.contains("san diego")) {
             String[] split = address.split(",");
@@ -209,8 +209,8 @@ public class LocationUtils {
                                 int minNum = Integer.parseInt(streetNumberParsings[0]);
                                 int maxNum = Integer.parseInt(streetNumberParsings[1]);
 
-                                Limit minLimit = checkAddress(minNum, streetName);
-                                Limit maxLimit = checkAddress(maxNum, streetName);
+                                Limit minLimit = checkAddress(limitHelper, minNum, streetName);
+                                Limit maxLimit = checkAddress(limitHelper, maxNum, streetName);
                                 result = (minLimit != null) ? minLimit :
                                         (maxLimit != null) ? maxLimit : null;
                             } catch (NumberFormatException e) {
@@ -222,7 +222,7 @@ public class LocationUtils {
                     } else {
                         try {
                             int num = Integer.parseInt(streetNumber);
-                            Limit l = checkAddress(num, streetName);
+                            Limit l = checkAddress(limitHelper, num, streetName);
                             result = (l != null) ? l : null;
                         } catch (NumberFormatException e) {
                             Log.e(TAG, "Malformed Street numbers: " + streetNumber);
@@ -240,10 +240,10 @@ public class LocationUtils {
         return result;
     }
 
-    private static Limit checkAddress(int houseNumber, String street) {
+    private static Limit checkAddress(LimitDbHelper limitHelper, int houseNumber, String street) {
         //Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
         Limit result = null;
-        for (Limit l : LimitManager.getPostedLimits()) {
+        for (Limit l : limitHelper.getLimitsForStreet(street)) {
             if (l.getStreet().toLowerCase().contains(street)) {
                 if (houseNumber >= l.getRange()[0] && houseNumber <= l.getRange()[1]) {
                     result = l;

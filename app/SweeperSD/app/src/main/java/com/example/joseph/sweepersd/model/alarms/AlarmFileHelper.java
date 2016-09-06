@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.alarms;
+package com.example.joseph.sweepersd.model.alarms;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,9 +7,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.SweepingAddress;
-import com.example.joseph.sweepersd.limits.Limit;
-import com.example.joseph.sweepersd.limits.LimitDbHelper;
+import com.example.joseph.sweepersd.model.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.BufferedReader;
@@ -28,8 +27,8 @@ import java.util.concurrent.Semaphore;
 /**
  * Helper class for loading and saving alarms to disk.
  */
-public class AlarmHelper {
-    private static final String TAG = AlarmHelper.class.getSimpleName();
+public class AlarmFileHelper {
+    private static final String TAG = AlarmFileHelper.class.getSimpleName();
 
     private static final String FILE_SWEEPING_LOCATIONS = "sweeping_locations.txt";
     private static final String FILE_ALARM_DETAILS = "alarm_details.txt";
@@ -53,7 +52,7 @@ public class AlarmHelper {
         void onAlarmDeleted(long createdTimestamp);
     }
 
-    public AlarmHelper(Context context, AlarmUpdateListener listener) {
+    public AlarmFileHelper(Context context, AlarmUpdateListener listener) {
         mContext = context;
         mAlarmUpdateListener = new WeakReference<>(listener);
 
@@ -75,7 +74,7 @@ public class AlarmHelper {
     public List<Alarm> loadAlarms() {
         List<Alarm> results = new ArrayList<>();
 
-        File alarmsDir = new File(getAlarmDirPath());
+        File alarmsDir = new File(getAlarmDirPath(mContext));
         File[] alarmDirs = null;
 
         try {
@@ -106,7 +105,7 @@ public class AlarmHelper {
         try {
             mSemaphore.acquire();
             try {
-                File dir = new File(getAlarmDirPath() + createdTimestamp);
+                File dir = new File(getAlarmDirPath(mContext) + createdTimestamp);
                 if (dir.exists()) {
                     builder.createdTimestamp = createdTimestamp;
 
@@ -168,7 +167,9 @@ public class AlarmHelper {
                     }
                 }
             } catch (FileNotFoundException e) {
+                Log.e(TAG, e.toString());
             } catch (IOException e) {
+                Log.e(TAG, e.toString());
             } finally {
                 mSemaphore.release();
             }
@@ -179,67 +180,86 @@ public class AlarmHelper {
         return builder.build();
     }
 
-    public void saveAlarm(Alarm alarm) {
+    public boolean saveAlarm(Alarm alarm) {
+        boolean result = false;
+
         Long tsLong = alarm.getCreatedTimestamp();
         String ts = tsLong.toString();
         try {
             mSemaphore.acquire();
-            File alarmDir = new File(getAlarmDirPath() + ts);
-            alarmDir.mkdirs();
-            try {
-                File alarmDetailsFile = new File(alarmDir.getAbsolutePath() + "/" +
-                        FILE_ALARM_DETAILS);
-                File sweepingLocationsFile = new File(alarmDir.getAbsolutePath() + "/" +
-                        FILE_SWEEPING_LOCATIONS);
-                alarmDetailsFile.createNewFile();
-                sweepingLocationsFile.createNewFile();
-
-                FileWriter ADwriter = new FileWriter(alarmDetailsFile);
-
-                if (ADwriter != null) {
-                    String LatLng = alarm.getCenter().latitude + "," + alarm.getCenter().longitude;
-                    ADwriter.write(LatLng + "\n");
-
-                    ADwriter.write(alarm.getRadius() + "\n");
-
-                    ADwriter.write(alarm.getLastUpdatedTimestamp() + "\n");
-
-                    ADwriter.close();
-                }
-
-                if (alarm.getSweepingPositions() != null) {
-                    FileWriter SLwriter = new FileWriter(sweepingLocationsFile);
-                    if (SLwriter != null) {
-                        for (SweepingAddress pos : alarm.getSweepingPositions()) {
-                            String LatLng = pos.getLatLng().latitude + "," + pos.getLatLng().longitude;
-                            String address = pos.getAddress();
-                            String limitId = pos.getLimit().getId() + "";
-
-                            SLwriter.write(LatLng + SEPARATOR_SWEEPING_LOCATIONS +
-                                    address + SEPARATOR_SWEEPING_LOCATIONS +
-                                    limitId + "\n");
-                        }
-
-                        SLwriter.close();
-                    }
-                }
-                sendAlarmUpdatedBroadcast(tsLong);
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) {
-            } finally {
+            File alarmDir = new File(getAlarmDirPath(mContext) + ts);
+            boolean dirsMade = alarmDir.exists();
+            if (!dirsMade) {
+                dirsMade = alarmDir.mkdirs();
+            }
+            if (!dirsMade) {
+                Log.e(TAG, "Failed to create alarmDir " + alarmDir.getAbsolutePath());
                 mSemaphore.release();
+            } else {
+                try {
+                    File alarmDetailsFile = new File(alarmDir,
+                            FILE_ALARM_DETAILS);
+                    File sweepingLocationsFile = new File(alarmDir,
+                            FILE_SWEEPING_LOCATIONS);
+                    alarmDetailsFile.createNewFile();
+                    sweepingLocationsFile.createNewFile();
+
+                    FileWriter ADwriter = new FileWriter(alarmDetailsFile);
+
+                    if (ADwriter != null) {
+                        String LatLng = alarm.getCenter().latitude + "," +
+                                alarm.getCenter().longitude;
+                        ADwriter.write(LatLng + "\n");
+
+                        ADwriter.write(alarm.getRadius() + "\n");
+
+                        ADwriter.write(alarm.getLastUpdatedTimestamp() + "\n");
+
+                        ADwriter.close();
+                    }
+
+                    if (alarm.getSweepingAddresses() != null) {
+                        FileWriter SLwriter = new FileWriter(sweepingLocationsFile);
+                        if (SLwriter != null) {
+                            for (SweepingAddress pos : alarm.getSweepingAddresses()) {
+                                String LatLng = pos.getLatLng().latitude + "," +
+                                        pos.getLatLng().longitude;
+                                String address = pos.getAddress();
+                                String limitId = pos.getLimit().getId() + "";
+
+                                SLwriter.write(LatLng + SEPARATOR_SWEEPING_LOCATIONS +
+                                        address + SEPARATOR_SWEEPING_LOCATIONS +
+                                        limitId + "\n");
+                            }
+
+                            SLwriter.close();
+                        }
+                    }
+                    result = true;
+                    sendAlarmUpdatedBroadcast(tsLong);
+                } catch (FileNotFoundException e) {
+                    Log.e(TAG, e.toString());
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                } finally {
+                    mSemaphore.release();
+                }
             }
         } catch (InterruptedException e) {
 
         }
-
+        return result;
     }
 
-    public void deleteAlarm(Alarm alarm) {
+    public boolean deleteAlarm(Alarm alarm) {
+        boolean result = false;
+
         Long tsLong = alarm.getCreatedTimestamp();
         String ts = tsLong.toString();
         try {
+            Log.e("Joey", "Before acquire");
             mSemaphore.acquire();
+            Log.e("Joey", "After acquire");
             String path = mContext.getFilesDir() + "/alarms/" + ts;
             File alarmDir = new File(path);
             if (alarmDir.exists()) {
@@ -250,16 +270,22 @@ public class AlarmHelper {
                     }
                 }
                 alarmDir.delete();
+                result = true;
             }
+            Log.e("Joey", "Before release");
             mSemaphore.release();
-            sendAlarmDeletedBroadcast(tsLong);
+            Log.e("Joey", "After release");
+            if (result) {
+                sendAlarmDeletedBroadcast(tsLong);
+            }
         } catch (InterruptedException e) {
-
+            Log.e(TAG, e.toString());
         }
+        return result;
     }
 
-    private String getAlarmDirPath() {
-         return mContext + "/alarms/";
+    public static String getAlarmDirPath(Context context) {
+         return context.getFilesDir() + "/alarms/";
     }
 
     private void sendAlarmUpdatedBroadcast(long createdTimestamp) {
@@ -306,32 +332,32 @@ public class AlarmHelper {
     private class AlarmBuilder {
         long createdTimestamp = -1;
         long lastUpdatedTimestamp = -1;
-        double latitude = -1;
-        double longitude = -1;
+        double latitude = Double.MIN_VALUE;
+        double longitude = Double.MIN_VALUE;
         int radius = -1;
 
         List<SweepingPositionStub> positionStubs;
 
         Alarm build() {
             Alarm result = null;
-            if (createdTimestamp < 0 || lastUpdatedTimestamp < 0 || latitude < 0 ||
-                    longitude < 0 || radius < 0 || positionStubs == null ||
-                    positionStubs.isEmpty()) {
+            if (createdTimestamp < 0 || lastUpdatedTimestamp < 0 || latitude == Double.MIN_VALUE ||
+                    longitude == Double.MIN_VALUE || radius < 0) {
                 String error = "createdTimestamp=" + createdTimestamp +
                         "lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                         "latitude=" + latitude +
                         "longitude=" + longitude +
-                        "radius=" + radius +
-                        "positionStubs=" + (positionStubs == null ? 0 : positionStubs.size());
+                        "radius=" + radius;
                 Log.e(TAG, "Attempted to build an Alarm but failed:\n" + error);
             } else {
                 List<SweepingAddress> sweepingAddresses = new ArrayList<>();
                 LimitDbHelper helper = new LimitDbHelper(mContext);
-                for (SweepingPositionStub stub : positionStubs) {
-                    Limit limit = helper.getLimitForId(stub.limitId);
-                    if (limit != null) {
-                        LatLng latLng = new LatLng(stub.latitude, stub.longitude);
-                        sweepingAddresses.add(new SweepingAddress(latLng, stub.address, limit));
+                if (positionStubs != null) {
+                    for (SweepingPositionStub stub : positionStubs) {
+                        Limit limit = helper.getLimitForId(stub.limitId);
+                        if (limit != null) {
+                            LatLng latLng = new LatLng(stub.latitude, stub.longitude);
+                            sweepingAddresses.add(new SweepingAddress(latLng, stub.address, limit));
+                        }
                     }
                 }
 

@@ -1,7 +1,6 @@
-package com.example.joseph.sweepersd.alarms;
+package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,8 +14,8 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.MapsActivity;
 import com.example.joseph.sweepersd.R;
-
-import java.util.List;
+import com.example.joseph.sweepersd.model.alarms.AlarmManager;
+import com.google.android.gms.maps.model.LatLng;
 
 public class AlarmViewActivity extends AppCompatActivity {
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
@@ -57,7 +56,6 @@ public class AlarmViewActivity extends AppCompatActivity {
 
         mRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
 
-        List<Alarm> alarms = AlarmHelper.loadAlarms(this);
         mAdapter = new AlarmViewAdapter(this, new AlarmManager(this));
 
         RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
@@ -72,7 +70,7 @@ public class AlarmViewActivity extends AppCompatActivity {
         switch (requestCode) {
             case CREATE_ALARM_CODE:
                 Log.e("Joey", "Processing mapsactivity result");
-                Location location = data.getParcelableExtra(MapsActivity.LOCATION_KEY);
+                LatLng location = data.getParcelableExtra(MapsActivity.LOCATION_KEY);
                 int radius = data.getIntExtra(MapsActivity.RADIUS_KEY, 0);
 
                 mAdapter.createAlarm(location, radius);

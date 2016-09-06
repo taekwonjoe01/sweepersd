@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.limits;
+package com.example.joseph.sweepersd.model.limits;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,10 +13,11 @@ import java.util.List;
 /**
  * Created by joseph on 8/27/16.
  */
-public class LimitImporter {
-    private static final String TAG = LimitImporter.class.getSimpleName();
+public class FileLimitImporter implements LimitDbHelper.LimitImporter {
+    private static final String TAG = FileLimitImporter.class.getSimpleName();
 
-    public static List<Limit> importLimits(Context context) {
+    @Override
+    public List<Limit> importLimits(Context context) {
         List<Limit> limits = new ArrayList<>();
 
         try {

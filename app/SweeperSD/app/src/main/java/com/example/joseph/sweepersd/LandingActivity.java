@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.alarms.AlarmViewActivity;
+import com.example.joseph.sweepersd.presentation.manualalarms.AlarmViewActivity;
 
 /**
  * Opening Activity for SweeperSD.

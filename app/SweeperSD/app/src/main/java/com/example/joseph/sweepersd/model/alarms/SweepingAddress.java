@@ -1,6 +1,6 @@
-package com.example.joseph.sweepersd;
+package com.example.joseph.sweepersd.model.alarms;
 
-import com.example.joseph.sweepersd.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.Limit;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -17,6 +17,12 @@ public class SweepingAddress {
         mLatLng = position;
         mAddress = address;
         mLimit = limit;
+    }
+
+    public SweepingAddress(SweepingAddress other) {
+        this.mLatLng = other.mLatLng;
+        this.mAddress = other.mAddress;
+        this.mLimit = other.mLimit;
     }
 
     public LatLng getLatLng() {

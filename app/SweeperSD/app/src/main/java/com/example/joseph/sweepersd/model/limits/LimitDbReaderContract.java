@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.limits;
+package com.example.joseph.sweepersd.model.limits;
 
 import android.provider.BaseColumns;
 
@@ -22,6 +22,7 @@ public final class LimitDbReaderContract {
         public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_END_TIME = "end_time";
         public static final String COLUMN_DAY = "day";
+        public static final String COLUMN_WEEK = "week";
     }
 
     public static class PersonalLimitEntry implements BaseColumns {
@@ -37,5 +38,6 @@ public final class LimitDbReaderContract {
         public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_END_TIME = "end_time";
         public static final String COLUMN_DAY = "day";
+        public static final String COLUMN_WEEK = "week";
     }
 }

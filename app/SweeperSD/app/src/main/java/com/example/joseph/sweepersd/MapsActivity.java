@@ -40,7 +40,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private Circle mMarkerRadius;
 
-    private Location mLocation;
+    private LatLng mLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +91,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()) {
             case R.id.action_done:
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra(LOCATION_KEY, mLocation);
+                returnIntent.putExtra(LOCATION_KEY, mLatLng);
                 returnIntent.putExtra(
                         RADIUS_KEY, getRadiusForProgress(mRadiusSeekbar.getProgress()));
                 returnIntent.putExtra(RADIUS_KEY,
@@ -137,9 +137,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
-                Location location = new Location("AddAlarmActivity");
-                location.setLatitude(marker.getPosition().latitude);
-                location.setLongitude(marker.getPosition().longitude);
+                LatLng location = new LatLng(marker.getPosition().latitude,
+                        marker.getPosition().longitude);
                 setAlarmLocation(location);
             }
         });
@@ -149,8 +148,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onConnected(Bundle bundle) {
         Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
-        setAlarmLocation(currentLocation);
-
+        if (currentLocation != null) {
+            setAlarmLocation(new LatLng(currentLocation.getLatitude(),
+                    currentLocation.getLongitude()));
+        } else {
+            //setAlarmLocation(new LatLng(32.715736, -117.161087));
+            setAlarmLocation(new LatLng(32.803680778620155, -117.25259441882373));
+        }
     }
 
     @Override
@@ -163,12 +167,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void setAlarmLocation(Location location) {
+    private void setAlarmLocation(LatLng location) {
         mMap.clear();
 
-        mLocation = location;
+        mLatLng = location;
 
-        LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng center = mLatLng;
         mMap.addMarker(new MarkerOptions()
                 .position(center)
                 .draggable(true));

@@ -21,6 +21,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.example.joseph.sweepersd.model.alarms.SweepingAddress;
+
 import java.util.List;
 
 public class SettingsActivity extends AppCompatPreferenceActivity

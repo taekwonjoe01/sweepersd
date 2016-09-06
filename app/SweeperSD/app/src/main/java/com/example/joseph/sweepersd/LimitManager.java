@@ -2,7 +2,7 @@ package com.example.joseph.sweepersd;
 
 import android.content.Context;
 
-import com.example.joseph.sweepersd.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.Limit;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class LimitManager {
                             }
                         }
 
-                        Limit l = new Limit(parsings[0], range, parsings[2], null);
+                        Limit l = new Limit(-1, parsings[0], range, parsings[2], null);
 
                         if (acceptable) {
                             results.add(l);

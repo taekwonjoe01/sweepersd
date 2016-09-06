@@ -1,11 +1,8 @@
-package com.example.joseph.sweepersd;
+package com.example.joseph.sweepersd.model.limits;
 
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
-
-import com.example.joseph.sweepersd.limits.Limit;
-import com.example.joseph.sweepersd.limits.LimitDbHelper;
 
 import java.util.List;
 
@@ -21,7 +18,7 @@ public class TestLimitDbHelper extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         mContext = new RenamingDelegatingContext(getContext(), "test_");
-        mDbHelper = new LimitDbHelper(mContext);
+        mDbHelper = new LimitDbHelper(mContext, new FileLimitImporter());
     }
 
     @Override

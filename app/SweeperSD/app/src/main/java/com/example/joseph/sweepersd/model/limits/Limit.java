@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.limits;
+package com.example.joseph.sweepersd.model.limits;
 
 import java.util.List;
 

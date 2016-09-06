@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.limits;
+package com.example.joseph.sweepersd.model.limits;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,10 +37,7 @@ public class LimitParser {
                             int startTime = convertTimeStringToHour(timeParsings[0]);
                             int endTime = convertTimeStringToHour(timeParsings[1]);
                             if (startTime > -1 && endTime > -1) {
-                                List<Integer> days = getDays(parsings[j]);
-                                for (Integer d : days) {
-                                    schedules.add(new LimitSchedule(startTime, endTime, d));
-                                }
+                                schedules.addAll(getDays(startTime, endTime, parsings[j]));
                             }
                         }
                     }
@@ -48,7 +45,7 @@ public class LimitParser {
                 if (!schedules.isEmpty()) {
                     String street = parsings[0].trim().toLowerCase();
                     String limit = parsings[2].trim().toLowerCase();
-                    result = new Limit(street, range, limit, schedules);
+                    result = new Limit(-1, street, range, limit, schedules);
                 }
             }
         }
@@ -91,9 +88,10 @@ public class LimitParser {
         return results;
     }
 
-    static List<Integer> getDays(String schedule) {
-        List<Integer> results = new ArrayList<>();
-        if (schedule != null) {
+    static List<LimitSchedule> getDays(int startTime, int endTime, String schedule) {
+        List<LimitSchedule> results = null;
+        if (schedule != null && startTime >= 0 && endTime < 24) {
+            results = new ArrayList<>();
             String s = schedule.trim().toLowerCase();
             s = s.replace(",", " ");
             s = s.replace(";", " ");
@@ -104,11 +102,69 @@ public class LimitParser {
                 String word = words.get(i);
                 int weekdayNumber = getDay(word);
                 if (weekdayNumber > 0) {
-                    results.add(weekdayNumber);
+                    List<LimitSchedule> schedulesForDay =
+                            refineDays(startTime, endTime, weekdayNumber, words, i);
+                    if (schedulesForDay.isEmpty()) {
+                        for (int j = 1; j < 5; j++) {
+                            schedulesForDay.add(
+                                    new LimitSchedule(startTime, endTime, weekdayNumber, i));
+                        }
+                    }
+                    results.addAll(schedulesForDay);
                 }
             }
         }
         return results;
+    }
+
+    private static List<LimitSchedule> refineDays(int startHour, int endHour, int weekdayNumber,
+                                          List<String> words, int index) {
+        //Log.d(TAG, "refineDays called on index " + index);
+        List<LimitSchedule> results = new ArrayList<>();
+        String prevWord = getPreviousWord(words, index);
+        if (prevWord != null) {
+            int prefix = getPrefix(prevWord);
+            if (prefix > 0) {
+                results.add(new LimitSchedule(startHour, endHour, weekdayNumber, prefix));
+                results.addAll(refineDays(startHour, endHour, weekdayNumber, words, index - 1));
+            } else if ("&".equals(prevWord) || getDay(prevWord) > 0) {
+                results.addAll(refineDays(startHour, endHour, weekdayNumber, words, index - 1));
+            }
+        }
+        return results;
+    }
+
+    static String getPreviousWord(List<String> words, int position) {
+        String result = null;
+        if (position > 0) {
+            result = words.get(position - 1);
+        }
+        return result;
+    }
+
+    static int getPrefix(String word) {
+        final String first = "1st";
+        final String second = "2nd";
+        final String third = "3rd";
+        final String fourth = "4th";
+
+        int result = 0;
+        switch (word) {
+            case first:
+                result = 1;
+                break;
+            case second:
+                result = 2;
+                break;
+            case third:
+                result = 3;
+                break;
+            case fourth:
+                result = 4;
+                break;
+
+        }
+        return result;
     }
 
     /**
