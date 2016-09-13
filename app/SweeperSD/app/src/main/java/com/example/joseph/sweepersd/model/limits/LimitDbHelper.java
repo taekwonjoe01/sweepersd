@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import com.example.joseph.sweepersd.model.AddressValidatorManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,8 +159,38 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public void updateLimit(Limit limit) {
+        try {
+            DB_SEMAPHORE.acquire();
+
+            SQLiteDatabase db = getReadableDatabase();
+
+            // New value for one column
+            ContentValues limitValues = new ContentValues();
+            limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_STREET_NAME, limit.getStreet());
+            String range = limit.getRange()[0] + "-" + limit.getRange()[1];
+            limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_RANGE, range);
+            limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
+
+            // Which row to update, based on the title
+            String selection = LimitDbReaderContract.ImportedLimitEntry._ID + " LIKE ?";
+            String[] selectionArgs = { "" + limit.getId() };
+
+            int count = db.update(
+                    LimitDbReaderContract.ImportedLimitEntry.TABLE_NAME,
+                    limitValues,
+                    selection,
+                    selectionArgs);
+
+            db.close();
+            DB_SEMAPHORE.release();
+        } catch (InterruptedException e) {
+        }
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.e("Joey", "onCreate");
         loadImportedLimits(db);
         db.execSQL(SQL_CREATE_PERSONAL_LIMITS);
         db.execSQL(SQL_CREATE_PERSONAL_SCHEDULES);
@@ -204,6 +237,9 @@ public class LimitDbHelper extends SQLiteOpenHelper {
                 db.insert(LimitDbReaderContract.ImportedScheduleEntry.TABLE_NAME, null, scheduleValues);
             }
         }
+
+        Log.e("Joey", "starting AddressValidatorService");
+        AddressValidatorManager.getInstance(mContext).validateAddresses();
     }
 
     private List<Limit> getLimitsForSelection(SQLiteDatabase db,

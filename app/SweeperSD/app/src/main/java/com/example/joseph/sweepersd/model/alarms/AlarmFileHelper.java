@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.model.limits.Limit;
@@ -127,6 +128,9 @@ public class AlarmFileHelper {
                         builder.longitude = Double.parseDouble(parsings[1]);
 
                         receiveString = bufferedReader.readLine();
+                        builder.address = receiveString;
+
+                        receiveString = bufferedReader.readLine();
                         builder.radius = Integer.parseInt(receiveString);
 
                         receiveString = bufferedReader.readLine();
@@ -210,6 +214,12 @@ public class AlarmFileHelper {
                         String LatLng = alarm.getCenter().latitude + "," +
                                 alarm.getCenter().longitude;
                         ADwriter.write(LatLng + "\n");
+
+                        if (TextUtils.isEmpty(alarm.getAddress())) {
+                            ADwriter.write("Unknown" + "\n");
+                        } else {
+                            ADwriter.write(alarm.getAddress() + "\n");
+                        }
 
                         ADwriter.write(alarm.getRadius() + "\n");
 
@@ -332,6 +342,7 @@ public class AlarmFileHelper {
     private class AlarmBuilder {
         long createdTimestamp = -1;
         long lastUpdatedTimestamp = -1;
+        String address = "";
         double latitude = Double.MIN_VALUE;
         double longitude = Double.MIN_VALUE;
         int radius = -1;
@@ -362,7 +373,7 @@ public class AlarmFileHelper {
                 }
 
                 LatLng center = new LatLng(latitude, longitude);
-                result = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+                result = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                         sweepingAddresses);
             }
 

@@ -4,6 +4,8 @@ import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.model.AddressValidatorManager;
+
 import java.util.List;
 
 /**
@@ -19,6 +21,18 @@ public class TestLimitDbHelper extends AndroidTestCase {
         super.setUp();
         mContext = new RenamingDelegatingContext(getContext(), "test_");
         mDbHelper = new LimitDbHelper(mContext, new FileLimitImporter());
+        AddressValidatorManager.getInstance(mContext).setAddressValidator(
+                new AddressValidatorManager.AddressValidator() {
+            @Override
+            public void validateAddresses(AddressValidatorManager.ValidatorProgressListener listener) {
+                // Do nothing
+            }
+
+            @Override
+            public int getProgress() {
+                return AddressValidatorManager.INVALID_PROGRESS;
+            }
+        });
     }
 
     @Override
@@ -35,5 +49,14 @@ public class TestLimitDbHelper extends AndroidTestCase {
         long durationMs = (end - start) / 1000000;
         Log.d(TAG, "getAllLimits duration: " + durationMs + "ms.");
         assertNotSame(0, limits.size());
+
+        limits = mDbHelper.getLimitsForStreet("beryl st");
+        assertNotSame(0, limits.size());
+        for (Limit limit : limits) {
+            Log.d(TAG, limit.getStreet());
+            for (LimitSchedule schedule : limit.getSchedules()) {
+                Log.d(TAG, schedule.getDay() + " " + schedule.getWeekNumber());
+            }
+        }
     }
 }

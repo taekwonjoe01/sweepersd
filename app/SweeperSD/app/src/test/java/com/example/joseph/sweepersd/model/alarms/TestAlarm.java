@@ -18,15 +18,17 @@ public class TestAlarm {
         long createdTimestamp = 1;
         long lastUpdatedTimestamp = 2;
         LatLng center = new LatLng(0, 0);
+        String address = "address";
         int radius = 5;
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
 
-        Alarm testAlarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+        Alarm testAlarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
         Assert.assertEquals(createdTimestamp, testAlarm.getCreatedTimestamp());
         Assert.assertEquals(lastUpdatedTimestamp, testAlarm.getLastUpdatedTimestamp());
         Assert.assertEquals(center, testAlarm.getCenter());
+        Assert.assertEquals(address, testAlarm.getAddress());
         Assert.assertEquals(radius, testAlarm.getRadius());
         Assert.assertEquals(sweepingAddresses.size(), testAlarm.getSweepingAddresses().size());
 
@@ -34,6 +36,7 @@ public class TestAlarm {
         Assert.assertEquals(createdTimestamp, copyAlarm.getCreatedTimestamp());
         Assert.assertEquals(lastUpdatedTimestamp, copyAlarm.getLastUpdatedTimestamp());
         Assert.assertEquals(center, copyAlarm.getCenter());
+        Assert.assertEquals(address, testAlarm.getAddress());
         Assert.assertEquals(radius, copyAlarm.getRadius());
         Assert.assertEquals(sweepingAddresses.size(), copyAlarm.getSweepingAddresses().size());
     }

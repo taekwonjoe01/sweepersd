@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.model.alarms;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -35,6 +36,7 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
         List<Alarm> alarms = mAlarmFileHelper.loadAlarms();
         mAlarms = new HashMap<>();
         for (Alarm alarm : alarms) {
+            Log.e("Joey", "size of sweepingaddresses " + alarm.getSweepingAddresses().size());
             mAlarms.put(alarm.getCreatedTimestamp(), alarm);
         }
     }
@@ -91,7 +93,7 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
     public long createAlarm(LatLng center, int radius) {
         long createdTimestamp = System.currentTimeMillis();
         long lastUpdatedTimestamp = 0;
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius, null);
+        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, null, center, radius, null);
         boolean alarmCreated = mAlarmFileHelper.saveAlarm(alarm);
 
         if (alarmCreated) {
@@ -115,7 +117,8 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
     public boolean updateAlarm(long createdTimestamp, LatLng center, int radius) {
         if (mAlarms.containsKey(createdTimestamp)) {
             Alarm newAlarm =
-                    new Alarm(createdTimestamp, System.currentTimeMillis(), center, radius, null);
+                    new Alarm(createdTimestamp, System.currentTimeMillis(), null,
+                            center, radius, null);
             boolean alarmCreated = mAlarmFileHelper.saveAlarm(newAlarm);
             if (alarmCreated) {
                 return refreshAlarm(createdTimestamp);

@@ -60,6 +60,10 @@
             android:name=".model.alarms.AlarmUpdateService"
             android:exported="false"/>
 
+        <service
+            android:name=".model.AddressValidatorService"
+            android:exported="false"/>
+
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"

@@ -20,6 +20,7 @@ public class AlarmViewItemDecoration extends RecyclerView.ItemDecoration {
                                RecyclerView.State state) {
         if (parent.getChildAdapterPosition(view) != parent.getAdapter().getItemCount() - 1) {
             outRect.bottom = mVerticalSpaceHeight;
+            outRect.right = mVerticalSpaceHeight;
         }
     }
 }

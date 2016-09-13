@@ -1,20 +1,24 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.model.alarms.Alarm;
 import com.example.joseph.sweepersd.model.alarms.AlarmManager;
 import com.example.joseph.sweepersd.model.alarms.AlarmUpdateManager;
-import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -24,6 +28,8 @@ import java.util.List;
  * Adapter for showing manual Alarms.
  */
 public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.ViewHolder> {
+    private static final String TAG = AlarmViewAdapter.class.getSimpleName();
+
     private final Context mContext;
     private final AlarmManager mAlarmManager;
     private final List<AlarmPresenter> mAlarmPresenters;
@@ -41,7 +47,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 mAlarmPresenters.add(presenter);
             } else {
                 NonUpdatingAlarmPresenter presenter =
-                        new NonUpdatingAlarmPresenter(mAlarmPresenters.size(), alarm, "TODO");
+                        new NonUpdatingAlarmPresenter(mAlarmPresenters.size(), alarm);
                 mAlarmPresenters.add(presenter);
             }
         }
@@ -53,14 +59,15 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_alarm_list_item, parent, false);
 
-        ViewHolder vh = new ViewHolder(v);
+        ViewHolder vh = new ViewHolder(mContext, v);
         return vh;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        holder.mAlarmAddress.setText(mAlarmPresenters.get(position).getTitle());
-        holder.mNextSweeping.setText(mAlarmPresenters.get(position).getDescription());
+        AlarmPresenter presenter = mAlarmPresenters.get(position);
+        holder.mAlarmAddress.setText(presenter.getTitle());
+        holder.mNextSweeping.setText(presenter.getDescription());
 
         holder.mOnClickListener = new View.OnClickListener() {
             @Override
@@ -80,6 +87,13 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 return true;
             }
         };
+        if (presenter instanceof NonUpdatingAlarmPresenter) {
+            holder.mLimitRecyclerView.setVisibility(View.VISIBLE);
+            holder.mLimitRecyclerView.setAdapter(((NonUpdatingAlarmPresenter) presenter).adapter);
+        } else {
+            holder.mLimitRecyclerView.setVisibility(View.GONE);
+            holder.mLimitRecyclerView.setAdapter(null);
+        }
     }
 
     @Override
@@ -95,6 +109,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
             new AlarmManager.AlarmChangeListener() {
         @Override
         public void onAlarmUpdated(Long createdTimestamp) {
+            Log.d(TAG, "onAlarmUpdated " + createdTimestamp);
             for (AlarmPresenter p : mAlarmPresenters) {
                 if (p.alarm.getCreatedTimestamp() == createdTimestamp) {
                     p.alarm = mAlarmManager.getAlarm(createdTimestamp);
@@ -105,6 +120,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
 
         @Override
         public void onAlarmCreated(Long createdTimestamp) {
+            Log.d(TAG, "onAlarmCreated " + createdTimestamp);
             UpdatingPresenter presenter = new UpdatingPresenter(
                     mAlarmPresenters.size(), mAlarmManager.getAlarm(createdTimestamp));
             mAlarmPresenters.add(presenter);
@@ -114,6 +130,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
 
         @Override
         public void onAlarmDeleted(Long createdTimestamp) {
+            Log.d(TAG, "onAlarmDeleted " + createdTimestamp);
             int position = -1;
             for (int i = 0; i < mAlarmPresenters.size(); i++) {
                 AlarmPresenter p = mAlarmPresenters.get(i);
@@ -121,8 +138,11 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                     position = i;
                 }
             }
-            if (position > 0) {
+            if (position > -1) {
                 mAlarmPresenters.remove(position);
+            }
+            for (int i = position; i < mAlarmPresenters.size(); i++) {
+                mAlarmPresenters.get(i).position--;
             }
             notifyItemRemoved(position);
         }
@@ -288,8 +308,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
 
     class UpdatingPresenter extends AlarmPresenter implements
             AlarmUpdateManager.AlarmProgressListener {
-        String progress = "Progress: 0%";
-        String title = null;
+        String progress = "Refreshing alarm location. Progress: 0%";
 
         UpdatingPresenter(int position, Alarm alarm) {
             super(position, alarm);
@@ -299,10 +318,10 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
 
         @Override
         String getTitle() {
-            if (TextUtils.isEmpty(title)) {
-                title = LocationUtils.getAddressForLatLnt(mContext, this.alarm.getCenter());
+            if (TextUtils.isEmpty(alarm.getAddress()) || "Unknown".equals(alarm.getAddress())) {
+                return "Fetching address...";
             }
-            return title;
+            return alarm.getAddress();
         }
 
         @Override
@@ -311,17 +330,22 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
 
         void setProgress(int progress) {
-            this.progress = String.format("Progress: %d%%", progress);
+            this.progress = String.format("Refreshing alarm location. Progress: %d%%", progress);
             notifyItemChanged(this.position);
         }
 
         @Override
         public void onAlarmUpdateComplete(long createdTimestamp) {
-            NonUpdatingAlarmPresenter newPresenter =
-                    new NonUpdatingAlarmPresenter(this.position, this.alarm, "TODO");
-            mAlarmPresenters.remove(this.position);
-            mAlarmPresenters.add(this.position, newPresenter);
-            notifyItemChanged(this.position);
+            if (mAlarmPresenters.contains(this) &&
+                    createdTimestamp == this.alarm.getCreatedTimestamp()) {
+                NonUpdatingAlarmPresenter newPresenter =
+                        new NonUpdatingAlarmPresenter(this.position, this.alarm);
+                mAlarmPresenters.remove(this.position);
+                mAlarmPresenters.add(this.position, newPresenter);
+                notifyItemChanged(this.position);
+
+                mAlarmManager.removeAlarmProgressListener(this);
+            }
         }
 
         @Override
@@ -332,51 +356,99 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         }
     }
 
-    class NonUpdatingAlarmPresenter extends AlarmPresenter {
+    class NonUpdatingAlarmPresenter extends AlarmPresenter implements
+            AlarmUpdateManager.AlarmProgressListener{
         Alarm alarm;
-        String description;
-        String title;
 
-        NonUpdatingAlarmPresenter(int position, Alarm alarm, String description) {
+        LimitViewAdapter adapter;
+
+        NonUpdatingAlarmPresenter(int position, Alarm alarm) {
             super(position, alarm);
             this.alarm = alarm;
-            this.description = description;
+
+            this.adapter = new LimitViewAdapter(mContext, this.alarm);
+
+            mAlarmManager.addAlarmProgressListener(this);
         }
 
         @Override
         String getTitle() {
-            if (TextUtils.isEmpty(title)) {
-                title = LocationUtils.getAddressForLatLnt(mContext, this.alarm.getCenter());
-            }
-            return title;
+            return alarm.getAddress();
         }
 
         @Override
         String getDescription() {
-            if (this.description != null) {
-                return this.description;
+            if (alarm.getSweepingAddresses().isEmpty()) {
+                if (AddressValidatorManager.getInstance(mContext).getValidationProgress()
+                        != AddressValidatorManager.INVALID_PROGRESS) {
+                    return "Database update in progress, please wait.";
+                } else {
+                    return "No sweeping information found.";
+                }
             } else {
-                return "No upcoming sweeping";
+                return "";
+            }
+        }
+
+        @Override
+        public void onAlarmUpdateComplete(long createdTimestamp) {
+        }
+
+        @Override
+        public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
+            if (mAlarmPresenters.contains(this) &&
+                    createdTimestamp == this.alarm.getCreatedTimestamp()) {
+                UpdatingPresenter newPresenter =
+                        new UpdatingPresenter(this.position, this.alarm);
+                newPresenter.setProgress(progress);
+                mAlarmPresenters.remove(this.position);
+                mAlarmPresenters.add(this.position, newPresenter);
+                notifyItemChanged(this.position);
+
+                mAlarmManager.removeAlarmProgressListener(this);
             }
         }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements
             View.OnClickListener, View.OnLongClickListener {
+        private final Context mContext;
+
         public TextView mAlarmAddress;
         public TextView mNextSweeping;
         private FrameLayout mViewLayout;
         public View.OnLongClickListener mLongClickListener;
         public View.OnClickListener mOnClickListener;
 
-        public ViewHolder(View v) {
+        public RecyclerView mLimitRecyclerView;
+        private RecyclerView.LayoutManager mLayoutManager;
+        private AlarmViewItemDecoration mAlarmViewItemDecoration;
+
+        public ViewHolder(Context context, View v) {
             super(v);
+            mContext = context;
             mAlarmAddress = (TextView) v.findViewById(R.id.textview_alarm_address);
             mNextSweeping = (TextView) v.findViewById(R.id.textview_alarm_next_sweep);
             mViewLayout = (FrameLayout) v.findViewById(R.id.list_item_layout);
+            mLimitRecyclerView = (RecyclerView) v.findViewById(R.id.limit_recycler_view);
 
             mViewLayout.setOnClickListener(this);
             mViewLayout.setOnLongClickListener(this);
+
+            mLimitRecyclerView.setHasFixedSize(true);
+            mLayoutManager = new LinearLayoutManager(mContext, LinearLayout.HORIZONTAL, false);
+            mLimitRecyclerView.setLayoutManager(mLayoutManager);
+
+            int itemMargin =
+                    mContext.getResources().getDimensionPixelSize(R.dimen.alarm_view_item_space);
+            mAlarmViewItemDecoration = new AlarmViewItemDecoration(itemMargin);
+
+            mLimitRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
+
+            RecyclerView.ItemAnimator animator = mLimitRecyclerView.getItemAnimator();
+            if (animator instanceof SimpleItemAnimator) {
+                ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+            }
         }
 
         @Override

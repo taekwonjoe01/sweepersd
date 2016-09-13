@@ -13,6 +13,7 @@ import java.util.List;
 public class Alarm {
     private final long mCreatedTimestamp;
     private final long mLastUpdatedTimestamp;
+    private final String mAddress;
     private final LatLng mCenter;
     private final int mRadius;
 
@@ -20,11 +21,12 @@ public class Alarm {
     private List<SweepingAddress> mSweepingAddresses;
 
     // TODO make package protected.
-    public Alarm(long createdTimestamp, long lastUpdatedTimestamp,  LatLng center, int radius,
-                 List<SweepingAddress> sweepingAddresses) {
+    public Alarm(long createdTimestamp, long lastUpdatedTimestamp, String address, LatLng center,
+                 int radius, List<SweepingAddress> sweepingAddresses) {
         mCreatedTimestamp = createdTimestamp;
         mLastUpdatedTimestamp = lastUpdatedTimestamp;
         mCenter = center;
+        mAddress = address;
         mRadius = radius;
         setSweepingAddresses(sweepingAddresses);
     }
@@ -33,6 +35,7 @@ public class Alarm {
         this.mCreatedTimestamp = other.mCreatedTimestamp;
         this.mLastUpdatedTimestamp = other.mLastUpdatedTimestamp;
         this.mCenter = other.mCenter;
+        this.mAddress = other.mAddress;
         this.mRadius = other.mRadius;
         List<SweepingAddress> addresses = new ArrayList<>();
         for (SweepingAddress address : other.getSweepingAddresses()) {
@@ -51,6 +54,10 @@ public class Alarm {
 
     public LatLng getCenter() {
         return mCenter;
+    }
+
+    public String getAddress() {
+        return mAddress;
     }
 
     public int getRadius() {

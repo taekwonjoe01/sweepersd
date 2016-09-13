@@ -120,7 +120,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
         // Save the alarm.
@@ -175,7 +175,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
         // Save the alarm.
@@ -233,9 +233,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
-        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, center, radius,
+        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
         // Save the alarm.
@@ -307,9 +307,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
-        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, center, radius,
+        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
         // Save the alarm.
@@ -375,9 +375,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, center, radius,
+        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
-        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, center, radius,
+        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
         // Save the alarm.

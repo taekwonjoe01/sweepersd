@@ -7,6 +7,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -352,10 +353,14 @@ public class TestLimitParser {
         Limit limit1 = LimitParser.buildLimitFromLine(line1);
         assertNull(limit1);
 
-        String line2 = "04TH AV \t1500 - 1599 \tBEECH ST - CEDAR ST \tPosted (2am - 6am), WS Wed, ES Thu\t";
+        String line2 = "BERYL ST \t1000 - 1099 \tCASS ST - DAWES ST \tPosted (10am - 1pm), SS 1st Wed, NS 1st Thur";
         Limit limit2 = LimitParser.buildLimitFromLine(line2);
         assertNotNull(limit2);
-        assertEquals("04th av", limit2.getStreet());
+        assertEquals("beryl st", limit2.getStreet());
+
+        assertEquals(2, limit2.getSchedules().size());
+        assertNotEquals(limit2.getSchedules().get(0).getDay(),
+                limit2.getSchedules().get(1).getDay());
     }
 
     @Test

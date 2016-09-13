@@ -8,16 +8,21 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.MapsActivity;
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.model.alarms.AlarmManager;
 import com.google.android.gms.maps.model.LatLng;
 
-public class AlarmViewActivity extends AppCompatActivity {
+public class AlarmViewActivity extends AppCompatActivity implements
+        AddressValidatorManager.ValidatorProgressListener{
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
     private static final int CREATE_ALARM_CODE = 1;
 
@@ -26,7 +31,7 @@ public class AlarmViewActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private AlarmViewItemDecoration mAlarmViewItemDecoration;
 
-
+    private Menu mOptionsMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +51,7 @@ public class AlarmViewActivity extends AppCompatActivity {
             }
         });
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.alarm_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -83,6 +88,55 @@ public class AlarmViewActivity extends AppCompatActivity {
         super.onResume();
 
         setAdapter();
+
+        AddressValidatorManager.getInstance(this).addListener(this);
+        setProgress(AddressValidatorManager.getInstance(this).getValidationProgress());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        AddressValidatorManager.getInstance(this).removeListener(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mOptionsMenu = menu;
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_activity_alarm, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    @Override
+    public void onValidatorProgress(int progress) {
+        setValidatorProgress(progress);
+    }
+
+    @Override
+    public void onValidatorComplete() {
+        setValidatorProgress(AddressValidatorManager.INVALID_PROGRESS);
+    }
+
+    private void setValidatorProgress(int progress) {
+        MenuItem progressItem = mOptionsMenu.findItem(R.id.validator_progress);
+        if (progress == AddressValidatorManager.INVALID_PROGRESS) {
+            progressItem.setTitle("");
+        } else {
+            String p = String.format("Updating DB: %d%%", progress);
+        }
     }
 
     private void setAdapter() {

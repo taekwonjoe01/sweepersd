@@ -11,6 +11,7 @@ import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -71,6 +72,8 @@ public class AlarmUpdateService extends IntentService implements
         if (createdTimestamp == mId && !mIsSaving) {
             mIsCancelled = true;
             setShouldRestart(true);
+        } else {
+            mIsSaving = false;
         }
     }
 
@@ -100,15 +103,30 @@ public class AlarmUpdateService extends IntentService implements
                 return true;
             }
 
+            String address  = LocationUtils.getAddressForLatLnt(this, alarmToUpdate.getCenter());
+            String[] addressSplit = address.split(",");
+            String alarmAddress = "";
+            if (addressSplit.length > 0) {
+                alarmAddress = addressSplit[0];
+
+                Alarm updatedAlarm = new Alarm(alarmToUpdate.getCreatedTimestamp(),
+                        System.currentTimeMillis(), alarmAddress, alarmToUpdate.getCenter(),
+                        alarmToUpdate.getRadius(), null);
+
+                mIsSaving = true;
+                helper.saveAlarm(updatedAlarm);
+            }
+
             List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(alarmToUpdate.getCenter(),
                     alarmToUpdate.getRadius());
 
-            List<SweepingAddress> sweepingAddresses = new ArrayList<>();
+            HashMap<String, SweepingAddress> sweepingAddresses = new HashMap<>();
 
+            String centerAdd  = LocationUtils.getAddressForLatLnt(this, alarmToUpdate.getCenter());
             SweepingAddress centerSA = buildSweepingAddress(limitHelper,
-                    alarmToUpdate.getCenter());
+                    alarmToUpdate.getCenter(), centerAdd);
             if (centerSA != null) {
-                sweepingAddresses.add(centerSA);
+                sweepingAddresses.put(centerAdd, centerSA);
             }
             for (int i = 0; i < latLngs.size(); i++) {
                 if (mIsCancelled) {
@@ -119,26 +137,34 @@ public class AlarmUpdateService extends IntentService implements
 
                 LatLng latLng = latLngs.get(i);
 
-                SweepingAddress sa = buildSweepingAddress(limitHelper, latLng);
-                if (sa != null) {
-                    sweepingAddresses.add(sa);
+                String add = LocationUtils.getAddressForLatLnt(this, latLng);
+                if (!sweepingAddresses.containsKey(add)) {
+                    SweepingAddress sa = buildSweepingAddress(limitHelper, latLng, add);
+                    if (sa != null) {
+                        sweepingAddresses.put(add, sa);
+                    }
                 }
             }
+            Log.d(TAG, "finished generating SweepingAddresses. Size " + sweepingAddresses.size());
 
             Alarm updatedAlarm = new Alarm(alarmToUpdate.getCreatedTimestamp(),
-                    System.currentTimeMillis(), alarmToUpdate.getCenter(),
-                    alarmToUpdate.getRadius(), sweepingAddresses);
+                    System.currentTimeMillis(), alarmAddress, alarmToUpdate.getCenter(),
+                    alarmToUpdate.getRadius(), new ArrayList<>(sweepingAddresses.values()));
 
             mIsSaving = true;
-            helper.saveAlarm(updatedAlarm);
+            boolean saveSuccess = helper.saveAlarm(updatedAlarm);
+            if (!saveSuccess) {
+                Log.d(TAG, "Failed to save updated Alarm! " + alarmToUpdate.getCreatedTimestamp());
+            }
         }
         return false;
     }
 
-    private SweepingAddress buildSweepingAddress(LimitDbHelper limitHelper, LatLng latLng) {
+    private SweepingAddress buildSweepingAddress(LimitDbHelper limitHelper, LatLng latLng,
+                                                 String address) {
         SweepingAddress result = null;
 
-        String address  = LocationUtils.getAddressForLatLnt(this, latLng);
+        Log.d(TAG, "buildSweepingAddress address: " + address);
         Limit limit = LocationUtils.findLimitForAddress(limitHelper, address);
         if (limit != null) {
             result = new SweepingAddress(latLng, address, limit);

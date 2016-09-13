@@ -149,6 +149,32 @@ public class LocationUtils {
         return result;
     }
 
+    public static String validateStreet(Context context, String street) {
+        String result = null;
+
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+
+        List<Address> addresses = new ArrayList<>();
+
+        try {
+            addresses = geocoder.getFromLocationName(street + ",san diego, ca", 1);
+        } catch (IOException ioException) {
+            // TODO: Catch network or other I/O problems.
+        } catch (IllegalArgumentException illegalArgumentException) {
+            // TODO: Catch invalid latitude or longitude values.
+        }
+
+        if (addresses != null && !addresses.isEmpty()) {
+            Address first = addresses.get(0);
+            result = "";
+            for (int i = 0; i < first.getMaxAddressLineIndex(); i++) {
+                result += first.getAddressLine(i) + ",";
+            }
+            result = result.toLowerCase();
+        }
+        return result;
+    }
+
     public static List<Address> getAddressesForLatLng(Context context, LatLng latLng) {
         long start = System.nanoTime();
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
@@ -194,6 +220,7 @@ public class LocationUtils {
             String[] split = address.split(",");
             if (split.length > 1) {
                 String streetAddress = split[0];
+                Log.e("Joey", "streetAddress: " + streetAddress);
                 String[] streetAddressParsings = streetAddress.split(" ");
                 if (streetAddressParsings.length > 1) {
                     String streetNumber = streetAddressParsings[0];
@@ -202,6 +229,7 @@ public class LocationUtils {
                         streetName += " " + streetAddressParsings[j];
                     }
                     streetName = streetName.trim();
+                    Log.e("Joey", "streetName: " + streetName);
                     if (streetNumber.contains("-")) {
                         String[] streetNumberParsings = streetNumber.split("-");
                         if (streetNumberParsings.length == 2) {
@@ -241,10 +269,11 @@ public class LocationUtils {
     }
 
     private static Limit checkAddress(LimitDbHelper limitHelper, int houseNumber, String street) {
-        //Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
+        Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
+
         Limit result = null;
         for (Limit l : limitHelper.getLimitsForStreet(street)) {
-            if (l.getStreet().toLowerCase().contains(street)) {
+            if (street.contains(l.getStreet())) {
                 if (houseNumber >= l.getRange()[0] && houseNumber <= l.getRange()[1]) {
                     result = l;
                 }

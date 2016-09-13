@@ -167,6 +167,31 @@ public class LimitParser {
         return result;
     }
 
+    public static String getPrefix(int number) {
+        final String first = "1st";
+        final String second = "2nd";
+        final String third = "3rd";
+        final String fourth = "4th";
+
+        String result = null;
+        switch (number) {
+            case 1:
+                result = first;
+                break;
+            case 2:
+                result = second;
+                break;
+            case 3:
+                result = third;
+                break;
+            case 4:
+                result = fourth;
+                break;
+
+        }
+        return result;
+    }
+
     /**
      * Example: "7pm", "10am".
      * @param time
@@ -200,7 +225,7 @@ public class LimitParser {
      * @param hour
      * @return
      */
-    static String convertHourToTimeString(int hour) {
+    public static String convertHourToTimeString(int hour) {
         if (hour >= 0 && hour < 24) {
             String suffix = hour > 12 ? "pm" : "am";
             int result = hour > 12 ? (hour - 12) : hour;
@@ -254,6 +279,50 @@ public class LimitParser {
                 break;
             case saturday:
                 result = Calendar.SATURDAY;
+                break;
+
+        }
+        return result;
+    }
+
+    /**
+     * Convert a word string to an integer number representing that day of the week.
+     *
+     * The integer value corresponding to the day is based on Calendar.DAY values.
+     *
+     * @param day
+     * @return
+     */
+    public static String getDay(int day) {
+        String result = null;
+        final String monday = "mon";
+        final String tuesday = "tue";
+        final String wednesday = "wed";
+        final String thursday = "thu";
+        final String friday = "fri";
+        final String saturday = "sat";
+        final String sunday = "sun";
+        switch (day) {
+            case Calendar.SUNDAY:
+                result = sunday;
+                break;
+            case Calendar.MONDAY:
+                result = monday;
+                break;
+            case Calendar.TUESDAY:
+                result = tuesday;
+                break;
+            case Calendar.WEDNESDAY:
+                result = wednesday;
+                break;
+            case Calendar.THURSDAY:
+                result = thursday;
+                break;
+            case Calendar.FRIDAY:
+                result = friday;
+                break;
+            case Calendar.SATURDAY:
+                result = saturday;
                 break;
 
         }

@@ -105,13 +105,18 @@ public class AlarmUpdateManager {
 
     private void notifyProgress(long id, int progress) {
         List<WeakReference> toRemove = new ArrayList<>();
+        List<AlarmProgressListener> listeners = new ArrayList<>();
         for (WeakReference<AlarmProgressListener> weakRef : mListeners) {
             AlarmProgressListener curListener = weakRef.get();
             if (curListener == null) {
                 toRemove.add(weakRef);
             } else {
-                curListener.onAlarmUpdateProgress(id, progress);
+                listeners.add(curListener);
             }
+        }
+
+        for (AlarmProgressListener listener : listeners) {
+            listener.onAlarmUpdateProgress(id, progress);
         }
 
         for (WeakReference removeMe : toRemove) {
@@ -123,13 +128,18 @@ public class AlarmUpdateManager {
 
     private void notifyComplete(long id) {
         List<WeakReference> toRemove = new ArrayList<>();
+        List<AlarmProgressListener> listeners = new ArrayList<>();
         for (WeakReference<AlarmProgressListener> weakRef : mListeners) {
             AlarmProgressListener curListener = weakRef.get();
             if (curListener == null) {
                 toRemove.add(weakRef);
             } else {
-                curListener.onAlarmUpdateComplete(id);
+                listeners.add(curListener);
             }
+        }
+
+        for (AlarmProgressListener listener : listeners) {
+            listener.onAlarmUpdateComplete(id);
         }
 
         for (WeakReference removeMe : toRemove) {
