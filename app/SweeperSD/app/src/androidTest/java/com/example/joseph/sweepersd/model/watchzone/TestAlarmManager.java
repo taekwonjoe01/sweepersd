@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.Context;
 import android.os.Handler;
@@ -31,7 +31,7 @@ public class TestAlarmManager extends AndroidTestCase {
         super.setUp();
         mContext = new RenamingDelegatingContext(getContext(), "test_");
 
-        File file = new File(AlarmFileHelper.getAlarmDirPath(mContext));
+        File file = new File(WatchZoneFileHelper.getAlarmDirPath(mContext));
 
         deleteRecursive(file);
 
@@ -81,14 +81,14 @@ public class TestAlarmManager extends AndroidTestCase {
     }
 
     public void testAlarmManager() {
-        AlarmManager manager = new AlarmManager(mContext);
+        WatchZoneManager manager = new WatchZoneManager(mContext);
 
         final CountDownLatch updatedLatch = new CountDownLatch(1);
         final CountDownLatch createdLatch = new CountDownLatch(1);
         final CountDownLatch deletedLatch = new CountDownLatch(1);
         final CountDownLatch assureListenerRemovedLatch = new CountDownLatch(100);
-        AlarmManager.AlarmChangeListener alarmChangeListener =
-                new AlarmManager.AlarmChangeListener() {
+        WatchZoneManager.AlarmChangeListener alarmChangeListener =
+                new WatchZoneManager.AlarmChangeListener() {
             @Override
             public void onAlarmUpdated(Long createdTimestamp) {
                 updatedLatch.countDown();
@@ -109,8 +109,8 @@ public class TestAlarmManager extends AndroidTestCase {
         };
         final CountDownLatch progressLatch = new CountDownLatch(9);
         final CountDownLatch completeLatch = new CountDownLatch(1);
-        AlarmUpdateManager.AlarmProgressListener alarmProgressListener =
-                new AlarmUpdateManager.AlarmProgressListener() {
+        WatchZoneUpdateManager.AlarmProgressListener alarmProgressListener =
+                new WatchZoneUpdateManager.AlarmProgressListener() {
             @Override
             public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
                 progressLatch.countDown();
@@ -124,7 +124,7 @@ public class TestAlarmManager extends AndroidTestCase {
             }
         };
         MockAlarmUpdaterFactory testFactory = new MockAlarmUpdaterFactory();
-        AlarmUpdateManager.getInstance(mContext).setAlarmUpdaterFactory(testFactory);
+        WatchZoneUpdateManager.getInstance(mContext).setAlarmUpdaterFactory(testFactory);
 
         manager.addAlarmChangeListener(alarmChangeListener);
         manager.addAlarmProgressListener(alarmProgressListener);
@@ -159,10 +159,10 @@ public class TestAlarmManager extends AndroidTestCase {
         assertTrue(timestamps.contains(timestamp));
         assertEquals(1, timestamps.size());
 
-        Alarm alarm = manager.getAlarm(timestamp);
-        assertNotNull(alarm);
-        assertEquals(radius, alarm.getRadius());
-        assertEquals(center, alarm.getCenter());
+        WatchZone watchZone = manager.getAlarm(timestamp);
+        assertNotNull(watchZone);
+        assertEquals(radius, watchZone.getRadius());
+        assertEquals(center, watchZone.getCenter());
 
         manager.removeAlarmChangeListener(alarmChangeListener);
         manager.removeAlarmProgressListener(alarmProgressListener);
@@ -171,7 +171,7 @@ public class TestAlarmManager extends AndroidTestCase {
         final CountDownLatch createdLatch2 = new CountDownLatch(2);
         final CountDownLatch deletedLatch2 = new CountDownLatch(2);
         alarmChangeListener =
-                new AlarmManager.AlarmChangeListener() {
+                new WatchZoneManager.AlarmChangeListener() {
                     @Override
                     public void onAlarmUpdated(Long createdTimestamp) {
                         updatedLatch2.countDown();
@@ -190,7 +190,7 @@ public class TestAlarmManager extends AndroidTestCase {
         final CountDownLatch progressLatch2 = new CountDownLatch(18);
         final CountDownLatch completeLatch2 = new CountDownLatch(2);
         alarmProgressListener =
-                new AlarmUpdateManager.AlarmProgressListener() {
+                new WatchZoneUpdateManager.AlarmProgressListener() {
                     @Override
                     public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
                         progressLatch2.countDown();
@@ -244,20 +244,20 @@ public class TestAlarmManager extends AndroidTestCase {
         assertTrue(timestamps.contains(timestamp3));
         assertEquals(3, timestamps.size());
 
-        alarm = manager.getAlarm(timestamp);
-        assertNotNull(alarm);
-        assertEquals(radius, alarm.getRadius());
-        assertEquals(center, alarm.getCenter());
+        watchZone = manager.getAlarm(timestamp);
+        assertNotNull(watchZone);
+        assertEquals(radius, watchZone.getRadius());
+        assertEquals(center, watchZone.getCenter());
 
-        alarm = manager.getAlarm(timestamp2);
-        assertNotNull(alarm);
-        assertEquals(radius2, alarm.getRadius());
-        assertEquals(center2, alarm.getCenter());
+        watchZone = manager.getAlarm(timestamp2);
+        assertNotNull(watchZone);
+        assertEquals(radius2, watchZone.getRadius());
+        assertEquals(center2, watchZone.getCenter());
 
-        alarm = manager.getAlarm(timestamp3);
-        assertNotNull(alarm);
-        assertEquals(radius3, alarm.getRadius());
-        assertEquals(center3, alarm.getCenter());
+        watchZone = manager.getAlarm(timestamp3);
+        assertNotNull(watchZone);
+        assertEquals(radius3, watchZone.getRadius());
+        assertEquals(center3, watchZone.getCenter());
 
 
 
@@ -268,7 +268,7 @@ public class TestAlarmManager extends AndroidTestCase {
         final CountDownLatch createdLatch3 = new CountDownLatch(1);
         final CountDownLatch deletedLatch3 = new CountDownLatch(1);
         alarmChangeListener =
-                new AlarmManager.AlarmChangeListener() {
+                new WatchZoneManager.AlarmChangeListener() {
                     @Override
                     public void onAlarmUpdated(Long createdTimestamp) {
                         updatedLatch3.countDown();
@@ -287,7 +287,7 @@ public class TestAlarmManager extends AndroidTestCase {
         final CountDownLatch progressLatch3 = new CountDownLatch(18);
         final CountDownLatch completeLatch3 = new CountDownLatch(2);
         alarmProgressListener =
-                new AlarmUpdateManager.AlarmProgressListener() {
+                new WatchZoneUpdateManager.AlarmProgressListener() {
                     @Override
                     public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
                         progressLatch3.countDown();
@@ -337,29 +337,29 @@ public class TestAlarmManager extends AndroidTestCase {
         assertFalse(timestamps.contains(timestamp3));
         assertEquals(2, timestamps.size());
 
-        alarm = manager.getAlarm(timestamp);
-        assertNotNull(alarm);
-        assertEquals(radius, alarm.getRadius());
-        assertEquals(center, alarm.getCenter());
+        watchZone = manager.getAlarm(timestamp);
+        assertNotNull(watchZone);
+        assertEquals(radius, watchZone.getRadius());
+        assertEquals(center, watchZone.getCenter());
 
-        alarm = manager.getAlarm(timestamp2);
-        assertNotNull(alarm);
-        assertEquals(updatedRadius, alarm.getRadius());
-        assertEquals(updatedLatLng, alarm.getCenter());
+        watchZone = manager.getAlarm(timestamp2);
+        assertNotNull(watchZone);
+        assertEquals(updatedRadius, watchZone.getRadius());
+        assertEquals(updatedLatLng, watchZone.getCenter());
     }
 
-    private class MockAlarmUpdaterFactory implements AlarmUpdateManager.AlarmUpdaterFactory {
+    private class MockAlarmUpdaterFactory implements WatchZoneUpdateManager.AlarmUpdaterFactory {
         @Override
-        public AlarmUpdateManager.AlarmUpdater createNewAlarmUpdater() {
+        public WatchZoneUpdateManager.AlarmUpdater createNewAlarmUpdater() {
             return new MockAlarmUpdater();
         }
     }
 
-    private class MockAlarmUpdater implements AlarmUpdateManager.AlarmUpdater {
+    private class MockAlarmUpdater implements WatchZoneUpdateManager.AlarmUpdater {
         private final Handler mHandler;
         private int mProgress = 0;
-        private AlarmUpdateManager.AlarmProgressListener mListener;
-        private Alarm mAlarm;
+        private WatchZoneUpdateManager.AlarmProgressListener mListener;
+        private WatchZone mWatchZone;
         public MockAlarmUpdater() {
             mHandler = new Handler(Looper.getMainLooper());
         }
@@ -370,9 +370,9 @@ public class TestAlarmManager extends AndroidTestCase {
         }
 
         @Override
-        public void updateAlarm(Alarm alarm, AlarmUpdateManager.AlarmProgressListener listener) {
+        public void updateAlarm(WatchZone watchZone, WatchZoneUpdateManager.AlarmProgressListener listener) {
             mListener = listener;
-            mAlarm = alarm;
+            mWatchZone = watchZone;
             scheduleWork();
         }
 
@@ -383,9 +383,9 @@ public class TestAlarmManager extends AndroidTestCase {
                     mProgress += 10;
                     if (mProgress >= 100) {
                         mProgress = 100;
-                        mListener.onAlarmUpdateComplete(mAlarm.getCreatedTimestamp());
+                        mListener.onAlarmUpdateComplete(mWatchZone.getCreatedTimestamp());
                     } else {
-                        mListener.onAlarmUpdateProgress(mAlarm.getCreatedTimestamp(), mProgress);
+                        mListener.onAlarmUpdateProgress(mWatchZone.getCreatedTimestamp(), mProgress);
                         scheduleWork();
                     }
                 }

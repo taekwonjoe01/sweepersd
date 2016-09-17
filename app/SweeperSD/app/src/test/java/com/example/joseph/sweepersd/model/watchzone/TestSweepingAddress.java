@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import com.example.joseph.sweepersd.model.limits.Limit;
 import com.google.android.gms.maps.model.LatLng;

@@ -21,7 +21,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.example.joseph.sweepersd.model.alarms.SweepingAddress;
+import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
 
 import java.util.List;
 

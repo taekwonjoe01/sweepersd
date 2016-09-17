@@ -1,7 +1,6 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -14,11 +13,11 @@ import java.util.Set;
 /**
  * Created by joseph on 6/12/16.
  */
-public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
-    private static final String TAG = AlarmManager.class.getSimpleName();
+public class WatchZoneManager implements WatchZoneFileHelper.AlarmUpdateListener {
+    private static final String TAG = WatchZoneManager.class.getSimpleName();
 
-    private final AlarmFileHelper mAlarmFileHelper;
-    private final HashMap<Long, Alarm> mAlarms;
+    private final WatchZoneFileHelper mWatchZoneFileHelper;
+    private final HashMap<Long, WatchZone> mAlarms;
     private final Context mContext;
 
     private Set<WeakReference<AlarmChangeListener>> mListeners = new HashSet<>();
@@ -29,15 +28,14 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
         void onAlarmDeleted(Long createdTimestamp);
     }
 
-    public AlarmManager(Context context) {
+    public WatchZoneManager(Context context) {
         mContext = context;
-        mAlarmFileHelper = new AlarmFileHelper(mContext, this);
+        mWatchZoneFileHelper = new WatchZoneFileHelper(mContext, this);
 
-        List<Alarm> alarms = mAlarmFileHelper.loadAlarms();
+        List<WatchZone> watchZones = mWatchZoneFileHelper.loadAlarms();
         mAlarms = new HashMap<>();
-        for (Alarm alarm : alarms) {
-            Log.e("Joey", "size of sweepingaddresses " + alarm.getSweepingAddresses().size());
-            mAlarms.put(alarm.getCreatedTimestamp(), alarm);
+        for (WatchZone watchZone : watchZones) {
+            mAlarms.put(watchZone.getCreatedTimestamp(), watchZone);
         }
     }
 
@@ -61,15 +59,15 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
         }
     }
 
-    public void addAlarmProgressListener(AlarmUpdateManager.AlarmProgressListener listener) {
-        AlarmUpdateManager.getInstance(mContext).addListener(listener);
+    public void addAlarmProgressListener(WatchZoneUpdateManager.AlarmProgressListener listener) {
+        WatchZoneUpdateManager.getInstance(mContext).addListener(listener);
     }
 
-    public void removeAlarmProgressListener(AlarmUpdateManager.AlarmProgressListener listener) {
-        AlarmUpdateManager.getInstance(mContext).removeListener(listener);
+    public void removeAlarmProgressListener(WatchZoneUpdateManager.AlarmProgressListener listener) {
+        WatchZoneUpdateManager.getInstance(mContext).removeListener(listener);
     }
 
-    public Alarm getAlarm(Long createdTimestamp) {
+    public WatchZone getAlarm(Long createdTimestamp) {
         return mAlarms.get(createdTimestamp);
     }
 
@@ -78,27 +76,27 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
     }
 
     public Set<Long> getUpdatingAlarms() {
-        return AlarmUpdateManager.getInstance(mContext).getUpdatingAlarmTimestamps();
+        return WatchZoneUpdateManager.getInstance(mContext).getUpdatingAlarmTimestamps();
     }
 
     public int getProgressForAlarm(long createdTimestamp) {
-        return AlarmUpdateManager.getInstance(mContext).getProgressForAlarm(createdTimestamp);
+        return WatchZoneUpdateManager.getInstance(mContext).getProgressForAlarm(createdTimestamp);
     }
 
     /**
-     * Create a new alarm and start a new AlarmUpdateService for this alarm. The alarm will be
-     * added to the AlarmManager asynchronously. If this function returns success, there will be a
+     * Create a new alarm and start a new WatchZoneUpdateService for this alarm. The alarm will be
+     * added to the WatchZoneManager asynchronously. If this function returns success, there will be a
      * subsequent call to onAlarmCreated(long timestamp).
      */
     public long createAlarm(LatLng center, int radius) {
         long createdTimestamp = System.currentTimeMillis();
         long lastUpdatedTimestamp = 0;
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, null, center, radius, null);
-        boolean alarmCreated = mAlarmFileHelper.saveAlarm(alarm);
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, null, center, radius, null);
+        boolean alarmCreated = mWatchZoneFileHelper.saveAlarm(watchZone);
 
         if (alarmCreated) {
-            AlarmUpdateManager alarmUpdateManager = AlarmUpdateManager.getInstance(mContext);
-            alarmUpdateManager.updateAlarm(alarm);
+            WatchZoneUpdateManager watchZoneUpdateManager = WatchZoneUpdateManager.getInstance(mContext);
+            watchZoneUpdateManager.updateAlarm(watchZone);
             return createdTimestamp;
         } else {
             return 0;
@@ -107,7 +105,7 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
 
     public boolean refreshAlarm(long createdTimestamp) {
         if (mAlarms.containsKey(createdTimestamp)) {
-            AlarmUpdateManager.getInstance(mContext).updateAlarm(mAlarms.get(createdTimestamp));
+            WatchZoneUpdateManager.getInstance(mContext).updateAlarm(mAlarms.get(createdTimestamp));
             return true;
         } else {
             return false;
@@ -116,10 +114,10 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
 
     public boolean updateAlarm(long createdTimestamp, LatLng center, int radius) {
         if (mAlarms.containsKey(createdTimestamp)) {
-            Alarm newAlarm =
-                    new Alarm(createdTimestamp, System.currentTimeMillis(), null,
+            WatchZone newWatchZone =
+                    new WatchZone(createdTimestamp, System.currentTimeMillis(), null,
                             center, radius, null);
-            boolean alarmCreated = mAlarmFileHelper.saveAlarm(newAlarm);
+            boolean alarmCreated = mWatchZoneFileHelper.saveAlarm(newWatchZone);
             if (alarmCreated) {
                 return refreshAlarm(createdTimestamp);
             } else {
@@ -132,7 +130,7 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
 
     public boolean deleteAlarm(long createdTimestamp) {
         if (mAlarms.containsKey(createdTimestamp)) {
-            return mAlarmFileHelper.deleteAlarm(mAlarms.get(createdTimestamp));
+            return mWatchZoneFileHelper.deleteAlarm(mAlarms.get(createdTimestamp));
         } else {
             return false;
         }
@@ -146,13 +144,13 @@ public class AlarmManager implements AlarmFileHelper.AlarmUpdateListener {
 
     @Override
     public void onAlarmUpdated(long createdTimestamp) {
-        Alarm alarm = mAlarmFileHelper.loadAlarm(createdTimestamp);
-        if (alarm != null) {
+        WatchZone watchZone = mWatchZoneFileHelper.loadAlarm(createdTimestamp);
+        if (watchZone != null) {
             boolean newAlarm = false;
             if (!mAlarms.containsKey(createdTimestamp)) {
                 newAlarm = true;
             }
-            mAlarms.put(createdTimestamp, alarm);
+            mAlarms.put(createdTimestamp, watchZone);
             if (newAlarm) {
                 notifyAlarmAdded(createdTimestamp);
             } else {

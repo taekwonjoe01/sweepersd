@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.presentation.manualalarms.AlarmViewActivity;
+import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewActivity;
 
 /**
  * Opening Activity for SweeperSD.
@@ -37,7 +37,7 @@ public class LandingActivity extends AppCompatActivity {
         mManualAlarmsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LandingActivity.this, AlarmViewActivity.class));
+                startActivity(new Intent(LandingActivity.this, WatchZoneViewActivity.class));
             }
         });
 

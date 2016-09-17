@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.example.joseph.sweepersd.model.alarms.AlarmUpdateService;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneUpdateService;
 
 /**
  * Created by joseph on 9/11/16.
@@ -46,7 +46,7 @@ public class ServiceAddressValidator implements AddressValidatorManager.AddressV
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case AddressValidatorService.ACTION_VALIDATOR_PROGRESS:
-                    int progress = intent.getIntExtra(AlarmUpdateService.PARAM_PROGRESS, 0);
+                    int progress = intent.getIntExtra(WatchZoneUpdateService.PARAM_PROGRESS, 0);
                     mProgress = progress;
                     mListener.onValidatorProgress(progress);
                     break;

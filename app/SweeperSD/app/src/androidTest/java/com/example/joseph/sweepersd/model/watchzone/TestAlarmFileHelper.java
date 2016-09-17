@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class TestAlarmFileHelper extends AndroidTestCase {
     private static final String TAG = TestAlarmFileHelper.class.getSimpleName();
     private RenamingDelegatingContext mContext;
-    private AlarmFileHelper.AlarmUpdateListener mMockListener;
+    private WatchZoneFileHelper.AlarmUpdateListener mMockListener;
     private CountDownLatch mOnAlarmUpdatedLatch;
     private CountDownLatch mOnAlarmDeletedLatch;
 
@@ -31,11 +31,11 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         super.setUp();
         mContext = new RenamingDelegatingContext(getContext(), "test_");
 
-        File file = new File(AlarmFileHelper.getAlarmDirPath(mContext));
+        File file = new File(WatchZoneFileHelper.getAlarmDirPath(mContext));
 
         deleteRecursive(file);
 
-        mMockListener = new AlarmFileHelper.AlarmUpdateListener() {
+        mMockListener = new WatchZoneFileHelper.AlarmUpdateListener() {
             @Override
             public void onAlarmUpdated(long createdTimestamp) {
                 mOnAlarmUpdatedLatch.countDown();
@@ -99,12 +99,12 @@ public class TestAlarmFileHelper extends AndroidTestCase {
     }
 
     public void testAddAlarm() {
-        AlarmFileHelper helper = new AlarmFileHelper(mContext, mMockListener);
-        List<Alarm> alarms = helper.loadAlarms();
+        WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
+        List<WatchZone> watchZones = helper.loadAlarms();
 
-        assertEquals(0, alarms.size());
+        assertEquals(0, watchZones.size());
 
-        // Create a test alarm.
+        // Create a test watchZone.
         // Create the Limit
         Limit limit = createTestLimit();
 
@@ -113,18 +113,18 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         LatLng center = new LatLng(12,12);
         SweepingAddress swAddress = new SweepingAddress(center, address, limit);
 
-        // Create the alarm
+        // Create the watchZone
         long createdTimestamp = 1;
         long lastUpdatedTimestamp = 0;
         int radius = 12;
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
-        // Save the alarm.
-        helper.saveAlarm(alarm);
+        // Save the watchZone.
+        helper.saveAlarm(watchZone);
 
         boolean countedDown = false;
         try {
@@ -134,19 +134,19 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        Alarm loadedAlarm = helper.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
 
-        alarms = helper.loadAlarms();
+        watchZones = helper.loadAlarms();
 
-        assertEquals(1, alarms.size());
+        assertEquals(1, watchZones.size());
 
-        // Check the Alarm
-        assertEquals(createdTimestamp, loadedAlarm.getCreatedTimestamp());
-        assertEquals(lastUpdatedTimestamp, loadedAlarm.getLastUpdatedTimestamp());
-        assertEquals(center, loadedAlarm.getCenter());
-        assertEquals(radius, loadedAlarm.getRadius());
+        // Check the WatchZone
+        assertEquals(createdTimestamp, loadedWatchZone.getCreatedTimestamp());
+        assertEquals(lastUpdatedTimestamp, loadedWatchZone.getLastUpdatedTimestamp());
+        assertEquals(center, loadedWatchZone.getCenter());
+        assertEquals(radius, loadedWatchZone.getRadius());
         // Check the SweepingAddresses
-        List<SweepingAddress> loadedSwAddresses = loadedAlarm.getSweepingAddresses();
+        List<SweepingAddress> loadedSwAddresses = loadedWatchZone.getSweepingAddresses();
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
@@ -154,12 +154,12 @@ public class TestAlarmFileHelper extends AndroidTestCase {
     }
 
     public void testOverwriteAlarm() {
-        AlarmFileHelper helper = new AlarmFileHelper(mContext, mMockListener);
-        List<Alarm> alarms = helper.loadAlarms();
+        WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
+        List<WatchZone> watchZones = helper.loadAlarms();
 
-        assertEquals(0, alarms.size());
+        assertEquals(0, watchZones.size());
 
-        // Create a test alarm.
+        // Create a test watchZone.
         // Create the Limit
         Limit limit = createTestLimit();
 
@@ -168,21 +168,21 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         LatLng center = new LatLng(12,12);
         SweepingAddress swAddress = new SweepingAddress(center, address, limit);
 
-        // Create the alarm
+        // Create the watchZone
         long createdTimestamp = 1;
         long lastUpdatedTimestamp = 0;
         int radius = 12;
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
-        // Save the alarm.
+        // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(alarm);
+        helper.saveAlarm(watchZone);
         // Overwrite the save!
-        helper.saveAlarm(alarm);
+        helper.saveAlarm(watchZone);
 
         boolean countedDown = false;
         try {
@@ -192,19 +192,19 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        Alarm loadedAlarm = helper.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
 
-        alarms = helper.loadAlarms();
+        watchZones = helper.loadAlarms();
 
-        assertEquals(1, alarms.size());
+        assertEquals(1, watchZones.size());
 
-        // Check the Alarm
-        assertEquals(createdTimestamp, loadedAlarm.getCreatedTimestamp());
-        assertEquals(lastUpdatedTimestamp, loadedAlarm.getLastUpdatedTimestamp());
-        assertEquals(center, loadedAlarm.getCenter());
-        assertEquals(radius, loadedAlarm.getRadius());
+        // Check the WatchZone
+        assertEquals(createdTimestamp, loadedWatchZone.getCreatedTimestamp());
+        assertEquals(lastUpdatedTimestamp, loadedWatchZone.getLastUpdatedTimestamp());
+        assertEquals(center, loadedWatchZone.getCenter());
+        assertEquals(radius, loadedWatchZone.getRadius());
         // Check the SweepingAddresses
-        List<SweepingAddress> loadedSwAddresses = loadedAlarm.getSweepingAddresses();
+        List<SweepingAddress> loadedSwAddresses = loadedWatchZone.getSweepingAddresses();
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
@@ -212,12 +212,12 @@ public class TestAlarmFileHelper extends AndroidTestCase {
     }
 
     public void testMultipleAlarms() {
-        AlarmFileHelper helper = new AlarmFileHelper(mContext, mMockListener);
-        List<Alarm> alarms = helper.loadAlarms();
+        WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
+        List<WatchZone> watchZones = helper.loadAlarms();
 
-        assertEquals(0, alarms.size());
+        assertEquals(0, watchZones.size());
 
-        // Create a test alarm.
+        // Create a test watchZone.
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
@@ -225,7 +225,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         LatLng center = new LatLng(12,12);
         SweepingAddress swAddress = new SweepingAddress(center, address, limit);
 
-        // Create the alarm
+        // Create the watchZone
         long createdTimestamp = 1;
         long createdTimestamp2 = 2;
         long lastUpdatedTimestamp = 0;
@@ -233,15 +233,15 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
-        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
-        // Save the alarm.
+        // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(alarm);
-        helper.saveAlarm(alarm2);
+        helper.saveAlarm(watchZone);
+        helper.saveAlarm(watchZone2);
 
 
         boolean countedDown = false;
@@ -252,32 +252,32 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        Alarm loadedAlarm = helper.loadAlarm(createdTimestamp);
-        Alarm loadedAlarm2 = helper.loadAlarm(createdTimestamp2);
+        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone2 = helper.loadAlarm(createdTimestamp2);
 
-        alarms = helper.loadAlarms();
+        watchZones = helper.loadAlarms();
 
-        assertEquals(2, alarms.size());
+        assertEquals(2, watchZones.size());
 
-        // Check the Alarm
-        assertEquals(createdTimestamp, loadedAlarm.getCreatedTimestamp());
-        assertEquals(lastUpdatedTimestamp, loadedAlarm.getLastUpdatedTimestamp());
-        assertEquals(center, loadedAlarm.getCenter());
-        assertEquals(radius, loadedAlarm.getRadius());
+        // Check the WatchZone
+        assertEquals(createdTimestamp, loadedWatchZone.getCreatedTimestamp());
+        assertEquals(lastUpdatedTimestamp, loadedWatchZone.getLastUpdatedTimestamp());
+        assertEquals(center, loadedWatchZone.getCenter());
+        assertEquals(radius, loadedWatchZone.getRadius());
         // Check the SweepingAddresses
-        List<SweepingAddress> loadedSwAddresses = loadedAlarm.getSweepingAddresses();
+        List<SweepingAddress> loadedSwAddresses = loadedWatchZone.getSweepingAddresses();
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
         assertEquals(address, loadedSwAddress.getAddress());
 
-        // Check the Second Alarm
-        assertEquals(createdTimestamp2, loadedAlarm2.getCreatedTimestamp());
-        assertEquals(lastUpdatedTimestamp, loadedAlarm2.getLastUpdatedTimestamp());
-        assertEquals(center, loadedAlarm2.getCenter());
-        assertEquals(radius, loadedAlarm2.getRadius());
+        // Check the Second WatchZone
+        assertEquals(createdTimestamp2, loadedWatchZone2.getCreatedTimestamp());
+        assertEquals(lastUpdatedTimestamp, loadedWatchZone2.getLastUpdatedTimestamp());
+        assertEquals(center, loadedWatchZone2.getCenter());
+        assertEquals(radius, loadedWatchZone2.getRadius());
         // Check the SweepingAddresses
-        List<SweepingAddress> loadedSwAddresses2 = loadedAlarm2.getSweepingAddresses();
+        List<SweepingAddress> loadedSwAddresses2 = loadedWatchZone2.getSweepingAddresses();
         assertEquals(1, loadedSwAddresses2.size());
         SweepingAddress loadedSwAddress2 = loadedSwAddresses2.get(0);
         assertEquals(center, loadedSwAddress2.getLatLng());
@@ -285,12 +285,12 @@ public class TestAlarmFileHelper extends AndroidTestCase {
     }
 
     public void testDeleteAlarm() {
-        AlarmFileHelper helper = new AlarmFileHelper(mContext, mMockListener);
-        List<Alarm> alarms = helper.loadAlarms();
+        WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
+        List<WatchZone> watchZones = helper.loadAlarms();
 
-        assertEquals(0, alarms.size());
+        assertEquals(0, watchZones.size());
 
-        // Create a test alarm.
+        // Create a test watchZone.
         // Create the Limit
         Limit limit = createTestLimit();
 
@@ -299,7 +299,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         LatLng center = new LatLng(12,12);
         SweepingAddress swAddress = new SweepingAddress(center, address, limit);
 
-        // Create the alarm
+        // Create the watchZone
         long createdTimestamp = 1;
         long createdTimestamp2 = 2;
         long lastUpdatedTimestamp = 0;
@@ -307,16 +307,16 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
-        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
-        // Save the alarm.
+        // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(alarm);
-        helper.saveAlarm(alarm2);
-        helper.deleteAlarm(alarm2);
+        helper.saveAlarm(watchZone);
+        helper.saveAlarm(watchZone2);
+        helper.deleteAlarm(watchZone2);
 
 
         boolean countedDown = false;
@@ -328,37 +328,37 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        Alarm loadedAlarm = helper.loadAlarm(createdTimestamp);
-        Alarm loadedAlarm2 = helper.loadAlarm(createdTimestamp2);
+        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone2 = helper.loadAlarm(createdTimestamp2);
 
-        alarms = helper.loadAlarms();
+        watchZones = helper.loadAlarms();
 
-        assertEquals(1, alarms.size());
+        assertEquals(1, watchZones.size());
 
-        // Check the Alarm
-        assertEquals(createdTimestamp, loadedAlarm.getCreatedTimestamp());
-        assertEquals(lastUpdatedTimestamp, loadedAlarm.getLastUpdatedTimestamp());
-        assertEquals(center, loadedAlarm.getCenter());
-        assertEquals(radius, loadedAlarm.getRadius());
+        // Check the WatchZone
+        assertEquals(createdTimestamp, loadedWatchZone.getCreatedTimestamp());
+        assertEquals(lastUpdatedTimestamp, loadedWatchZone.getLastUpdatedTimestamp());
+        assertEquals(center, loadedWatchZone.getCenter());
+        assertEquals(radius, loadedWatchZone.getRadius());
         // Check the SweepingAddresses
-        List<SweepingAddress> loadedSwAddresses = loadedAlarm.getSweepingAddresses();
+        List<SweepingAddress> loadedSwAddresses = loadedWatchZone.getSweepingAddresses();
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
         assertEquals(address, loadedSwAddress.getAddress());
 
-        // Check the Second Alarm
-        assertNull(loadedAlarm2);
+        // Check the Second WatchZone
+        assertNull(loadedWatchZone2);
     }
 
     public void testMultipleHelpers() {
-        AlarmFileHelper helper = new AlarmFileHelper(mContext, null);
-        AlarmFileHelper helper2 = new AlarmFileHelper(mContext, mMockListener);
-        List<Alarm> alarms = helper.loadAlarms();
+        WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, null);
+        WatchZoneFileHelper helper2 = new WatchZoneFileHelper(mContext, mMockListener);
+        List<WatchZone> watchZones = helper.loadAlarms();
 
-        assertEquals(0, alarms.size());
+        assertEquals(0, watchZones.size());
 
-        // Create a test alarm.
+        // Create a test watchZone.
         // Create the Limit
         Limit limit = createTestLimit();
 
@@ -367,7 +367,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         LatLng center = new LatLng(12,12);
         SweepingAddress swAddress = new SweepingAddress(center, address, limit);
 
-        // Create the alarm
+        // Create the watchZone
         long createdTimestamp = 1;
         long createdTimestamp2 = 2;
         long lastUpdatedTimestamp = 0;
@@ -375,16 +375,16 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        Alarm alarm = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
-        Alarm alarm2 = new Alarm(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
                 sweepingAddresses);
 
-        // Save the alarm.
+        // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(alarm);
-        helper.saveAlarm(alarm2);
-        helper.deleteAlarm(alarm2);
+        helper.saveAlarm(watchZone);
+        helper.saveAlarm(watchZone2);
+        helper.deleteAlarm(watchZone2);
 
 
         boolean countedDown = false;
@@ -396,7 +396,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        Alarm loadedAlarm = helper2.loadAlarm(createdTimestamp);
-        assertNotNull(loadedAlarm);
+        WatchZone loadedWatchZone = helper2.loadAlarm(createdTimestamp);
+        assertNotNull(loadedWatchZone);
     }
 }

@@ -187,7 +187,7 @@ public class LocationUtils {
                 addresses = geocoder.getFromLocation(
                         latLng.latitude,
                         latLng.longitude,
-                        10);
+                        1);
             } catch (IOException ioException) {
                 // TODO: Catch network or other I/O problems.
             } catch (IllegalArgumentException illegalArgumentException) {

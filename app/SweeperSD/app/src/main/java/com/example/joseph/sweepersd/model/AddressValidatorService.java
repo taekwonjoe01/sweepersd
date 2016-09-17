@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.model.alarms.Alarm;
-import com.example.joseph.sweepersd.model.alarms.AlarmManager;
+import com.example.joseph.sweepersd.model.watchzone.WatchZone;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneManager;
 import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
 import com.example.joseph.sweepersd.utils.LocationUtils;
@@ -106,14 +106,14 @@ public class AddressValidatorService extends IntentService {
 
         Log.i(TAG, "Finishing " + TAG);
 
-        AlarmManager manager = new AlarmManager(this);
+        WatchZoneManager manager = new WatchZoneManager(this);
         Set<Long> alarmIds = manager.getAlarms();
         for (Long id : alarmIds) {
-            Alarm alarm = manager.getAlarm(id);
+            WatchZone watchZone = manager.getAlarm(id);
 
-            // This will resave the alarm, and if it's currently being updated,
+            // This will resave the watchZone, and if it's currently being updated,
             // the update will restart.
-            manager.updateAlarm(alarm.getCreatedTimestamp(), alarm.getCenter(), alarm.getRadius());
+            manager.updateAlarm(watchZone.getCreatedTimestamp(), watchZone.getCenter(), watchZone.getRadius());
         }
 
         publishFinished();

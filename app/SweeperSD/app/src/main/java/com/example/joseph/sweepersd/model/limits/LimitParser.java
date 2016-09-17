@@ -107,7 +107,7 @@ public class LimitParser {
                     if (schedulesForDay.isEmpty()) {
                         for (int j = 1; j < 5; j++) {
                             schedulesForDay.add(
-                                    new LimitSchedule(startTime, endTime, weekdayNumber, i));
+                                    new LimitSchedule(startTime, endTime, weekdayNumber, j));
                         }
                     }
                     results.addAll(schedulesForDay);

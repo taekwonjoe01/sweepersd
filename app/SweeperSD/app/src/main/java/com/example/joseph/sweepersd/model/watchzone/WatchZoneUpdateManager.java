@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.Context;
 
@@ -12,9 +12,9 @@ import java.util.Set;
 /**
  * Created by joseph on 9/2/16.
  */
-public class AlarmUpdateManager {
+public class WatchZoneUpdateManager {
     public static final int INVALID_PROGRESS = -1;
-    private static AlarmUpdateManager sInstance;
+    private static WatchZoneUpdateManager sInstance;
 
     private final Context mContext;
     private HashMap<Long, AlarmUpdater> mAlarmStatuses = new HashMap<>();
@@ -27,7 +27,7 @@ public class AlarmUpdateManager {
     }
 
     interface AlarmUpdater {
-        void updateAlarm(Alarm alarm, AlarmProgressListener listener);
+        void updateAlarm(WatchZone watchZone, AlarmProgressListener listener);
         int getProgress();
     }
 
@@ -36,10 +36,10 @@ public class AlarmUpdateManager {
         void onAlarmUpdateComplete(long createdTimestamp);
     }
 
-    private AlarmUpdateManager(Context context) {
+    private WatchZoneUpdateManager(Context context) {
         mContext = context;
 
-        mAlarmUpdaterFactory = new ServiceAlarmUpdaterFactory(mContext);
+        mAlarmUpdaterFactory = new ServiceWatchZoneUpdaterFactory(mContext);
     }
 
     /**
@@ -47,7 +47,7 @@ public class AlarmUpdateManager {
      */
     void setAlarmUpdaterFactory(AlarmUpdaterFactory factory) {
         if (factory == null) {
-            mAlarmUpdaterFactory = new ServiceAlarmUpdaterFactory(mContext);
+            mAlarmUpdaterFactory = new ServiceWatchZoneUpdaterFactory(mContext);
         } else {
             mAlarmUpdaterFactory = factory;
         }
@@ -73,20 +73,20 @@ public class AlarmUpdateManager {
         }
     }
 
-    public static AlarmUpdateManager getInstance(Context context) {
+    public static WatchZoneUpdateManager getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new AlarmUpdateManager(context.getApplicationContext());
+            sInstance = new WatchZoneUpdateManager(context.getApplicationContext());
         }
         return sInstance;
     }
 
-    public boolean updateAlarm(Alarm alarm) {
-        if (mAlarmStatuses.containsKey(alarm.getCreatedTimestamp())) {
+    public boolean updateAlarm(WatchZone watchZone) {
+        if (mAlarmStatuses.containsKey(watchZone.getCreatedTimestamp())) {
             return false;
         } else {
             AlarmUpdater updater = mAlarmUpdaterFactory.createNewAlarmUpdater();
-            mAlarmStatuses.put(alarm.getCreatedTimestamp(), updater);
-            updater.updateAlarm(alarm, mProgressListener);
+            mAlarmStatuses.put(watchZone.getCreatedTimestamp(), updater);
+            updater.updateAlarm(watchZone, mProgressListener);
             return true;
         }
     }

@@ -7,11 +7,11 @@ import android.view.View;
 /**
  * Created by joseph on 6/8/16.
  */
-public class AlarmViewItemDecoration extends RecyclerView.ItemDecoration {
+public class WatchZoneViewItemDecoration extends RecyclerView.ItemDecoration {
 
     private final int mVerticalSpaceHeight;
 
-    public AlarmViewItemDecoration(int mVerticalSpaceHeight) {
+    public WatchZoneViewItemDecoration(int mVerticalSpaceHeight) {
         this.mVerticalSpaceHeight = mVerticalSpaceHeight;
     }
 

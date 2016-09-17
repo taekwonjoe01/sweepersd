@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,8 +28,8 @@ import java.util.concurrent.Semaphore;
 /**
  * Helper class for loading and saving alarms to disk.
  */
-public class AlarmFileHelper {
-    private static final String TAG = AlarmFileHelper.class.getSimpleName();
+public class WatchZoneFileHelper {
+    private static final String TAG = WatchZoneFileHelper.class.getSimpleName();
 
     private static final String FILE_SWEEPING_LOCATIONS = "sweeping_locations.txt";
     private static final String FILE_ALARM_DETAILS = "alarm_details.txt";
@@ -53,7 +53,7 @@ public class AlarmFileHelper {
         void onAlarmDeleted(long createdTimestamp);
     }
 
-    public AlarmFileHelper(Context context, AlarmUpdateListener listener) {
+    public WatchZoneFileHelper(Context context, AlarmUpdateListener listener) {
         mContext = context;
         mAlarmUpdateListener = new WeakReference<>(listener);
 
@@ -72,8 +72,8 @@ public class AlarmFileHelper {
         mAlarmUpdateListener = new WeakReference<>(listener);
     }
 
-    public List<Alarm> loadAlarms() {
-        List<Alarm> results = new ArrayList<>();
+    public List<WatchZone> loadAlarms() {
+        List<WatchZone> results = new ArrayList<>();
 
         File alarmsDir = new File(getAlarmDirPath(mContext));
         File[] alarmDirs = null;
@@ -90,18 +90,18 @@ public class AlarmFileHelper {
 
         if (alarmDirs != null) {
             for (File alarmDir : alarmDirs) {
-                Alarm alarm = loadAlarm(Long.parseLong(alarmDir.getName()));
-                if (alarm != null) {
-                    results.add(alarm);
+                WatchZone watchZone = loadAlarm(Long.parseLong(alarmDir.getName()));
+                if (watchZone != null) {
+                    results.add(watchZone);
                 } else {
-                    Log.e(TAG, "Alarm was corrupt. " + alarmDir.getName());
+                    Log.e(TAG, "WatchZone was corrupt. " + alarmDir.getName());
                 }
             }
         }
         return results;
     }
 
-    public Alarm loadAlarm(long createdTimestamp) {
+    public WatchZone loadAlarm(long createdTimestamp) {
         AlarmBuilder builder = new AlarmBuilder();
         try {
             mSemaphore.acquire();
@@ -159,8 +159,11 @@ public class AlarmFileHelper {
                                     stub.latitude = Double.parseDouble(latLngData.split(",")[0]);
                                     stub.longitude = Double.parseDouble(latLngData.split(",")[1]);
 
-                                    stub.address = parsings[1];
-                                    stub.limitId = Integer.parseInt(parsings[2]);
+                                    String address = parsings[1];
+                                    stub.address = TextUtils.isEmpty(address) ? "" : address;
+                                    String limitId = parsings[2];
+                                    stub.limitId = TextUtils.isEmpty(limitId) ? -1 :
+                                            Integer.parseInt(parsings[2]);
 
                                     builder.positionStubs.add(stub);
                                 }
@@ -184,10 +187,10 @@ public class AlarmFileHelper {
         return builder.build();
     }
 
-    public boolean saveAlarm(Alarm alarm) {
+    public boolean saveAlarm(WatchZone watchZone) {
         boolean result = false;
 
-        Long tsLong = alarm.getCreatedTimestamp();
+        Long tsLong = watchZone.getCreatedTimestamp();
         String ts = tsLong.toString();
         try {
             mSemaphore.acquire();
@@ -211,31 +214,32 @@ public class AlarmFileHelper {
                     FileWriter ADwriter = new FileWriter(alarmDetailsFile);
 
                     if (ADwriter != null) {
-                        String LatLng = alarm.getCenter().latitude + "," +
-                                alarm.getCenter().longitude;
+                        String LatLng = watchZone.getCenter().latitude + "," +
+                                watchZone.getCenter().longitude;
                         ADwriter.write(LatLng + "\n");
 
-                        if (TextUtils.isEmpty(alarm.getAddress())) {
+                        if (TextUtils.isEmpty(watchZone.getAddress())) {
                             ADwriter.write("Unknown" + "\n");
                         } else {
-                            ADwriter.write(alarm.getAddress() + "\n");
+                            ADwriter.write(watchZone.getAddress() + "\n");
                         }
 
-                        ADwriter.write(alarm.getRadius() + "\n");
+                        ADwriter.write(watchZone.getRadius() + "\n");
 
-                        ADwriter.write(alarm.getLastUpdatedTimestamp() + "\n");
+                        ADwriter.write(watchZone.getLastUpdatedTimestamp() + "\n");
 
                         ADwriter.close();
                     }
 
-                    if (alarm.getSweepingAddresses() != null) {
+                    if (watchZone.getSweepingAddresses() != null) {
                         FileWriter SLwriter = new FileWriter(sweepingLocationsFile);
                         if (SLwriter != null) {
-                            for (SweepingAddress pos : alarm.getSweepingAddresses()) {
+                            for (SweepingAddress pos : watchZone.getSweepingAddresses()) {
                                 String LatLng = pos.getLatLng().latitude + "," +
                                         pos.getLatLng().longitude;
-                                String address = pos.getAddress();
-                                String limitId = pos.getLimit().getId() + "";
+                                String address = pos.getAddress() == null ? "" : pos.getAddress();
+                                String limitId = pos.getLimit() == null ? "" :
+                                        pos.getLimit().getId() + "";
 
                                 SLwriter.write(LatLng + SEPARATOR_SWEEPING_LOCATIONS +
                                         address + SEPARATOR_SWEEPING_LOCATIONS +
@@ -244,6 +248,8 @@ public class AlarmFileHelper {
 
                             SLwriter.close();
                         }
+                    } else {
+                        sweepingLocationsFile.delete();
                     }
                     result = true;
                     sendAlarmUpdatedBroadcast(tsLong);
@@ -261,10 +267,10 @@ public class AlarmFileHelper {
         return result;
     }
 
-    public boolean deleteAlarm(Alarm alarm) {
+    public boolean deleteAlarm(WatchZone watchZone) {
         boolean result = false;
 
-        Long tsLong = alarm.getCreatedTimestamp();
+        Long tsLong = watchZone.getCreatedTimestamp();
         String ts = tsLong.toString();
         try {
             Log.e("Joey", "Before acquire");
@@ -349,8 +355,8 @@ public class AlarmFileHelper {
 
         List<SweepingPositionStub> positionStubs;
 
-        Alarm build() {
-            Alarm result = null;
+        WatchZone build() {
+            WatchZone result = null;
             if (createdTimestamp < 0 || lastUpdatedTimestamp < 0 || latitude == Double.MIN_VALUE ||
                     longitude == Double.MIN_VALUE || radius < 0) {
                 String error = "createdTimestamp=" + createdTimestamp +
@@ -358,22 +364,20 @@ public class AlarmFileHelper {
                         "latitude=" + latitude +
                         "longitude=" + longitude +
                         "radius=" + radius;
-                Log.e(TAG, "Attempted to build an Alarm but failed:\n" + error);
+                Log.e(TAG, "Attempted to build an WatchZone but failed:\n" + error);
             } else {
                 List<SweepingAddress> sweepingAddresses = new ArrayList<>();
                 LimitDbHelper helper = new LimitDbHelper(mContext);
                 if (positionStubs != null) {
                     for (SweepingPositionStub stub : positionStubs) {
                         Limit limit = helper.getLimitForId(stub.limitId);
-                        if (limit != null) {
-                            LatLng latLng = new LatLng(stub.latitude, stub.longitude);
-                            sweepingAddresses.add(new SweepingAddress(latLng, stub.address, limit));
-                        }
+                        LatLng latLng = new LatLng(stub.latitude, stub.longitude);
+                        sweepingAddresses.add(new SweepingAddress(latLng, stub.address, limit));
                     }
                 }
 
                 LatLng center = new LatLng(latitude, longitude);
-                result = new Alarm(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+                result = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
                         sweepingAddresses);
             }
 

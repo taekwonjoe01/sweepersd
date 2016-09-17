@@ -18,18 +18,17 @@ import android.widget.Toast;
 import com.example.joseph.sweepersd.MapsActivity;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.AddressValidatorManager;
-import com.example.joseph.sweepersd.model.alarms.AlarmManager;
 import com.google.android.gms.maps.model.LatLng;
 
-public class AlarmViewActivity extends AppCompatActivity implements
+public class WatchZoneViewActivity extends AppCompatActivity implements
         AddressValidatorManager.ValidatorProgressListener{
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
     private static final int CREATE_ALARM_CODE = 1;
 
     private RecyclerView mRecyclerView;
-    private AlarmViewAdapter mAdapter;
+    private WatchZoneViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private AlarmViewItemDecoration mAlarmViewItemDecoration;
+    private WatchZoneViewItemDecoration mWatchZoneViewItemDecoration;
 
     private Menu mOptionsMenu;
 
@@ -45,9 +44,9 @@ public class AlarmViewActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(AlarmViewActivity.this, "Add Alarm", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WatchZoneViewActivity.this, "Add WatchZone", Toast.LENGTH_SHORT).show();
                 startActivityForResult(
-                        new Intent(AlarmViewActivity.this, MapsActivity.class), CREATE_ALARM_CODE);
+                        new Intent(WatchZoneViewActivity.this, MapsActivity.class), CREATE_ALARM_CODE);
             }
         });
 
@@ -57,11 +56,13 @@ public class AlarmViewActivity extends AppCompatActivity implements
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         int itemMargin = getResources().getDimensionPixelSize(R.dimen.alarm_view_item_space);
-        mAlarmViewItemDecoration = new AlarmViewItemDecoration(itemMargin);
+        mWatchZoneViewItemDecoration = new WatchZoneViewItemDecoration(itemMargin);
 
-        mRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
+        mRecyclerView.addItemDecoration(mWatchZoneViewItemDecoration);
 
-        mAdapter = new AlarmViewAdapter(this, new AlarmManager(this));
+        mAdapter = new WatchZoneViewAdapter(this);
+
+        setTitle("Watch Zones");
 
         RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {
@@ -132,11 +133,11 @@ public class AlarmViewActivity extends AppCompatActivity implements
 
     private void setValidatorProgress(int progress) {
         MenuItem progressItem = mOptionsMenu.findItem(R.id.validator_progress);
-        if (progress == AddressValidatorManager.INVALID_PROGRESS) {
-            progressItem.setTitle("");
-        } else {
-            String p = String.format("Updating DB: %d%%", progress);
+        String p = "";
+        if (progress != AddressValidatorManager.INVALID_PROGRESS) {
+            p = String.format("Updating DB: %d%%", progress);
         }
+        progressItem.setTitle(p);
     }
 
     private void setAdapter() {

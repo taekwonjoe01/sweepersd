@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,10 +18,12 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.AddressValidatorManager;
-import com.example.joseph.sweepersd.model.alarms.Alarm;
-import com.example.joseph.sweepersd.model.alarms.AlarmManager;
-import com.example.joseph.sweepersd.model.alarms.AlarmUpdateManager;
+import com.example.joseph.sweepersd.model.watchzone.WatchZone;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneManager;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneUpdateManager;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,35 +31,23 @@ import java.util.List;
 /**
  * Adapter for showing manual Alarms.
  */
-public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.ViewHolder> {
-    private static final String TAG = AlarmViewAdapter.class.getSimpleName();
+public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdapter.ViewHolder> {
+    private static final String TAG = WatchZoneViewAdapter.class.getSimpleName();
 
     private final Context mContext;
-    private final AlarmManager mAlarmManager;
+    private WatchZoneManager mWatchZoneManager;
     private final List<AlarmPresenter> mAlarmPresenters;
 
-    public AlarmViewAdapter(Context context, AlarmManager alarmManager) {
+    public WatchZoneViewAdapter(Context context) {
         mContext = context;
-        mAlarmManager = alarmManager;
-        mAlarmManager.addAlarmChangeListener(mAlarmChangeListener);
         mAlarmPresenters = new ArrayList<>();
-        for (Long createdTimestamp : mAlarmManager.getAlarms()) {
-            Alarm alarm = mAlarmManager.getAlarm(createdTimestamp);
-            if (mAlarmManager.getUpdatingAlarms().contains(createdTimestamp)) {
-                UpdatingPresenter presenter = new UpdatingPresenter(
-                        mAlarmPresenters.size(), alarm);
-                mAlarmPresenters.add(presenter);
-            } else {
-                NonUpdatingAlarmPresenter presenter =
-                        new NonUpdatingAlarmPresenter(mAlarmPresenters.size(), alarm);
-                mAlarmPresenters.add(presenter);
-            }
-        }
+
+        new LoadAlarmsTask().execute();
     }
 
     @Override
-    public AlarmViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
+    public WatchZoneViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                              int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_alarm_list_item, parent, false);
 
@@ -67,12 +59,13 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         AlarmPresenter presenter = mAlarmPresenters.get(position);
         holder.mAlarmAddress.setText(presenter.getTitle());
-        holder.mNextSweeping.setText(presenter.getDescription());
+        holder.mRadius.setText(presenter.getRadius());
+        holder.mStatus.setText(presenter.getStatus());
 
         holder.mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Show alarm details", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Show watchZone details", Toast.LENGTH_SHORT).show();
             }
         };
         holder.mLongClickListener = new View.OnLongClickListener() {
@@ -81,17 +74,25 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 /*AlarmPresenter presenter = mAlarmPresenters.get(position);
                 presenter.setDeleted();
                 mAlarmPresenters.remove(presenter);
-                mAlarmManager.removeAlarm(presenter.alarm);*/
-                mAlarmManager.deleteAlarm(mAlarmPresenters.get(position).alarm.getCreatedTimestamp());
-                Toast.makeText(v.getContext(), "Delete alarm", Toast.LENGTH_SHORT).show();
+                mWatchZoneManager.removeAlarm(presenter.watchZone);*/
+                mWatchZoneManager.deleteAlarm(mAlarmPresenters.get(position).watchZone.getCreatedTimestamp());
+                Toast.makeText(v.getContext(), "Delete watchZone", Toast.LENGTH_SHORT).show();
                 return true;
             }
         };
+        holder.mRefreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mWatchZoneManager.refreshAlarm(mAlarmPresenters.get(position).watchZone.getCreatedTimestamp());
+            }
+        });
         if (presenter instanceof NonUpdatingAlarmPresenter) {
             holder.mLimitRecyclerView.setVisibility(View.VISIBLE);
+            holder.mStatus.setVisibility(View.GONE);
             holder.mLimitRecyclerView.setAdapter(((NonUpdatingAlarmPresenter) presenter).adapter);
         } else {
             holder.mLimitRecyclerView.setVisibility(View.GONE);
+            holder.mStatus.setVisibility(View.VISIBLE);
             holder.mLimitRecyclerView.setAdapter(null);
         }
     }
@@ -102,17 +103,17 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     }
 
     public void createAlarm(LatLng location, int radius) {
-        mAlarmManager.createAlarm(location, radius);
+        mWatchZoneManager.createAlarm(location, radius);
     }
 
-    private AlarmManager.AlarmChangeListener mAlarmChangeListener =
-            new AlarmManager.AlarmChangeListener() {
+    private WatchZoneManager.AlarmChangeListener mAlarmChangeListener =
+            new WatchZoneManager.AlarmChangeListener() {
         @Override
         public void onAlarmUpdated(Long createdTimestamp) {
             Log.d(TAG, "onAlarmUpdated " + createdTimestamp);
             for (AlarmPresenter p : mAlarmPresenters) {
-                if (p.alarm.getCreatedTimestamp() == createdTimestamp) {
-                    p.alarm = mAlarmManager.getAlarm(createdTimestamp);
+                if (p.watchZone.getCreatedTimestamp() == createdTimestamp) {
+                    p.watchZone = mWatchZoneManager.getAlarm(createdTimestamp);
                 }
             }
             notifyDataSetChanged();
@@ -122,7 +123,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         public void onAlarmCreated(Long createdTimestamp) {
             Log.d(TAG, "onAlarmCreated " + createdTimestamp);
             UpdatingPresenter presenter = new UpdatingPresenter(
-                    mAlarmPresenters.size(), mAlarmManager.getAlarm(createdTimestamp));
+                    mAlarmPresenters.size(), mWatchZoneManager.getAlarm(createdTimestamp));
             mAlarmPresenters.add(presenter);
 
             notifyDataSetChanged();
@@ -134,7 +135,7 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
             int position = -1;
             for (int i = 0; i < mAlarmPresenters.size(); i++) {
                 AlarmPresenter p = mAlarmPresenters.get(i);
-                if (p.alarm.getCreatedTimestamp() == createdTimestamp) {
+                if (p.watchZone.getCreatedTimestamp() == createdTimestamp) {
                     position = i;
                 }
             }
@@ -149,11 +150,11 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     };
 
     /*public class LoadAlarmSweepingPositionsTask extends AsyncTask<Void, String, List<SweepingAddress>> {
-        private Alarm mAlarm;
+        private WatchZone mAlarm;
         private UpdatingPresenter mAlarmPresenter;
 
-        public LoadAlarmSweepingPositionsTask(UpdatingPresenter alarmPresenter, Alarm alarm) {
-            mAlarm = alarm;
+        public LoadAlarmSweepingPositionsTask(UpdatingPresenter alarmPresenter, WatchZone watchZone) {
+            mAlarm = watchZone;
             mAlarmPresenter = alarmPresenter;
         }
 
@@ -201,105 +202,60 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
                 notifyItemChanged(mAlarmPresenter.position);
 
                 mAlarm.setSweepingAddresses(sweepingAddresses);
-                //mAlarmManager.saveAlarm(mAlarm);
+                //mWatchZoneManager.saveAlarm(mAlarm);
 
-                //new LoadLimitsTask(newPresenter, mAlarm).execute();
+                //new LoadAlarmsTask(newPresenter, mAlarm).execute();
             }
             super.onPostExecute(sweepingAddresses);
         }
     }*/
 
-    /*public class LoadLimitsTask extends AsyncTask<Void, String, HashMap<SweepingAddress, Limit>> {
-        private final Alarm mAlarm;
-        private LoadingLimitsPresenter mAlarmPresenter;
-        private String mDescriptionResult;
+    public class LoadAlarmsTask extends AsyncTask<Void, Void, Void> {
 
-        public LoadLimitsTask(LoadingLimitsPresenter alarmPresenter, Alarm alarm) {
-            mAlarm = alarm;
-            mAlarmPresenter = alarmPresenter;
+        public LoadAlarmsTask() {
         }
 
         @Override
-        protected HashMap<SweepingAddress, Limit> doInBackground(Void... params) {
-            HashMap<SweepingAddress, Limit> results = new HashMap<>();
-            for (int i = 0; i < mAlarm.getSweepingAddresses().size(); i++) {
-                SweepingAddress position = mAlarm.getSweepingAddresses().get(i);
+        protected Void doInBackground(Void... params) {
+            mWatchZoneManager = new WatchZoneManager(mContext);
+            mWatchZoneManager.addAlarmChangeListener(mAlarmChangeListener);
 
-                if (mAlarmPresenter.isDeleted || isCancelled()) {
-                    return null;
-                }
-                int progress =
-                        (int) (((double)i / (double)mAlarm.getSweepingAddresses().size()) * 50);
-                String progressUpdate = String.format("Loading limit information: %d%%", progress);
-                publishProgress(progressUpdate);
-
-                Limit limit = LocationUtils.findLimitForAddress(position.getAddress());
-                results.put(position, limit);
-            }
-
-            GregorianCalendar nextSweepingTime = null;
-            for (int i = 0; i < mAlarm.getSweepingAddresses().size(); i++) {
-                SweepingAddress position = mAlarm.getSweepingAddresses().get(i);
-
-                if (mAlarmPresenter.isDeleted || isCancelled()) {
-                    return null;
-                }
-                int progress =
-                     50 + (int) (((double)i / (double)mAlarm.getSweepingAddresses().size()) * 50);
-                String progressUpdate = String.format("Finding next sweeping date: %d%%", progress);
-                publishProgress(progressUpdate);
-
-                List<GregorianCalendar> sweepingDays = LocationUtils.getSweepingDaysForLimit(
-                        LocationUtils.findLimitForAddress(position.getAddress()), 31);
-                if (!sweepingDays.isEmpty()) {
-                    GregorianCalendar potentialNew = sweepingDays.get(0);
-                    if (nextSweepingTime == null ||
-                            potentialNew.getTime().getTime() < nextSweepingTime.getTime().getTime()) {
-                        nextSweepingTime = potentialNew;
-                    }
-                }
-            }
-            if (nextSweepingTime != null) {
-                SimpleDateFormat fmt = new SimpleDateFormat("EEEE, MMMM d 'at' ha");
-                fmt.setCalendar(nextSweepingTime);
-                mDescriptionResult = fmt.format(nextSweepingTime.getTime());
-            }
-            return results;
+            return null;
         }
-
         @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            mAlarmPresenter.setProgress(values[0]);
-        }
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            for (Long createdTimestamp : mWatchZoneManager.getAlarms()) {
+                WatchZone watchZone = mWatchZoneManager.getAlarm(createdTimestamp);
 
-        @Override
-        protected void onPostExecute(HashMap<SweepingAddress, Limit> results) {
-            if (!mAlarmPresenter.isDeleted && !isCancelled() && results != null) {
-                NonUpdatingAlarmPresenter newPresenter =
-                        new NonUpdatingAlarmPresenter(mAlarmPresenter.position, mAlarm, results,
-                                mDescriptionResult);
-                mAlarmPresenters.remove(mAlarmPresenter.position);
-                mAlarmPresenters.add(mAlarmPresenter.position, newPresenter);
-                notifyItemChanged(mAlarmPresenter.position);
+                if (mWatchZoneManager.getUpdatingAlarms().contains(createdTimestamp)) {
+                    UpdatingPresenter presenter = new UpdatingPresenter(
+                            mAlarmPresenters.size(), watchZone);
+                    mAlarmPresenters.add(presenter);
+                } else {
+                    NonUpdatingAlarmPresenter presenter =
+                            new NonUpdatingAlarmPresenter(mAlarmPresenters.size(), watchZone);
+                    mAlarmPresenters.add(presenter);
+                }
             }
-            super.onPostExecute(results);
+            notifyDataSetChanged();
         }
-    }*/
+    }
 
     abstract class AlarmPresenter {
         int position;
-        Alarm alarm;
+        WatchZone watchZone;
         boolean isDeleted;
 
-        AlarmPresenter(int position, Alarm alarm) {
+        AlarmPresenter(int position, WatchZone watchZone) {
             this.position = position;
-            this.alarm = alarm;
+            this.watchZone = watchZone;
             isDeleted = false;
         }
 
         abstract String getTitle();
-        abstract String getDescription();
+        abstract String getRadius();
+        abstract String getStatus();
 
         public void setDeleted() {
             isDeleted = true;
@@ -307,78 +263,88 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
     }
 
     class UpdatingPresenter extends AlarmPresenter implements
-            AlarmUpdateManager.AlarmProgressListener {
-        String progress = "Refreshing alarm location. Progress: 0%";
+            WatchZoneUpdateManager.AlarmProgressListener {
+        String progress = "Refreshing watchZone location. \nProgress: 0%";
 
-        UpdatingPresenter(int position, Alarm alarm) {
-            super(position, alarm);
-            mAlarmManager.addAlarmProgressListener(this);
-            setProgress(mAlarmManager.getProgressForAlarm(alarm.getCreatedTimestamp()));
+        UpdatingPresenter(int position, WatchZone watchZone) {
+            super(position, watchZone);
+            mWatchZoneManager.addAlarmProgressListener(this);
+            setProgress(mWatchZoneManager.getProgressForAlarm(watchZone.getCreatedTimestamp()));
         }
 
         @Override
         String getTitle() {
-            if (TextUtils.isEmpty(alarm.getAddress()) || "Unknown".equals(alarm.getAddress())) {
+            if (TextUtils.isEmpty(watchZone.getAddress()) || "Unknown".equals(watchZone.getAddress())) {
                 return "Fetching address...";
             }
-            return alarm.getAddress();
+            return WordUtils.capitalize(watchZone.getAddress());
         }
 
         @Override
-        String getDescription() {
+        String getRadius() {
+            return watchZone.getRadius() + "ft radius";
+        }
+
+        @Override
+        String getStatus() {
             return progress;
         }
 
         void setProgress(int progress) {
-            this.progress = String.format("Refreshing alarm location. Progress: %d%%", progress);
+            this.progress = String.format("Refreshing watchZone location. \nProgress: %d%%", progress);
             notifyItemChanged(this.position);
         }
 
         @Override
         public void onAlarmUpdateComplete(long createdTimestamp) {
             if (mAlarmPresenters.contains(this) &&
-                    createdTimestamp == this.alarm.getCreatedTimestamp()) {
+                    createdTimestamp == this.watchZone.getCreatedTimestamp()) {
                 NonUpdatingAlarmPresenter newPresenter =
-                        new NonUpdatingAlarmPresenter(this.position, this.alarm);
+                        new NonUpdatingAlarmPresenter(this.position, this.watchZone);
                 mAlarmPresenters.remove(this.position);
                 mAlarmPresenters.add(this.position, newPresenter);
                 notifyItemChanged(this.position);
 
-                mAlarmManager.removeAlarmProgressListener(this);
+                mWatchZoneManager.removeAlarmProgressListener(this);
             }
         }
 
         @Override
         public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
-            if (createdTimestamp == this.alarm.getCreatedTimestamp()) {
+            if (createdTimestamp == this.watchZone.getCreatedTimestamp()) {
                 setProgress(progress);
             }
         }
     }
 
     class NonUpdatingAlarmPresenter extends AlarmPresenter implements
-            AlarmUpdateManager.AlarmProgressListener{
-        Alarm alarm;
+            WatchZoneUpdateManager.AlarmProgressListener{
+        WatchZone watchZone;
 
         LimitViewAdapter adapter;
 
-        NonUpdatingAlarmPresenter(int position, Alarm alarm) {
-            super(position, alarm);
-            this.alarm = alarm;
+        NonUpdatingAlarmPresenter(int position, WatchZone watchZone) {
+            super(position, watchZone);
+            this.watchZone = watchZone;
 
-            this.adapter = new LimitViewAdapter(mContext, this.alarm);
+            this.adapter = new LimitViewAdapter(mContext, this.watchZone);
 
-            mAlarmManager.addAlarmProgressListener(this);
+            mWatchZoneManager.addAlarmProgressListener(this);
         }
 
         @Override
         String getTitle() {
-            return alarm.getAddress();
+            return WordUtils.capitalize(watchZone.getAddress());
         }
 
         @Override
-        String getDescription() {
-            if (alarm.getSweepingAddresses().isEmpty()) {
+        String getRadius() {
+            return watchZone.getRadius() + "ft radius";
+        }
+
+        @Override
+        String getStatus() {
+            if (watchZone.getSweepingAddresses().isEmpty()) {
                 if (AddressValidatorManager.getInstance(mContext).getValidationProgress()
                         != AddressValidatorManager.INVALID_PROGRESS) {
                     return "Database update in progress, please wait.";
@@ -397,15 +363,15 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         @Override
         public void onAlarmUpdateProgress(long createdTimestamp, int progress) {
             if (mAlarmPresenters.contains(this) &&
-                    createdTimestamp == this.alarm.getCreatedTimestamp()) {
+                    createdTimestamp == this.watchZone.getCreatedTimestamp()) {
                 UpdatingPresenter newPresenter =
-                        new UpdatingPresenter(this.position, this.alarm);
+                        new UpdatingPresenter(this.position, this.watchZone);
                 newPresenter.setProgress(progress);
                 mAlarmPresenters.remove(this.position);
                 mAlarmPresenters.add(this.position, newPresenter);
                 notifyItemChanged(this.position);
 
-                mAlarmManager.removeAlarmProgressListener(this);
+                mWatchZoneManager.removeAlarmProgressListener(this);
             }
         }
     }
@@ -415,20 +381,24 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
         private final Context mContext;
 
         public TextView mAlarmAddress;
-        public TextView mNextSweeping;
+        public TextView mRadius;
+        public TextView mStatus;
+        public Button mRefreshButton;
         private FrameLayout mViewLayout;
         public View.OnLongClickListener mLongClickListener;
         public View.OnClickListener mOnClickListener;
 
         public RecyclerView mLimitRecyclerView;
         private RecyclerView.LayoutManager mLayoutManager;
-        private AlarmViewItemDecoration mAlarmViewItemDecoration;
+        private WatchZoneViewItemDecoration mLimitViewItemDecoration;
 
         public ViewHolder(Context context, View v) {
             super(v);
             mContext = context;
             mAlarmAddress = (TextView) v.findViewById(R.id.textview_alarm_address);
-            mNextSweeping = (TextView) v.findViewById(R.id.textview_alarm_next_sweep);
+            mRadius = (TextView) v.findViewById(R.id.textview_alarm_radius);
+            mStatus = (TextView) v.findViewById(R.id.textview_status);
+            mRefreshButton = (Button) v.findViewById(R.id.button_refresh);
             mViewLayout = (FrameLayout) v.findViewById(R.id.list_item_layout);
             mLimitRecyclerView = (RecyclerView) v.findViewById(R.id.limit_recycler_view);
 
@@ -440,10 +410,10 @@ public class AlarmViewAdapter extends RecyclerView.Adapter<AlarmViewAdapter.View
             mLimitRecyclerView.setLayoutManager(mLayoutManager);
 
             int itemMargin =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.alarm_view_item_space);
-            mAlarmViewItemDecoration = new AlarmViewItemDecoration(itemMargin);
+                    mContext.getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);
+            mLimitViewItemDecoration = new WatchZoneViewItemDecoration(itemMargin);
 
-            mLimitRecyclerView.addItemDecoration(mAlarmViewItemDecoration);
+            mLimitRecyclerView.addItemDecoration(mLimitViewItemDecoration);
 
             RecyclerView.ItemAnimator animator = mLimitRecyclerView.getItemAnimator();
             if (animator instanceof SimpleItemAnimator) {

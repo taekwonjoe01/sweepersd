@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.joseph.sweepersd"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -31,6 +31,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:8.3.0'
     compile 'com.google.android.gms:play-services-identity:8.3.0'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'org.apache.commons:commons-lang3:3.4'
 
     // Required -- JUnit 4 framework
     testCompile 'junit:junit:4.12'

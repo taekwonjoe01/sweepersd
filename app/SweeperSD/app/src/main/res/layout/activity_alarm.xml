@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".presentation.manualalarms.AlarmViewActivity">
+    tools:context=".presentation.manualalarms.WatchZoneViewActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -31,6 +31,7 @@
         android:layout_margin="@dimen/fab_margin"
         android:padding="5dp"
         android:src="@drawable/ic_add_white"
-        android:background="@drawable/button_landing_page" />
+        android:elevation="20dp"
+        android:background="@drawable/background_apptheme" />
 
 </android.support.design.widget.CoordinatorLayout>

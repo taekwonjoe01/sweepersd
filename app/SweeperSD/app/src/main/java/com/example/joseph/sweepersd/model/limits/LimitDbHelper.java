@@ -117,8 +117,9 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         List<Limit> results = null;
         try {
             DB_SEMAPHORE.acquire();
+            Log.e("Joey", "after acquire");
 
-            SQLiteDatabase db = this.getReadableDatabase();
+            SQLiteDatabase db = this.getWritableDatabase();
 
             String selection = LimitDbReaderContract.ImportedLimitEntry.COLUMN_STREET_NAME + " LIKE ?";
             String streetToLower = street.toLowerCase();
@@ -136,6 +137,7 @@ public class LimitDbHelper extends SQLiteOpenHelper {
     }
 
     public Limit getLimitForId(int id) {
+        if (id < 0) return null;
         Limit result = null;
         try {
             DB_SEMAPHORE.acquire();
@@ -238,7 +240,6 @@ public class LimitDbHelper extends SQLiteOpenHelper {
             }
         }
 
-        Log.e("Joey", "starting AddressValidatorService");
         AddressValidatorManager.getInstance(mContext).validateAddresses();
     }
 

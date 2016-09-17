@@ -1,8 +1,9 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.model.limits.Limit;
@@ -17,9 +18,9 @@ import java.util.List;
 /**
  * Created by joseph on 9/2/16.
  */
-public class AlarmUpdateService extends IntentService implements
-        AlarmFileHelper.AlarmUpdateListener {
-    private static final String TAG = AlarmUpdateService.class.getSimpleName();
+public class WatchZoneUpdateService extends IntentService implements
+        WatchZoneFileHelper.AlarmUpdateListener {
+    private static final String TAG = WatchZoneUpdateService.class.getSimpleName();
     public static final String ACTION_ALARM_PROGRESS =
             "com.example.joseph.sweepersd.ACTION_ALARM_PROGRESS";
     public static final String ACTION_ALARM_FINISHED =
@@ -34,7 +35,7 @@ public class AlarmUpdateService extends IntentService implements
     private boolean mShouldRestart = false;
     private boolean mIsSaving = false;
 
-    public AlarmUpdateService() {
+    public WatchZoneUpdateService() {
         super(TAG);
     }
 
@@ -45,7 +46,7 @@ public class AlarmUpdateService extends IntentService implements
         if (id > 0) {
             mId = id;
 
-            AlarmFileHelper helper = new AlarmFileHelper(this, this);
+            WatchZoneFileHelper helper = new WatchZoneFileHelper(this, this);
             boolean update = true;
             while (update) {
                 boolean cancelled = updateAlarm(helper);
@@ -93,41 +94,48 @@ public class AlarmUpdateService extends IntentService implements
         return mShouldRestart;
     }
 
-    private boolean updateAlarm(AlarmFileHelper helper) {
+    private boolean updateAlarm(WatchZoneFileHelper helper) {
         mIsSaving = false;
-        Alarm alarmToUpdate = helper.loadAlarm(mId);
-        if (alarmToUpdate != null) {
+        WatchZone watchZoneToUpdate = helper.loadAlarm(mId);
+        if (watchZoneToUpdate != null) {
+            List<SweepingAddress> oldSweeingAddresses = watchZoneToUpdate.getSweepingAddresses();
+            HashMap<LatLng, SweepingAddress> oldSweepingAddressMap = new HashMap<>();
+            List<LatLng> latLngs = new ArrayList<>();
+            if (oldSweeingAddresses != null && !oldSweeingAddresses.isEmpty()) {
+                for (SweepingAddress a : watchZoneToUpdate.getSweepingAddresses()) {
+                    oldSweepingAddressMap.put(a.getLatLng(), a);
+                    latLngs.add(a.getLatLng());
+                }
+            } else {
+                latLngs = LocationUtils.getLatLngsInRadius(watchZoneToUpdate.getCenter(),
+                        watchZoneToUpdate.getRadius());
+            }
+
             LimitDbHelper limitHelper = new LimitDbHelper(this);
 
             if (mIsCancelled) {
                 return true;
             }
 
-            String address  = LocationUtils.getAddressForLatLnt(this, alarmToUpdate.getCenter());
+            String address  = LocationUtils.getAddressForLatLnt(this, watchZoneToUpdate.getCenter());
+            if (address == null) {
+                return false;
+            }
             String[] addressSplit = address.split(",");
             String alarmAddress = "";
             if (addressSplit.length > 0) {
                 alarmAddress = addressSplit[0];
 
-                Alarm updatedAlarm = new Alarm(alarmToUpdate.getCreatedTimestamp(),
-                        System.currentTimeMillis(), alarmAddress, alarmToUpdate.getCenter(),
-                        alarmToUpdate.getRadius(), null);
+                WatchZone updatedWatchZone = new WatchZone(watchZoneToUpdate.getCreatedTimestamp(),
+                        System.currentTimeMillis(), alarmAddress, watchZoneToUpdate.getCenter(),
+                        watchZoneToUpdate.getRadius(), null);
 
                 mIsSaving = true;
-                helper.saveAlarm(updatedAlarm);
+                helper.saveAlarm(updatedWatchZone);
             }
 
-            List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(alarmToUpdate.getCenter(),
-                    alarmToUpdate.getRadius());
+            List<SweepingAddress> sweepingAddresses = new ArrayList<>();
 
-            HashMap<String, SweepingAddress> sweepingAddresses = new HashMap<>();
-
-            String centerAdd  = LocationUtils.getAddressForLatLnt(this, alarmToUpdate.getCenter());
-            SweepingAddress centerSA = buildSweepingAddress(limitHelper,
-                    alarmToUpdate.getCenter(), centerAdd);
-            if (centerSA != null) {
-                sweepingAddresses.put(centerAdd, centerSA);
-            }
             for (int i = 0; i < latLngs.size(); i++) {
                 if (mIsCancelled) {
                     return true;
@@ -138,39 +146,50 @@ public class AlarmUpdateService extends IntentService implements
                 LatLng latLng = latLngs.get(i);
 
                 String add = LocationUtils.getAddressForLatLnt(this, latLng);
-                if (!sweepingAddresses.containsKey(add)) {
-                    SweepingAddress sa = buildSweepingAddress(limitHelper, latLng, add);
-                    if (sa != null) {
-                        sweepingAddresses.put(add, sa);
-                    }
-                }
+                sweepingAddresses.add(buildSweepingAddress(oldSweepingAddressMap,
+                        limitHelper, latLng, add));
             }
             Log.d(TAG, "finished generating SweepingAddresses. Size " + sweepingAddresses.size());
 
-            Alarm updatedAlarm = new Alarm(alarmToUpdate.getCreatedTimestamp(),
-                    System.currentTimeMillis(), alarmAddress, alarmToUpdate.getCenter(),
-                    alarmToUpdate.getRadius(), new ArrayList<>(sweepingAddresses.values()));
+            WatchZone updatedWatchZone = new WatchZone(watchZoneToUpdate.getCreatedTimestamp(),
+                    System.currentTimeMillis(), alarmAddress, watchZoneToUpdate.getCenter(),
+                    watchZoneToUpdate.getRadius(), new ArrayList<>(sweepingAddresses));
 
             mIsSaving = true;
-            boolean saveSuccess = helper.saveAlarm(updatedAlarm);
+            boolean saveSuccess = helper.saveAlarm(updatedWatchZone);
             if (!saveSuccess) {
-                Log.d(TAG, "Failed to save updated Alarm! " + alarmToUpdate.getCreatedTimestamp());
+                Log.d(TAG, "Failed to save updated WatchZone! " + watchZoneToUpdate.getCreatedTimestamp());
+            } else {
+                scheduleAlarm(updatedWatchZone);
             }
         }
         return false;
     }
 
-    private SweepingAddress buildSweepingAddress(LimitDbHelper limitHelper, LatLng latLng,
+    private SweepingAddress buildSweepingAddress(HashMap<LatLng, SweepingAddress> oldAddresses,
+                                                 LimitDbHelper limitHelper, LatLng latLng,
                                                  String address) {
-        SweepingAddress result = null;
-
-        Log.d(TAG, "buildSweepingAddress address: " + address);
-        Limit limit = LocationUtils.findLimitForAddress(limitHelper, address);
-        if (limit != null) {
-            result = new SweepingAddress(latLng, address, limit);
+        String finalAddress = null;
+        Limit finalLimit = null;
+        if (!TextUtils.isEmpty(address)) {
+            finalAddress = address;
+            Limit limit = LocationUtils.findLimitForAddress(limitHelper, address);
+            if (limit != null) {
+                finalLimit = limit;
+            } else {
+                SweepingAddress old = oldAddresses.get(latLng);
+                if (old != null) {
+                    finalLimit = old.getLimit();
+                }
+            }
+        } else {
+            SweepingAddress old = oldAddresses.get(latLng);
+            if (old != null) {
+                finalAddress = old.getAddress();
+                finalLimit = old.getLimit();
+            }
         }
-
-        return result;
+        return new SweepingAddress(latLng, finalAddress, finalLimit);
     }
 
     private void publishProgress(int progress) {
@@ -194,5 +213,17 @@ public class AlarmUpdateService extends IntentService implements
         Intent intent = new Intent(action);
         intent.putExtras(bundle);
         sendBroadcast(intent);
+    }
+
+    private void scheduleAlarm(WatchZone watchZone) {
+        /*WatchZoneManager alarmMgr;
+        PendingIntent alarmIntent;
+
+        alarmMgr = (WatchZoneManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+        alarmMgr.*/
+
     }
 }

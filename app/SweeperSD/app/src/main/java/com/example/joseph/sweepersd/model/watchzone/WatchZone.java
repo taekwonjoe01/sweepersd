@@ -1,28 +1,25 @@
-package com.example.joseph.sweepersd.model.alarms;
+package com.example.joseph.sweepersd.model.watchzone;
 
-import com.example.joseph.sweepersd.model.limits.Limit;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
- * Data model for an Alarm.
+ * Data model for an WatchZone.
  */
-public class Alarm {
+public class WatchZone {
     private final long mCreatedTimestamp;
     private final long mLastUpdatedTimestamp;
     private final String mAddress;
     private final LatLng mCenter;
     private final int mRadius;
 
-    private HashMap<Integer, Limit> mUniqueLimits;
     private List<SweepingAddress> mSweepingAddresses;
 
     // TODO make package protected.
-    public Alarm(long createdTimestamp, long lastUpdatedTimestamp, String address, LatLng center,
-                 int radius, List<SweepingAddress> sweepingAddresses) {
+    public WatchZone(long createdTimestamp, long lastUpdatedTimestamp, String address, LatLng center,
+                     int radius, List<SweepingAddress> sweepingAddresses) {
         mCreatedTimestamp = createdTimestamp;
         mLastUpdatedTimestamp = lastUpdatedTimestamp;
         mCenter = center;
@@ -31,7 +28,7 @@ public class Alarm {
         setSweepingAddresses(sweepingAddresses);
     }
     // TODO make package protected.
-    public Alarm(Alarm other) {
+    public WatchZone(WatchZone other) {
         this.mCreatedTimestamp = other.mCreatedTimestamp;
         this.mLastUpdatedTimestamp = other.mLastUpdatedTimestamp;
         this.mCenter = other.mCenter;
@@ -73,12 +70,6 @@ public class Alarm {
             mSweepingAddresses = new ArrayList<>();
         } else {
             mSweepingAddresses = sweepingAddresses;
-        }
-
-        mUniqueLimits = new HashMap<>();
-        for (SweepingAddress address : mSweepingAddresses) {
-            Limit l = address.getLimit();
-            mUniqueLimits.put(l.getId(), l);
         }
     }
 }
