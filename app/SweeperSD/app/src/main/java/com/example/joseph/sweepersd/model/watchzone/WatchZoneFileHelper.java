@@ -73,6 +73,32 @@ public class WatchZoneFileHelper {
         mWatchZoneUpdateListener = new WeakReference<>(listener);
     }
 
+    public List<Long> getWatchZoneList() {
+        List<Long> results = new ArrayList<>();
+
+        File alarmsDir = new File(getAlarmDirPath(mContext));
+        File[] alarmDirs = null;
+
+        try {
+            mSemaphore.acquire();
+            if (alarmsDir.exists()) {
+                alarmDirs = alarmsDir.listFiles();
+            }
+            mSemaphore.release();
+        } catch (InterruptedException e) {
+
+        }
+
+        if (alarmDirs != null) {
+            for (File alarmDir : alarmDirs) {
+                long watchZone = Long.parseLong(alarmDir.getName());
+                results.add(watchZone);
+            }
+        }
+
+        return results;
+    }
+
     public List<WatchZone> loadWatchZones() {
         List<WatchZone> results = new ArrayList<>();
 
@@ -274,9 +300,7 @@ public class WatchZoneFileHelper {
         Long tsLong = watchZone.getCreatedTimestamp();
         String ts = tsLong.toString();
         try {
-            Log.e("Joey", "Before acquire");
             mSemaphore.acquire();
-            Log.e("Joey", "After acquire");
             String path = mContext.getFilesDir() + "/alarms/" + ts;
             File alarmDir = new File(path);
             if (alarmDir.exists()) {
@@ -289,9 +313,7 @@ public class WatchZoneFileHelper {
                 alarmDir.delete();
                 result = true;
             }
-            Log.e("Joey", "Before release");
             mSemaphore.release();
-            Log.e("Joey", "After release");
             if (result) {
                 sendDeletedBroadcast(tsLong);
             }

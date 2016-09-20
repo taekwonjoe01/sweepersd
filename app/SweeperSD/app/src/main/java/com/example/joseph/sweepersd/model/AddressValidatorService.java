@@ -5,16 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.model.watchzone.WatchZone;
-import com.example.joseph.sweepersd.model.watchzone.WatchZoneManager;
 import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
+import com.example.joseph.sweepersd.model.watchzone.WatchZone;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneManager;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by joseph on 9/10/16.
@@ -107,7 +106,7 @@ public class AddressValidatorService extends IntentService {
         Log.i(TAG, "Finishing " + TAG);
 
         WatchZoneManager manager = new WatchZoneManager(this);
-        Set<Long> alarmIds = manager.getWatchZones();
+        List<Long> alarmIds = manager.getWatchZones();
         for (Long id : alarmIds) {
             WatchZone watchZone = manager.getWatchZone(id);
 

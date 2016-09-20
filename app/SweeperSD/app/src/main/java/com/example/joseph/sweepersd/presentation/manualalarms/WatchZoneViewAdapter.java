@@ -43,14 +43,22 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     private static final String TAG = WatchZoneViewAdapter.class.getSimpleName();
 
     private final Context mContext;
-    private WatchZoneManager mWatchZoneManager;
+    private final WatchZoneManager mWatchZoneManager;
     private final List<WatchZonePresenter> mWatchZonePresenters;
 
     public WatchZoneViewAdapter(Context context) {
         mContext = context;
         mWatchZonePresenters = new ArrayList<>();
 
-        new LoadAlarmsTask().execute();
+        mWatchZoneManager = new WatchZoneManager(mContext);
+        mWatchZoneManager.addWatchZoneChangeListener(mWatchZoneChangeListener);
+
+        for (Long timestamp : mWatchZoneManager.getWatchZones()) {
+            mWatchZonePresenters.add(new LoadingWatchZonePresenter(mWatchZonePresenters.size(), timestamp));
+        }
+        Log.e("Joey", "watchzones size " + mWatchZoneManager.getWatchZones().size());
+
+        new LoadWatchZonesTask().execute();
     }
 
     @Override
@@ -83,7 +91,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
                 alarmMgr = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
                 Intent intent = new Intent(mContext, WatchZoneAlarmReceiver.class);
-                intent.setType(presenter.watchZone.getCreatedTimestamp() + "");
+                intent.setType(presenter.watchZoneTimestamp + "");
                 alarmIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
 
@@ -94,11 +102,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         holder.mLongClickListener = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                /*WatchZonePresenter presenter = mWatchZonePresenters.get(position);
-                presenter.setDeleted();
-                mWatchZonePresenters.remove(presenter);
-                mWatchZoneManager.removeAlarm(presenter.watchZone);*/
-                mWatchZoneManager.deleteWatchZone(mWatchZonePresenters.get(position).watchZone.getCreatedTimestamp());
+                mWatchZoneManager.deleteWatchZone(mWatchZonePresenters.get(position).watchZoneTimestamp);
                 Toast.makeText(v.getContext(), "Delete watchZone", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -106,7 +110,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         holder.mRefreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mWatchZoneManager.refreshWatchZone(mWatchZonePresenters.get(position).watchZone.getCreatedTimestamp());
+                mWatchZoneManager.refreshWatchZone(mWatchZonePresenters.get(position).watchZoneTimestamp);
             }
         });
         if (presenter instanceof NonUpdatingWatchZonePresenter) {
@@ -132,43 +136,57 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     private WatchZoneManager.WatchZoneChangeListener mWatchZoneChangeListener =
             new WatchZoneManager.WatchZoneChangeListener() {
         @Override
-        public void onWatchZoneUpdated(Long createdTimestamp) {
+        public void onWatchZoneUpdated(long createdTimestamp) {
             Log.d(TAG, "onWatchZoneUpdated " + createdTimestamp);
+
             for (WatchZonePresenter p : mWatchZonePresenters) {
-                if (p.watchZone.getCreatedTimestamp() == createdTimestamp) {
-                    p.watchZone = mWatchZoneManager.getWatchZone(createdTimestamp);
+                if (p.watchZoneTimestamp == createdTimestamp) {
+                    if (mWatchZoneManager.getUpdatingWatchZones().contains(createdTimestamp)) {
+                        UpdatingPresenter presenter = new UpdatingPresenter(
+                                p.position, createdTimestamp);
+                        mWatchZonePresenters.remove(p.position);
+                        mWatchZonePresenters.add(p.position, presenter);
+                    } else {
+                        NonUpdatingWatchZonePresenter presenter =
+                                new NonUpdatingWatchZonePresenter(p.position, createdTimestamp);
+                        mWatchZonePresenters.remove(p.position);
+                        mWatchZonePresenters.add(p.position, presenter);
+                    }
+                    notifyItemChanged(p.position);
                 }
             }
-            notifyDataSetChanged();
         }
 
         @Override
-        public void onWatchZoneCreated(Long createdTimestamp) {
+        public void onWatchZoneCreated(long createdTimestamp) {
             Log.d(TAG, "onWatchZoneCreated " + createdTimestamp);
             UpdatingPresenter presenter = new UpdatingPresenter(
-                    mWatchZonePresenters.size(), mWatchZoneManager.getWatchZone(createdTimestamp));
+                    mWatchZonePresenters.size(), createdTimestamp);
             mWatchZonePresenters.add(presenter);
 
             notifyDataSetChanged();
         }
 
         @Override
-        public void onWatchZoneDeleted(Long createdTimestamp) {
+        public void onWatchZoneDeleted(long createdTimestamp) {
             Log.d(TAG, "onWatchZoneDeleted " + createdTimestamp);
             int position = -1;
             for (int i = 0; i < mWatchZonePresenters.size(); i++) {
                 WatchZonePresenter p = mWatchZonePresenters.get(i);
-                if (p.watchZone.getCreatedTimestamp() == createdTimestamp) {
+                Log.d(TAG, "timestamp: " + p.watchZoneTimestamp);
+                if (p.watchZoneTimestamp == createdTimestamp) {
                     position = i;
+                    Log.d(TAG, "position being set to: " + i);
                 }
             }
             if (position > -1) {
+                Log.d(TAG, "removing item at position: " + position);
                 mWatchZonePresenters.remove(position);
+                for (int i = position; i < mWatchZonePresenters.size(); i++) {
+                    mWatchZonePresenters.get(i).position--;
+                }
+                notifyItemRemoved(position);
             }
-            for (int i = position; i < mWatchZonePresenters.size(); i++) {
-                mWatchZonePresenters.get(i).position--;
-            }
-            notifyItemRemoved(position);
         }
     };
 
@@ -227,52 +245,61 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
                 mAlarm.setSweepingAddresses(sweepingAddresses);
                 //mWatchZoneManager.saveWatchZone(mAlarm);
 
-                //new LoadAlarmsTask(newPresenter, mAlarm).execute();
+                //new LoadWatchZonesTask(newPresenter, mAlarm).execute();
             }
             super.onPostExecute(sweepingAddresses);
         }
     }*/
 
-    public class LoadAlarmsTask extends AsyncTask<Void, Void, Void> {
+    public class LoadWatchZonesTask extends AsyncTask<Void, Long, Void> {
+        private int mPosition = 0;
 
-        public LoadAlarmsTask() {
+        public LoadWatchZonesTask() {
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            mWatchZoneManager = new WatchZoneManager(mContext);
-            mWatchZoneManager.addWatchZoneChangeListener(mWatchZoneChangeListener);
+            List<Long> timestamps = mWatchZoneManager.getWatchZones();
+            for (Long timestamp : timestamps) {
+                mWatchZoneManager.getWatchZone(timestamp);
+                publishProgress(timestamp);
+            }
 
             return null;
         }
+
+        @Override
+        protected void onProgressUpdate(Long... timestamp) {
+            super.onProgressUpdate(timestamp);
+            if (mWatchZoneManager.getUpdatingWatchZones().contains(timestamp[0])) {
+                UpdatingPresenter presenter = new UpdatingPresenter(
+                        mPosition, timestamp[0]);
+                mWatchZonePresenters.remove(mPosition);
+                mWatchZonePresenters.add(mPosition, presenter);
+            } else {
+                NonUpdatingWatchZonePresenter presenter =
+                        new NonUpdatingWatchZonePresenter(mPosition, timestamp[0]);
+                mWatchZonePresenters.remove(mPosition);
+                mWatchZonePresenters.add(mPosition, presenter);
+            }
+            notifyItemChanged(mPosition);
+            mPosition++;
+        }
+
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            for (Long createdTimestamp : mWatchZoneManager.getWatchZones()) {
-                WatchZone watchZone = mWatchZoneManager.getWatchZone(createdTimestamp);
-
-                if (mWatchZoneManager.getUpdatingWatchZones().contains(createdTimestamp)) {
-                    UpdatingPresenter presenter = new UpdatingPresenter(
-                            mWatchZonePresenters.size(), watchZone);
-                    mWatchZonePresenters.add(presenter);
-                } else {
-                    NonUpdatingWatchZonePresenter presenter =
-                            new NonUpdatingWatchZonePresenter(mWatchZonePresenters.size(), watchZone);
-                    mWatchZonePresenters.add(presenter);
-                }
-            }
-            notifyDataSetChanged();
         }
     }
 
     abstract class WatchZonePresenter {
         int position;
-        WatchZone watchZone;
+        Long watchZoneTimestamp;
         boolean isDeleted;
 
-        WatchZonePresenter(int position, WatchZone watchZone) {
+        WatchZonePresenter(int position, Long watchZoneTimestamp) {
             this.position = position;
-            this.watchZone = watchZone;
+            this.watchZoneTimestamp = watchZoneTimestamp;
             isDeleted = false;
         }
 
@@ -285,14 +312,38 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         }
     }
 
+    class LoadingWatchZonePresenter extends WatchZonePresenter {
+
+        LoadingWatchZonePresenter(int position, Long watchZoneTimestamp) {
+            super(position, watchZoneTimestamp);
+        }
+
+        @Override
+        String getTitle() {
+            return "Loading...";
+        }
+
+        @Override
+        String getRadius() {
+            return "";
+        }
+
+        @Override
+        String getStatus() {
+            return "Please wait";
+        }
+    }
+
     class UpdatingPresenter extends WatchZonePresenter implements
             WatchZoneUpdateManager.WatchZoneProgressListener {
         String progress = "Refreshing watchZone location. \nProgress: 0%";
+        WatchZone watchZone;
 
-        UpdatingPresenter(int position, WatchZone watchZone) {
+        UpdatingPresenter(int position, Long watchZone) {
             super(position, watchZone);
+            this.watchZone = mWatchZoneManager.getWatchZone(watchZoneTimestamp);
             mWatchZoneManager.addWatchZoneProgressListener(this);
-            setProgress(mWatchZoneManager.getProgressForWatchZone(watchZone.getCreatedTimestamp()));
+            setProgress(mWatchZoneManager.getProgressForWatchZone(watchZone));
         }
 
         @Override
@@ -321,9 +372,9 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         @Override
         public void onWatchZoneUpdateComplete(long createdTimestamp) {
             if (mWatchZonePresenters.contains(this) &&
-                    createdTimestamp == this.watchZone.getCreatedTimestamp()) {
+                    createdTimestamp == this.watchZoneTimestamp) {
                 NonUpdatingWatchZonePresenter newPresenter =
-                        new NonUpdatingWatchZonePresenter(this.position, this.watchZone);
+                        new NonUpdatingWatchZonePresenter(this.position, createdTimestamp);
                 mWatchZonePresenters.remove(this.position);
                 mWatchZonePresenters.add(this.position, newPresenter);
                 notifyItemChanged(this.position);
@@ -344,11 +395,12 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             WatchZoneUpdateManager.WatchZoneProgressListener {
         WatchZone watchZone;
 
+
         LimitViewAdapter adapter;
 
-        NonUpdatingWatchZonePresenter(int position, WatchZone watchZone) {
-            super(position, watchZone);
-            this.watchZone = watchZone;
+        NonUpdatingWatchZonePresenter(int position, Long watchZoneTimestamp) {
+            super(position, watchZoneTimestamp);
+            this.watchZone = mWatchZoneManager.getWatchZone(watchZoneTimestamp);
 
             this.adapter = new LimitViewAdapter(mContext, this.watchZone);
 
@@ -386,9 +438,9 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         @Override
         public void onWatchZoneUpdateProgress(long createdTimestamp, int progress) {
             if (mWatchZonePresenters.contains(this) &&
-                    createdTimestamp == this.watchZone.getCreatedTimestamp()) {
+                    createdTimestamp == this.watchZoneTimestamp) {
                 UpdatingPresenter newPresenter =
-                        new UpdatingPresenter(this.position, this.watchZone);
+                        new UpdatingPresenter(this.position, createdTimestamp);
                 newPresenter.setProgress(progress);
                 mWatchZonePresenters.remove(this.position);
                 mWatchZonePresenters.add(this.position, newPresenter);

@@ -284,6 +284,73 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(address, loadedSwAddress2.getAddress());
     }
 
+    public void testGetWatchZoneList() {
+        WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
+        List<Long> watchZones = helper.getWatchZoneList();
+
+        assertEquals(0, watchZones.size());
+
+        // Create a test watchZone.
+        // Create the Limit
+        Limit limit = createTestLimit();
+
+        // Create a SweepingAddress
+        String address = "1061 beryl st";
+        LatLng center = new LatLng(12,12);
+        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+
+        // Create the watchZone
+        long createdTimestamp = 1;
+        long createdTimestamp2 = 2;
+        long lastUpdatedTimestamp = 0;
+        int radius = 12;
+        List<SweepingAddress> sweepingAddresses = new ArrayList<>();
+        sweepingAddresses.add(swAddress);
+
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+                sweepingAddresses);
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+                sweepingAddresses);
+
+        // Save the watchZone.
+        mOnAlarmUpdatedLatch = new CountDownLatch(2);
+        helper.saveWatchZone(watchZone);
+        helper.saveWatchZone(watchZone2);
+        helper.deleteWatchZone(watchZone2);
+
+
+        boolean countedDown = false;
+        try {
+            countedDown = mOnAlarmUpdatedLatch.await(2000, TimeUnit.MILLISECONDS);
+            countedDown &= mOnAlarmDeletedLatch.await(1000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+
+        }
+        assertTrue(countedDown);
+
+        WatchZone loadedWatchZone = helper.loadWatchZone(createdTimestamp);
+        WatchZone loadedWatchZone2 = helper.loadWatchZone(createdTimestamp2);
+
+        watchZones = helper.getWatchZoneList();
+
+        assertEquals(1, watchZones.size());
+
+        // Check the WatchZone
+        assertEquals(createdTimestamp, loadedWatchZone.getCreatedTimestamp());
+        assertEquals(lastUpdatedTimestamp, loadedWatchZone.getLastUpdatedTimestamp());
+        assertEquals(center, loadedWatchZone.getCenter());
+        assertEquals(radius, loadedWatchZone.getRadius());
+        // Check the SweepingAddresses
+        List<SweepingAddress> loadedSwAddresses = loadedWatchZone.getSweepingAddresses();
+        assertEquals(1, loadedSwAddresses.size());
+        SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
+        assertEquals(center, loadedSwAddress.getLatLng());
+        assertEquals(address, loadedSwAddress.getAddress());
+
+        // Check the Second WatchZone
+        assertNull(loadedWatchZone2);
+    }
+
     public void testDeleteAlarm() {
         WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
         List<WatchZone> watchZones = helper.loadWatchZones();

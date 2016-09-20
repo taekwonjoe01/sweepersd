@@ -2,12 +2,11 @@ package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.Context;
 
-import com.example.joseph.sweepersd.model.limits.Limit;
-import com.example.joseph.sweepersd.model.limits.LimitSchedule;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,17 +25,18 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
     private Set<WeakReference<WatchZoneChangeListener>> mListeners = new HashSet<>();
 
     public interface WatchZoneChangeListener {
-        void onWatchZoneUpdated(Long createdTimestamp);
-        void onWatchZoneCreated(Long createdTimestamp);
-        void onWatchZoneDeleted(Long createdTimestamp);
+        void onWatchZoneUpdated(long createdTimestamp);
+        void onWatchZoneCreated(long createdTimestamp);
+        void onWatchZoneDeleted(long createdTimestamp);
     }
 
     public WatchZoneManager(Context context) {
         mContext = context;
         mWatchZoneFileHelper = new WatchZoneFileHelper(mContext, this);
 
-        List<WatchZone> watchZones = mWatchZoneFileHelper.loadWatchZones();
-        if (watchZones.isEmpty()) {
+        List<Long> watchZones = mWatchZoneFileHelper.getWatchZoneList();
+
+        /*if (watchZones.isEmpty()) {
             List<LimitSchedule> schedules = new ArrayList<>();
             for (int i = 1; i < 5; i++) {
                 for (int j = 1; j < 8; j++) {
@@ -53,11 +53,11 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
 
             WatchZoneUpdateManager watchZoneUpdateManager = WatchZoneUpdateManager.getInstance(mContext);
             watchZoneUpdateManager.updateWatchZone(satan);
-            watchZones.add(satan);
-        }
+            watchZones.add((long)666);
+        }*/
         mWatchZones = new HashMap<>();
-        for (WatchZone watchZone : watchZones) {
-            mWatchZones.put(watchZone.getCreatedTimestamp(), watchZone);
+        for (Long watchZone : watchZones) {
+            mWatchZones.put(watchZone, null);
         }
     }
 
@@ -89,16 +89,30 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
         WatchZoneUpdateManager.getInstance(mContext).removeListener(listener);
     }
 
-    public WatchZone getWatchZone(Long createdTimestamp) {
-        return mWatchZones.get(createdTimestamp);
+    public WatchZone getWatchZone(long createdTimestamp) {
+        WatchZone result = null;
+        if (mWatchZones.containsKey(createdTimestamp)) {
+            WatchZone zone = mWatchZones.get(createdTimestamp);
+            if (zone == null) {
+                zone = mWatchZoneFileHelper.loadWatchZone(createdTimestamp);
+                mWatchZones.put(createdTimestamp, zone);
+            }
+            result = zone;
+        }
+        return result;
     }
 
-    public Set<Long> getWatchZones() {
-        return mWatchZones.keySet();
+    public List<Long> getWatchZones() {
+        List<Long> results = new ArrayList<>(mWatchZones.keySet());
+        Collections.sort(results);
+        return results;
     }
 
-    public Set<Long> getUpdatingWatchZones() {
-        return WatchZoneUpdateManager.getInstance(mContext).getUpdatingWatchZoneTimestamps();
+    public List<Long> getUpdatingWatchZones() {
+        List<Long> results = new ArrayList<>(
+                WatchZoneUpdateManager.getInstance(mContext).getUpdatingWatchZoneTimestamps());
+        Collections.sort(results);
+        return results;
     }
 
     public int getProgressForWatchZone(long createdTimestamp) {
