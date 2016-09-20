@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
+import com.example.joseph.sweepersd.model.limits.LimitSchedule;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.BufferedReader;
@@ -26,13 +27,13 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Helper class for loading and saving alarms to disk.
+ * Helper class for loading and saving watch zones to disk.
  */
 public class WatchZoneFileHelper {
     private static final String TAG = WatchZoneFileHelper.class.getSimpleName();
 
     private static final String FILE_SWEEPING_LOCATIONS = "sweeping_locations.txt";
-    private static final String FILE_ALARM_DETAILS = "alarm_details.txt";
+    private static final String FILE_WATCH_ZONE_DETAILS = "alarm_details.txt";
 
     private static final String SEPARATOR_SWEEPING_LOCATIONS = "::";
 
@@ -46,33 +47,33 @@ public class WatchZoneFileHelper {
     private static Semaphore mSemaphore = new Semaphore(1);
 
     private final Context mContext;
-    private WeakReference<AlarmUpdateListener> mAlarmUpdateListener;
+    private WeakReference<WatchZoneUpdateListener> mWatchZoneUpdateListener;
 
-    public interface AlarmUpdateListener {
-        void onAlarmUpdated(long createdTimestamp);
-        void onAlarmDeleted(long createdTimestamp);
+    public interface WatchZoneUpdateListener {
+        void onWatchZoneUpdated(long createdTimestamp);
+        void onWatchZoneDeleted(long createdTimestamp);
     }
 
-    public WatchZoneFileHelper(Context context, AlarmUpdateListener listener) {
+    public WatchZoneFileHelper(Context context, WatchZoneUpdateListener listener) {
         mContext = context;
-        mAlarmUpdateListener = new WeakReference<>(listener);
+        mWatchZoneUpdateListener = new WeakReference<>(listener);
 
         if (listener != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(ACTION_ALARM_UPDATED);
             filter.addAction(ACTION_ALARM_DELETED);
-            mContext.registerReceiver(mAlarmUpdateReceiver, filter);
+            mContext.registerReceiver(mWatchZoneUpdateReceiver, filter);
         }
     }
 
-    public void setAlarmUpdateListener(AlarmUpdateListener listener) {
+    public void setWatchZoneUpdateListener(WatchZoneUpdateListener listener) {
         if (listener == null) {
-            mContext.unregisterReceiver(mAlarmUpdateReceiver);
+            mContext.unregisterReceiver(mWatchZoneUpdateReceiver);
         }
-        mAlarmUpdateListener = new WeakReference<>(listener);
+        mWatchZoneUpdateListener = new WeakReference<>(listener);
     }
 
-    public List<WatchZone> loadAlarms() {
+    public List<WatchZone> loadWatchZones() {
         List<WatchZone> results = new ArrayList<>();
 
         File alarmsDir = new File(getAlarmDirPath(mContext));
@@ -90,7 +91,7 @@ public class WatchZoneFileHelper {
 
         if (alarmDirs != null) {
             for (File alarmDir : alarmDirs) {
-                WatchZone watchZone = loadAlarm(Long.parseLong(alarmDir.getName()));
+                WatchZone watchZone = loadWatchZone(Long.parseLong(alarmDir.getName()));
                 if (watchZone != null) {
                     results.add(watchZone);
                 } else {
@@ -101,8 +102,8 @@ public class WatchZoneFileHelper {
         return results;
     }
 
-    public WatchZone loadAlarm(long createdTimestamp) {
-        AlarmBuilder builder = new AlarmBuilder();
+    public WatchZone loadWatchZone(long createdTimestamp) {
+        WatchZoneBuilder builder = new WatchZoneBuilder();
         try {
             mSemaphore.acquire();
             try {
@@ -111,7 +112,7 @@ public class WatchZoneFileHelper {
                     builder.createdTimestamp = createdTimestamp;
 
                     File alarmDetailsFile = new File(dir.getAbsolutePath() + "/" +
-                            FILE_ALARM_DETAILS);
+                            FILE_WATCH_ZONE_DETAILS);
                     File sweepingLocationsFile = new File(dir.getAbsolutePath() + "/" +
                             FILE_SWEEPING_LOCATIONS);
 
@@ -187,7 +188,7 @@ public class WatchZoneFileHelper {
         return builder.build();
     }
 
-    public boolean saveAlarm(WatchZone watchZone) {
+    public boolean saveWatchZone(WatchZone watchZone) {
         boolean result = false;
 
         Long tsLong = watchZone.getCreatedTimestamp();
@@ -205,7 +206,7 @@ public class WatchZoneFileHelper {
             } else {
                 try {
                     File alarmDetailsFile = new File(alarmDir,
-                            FILE_ALARM_DETAILS);
+                            FILE_WATCH_ZONE_DETAILS);
                     File sweepingLocationsFile = new File(alarmDir,
                             FILE_SWEEPING_LOCATIONS);
                     alarmDetailsFile.createNewFile();
@@ -252,7 +253,7 @@ public class WatchZoneFileHelper {
                         sweepingLocationsFile.delete();
                     }
                     result = true;
-                    sendAlarmUpdatedBroadcast(tsLong);
+                    sendUpdatedBroadcast(tsLong);
                 } catch (FileNotFoundException e) {
                     Log.e(TAG, e.toString());
                 } catch (IOException e) {
@@ -267,7 +268,7 @@ public class WatchZoneFileHelper {
         return result;
     }
 
-    public boolean deleteAlarm(WatchZone watchZone) {
+    public boolean deleteWatchZone(WatchZone watchZone) {
         boolean result = false;
 
         Long tsLong = watchZone.getCreatedTimestamp();
@@ -292,7 +293,7 @@ public class WatchZoneFileHelper {
             mSemaphore.release();
             Log.e("Joey", "After release");
             if (result) {
-                sendAlarmDeletedBroadcast(tsLong);
+                sendDeletedBroadcast(tsLong);
             }
         } catch (InterruptedException e) {
             Log.e(TAG, e.toString());
@@ -304,14 +305,14 @@ public class WatchZoneFileHelper {
          return context.getFilesDir() + "/alarms/";
     }
 
-    private void sendAlarmUpdatedBroadcast(long createdTimestamp) {
+    private void sendUpdatedBroadcast(long createdTimestamp) {
         Bundle bundle = new Bundle();
         bundle.putLong(ALARM_TIMESTAMP, createdTimestamp);
 
         sendBroadcast(bundle, ACTION_ALARM_UPDATED);
     }
 
-    private void sendAlarmDeletedBroadcast(long createdTimestamp) {
+    private void sendDeletedBroadcast(long createdTimestamp) {
         Bundle bundle = new Bundle();
         bundle.putLong(ALARM_TIMESTAMP, createdTimestamp);
 
@@ -324,18 +325,18 @@ public class WatchZoneFileHelper {
         mContext.sendBroadcast(intent);
     }
 
-    private final BroadcastReceiver mAlarmUpdateReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mWatchZoneUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            AlarmUpdateListener listener = mAlarmUpdateListener.get();
+            WatchZoneUpdateListener listener = mWatchZoneUpdateListener.get();
             if (listener != null) {
                 long createdTimestamp = intent.getExtras().getLong(ALARM_TIMESTAMP);
                 switch (intent.getAction()) {
                     case ACTION_ALARM_UPDATED:
-                        listener.onAlarmUpdated(createdTimestamp);
+                        listener.onWatchZoneUpdated(createdTimestamp);
                         break;
                     case ACTION_ALARM_DELETED:
-                        listener.onAlarmDeleted(createdTimestamp);
+                        listener.onWatchZoneDeleted(createdTimestamp);
                         break;
                     default:
                 }
@@ -345,7 +346,7 @@ public class WatchZoneFileHelper {
         }
     };
 
-    private class AlarmBuilder {
+    private class WatchZoneBuilder {
         long createdTimestamp = -1;
         long lastUpdatedTimestamp = -1;
         String address = "";
@@ -370,7 +371,20 @@ public class WatchZoneFileHelper {
                 LimitDbHelper helper = new LimitDbHelper(mContext);
                 if (positionStubs != null) {
                     for (SweepingPositionStub stub : positionStubs) {
+                        if (stub.limitId == 666666666) {
+                            // TODO REMOVE THIS
+                        }
                         Limit limit = helper.getLimitForId(stub.limitId);
+                        if (stub.limitId == 666666666) {
+                            List<LimitSchedule> schedules = new ArrayList<>();
+                            for (int i = 1; i < 5; i++) {
+                                for (int j = 1; j < 8; j++) {
+                                    schedules.add(new LimitSchedule(12, 15, j, i));
+                                }
+                            }
+                            limit = new Limit(666, "Satan's Butthole", new int[]{0, 666666666},
+                                    "Satan's Butthole", schedules);
+                        }
                         LatLng latLng = new LatLng(stub.latitude, stub.longitude);
                         sweepingAddresses.add(new SweepingAddress(latLng, stub.address, limit));
                     }

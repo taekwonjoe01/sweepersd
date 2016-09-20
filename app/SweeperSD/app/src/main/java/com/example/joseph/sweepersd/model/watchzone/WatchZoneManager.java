@@ -2,9 +2,12 @@ package com.example.joseph.sweepersd.model.watchzone;
 
 import android.content.Context;
 
+import com.example.joseph.sweepersd.model.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.LimitSchedule;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,43 +16,62 @@ import java.util.Set;
 /**
  * Created by joseph on 6/12/16.
  */
-public class WatchZoneManager implements WatchZoneFileHelper.AlarmUpdateListener {
+public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateListener {
     private static final String TAG = WatchZoneManager.class.getSimpleName();
 
     private final WatchZoneFileHelper mWatchZoneFileHelper;
-    private final HashMap<Long, WatchZone> mAlarms;
+    private final HashMap<Long, WatchZone> mWatchZones;
     private final Context mContext;
 
-    private Set<WeakReference<AlarmChangeListener>> mListeners = new HashSet<>();
+    private Set<WeakReference<WatchZoneChangeListener>> mListeners = new HashSet<>();
 
-    public interface AlarmChangeListener {
-        void onAlarmUpdated(Long createdTimestamp);
-        void onAlarmCreated(Long createdTimestamp);
-        void onAlarmDeleted(Long createdTimestamp);
+    public interface WatchZoneChangeListener {
+        void onWatchZoneUpdated(Long createdTimestamp);
+        void onWatchZoneCreated(Long createdTimestamp);
+        void onWatchZoneDeleted(Long createdTimestamp);
     }
 
     public WatchZoneManager(Context context) {
         mContext = context;
         mWatchZoneFileHelper = new WatchZoneFileHelper(mContext, this);
 
-        List<WatchZone> watchZones = mWatchZoneFileHelper.loadAlarms();
-        mAlarms = new HashMap<>();
+        List<WatchZone> watchZones = mWatchZoneFileHelper.loadWatchZones();
+        if (watchZones.isEmpty()) {
+            List<LimitSchedule> schedules = new ArrayList<>();
+            for (int i = 1; i < 5; i++) {
+                for (int j = 1; j < 8; j++) {
+                    schedules.add(new LimitSchedule(12, 15, j, i));
+                }
+            }
+            List<SweepingAddress> addresses = new ArrayList<>();
+            addresses.add(new SweepingAddress(new LatLng(0, 0), "Satan's Butthole",
+                    new Limit(666666666, "Satan's Butthole", new int[]{0, 666},
+                            "Satan's Butthole", schedules)));
+            WatchZone satan =
+                    new WatchZone(666, 0, "Satan's Butthole", new LatLng(0, 0), 666, addresses);
+            boolean watchZoneCreated = mWatchZoneFileHelper.saveWatchZone(satan);
+
+            WatchZoneUpdateManager watchZoneUpdateManager = WatchZoneUpdateManager.getInstance(mContext);
+            watchZoneUpdateManager.updateWatchZone(satan);
+            watchZones.add(satan);
+        }
+        mWatchZones = new HashMap<>();
         for (WatchZone watchZone : watchZones) {
-            mAlarms.put(watchZone.getCreatedTimestamp(), watchZone);
+            mWatchZones.put(watchZone.getCreatedTimestamp(), watchZone);
         }
     }
 
-    public void addAlarmChangeListener(AlarmChangeListener listener) {
+    public void addWatchZoneChangeListener(WatchZoneChangeListener listener) {
         if (listener != null) {
-            mListeners.add(new WeakReference<AlarmChangeListener>(listener));
+            mListeners.add(new WeakReference<WatchZoneChangeListener>(listener));
         }
     }
 
-    public void removeAlarmChangeListener(AlarmChangeListener listener) {
+    public void removeWatchZoneChangeListener(WatchZoneChangeListener listener) {
         if (listener != null) {
-            WeakReference<AlarmChangeListener> toRemove = null;
-            for (WeakReference<AlarmChangeListener> weakRef : mListeners) {
-                AlarmChangeListener curListener = weakRef.get();
+            WeakReference<WatchZoneChangeListener> toRemove = null;
+            for (WeakReference<WatchZoneChangeListener> weakRef : mListeners) {
+                WatchZoneChangeListener curListener = weakRef.get();
                 if (curListener == listener) {
                     toRemove = weakRef;
                     break;
@@ -59,67 +81,67 @@ public class WatchZoneManager implements WatchZoneFileHelper.AlarmUpdateListener
         }
     }
 
-    public void addAlarmProgressListener(WatchZoneUpdateManager.AlarmProgressListener listener) {
+    public void addWatchZoneProgressListener(WatchZoneUpdateManager.WatchZoneProgressListener listener) {
         WatchZoneUpdateManager.getInstance(mContext).addListener(listener);
     }
 
-    public void removeAlarmProgressListener(WatchZoneUpdateManager.AlarmProgressListener listener) {
+    public void removeWatchZoneProgressListener(WatchZoneUpdateManager.WatchZoneProgressListener listener) {
         WatchZoneUpdateManager.getInstance(mContext).removeListener(listener);
     }
 
-    public WatchZone getAlarm(Long createdTimestamp) {
-        return mAlarms.get(createdTimestamp);
+    public WatchZone getWatchZone(Long createdTimestamp) {
+        return mWatchZones.get(createdTimestamp);
     }
 
-    public Set<Long> getAlarms() {
-        return mAlarms.keySet();
+    public Set<Long> getWatchZones() {
+        return mWatchZones.keySet();
     }
 
-    public Set<Long> getUpdatingAlarms() {
-        return WatchZoneUpdateManager.getInstance(mContext).getUpdatingAlarmTimestamps();
+    public Set<Long> getUpdatingWatchZones() {
+        return WatchZoneUpdateManager.getInstance(mContext).getUpdatingWatchZoneTimestamps();
     }
 
-    public int getProgressForAlarm(long createdTimestamp) {
-        return WatchZoneUpdateManager.getInstance(mContext).getProgressForAlarm(createdTimestamp);
+    public int getProgressForWatchZone(long createdTimestamp) {
+        return WatchZoneUpdateManager.getInstance(mContext).getProgressForWatchZone(createdTimestamp);
     }
 
     /**
-     * Create a new alarm and start a new WatchZoneUpdateService for this alarm. The alarm will be
+     * Create a new watch zone and start a new WatchZoneUpdateService for this watch zone. The watch zone will be
      * added to the WatchZoneManager asynchronously. If this function returns success, there will be a
-     * subsequent call to onAlarmCreated(long timestamp).
+     * subsequent call to onWatchZoneCreated(long timestamp).
      */
-    public long createAlarm(LatLng center, int radius) {
+    public long createWatchZone(LatLng center, int radius) {
         long createdTimestamp = System.currentTimeMillis();
         long lastUpdatedTimestamp = 0;
         WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, null, center, radius, null);
-        boolean alarmCreated = mWatchZoneFileHelper.saveAlarm(watchZone);
+        boolean watchZoneCreated = mWatchZoneFileHelper.saveWatchZone(watchZone);
 
-        if (alarmCreated) {
+        if (watchZoneCreated) {
             WatchZoneUpdateManager watchZoneUpdateManager = WatchZoneUpdateManager.getInstance(mContext);
-            watchZoneUpdateManager.updateAlarm(watchZone);
+            watchZoneUpdateManager.updateWatchZone(watchZone);
             return createdTimestamp;
         } else {
             return 0;
         }
     }
 
-    public boolean refreshAlarm(long createdTimestamp) {
-        if (mAlarms.containsKey(createdTimestamp)) {
-            WatchZoneUpdateManager.getInstance(mContext).updateAlarm(mAlarms.get(createdTimestamp));
+    public boolean refreshWatchZone(long createdTimestamp) {
+        if (mWatchZones.containsKey(createdTimestamp)) {
+            WatchZoneUpdateManager.getInstance(mContext).updateWatchZone(mWatchZones.get(createdTimestamp));
             return true;
         } else {
             return false;
         }
     }
 
-    public boolean updateAlarm(long createdTimestamp, LatLng center, int radius) {
-        if (mAlarms.containsKey(createdTimestamp)) {
+    public boolean updateWatchZone(long createdTimestamp, LatLng center, int radius) {
+        if (mWatchZones.containsKey(createdTimestamp)) {
             WatchZone newWatchZone =
                     new WatchZone(createdTimestamp, System.currentTimeMillis(), null,
                             center, radius, null);
-            boolean alarmCreated = mWatchZoneFileHelper.saveAlarm(newWatchZone);
-            if (alarmCreated) {
-                return refreshAlarm(createdTimestamp);
+            boolean watchZoneCreated = mWatchZoneFileHelper.saveWatchZone(newWatchZone);
+            if (watchZoneCreated) {
+                return refreshWatchZone(createdTimestamp);
             } else {
                 return false;
             }
@@ -128,67 +150,67 @@ public class WatchZoneManager implements WatchZoneFileHelper.AlarmUpdateListener
         }
     }
 
-    public boolean deleteAlarm(long createdTimestamp) {
-        if (mAlarms.containsKey(createdTimestamp)) {
-            return mWatchZoneFileHelper.deleteAlarm(mAlarms.get(createdTimestamp));
+    public boolean deleteWatchZone(long createdTimestamp) {
+        if (mWatchZones.containsKey(createdTimestamp)) {
+            return mWatchZoneFileHelper.deleteWatchZone(mWatchZones.get(createdTimestamp));
         } else {
             return false;
         }
     }
 
     @Override
-    public void onAlarmDeleted(long createdTimestamp) {
-        mAlarms.remove(createdTimestamp);
-        notifyAlarmDeleted(createdTimestamp);
+    public void onWatchZoneDeleted(long createdTimestamp) {
+        mWatchZones.remove(createdTimestamp);
+        notifyWatchZoneDeleted(createdTimestamp);
     }
 
     @Override
-    public void onAlarmUpdated(long createdTimestamp) {
-        WatchZone watchZone = mWatchZoneFileHelper.loadAlarm(createdTimestamp);
+    public void onWatchZoneUpdated(long createdTimestamp) {
+        WatchZone watchZone = mWatchZoneFileHelper.loadWatchZone(createdTimestamp);
         if (watchZone != null) {
-            boolean newAlarm = false;
-            if (!mAlarms.containsKey(createdTimestamp)) {
-                newAlarm = true;
+            boolean newWatchZone = false;
+            if (!mWatchZones.containsKey(createdTimestamp)) {
+                newWatchZone = true;
             }
-            mAlarms.put(createdTimestamp, watchZone);
-            if (newAlarm) {
-                notifyAlarmAdded(createdTimestamp);
+            mWatchZones.put(createdTimestamp, watchZone);
+            if (newWatchZone) {
+                notifyWatchZoneAdded(createdTimestamp);
             } else {
-                notifyAlarmUpdated(createdTimestamp);
+                notifyWatchZoneUpdated(createdTimestamp);
             }
         } else {
-            mAlarms.remove(createdTimestamp);
-            notifyAlarmDeleted(createdTimestamp);
+            mWatchZones.remove(createdTimestamp);
+            notifyWatchZoneDeleted(createdTimestamp);
         }
     }
 
-    private void notifyAlarmUpdated(long createdTimestamp) {
-        for (WeakReference<AlarmChangeListener> weakRef : mListeners) {
-            AlarmChangeListener listener = weakRef.get();
+    private void notifyWatchZoneUpdated(long createdTimestamp) {
+        for (WeakReference<WatchZoneChangeListener> weakRef : mListeners) {
+            WatchZoneChangeListener listener = weakRef.get();
             if (listener != null) {
-                listener.onAlarmUpdated(createdTimestamp);
+                listener.onWatchZoneUpdated(createdTimestamp);
             } else {
                 mListeners.remove(weakRef);
             }
         }
     }
 
-    private void notifyAlarmAdded(long createdTimestamp) {
-        for (WeakReference<AlarmChangeListener> weakRef : mListeners) {
-            AlarmChangeListener listener = weakRef.get();
+    private void notifyWatchZoneAdded(long createdTimestamp) {
+        for (WeakReference<WatchZoneChangeListener> weakRef : mListeners) {
+            WatchZoneChangeListener listener = weakRef.get();
             if (listener != null) {
-                listener.onAlarmCreated(createdTimestamp);
+                listener.onWatchZoneCreated(createdTimestamp);
             } else {
                 mListeners.remove(weakRef);
             }
         }
     }
 
-    private void notifyAlarmDeleted(long createdTimestamp) {
-        for (WeakReference<AlarmChangeListener> weakRef : mListeners) {
-            AlarmChangeListener listener = weakRef.get();
+    private void notifyWatchZoneDeleted(long createdTimestamp) {
+        for (WeakReference<WatchZoneChangeListener> weakRef : mListeners) {
+            WatchZoneChangeListener listener = weakRef.get();
             if (listener != null) {
-                listener.onAlarmDeleted(createdTimestamp);
+                listener.onWatchZoneDeleted(createdTimestamp);
             } else {
                 mListeners.remove(weakRef);
             }

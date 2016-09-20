@@ -5,7 +5,7 @@ import android.content.Context;
 /**
  * Created by joseph on 9/5/16.
  */
-public class ServiceWatchZoneUpdaterFactory implements WatchZoneUpdateManager.AlarmUpdaterFactory {
+public class ServiceWatchZoneUpdaterFactory implements WatchZoneUpdateManager.WatchZoneUpdaterFactory {
     private final Context mContext;
 
     public ServiceWatchZoneUpdaterFactory(Context context) {
@@ -13,7 +13,7 @@ public class ServiceWatchZoneUpdaterFactory implements WatchZoneUpdateManager.Al
     }
 
     @Override
-    public WatchZoneUpdateManager.AlarmUpdater createNewAlarmUpdater() {
+    public WatchZoneUpdateManager.WatchZoneUpdater createNewWatchZoneUpdater() {
         return new ServiceWatchZoneUpdater(mContext);
     }
 }

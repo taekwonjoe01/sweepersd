@@ -39,4 +39,14 @@ public class Limit {
     public List<LimitSchedule> getSchedules() {
         return mSchedules;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean equals = false;
+        if (o instanceof Limit) {
+            Limit other = (Limit) o;
+            equals = this.mId == other.mId;
+        }
+        return equals;
+    }
 }

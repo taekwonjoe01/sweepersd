@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by joseph on 9/2/16.
  */
-public class TestAlarm {
+public class TestWatchZone {
 
     @Test
     public void testAlarm() throws Exception {

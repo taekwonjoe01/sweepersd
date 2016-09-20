@@ -133,11 +133,13 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
 
     private void setValidatorProgress(int progress) {
         MenuItem progressItem = mOptionsMenu.findItem(R.id.validator_progress);
-        String p = "";
-        if (progress != AddressValidatorManager.INVALID_PROGRESS) {
-            p = String.format("Updating DB: %d%%", progress);
+        if (progressItem != null) {
+            String p = "";
+            if (progress != AddressValidatorManager.INVALID_PROGRESS) {
+                p = String.format("Updating DB: %d%%", progress);
+            }
+            progressItem.setTitle(p);
         }
-        progressItem.setTitle(p);
     }
 
     private void setAdapter() {

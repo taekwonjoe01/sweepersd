@@ -107,13 +107,13 @@ public class AddressValidatorService extends IntentService {
         Log.i(TAG, "Finishing " + TAG);
 
         WatchZoneManager manager = new WatchZoneManager(this);
-        Set<Long> alarmIds = manager.getAlarms();
+        Set<Long> alarmIds = manager.getWatchZones();
         for (Long id : alarmIds) {
-            WatchZone watchZone = manager.getAlarm(id);
+            WatchZone watchZone = manager.getWatchZone(id);
 
             // This will resave the watchZone, and if it's currently being updated,
             // the update will restart.
-            manager.updateAlarm(watchZone.getCreatedTimestamp(), watchZone.getCenter(), watchZone.getRadius());
+            manager.updateWatchZone(watchZone.getCreatedTimestamp(), watchZone.getCenter(), watchZone.getRadius());
         }
 
         publishFinished();

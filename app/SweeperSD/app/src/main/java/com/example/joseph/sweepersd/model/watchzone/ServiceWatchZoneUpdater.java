@@ -8,12 +8,12 @@ import android.content.IntentFilter;
 /**
  * Created by joseph on 9/5/16.
  */
-public class ServiceWatchZoneUpdater implements WatchZoneUpdateManager.AlarmUpdater {
+public class ServiceWatchZoneUpdater implements WatchZoneUpdateManager.WatchZoneUpdater {
     private final Context mContext;
 
     private WatchZone mWatchZone;
     private int mProgress;
-    private WatchZoneUpdateManager.AlarmProgressListener mListener;
+    private WatchZoneUpdateManager.WatchZoneProgressListener mListener;
 
     public ServiceWatchZoneUpdater(Context context) {
         mContext = context.getApplicationContext();
@@ -25,7 +25,7 @@ public class ServiceWatchZoneUpdater implements WatchZoneUpdateManager.AlarmUpda
     }
 
     @Override
-    public void updateAlarm(WatchZone watchZone, WatchZoneUpdateManager.AlarmProgressListener listener) {
+    public void updateWatchZone(WatchZone watchZone, WatchZoneUpdateManager.WatchZoneProgressListener listener) {
         mWatchZone = watchZone;
         mListener = listener;
 
@@ -51,10 +51,10 @@ public class ServiceWatchZoneUpdater implements WatchZoneUpdateManager.AlarmUpda
                     case WatchZoneUpdateService.ACTION_ALARM_PROGRESS:
                         int progress = intent.getIntExtra(WatchZoneUpdateService.PARAM_PROGRESS, 0);
                         mProgress = progress;
-                        mListener.onAlarmUpdateProgress(mWatchZone.getCreatedTimestamp(), progress);
+                        mListener.onWatchZoneUpdateProgress(mWatchZone.getCreatedTimestamp(), progress);
                         break;
                     case WatchZoneUpdateService.ACTION_ALARM_FINISHED:
-                        mListener.onAlarmUpdateComplete(mWatchZone.getCreatedTimestamp());
+                        mListener.onWatchZoneUpdateComplete(mWatchZone.getCreatedTimestamp());
                         mContext.unregisterReceiver(this);
                         break;
                     default:

@@ -6,7 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
+import com.example.joseph.sweepersd.model.watchzone.WatchZone;
+import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewActivity;
 import com.example.joseph.sweepersd.utils.SettingsUtils;
+
+import org.apache.commons.lang3.text.WordUtils;
 
 /**
  * Created by joseph on 4/7/16.
@@ -56,7 +60,7 @@ public class NotificationPresenter {
                 .setSmallIcon(R.drawable.ic_lrg_no_parking_yellow)
                 .setContentTitle("Sweeping soon")
                 .setContentText(message)
-                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
+                .setVibrate(new long[]{1000, 750, 500, 750, 500, 750, 500})
                 .setContentIntent(intent);
 
         NotificationManager notificationManager = (NotificationManager)
@@ -64,9 +68,11 @@ public class NotificationPresenter {
         notificationManager.notify(NotificationType.REDZONE_WARNING.ordinal(), builder.build());
     }
 
-    public static void sendRedzoneNotification(Context context) {
-        String message = "WARNING: Street Sweeping now!";
-        Intent notificationIntent = new Intent(context, MainActivity.class);
+    public static void sendWatchZoneNotification(Context context, WatchZone watchzone,
+                                                 int hoursUntilStarting) {
+        String message = "WARNING: Sweeping near " + WordUtils.capitalize(watchzone.getAddress())
+                + " starting in " + hoursUntilStarting + " hours.";
+        Intent notificationIntent = new Intent(context, WatchZoneViewActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -75,9 +81,9 @@ public class NotificationPresenter {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_lrg_no_parking_red)
-                .setContentTitle("No Parking")
+                .setContentTitle("Street Sweeping")
                 .setContentText(message)
-                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
+                .setVibrate(new long[]{1000, 750, 500, 750, 500, 750, 500})
                 .setContentIntent(intent);
 
         NotificationManager notificationManager = (NotificationManager)

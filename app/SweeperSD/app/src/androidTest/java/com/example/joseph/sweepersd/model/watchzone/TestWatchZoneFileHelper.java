@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by joseph on 9/4/16.
  */
-public class TestAlarmFileHelper extends AndroidTestCase {
-    private static final String TAG = TestAlarmFileHelper.class.getSimpleName();
+public class TestWatchZoneFileHelper extends AndroidTestCase {
+    private static final String TAG = TestWatchZoneFileHelper.class.getSimpleName();
     private RenamingDelegatingContext mContext;
-    private WatchZoneFileHelper.AlarmUpdateListener mMockListener;
+    private WatchZoneFileHelper.WatchZoneUpdateListener mMockListener;
     private CountDownLatch mOnAlarmUpdatedLatch;
     private CountDownLatch mOnAlarmDeletedLatch;
 
@@ -35,14 +35,14 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
         deleteRecursive(file);
 
-        mMockListener = new WatchZoneFileHelper.AlarmUpdateListener() {
+        mMockListener = new WatchZoneFileHelper.WatchZoneUpdateListener() {
             @Override
-            public void onAlarmUpdated(long createdTimestamp) {
+            public void onWatchZoneUpdated(long createdTimestamp) {
                 mOnAlarmUpdatedLatch.countDown();
             }
 
             @Override
-            public void onAlarmDeleted(long createdTimestamp) {
+            public void onWatchZoneDeleted(long createdTimestamp) {
                 mOnAlarmDeletedLatch.countDown();
             }
         };
@@ -100,7 +100,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
     public void testAddAlarm() {
         WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
-        List<WatchZone> watchZones = helper.loadAlarms();
+        List<WatchZone> watchZones = helper.loadWatchZones();
 
         assertEquals(0, watchZones.size());
 
@@ -124,7 +124,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
                 sweepingAddresses);
 
         // Save the watchZone.
-        helper.saveAlarm(watchZone);
+        helper.saveWatchZone(watchZone);
 
         boolean countedDown = false;
         try {
@@ -134,9 +134,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone = helper.loadWatchZone(createdTimestamp);
 
-        watchZones = helper.loadAlarms();
+        watchZones = helper.loadWatchZones();
 
         assertEquals(1, watchZones.size());
 
@@ -155,7 +155,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
     public void testOverwriteAlarm() {
         WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
-        List<WatchZone> watchZones = helper.loadAlarms();
+        List<WatchZone> watchZones = helper.loadWatchZones();
 
         assertEquals(0, watchZones.size());
 
@@ -180,9 +180,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(watchZone);
+        helper.saveWatchZone(watchZone);
         // Overwrite the save!
-        helper.saveAlarm(watchZone);
+        helper.saveWatchZone(watchZone);
 
         boolean countedDown = false;
         try {
@@ -192,9 +192,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone = helper.loadWatchZone(createdTimestamp);
 
-        watchZones = helper.loadAlarms();
+        watchZones = helper.loadWatchZones();
 
         assertEquals(1, watchZones.size());
 
@@ -213,7 +213,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
     public void testMultipleAlarms() {
         WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
-        List<WatchZone> watchZones = helper.loadAlarms();
+        List<WatchZone> watchZones = helper.loadWatchZones();
 
         assertEquals(0, watchZones.size());
 
@@ -240,8 +240,8 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(watchZone);
-        helper.saveAlarm(watchZone2);
+        helper.saveWatchZone(watchZone);
+        helper.saveWatchZone(watchZone2);
 
 
         boolean countedDown = false;
@@ -252,10 +252,10 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
-        WatchZone loadedWatchZone2 = helper.loadAlarm(createdTimestamp2);
+        WatchZone loadedWatchZone = helper.loadWatchZone(createdTimestamp);
+        WatchZone loadedWatchZone2 = helper.loadWatchZone(createdTimestamp2);
 
-        watchZones = helper.loadAlarms();
+        watchZones = helper.loadWatchZones();
 
         assertEquals(2, watchZones.size());
 
@@ -286,7 +286,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
     public void testDeleteAlarm() {
         WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, mMockListener);
-        List<WatchZone> watchZones = helper.loadAlarms();
+        List<WatchZone> watchZones = helper.loadWatchZones();
 
         assertEquals(0, watchZones.size());
 
@@ -314,9 +314,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(watchZone);
-        helper.saveAlarm(watchZone2);
-        helper.deleteAlarm(watchZone2);
+        helper.saveWatchZone(watchZone);
+        helper.saveWatchZone(watchZone2);
+        helper.deleteWatchZone(watchZone2);
 
 
         boolean countedDown = false;
@@ -328,10 +328,10 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        WatchZone loadedWatchZone = helper.loadAlarm(createdTimestamp);
-        WatchZone loadedWatchZone2 = helper.loadAlarm(createdTimestamp2);
+        WatchZone loadedWatchZone = helper.loadWatchZone(createdTimestamp);
+        WatchZone loadedWatchZone2 = helper.loadWatchZone(createdTimestamp2);
 
-        watchZones = helper.loadAlarms();
+        watchZones = helper.loadWatchZones();
 
         assertEquals(1, watchZones.size());
 
@@ -354,7 +354,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
     public void testMultipleHelpers() {
         WatchZoneFileHelper helper = new WatchZoneFileHelper(mContext, null);
         WatchZoneFileHelper helper2 = new WatchZoneFileHelper(mContext, mMockListener);
-        List<WatchZone> watchZones = helper.loadAlarms();
+        List<WatchZone> watchZones = helper.loadWatchZones();
 
         assertEquals(0, watchZones.size());
 
@@ -382,9 +382,9 @@ public class TestAlarmFileHelper extends AndroidTestCase {
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
-        helper.saveAlarm(watchZone);
-        helper.saveAlarm(watchZone2);
-        helper.deleteAlarm(watchZone2);
+        helper.saveWatchZone(watchZone);
+        helper.saveWatchZone(watchZone2);
+        helper.deleteWatchZone(watchZone2);
 
 
         boolean countedDown = false;
@@ -396,7 +396,7 @@ public class TestAlarmFileHelper extends AndroidTestCase {
         }
         assertTrue(countedDown);
 
-        WatchZone loadedWatchZone = helper2.loadAlarm(createdTimestamp);
+        WatchZone loadedWatchZone = helper2.loadWatchZone(createdTimestamp);
         assertNotNull(loadedWatchZone);
     }
 }

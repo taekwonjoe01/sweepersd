@@ -57,12 +57,22 @@
             android:value="@string/google_maps_key" />
 
         <service
-            android:name=".model.watchZones.AlarmUpdateService"
+            android:name=".model.watchzone.WatchZoneUpdateService"
             android:exported="false"/>
+
+        <service
+        android:name=".model.watchzone.WatchZoneNotificationDeliverer"
+        android:exported="false"/>
 
         <service
             android:name=".model.AddressValidatorService"
             android:exported="false"/>
+
+        <receiver
+            android:name=".model.watchzone.WatchZoneAlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+        </receiver>
 
         <activity
             android:name=".MapsActivity"

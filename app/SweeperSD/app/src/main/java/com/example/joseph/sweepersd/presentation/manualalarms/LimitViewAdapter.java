@@ -12,23 +12,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.model.watchzone.WatchZone;
-import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
+import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitParser;
-import com.example.joseph.sweepersd.model.limits.LimitSchedule;
+import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneUtils;
+import com.example.joseph.sweepersd.model.watchzone.SweepingDate;
+import com.example.joseph.sweepersd.model.watchzone.WatchZone;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by joseph on 9/7/16.
@@ -112,19 +110,12 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     class LimitPresenter {
         int position;
         String street;
-        LimitSchedule schedule;
-        GregorianCalendar startCalendar;
-        GregorianCalendar endCalendar;
-        boolean isDeleted;
+        SweepingDate date;
 
-        LimitPresenter(int position, String street, LimitSchedule schedule,
-                       GregorianCalendar start, GregorianCalendar end) {
+        LimitPresenter(int position, String street, SweepingDate date) {
             this.position = position;
             this.street = street;
-            this.schedule = schedule;
-            this.startCalendar = start;
-            this.endCalendar = end;
-            isDeleted = false;
+            this.date = date;
         }
 
         String getStreet() {
@@ -134,19 +125,20 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         String getDate() {
             SimpleDateFormat format = new SimpleDateFormat("EEE, MMM dd");
 
-            String date = format.format(startCalendar.getTime());
-            return date;
+            String dateString = format.format(date.getStartTime().getTime());
+            return dateString;
         }
 
         String getTime() {
-            return LimitParser.convertHourToTimeString(schedule.getStartHour()) + "-" +
-                    LimitParser.convertHourToTimeString(schedule.getEndHour());
+            return LimitParser.convertHourToTimeString(date.getLimitSchedule().getStartHour())
+                    + "-" +
+                    LimitParser.convertHourToTimeString(date.getLimitSchedule().getEndHour());
         }
 
         String getTimeUntilSweeping() {
-            if (startCalendar != null) {
+            if (date.getStartTime() != null) {
                 GregorianCalendar today = new GregorianCalendar();
-                long timeUntilSweeping = startCalendar.getTime().getTime() -
+                long timeUntilSweeping = date.getStartTime().getTime().getTime() -
                         today.getTime().getTime();
 
                 String timerMessage = "";
@@ -235,82 +227,24 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         protected List<LimitPresenter> doInBackground(Void... params) {
             List<LimitPresenter> results = new ArrayList<>();
 
-            HashMap<Integer, SweepingAddress> uniqueLimitSweepingAddresses = new HashMap<>();
-            for (SweepingAddress address : mAddresses) {
-                if (address.getLimit() != null) {
-                    uniqueLimitSweepingAddresses.put(address.getLimit().getId(), address);
-                }
-            }
-            for (Integer limitId : uniqueLimitSweepingAddresses.keySet()) {
-                SweepingAddress address = uniqueLimitSweepingAddresses.get(limitId);
-                Log.d(TAG, address.getAddress() + "\n" +
-                        address.getLimit().getId() + " " + address.getLimit().getStreet());
-
-                for (LimitSchedule schedule : address.getLimit().getSchedules()) {
-                    GregorianCalendar startTime = null;
-                    GregorianCalendar endTime = null;
-                    Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
-
-                    for (int j = 0; j < 31; j++) {
-                        int dow = calendar.get(Calendar.DAY_OF_WEEK);
-
-                        if (dow == schedule.getDay()) {
-                            int dom = calendar.get(Calendar.DAY_OF_MONTH);
-                            int result = ((dom - 1) / 7) + 1;
-                            if (result == schedule.getWeekNumber()) {
-                                GregorianCalendar potentialStartTime = new GregorianCalendar(calendar.get(Calendar.YEAR),
-                                        calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH),
-                                        schedule.getStartHour(), 0, 0);
-                                GregorianCalendar potentialEndTime = new GregorianCalendar(calendar.get(Calendar.YEAR),
-                                        calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH),
-                                        schedule.getEndHour(), 0, 0);
-
-                                GregorianCalendar today = new GregorianCalendar(Locale.getDefault());
-                                if (today.getTime().getTime() - potentialEndTime.getTime().getTime() < 0) {
-                                    Log.e("Joey", "Now: " + today.getTime().toString());
-                                    Log.e("Joey", "endTime: " + potentialEndTime.getTime().toString());
-
-
-                                    Log.e("Joey", "Now: " + today.getTime().getTime());
-                                    Log.e("Joey", "endTime: " + potentialEndTime.getTime().getTime());
-                                    startTime = potentialStartTime;
-                                    endTime = potentialEndTime;
-                                    break;
-                                }
-                            }
-                        }
-
-                        calendar.add(Calendar.DATE, 1);
-                    }
-
-                    if (startTime != null && endTime != null) {
-                        LimitPresenter presenter = new LimitPresenter(results.size(),
-                                address.getLimit().getStreet(), schedule, startTime, endTime);
-                        results.add(presenter);
-                    } else {
-                        Log.e(TAG, "start time or end time null! " + schedule.getDay() + "\n" +
-                                schedule.getWeekNumber());
-                    }
+            List<Limit> uniqueLimits = WatchZoneUtils.getUniqueLimits(mAddresses);
+            for (Limit l : uniqueLimits) {
+                List<SweepingDate> sweepingDates =
+                        WatchZoneUtils.getTimeOrderedSweepingDatesForLimit(l);
+                if (sweepingDates.size() > 0) {
+                    results.add(new LimitPresenter(results.size(), l.getStreet(),
+                            sweepingDates.get(0)));
                 }
             }
 
-            // Sorting
             Collections.sort(results, new Comparator<LimitPresenter>() {
                 @Override
-                public int compare(LimitPresenter limit1, LimitPresenter limit2) {
-                    long val = limit1.startCalendar.getTime().getTime() -
-                            limit2.startCalendar.getTime().getTime();
+                public int compare(LimitPresenter presenter1, LimitPresenter presenter2) {
+                    long val = presenter1.date.getStartTime().getTime().getTime() -
+                            presenter2.date.getStartTime().getTime().getTime();
                     return (int)val;
                 }
             });
-
-            HashMap<String, LimitPresenter> finalPresenters = new HashMap<>();
-            for (LimitPresenter p : results) {
-                if (!finalPresenters.containsKey(p.getStreet())) {
-                    finalPresenters.put(p.getStreet(), p);
-                }
-            }
-            results = new ArrayList<>(finalPresenters.values());
 
             return results;
         }
