@@ -29,12 +29,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.commons.lang3.text.WordUtils;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Adapter for showing manual Alarms.
@@ -48,7 +48,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
     public WatchZoneViewAdapter(Context context) {
         mContext = context;
-        mWatchZonePresenters = new ArrayList<>();
+        mWatchZonePresenters = new CopyOnWriteArrayList<>();
 
         mWatchZoneManager = new WatchZoneManager(mContext);
         mWatchZoneManager.addWatchZoneChangeListener(mWatchZoneChangeListener);
@@ -102,7 +102,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         holder.mLongClickListener = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                mWatchZoneManager.deleteWatchZone(mWatchZonePresenters.get(position).watchZoneTimestamp);
+                mWatchZoneManager.deleteWatchZone(mWatchZonePresenters.get(presenter.position).watchZoneTimestamp);
                 Toast.makeText(v.getContext(), "Delete watchZone", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -110,7 +110,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         holder.mRefreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mWatchZoneManager.refreshWatchZone(mWatchZonePresenters.get(position).watchZoneTimestamp);
+                mWatchZoneManager.refreshWatchZone(mWatchZonePresenters.get(presenter.position).watchZoneTimestamp);
             }
         });
         if (presenter instanceof NonUpdatingWatchZonePresenter) {
@@ -189,67 +189,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             }
         }
     };
-
-    /*public class LoadAlarmSweepingPositionsTask extends AsyncTask<Void, String, List<SweepingAddress>> {
-        private WatchZone mAlarm;
-        private UpdatingPresenter mAlarmPresenter;
-
-        public LoadAlarmSweepingPositionsTask(UpdatingPresenter alarmPresenter, WatchZone watchZone) {
-            mAlarm = watchZone;
-            mAlarmPresenter = alarmPresenter;
-        }
-
-        @Override
-        protected List<SweepingAddress> doInBackground(Void... params) {
-            // TODO
-            List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(mAlarm.getCenter(),
-                    mAlarm.getRadius());
-
-            List<SweepingAddress> sweepingAddresses = new ArrayList<>();
-
-            String centerAddress  = LocationUtils.getAddressForLatLnt(mContext, mAlarm.getCenter());
-            sweepingAddresses.add(new SweepingAddress(mAlarm.getCenter(), centerAddress));
-            for (int i = 0; i < latLngs.size(); i++) {
-                LatLng latLng = latLngs.get(i);
-
-                if (mAlarmPresenter.isDeleted || isCancelled()) {
-                    return null;
-                }
-                int progress = (int) (((double)i / (double)latLngs.size()) * 100);
-                String progressUpdate = String.format("Loading addresses in radius: %d%%", progress);
-                publishProgress(progressUpdate);
-
-                String address  = LocationUtils.getAddressForLatLnt(mContext, mAlarm.getCenter());
-                sweepingAddresses.add(
-                        new SweepingAddress(latLng, address));
-            }
-            return sweepingAddresses;
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            mAlarmPresenter.setProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(List<SweepingAddress> sweepingAddresses) {
-            if (!mAlarmPresenter.isDeleted && !isCancelled() && sweepingAddresses != null) {
-                LoadingLimitsPresenter newPresenter =
-                        new LoadingLimitsPresenter(mAlarmPresenter.position, mAlarm);
-                mWatchZonePresenters.remove(mAlarmPresenter.position);
-                mWatchZonePresenters.add(mAlarmPresenter.position, newPresenter);
-                notifyItemChanged(mAlarmPresenter.position);
-
-                mAlarm.setSweepingAddresses(sweepingAddresses);
-                //mWatchZoneManager.saveWatchZone(mAlarm);
-
-                //new LoadWatchZonesTask(newPresenter, mAlarm).execute();
-            }
-            super.onPostExecute(sweepingAddresses);
-        }
-    }*/
 
     public class LoadWatchZonesTask extends AsyncTask<Void, Long, Void> {
         private int mPosition = 0;
@@ -511,29 +450,4 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             return false;
         }
     }
-
-    /*private GregorianCalendar getNextSweepingDate(HashMap<SweepingAddress, Limit> limitsMap) {
-        GregorianCalendar result = null;
-        for (SweepingAddress pos : mSweepingPositions) {
-            List<GregorianCalendar> sweepingDays = LocationUtils.getSweepingDaysForLimit(
-                    LocationUtils.findLimitForAddress(pos.getAddress()), 31);
-            if (!sweepingDays.isEmpty()) {
-                GregorianCalendar potentialNew = sweepingDays.get(0);
-                if (result == null ||
-                        potentialNew.getTime().getTime() < result.getTime().getTime()) {
-                    result = potentialNew;
-                }
-            }
-        }
-        return result;
-    }
-
-    private List<GregorianCalendar> getNextSweepingDates(int maxDays, HashMap<SweepingAddress, Limit> limitsMap) {
-        List<GregorianCalendar> result = new ArrayList<>();
-        for (SweepingAddress pos : mSweepingPositions) {
-            result.addAll(LocationUtils.getSweepingDaysForLimit(
-                    LocationUtils.findLimitForAddress(pos.getAddress()), maxDays));
-        }
-        return result;
-    }*/
 }
