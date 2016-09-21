@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.model.AddressValidatorManager;
 
@@ -117,7 +116,6 @@ public class LimitDbHelper extends SQLiteOpenHelper {
         List<Limit> results = null;
         try {
             DB_SEMAPHORE.acquire();
-            Log.e("Joey", "after acquire");
 
             SQLiteDatabase db = this.getWritableDatabase();
 
@@ -192,7 +190,6 @@ public class LimitDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.e("Joey", "onCreate");
         loadImportedLimits(db);
         db.execSQL(SQL_CREATE_PERSONAL_LIMITS);
         db.execSQL(SQL_CREATE_PERSONAL_SCHEDULES);

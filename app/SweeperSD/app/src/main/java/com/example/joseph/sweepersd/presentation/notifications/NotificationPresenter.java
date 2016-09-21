@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd;
+package com.example.joseph.sweepersd.presentation.notifications;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
+import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewActivity;
-import com.example.joseph.sweepersd.utils.SettingsUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -18,13 +18,7 @@ import org.apache.commons.lang3.text.WordUtils;
 public class NotificationPresenter {
     private static final String TAG = NotificationPresenter.class.getSimpleName();
 
-    public enum NotificationType {
-        PARKED,
-        REDZONE_WARNING,
-        REDZONE
-    }
-
-    public static void sendParkedNotificationIfEnabled(Context context) {
+    /*public static void sendParkedNotificationIfEnabled(Context context) {
         if (SettingsUtils.isParkedNotificationEnabled(context)) {
             String message = "Park detected";
             Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -45,9 +39,9 @@ public class NotificationPresenter {
                     context.getSystemService(context.NOTIFICATION_SERVICE);
             notificationManager.notify(NotificationType.PARKED.ordinal(), builder.build());
         }
-    }
+    }*/
 
-    public static void sendRedzoneWarningNotification(Context context) {
+    /*public static void sendRedzoneWarningNotification(Context context) {
         String message = "WARNING: Street sweeping soon!";
         Intent notificationIntent = new Intent(context, MainActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -66,7 +60,7 @@ public class NotificationPresenter {
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(context.NOTIFICATION_SERVICE);
         notificationManager.notify(NotificationType.REDZONE_WARNING.ordinal(), builder.build());
-    }
+    }*/
 
     public static void sendWatchZoneNotification(Context context, WatchZone watchzone,
                                                  int hoursUntilStarting) {
@@ -88,7 +82,8 @@ public class NotificationPresenter {
 
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(context.NOTIFICATION_SERVICE);
-        notificationManager.notify(NotificationType.REDZONE.ordinal(), builder.build());
+        int id = (int) watchzone.getCreatedTimestamp() / 1000;
+        notificationManager.notify(id, builder.build());
     }
 
     /*private void sendParkedInLimitZoneNotification() {

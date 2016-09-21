@@ -3,7 +3,6 @@ package com.example.joseph.sweepersd.presentation.manualalarms;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,9 @@ import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitParser;
 import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
-import com.example.joseph.sweepersd.model.watchzone.WatchZoneUtils;
 import com.example.joseph.sweepersd.model.watchzone.SweepingDate;
 import com.example.joseph.sweepersd.model.watchzone.WatchZone;
+import com.example.joseph.sweepersd.model.watchzone.WatchZoneUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -44,9 +43,6 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         mContext = context;
         mWatchZone = watchZone;
         mLimitPresenters = new ArrayList<>();
-
-
-        Log.e("Joey", "LIMITPRESENTER size " + mLimitPresenters.size());
     }
 
     @Override
@@ -70,8 +66,6 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
                 .inflate(R.layout.layout_limit_list_item, parent, false);
 
         ViewHolder vh = new ViewHolder(v);
-
-        Log.e("Joey", "onCreateViewHolder ");
         return vh;
     }
 

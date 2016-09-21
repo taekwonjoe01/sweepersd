@@ -1,5 +1,6 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -68,6 +68,10 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         if (animator instanceof SimpleItemAnimator) {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
+
+        NotificationManager notificationManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
     }
 
     @Override
@@ -75,7 +79,6 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case CREATE_ALARM_CODE:
-                Log.e("Joey", "Processing mapsactivity result");
                 LatLng location = data.getParcelableExtra(MapsActivity.LOCATION_KEY);
                 int radius = data.getIntExtra(MapsActivity.RADIUS_KEY, 0);
 

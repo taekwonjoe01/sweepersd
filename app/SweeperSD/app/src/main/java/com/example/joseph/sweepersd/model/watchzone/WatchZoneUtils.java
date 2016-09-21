@@ -194,7 +194,7 @@ public class WatchZoneUtils {
         } else if (timeUntil > ONE_HOUR) {
             return sweepingTime - ONE_HOUR;
         } else {
-            return 0;
+            return today.getTime().getTime();
         }
     }
 

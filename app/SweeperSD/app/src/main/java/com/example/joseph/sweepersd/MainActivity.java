@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
+import com.example.joseph.sweepersd.presentation.notifications.NotificationPresenter;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -146,12 +147,6 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         mActivityHandler.postDelayed(mRunnable, 33);
-
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(NotificationPresenter.NotificationType.PARKED.ordinal());
-        notificationManager.cancel(NotificationPresenter.NotificationType.REDZONE.ordinal());
-        notificationManager.cancel(NotificationPresenter.NotificationType.REDZONE_WARNING.ordinal());
     }
 
     @Override

@@ -220,7 +220,6 @@ public class LocationUtils {
             String[] split = address.split(",");
             if (split.length > 1) {
                 String streetAddress = split[0];
-                Log.e("Joey", "streetAddress: " + streetAddress);
                 String[] streetAddressParsings = streetAddress.split(" ");
                 if (streetAddressParsings.length > 1) {
                     String streetNumber = streetAddressParsings[0];
@@ -229,7 +228,6 @@ public class LocationUtils {
                         streetName += " " + streetAddressParsings[j];
                     }
                     streetName = streetName.trim();
-                    Log.e("Joey", "streetName: " + streetName);
                     if (streetNumber.contains("-")) {
                         String[] streetNumberParsings = streetNumber.split("-");
                         if (streetNumberParsings.length == 2) {

@@ -56,7 +56,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         for (Long timestamp : mWatchZoneManager.getWatchZones()) {
             mWatchZonePresenters.add(new LoadingWatchZonePresenter(mWatchZonePresenters.size(), timestamp));
         }
-        Log.e("Joey", "watchzones size " + mWatchZoneManager.getWatchZones().size());
 
         new LoadWatchZonesTask().execute();
     }

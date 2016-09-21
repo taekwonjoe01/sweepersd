@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.NotificationPresenter;
+import com.example.joseph.sweepersd.presentation.notifications.NotificationPresenter;
 
 import java.util.GregorianCalendar;
 import java.util.Locale;
