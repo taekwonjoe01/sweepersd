@@ -14,8 +14,8 @@ import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
 import com.example.joseph.sweepersd.model.limits.Limit;
+import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;

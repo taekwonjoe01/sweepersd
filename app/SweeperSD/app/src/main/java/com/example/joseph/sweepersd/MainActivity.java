@@ -1,6 +1,5 @@
 package com.example.joseph.sweepersd;
 
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
-import com.example.joseph.sweepersd.presentation.notifications.NotificationPresenter;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
