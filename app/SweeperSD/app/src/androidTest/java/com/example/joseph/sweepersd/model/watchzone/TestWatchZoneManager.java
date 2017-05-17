@@ -15,7 +15,6 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -90,19 +89,19 @@ public class TestWatchZoneManager extends AndroidTestCase {
         WatchZoneManager.WatchZoneChangeListener watchZoneChangeListener =
                 new WatchZoneManager.WatchZoneChangeListener() {
             @Override
-            public void onWatchZoneUpdated(Long createdTimestamp) {
+            public void onWatchZoneUpdated(long createdTimestamp) {
                 updatedLatch.countDown();
                 assureListenerRemovedLatch.countDown();
             }
 
             @Override
-            public void onWatchZoneCreated(Long createdTimestamp) {
+            public void onWatchZoneCreated(long createdTimestamp) {
                 createdLatch.countDown();
                 assureListenerRemovedLatch.countDown();
             }
 
             @Override
-            public void onWatchZoneDeleted(Long createdTimestamp) {
+            public void onWatchZoneDeleted(long createdTimestamp) {
                 deletedLatch.countDown();
                 assureListenerRemovedLatch.countDown();
             }
@@ -155,7 +154,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
         assertTrue(progressed);
         assertTrue(completed);
 
-        Set<Long> timestamps = manager.getWatchZones();
+        List<Long> timestamps = manager.getWatchZones();
         assertTrue(timestamps.contains(timestamp));
         assertEquals(1, timestamps.size());
 
@@ -173,17 +172,17 @@ public class TestWatchZoneManager extends AndroidTestCase {
         watchZoneChangeListener =
                 new WatchZoneManager.WatchZoneChangeListener() {
                     @Override
-                    public void onWatchZoneUpdated(Long createdTimestamp) {
+                    public void onWatchZoneUpdated(long createdTimestamp) {
                         updatedLatch2.countDown();
                     }
 
                     @Override
-                    public void onWatchZoneCreated(Long createdTimestamp) {
+                    public void onWatchZoneCreated(long createdTimestamp) {
                         createdLatch2.countDown();
                     }
 
                     @Override
-                    public void onWatchZoneDeleted(Long createdTimestamp) {
+                    public void onWatchZoneDeleted(long createdTimestamp) {
                         deletedLatch2.countDown();
                     }
                 };
@@ -270,17 +269,17 @@ public class TestWatchZoneManager extends AndroidTestCase {
         watchZoneChangeListener =
                 new WatchZoneManager.WatchZoneChangeListener() {
                     @Override
-                    public void onWatchZoneUpdated(Long createdTimestamp) {
+                    public void onWatchZoneUpdated(long createdTimestamp) {
                         updatedLatch3.countDown();
                     }
 
                     @Override
-                    public void onWatchZoneCreated(Long createdTimestamp) {
+                    public void onWatchZoneCreated(long createdTimestamp) {
                         createdLatch3.countDown();
                     }
 
                     @Override
-                    public void onWatchZoneDeleted(Long createdTimestamp) {
+                    public void onWatchZoneDeleted(long createdTimestamp) {
                         deletedLatch3.countDown();
                     }
                 };
