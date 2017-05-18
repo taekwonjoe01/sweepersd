@@ -63,7 +63,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     public WatchZoneViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                               int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.layout_alarm_list_item, parent, false);
+                .inflate(R.layout.layout_watch_zone_list_item, parent, false);
 
         ViewHolder vh = new ViewHolder(mContext, v);
         return vh;
@@ -106,13 +106,13 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             }
         };
         if (presenter instanceof NonUpdatingWatchZonePresenter) {
-            holder.mLimitRecyclerView.setVisibility(View.VISIBLE);
             holder.mStatus.setVisibility(View.GONE);
             holder.mLimitRecyclerView.setAdapter(((NonUpdatingWatchZonePresenter) presenter).adapter);
+            holder.mLimitRecyclerView.setVisibility(View.VISIBLE);
         } else {
+            holder.mLimitRecyclerView.setAdapter(null);
             holder.mLimitRecyclerView.setVisibility(View.GONE);
             holder.mStatus.setVisibility(View.VISIBLE);
-            holder.mLimitRecyclerView.setAdapter(null);
         }
     }
 
@@ -296,7 +296,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         }
 
         void setProgress(int progress) {
-            this.progress = String.format("Refreshing watchZone location. \nProgress: %d%%", progress);
+            this.progress = String.format("Scanning location. \nProgress: %d%%", progress);
             notifyItemChanged(this.position);
         }
 
@@ -325,7 +325,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     class NonUpdatingWatchZonePresenter extends WatchZonePresenter implements
             WatchZoneUpdateManager.WatchZoneProgressListener {
         WatchZone watchZone;
-        
+
         LimitViewAdapter adapter;
 
         NonUpdatingWatchZonePresenter(int position, Long watchZoneTimestamp) {
@@ -437,6 +437,10 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
                 return mLongClickListener.onLongClick(v);
             }
             return false;
+        }
+
+        public void refresh() {
+            mViewLayout.requestLayout();
         }
     }
 }

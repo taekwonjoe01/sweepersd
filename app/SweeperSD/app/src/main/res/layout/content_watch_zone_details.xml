@@ -1,41 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="220dp"
-    android:id="@+id/list_item_layout"
-    android:background="@drawable/apptheme_action_button"
-    android:elevation="10dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:weightSum="100"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:background="@color/app_background">
 
-        <LinearLayout
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="10dp">
+            android:layout_height="0dp"
+            android:layout_weight="50"
+            tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
 
-            <TextView
-                android:id="@+id/textview_alarm_radius"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|bottom"
-                style="@android:style/TextAppearance.Small"
-                android:textColor="@color/app_secondary"
-                android:text="120ft radius" />
-
-            <TextView
-                android:id="@+id/textview_alarm_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left|center_vertical"
-                style="@android:style/TextAppearance.Large"
-                android:textColor="@color/app_secondary"
-                android:text="1061 Beryl Street" />
-        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,7 +31,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textview_status"
@@ -57,20 +41,17 @@
                 android:gravity="center"
                 style="@android:style/TextAppearance.Medium"
                 android:textColor="@color/app_secondary"
-                android:text="Refreshing watchZone location. \nProgress: 0%" />
+                android:text="Scanning location. \nProgress: 0%" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/limit_recycler_view"
                 android:scrollbars="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:background="#22000000"
                 android:padding="@dimen/alarm_view_item_space"
                 android:visibility="gone"/>
         </FrameLayout>
-
     </LinearLayout>
-
-
 </FrameLayout>
 
