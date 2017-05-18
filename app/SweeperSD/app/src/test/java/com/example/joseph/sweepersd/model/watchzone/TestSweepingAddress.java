@@ -14,7 +14,7 @@ public class TestSweepingAddress {
     @Test
     public void testAlarm() throws Exception {
         LatLng latLng = new LatLng(0, 0);
-        String address = "address";
+        String address = "label";
         Limit limit = null;
 
         SweepingAddress testAddress = new SweepingAddress(latLng, address, limit);

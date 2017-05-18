@@ -155,7 +155,7 @@ public class WatchZoneFileHelper {
                         builder.longitude = Double.parseDouble(parsings[1]);
 
                         receiveString = bufferedReader.readLine();
-                        builder.address = receiveString;
+                        builder.label = receiveString;
 
                         receiveString = bufferedReader.readLine();
                         builder.radius = Integer.parseInt(receiveString);
@@ -245,10 +245,10 @@ public class WatchZoneFileHelper {
                                 watchZone.getCenter().longitude;
                         ADwriter.write(LatLng + "\n");
 
-                        if (TextUtils.isEmpty(watchZone.getAddress())) {
-                            ADwriter.write("Unknown" + "\n");
+                        if (TextUtils.isEmpty(watchZone.getLabel())) {
+                            ADwriter.write("Unlabeled" + "\n");
                         } else {
-                            ADwriter.write(watchZone.getAddress() + "\n");
+                            ADwriter.write(watchZone.getLabel() + "\n");
                         }
 
                         ADwriter.write(watchZone.getRadius() + "\n");
@@ -294,11 +294,10 @@ public class WatchZoneFileHelper {
         return result;
     }
 
-    public boolean deleteWatchZone(WatchZone watchZone) {
+    public boolean deleteWatchZone(Long watchZoneTimestamp) {
         boolean result = false;
 
-        Long tsLong = watchZone.getCreatedTimestamp();
-        String ts = tsLong.toString();
+        String ts = watchZoneTimestamp.toString();
         try {
             mSemaphore.acquire();
             String path = mContext.getFilesDir() + "/alarms/" + ts;
@@ -315,7 +314,7 @@ public class WatchZoneFileHelper {
             }
             mSemaphore.release();
             if (result) {
-                sendDeletedBroadcast(tsLong);
+                sendDeletedBroadcast(watchZoneTimestamp);
             }
         } catch (InterruptedException e) {
             Log.e(TAG, e.toString());
@@ -371,7 +370,7 @@ public class WatchZoneFileHelper {
     private class WatchZoneBuilder {
         long createdTimestamp = -1;
         long lastUpdatedTimestamp = -1;
-        String address = "";
+        String label = "";
         double latitude = Double.MIN_VALUE;
         double longitude = Double.MIN_VALUE;
         int radius = -1;
@@ -413,7 +412,7 @@ public class WatchZoneFileHelper {
                 }
 
                 LatLng center = new LatLng(latitude, longitude);
-                result = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+                result = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                         sweepingAddresses);
             }
 

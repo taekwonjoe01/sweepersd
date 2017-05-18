@@ -3,7 +3,6 @@ package com.example.joseph.sweepersd.presentation.manualalarms;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -163,16 +162,12 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         boolean insertLimit(Limit l, SweepingDate nextSweepingDate) {
             boolean result = false;
             Limit thisLimit = this.limits.get(0);
-            Log.e("Joey", "insertLimit thisStreet=" + thisLimit.getStreet() + " otherStreet=" +
-            l.getStreet() + " this.startTime=" + this.date.getStartTime().getTime().getTime() +
-            " other.startTime=" + nextSweepingDate.getStartTime().getTime().getTime());
             if (thisLimit.getStreet().equals(l.getStreet()) &&
                     this.date.getStartTime().getTime().getTime() ==
                     nextSweepingDate.getStartTime().getTime().getTime()) {
                 this.limits.add(l);
                 result = true;
             }
-            Log.e("Joey", "result=" + result);
             return result;
         }
     }

@@ -64,7 +64,7 @@ public class NotificationPresenter {
 
     public static void sendWatchZoneNotification(Context context, WatchZone watchzone,
                                                  int hoursUntilStarting) {
-        String message = "WARNING: Sweeping near " + WordUtils.capitalize(watchzone.getAddress())
+        String message = "WARNING: Sweeping near " + WordUtils.capitalize(watchzone.getLabel())
                 + " starting in " + hoursUntilStarting + " hours.";
         Intent notificationIntent = new Intent(context, WatchZoneViewActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP

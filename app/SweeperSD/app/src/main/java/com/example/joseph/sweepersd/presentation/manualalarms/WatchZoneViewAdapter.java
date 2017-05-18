@@ -121,8 +121,8 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         return mWatchZonePresenters.size();
     }
 
-    public void createAlarm(LatLng location, int radius) {
-        mWatchZoneManager.createWatchZone(location, radius);
+    public void createAlarm(String label, LatLng location, int radius) {
+        mWatchZoneManager.createWatchZone(label, location, radius);
     }
 
     private WatchZoneManager.WatchZoneChangeListener mWatchZoneChangeListener =
@@ -267,7 +267,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
     class UpdatingPresenter extends WatchZonePresenter implements
             WatchZoneUpdateManager.WatchZoneProgressListener {
-        String progress = "Refreshing watchZone location. \nProgress: 0%";
+        String progress = "Scanning location. \nProgress: 0%";
         WatchZone watchZone;
 
         UpdatingPresenter(int position, Long watchZone) {
@@ -279,10 +279,10 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
         @Override
         String getTitle() {
-            if (TextUtils.isEmpty(watchZone.getAddress()) || "Unknown".equals(watchZone.getAddress())) {
+            if (TextUtils.isEmpty(watchZone.getLabel()) || "Unknown".equals(watchZone.getLabel())) {
                 return "Fetching address...";
             }
-            return WordUtils.capitalize(watchZone.getAddress());
+            return WordUtils.capitalize(watchZone.getLabel());
         }
 
         @Override
@@ -325,8 +325,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     class NonUpdatingWatchZonePresenter extends WatchZonePresenter implements
             WatchZoneUpdateManager.WatchZoneProgressListener {
         WatchZone watchZone;
-
-
+        
         LimitViewAdapter adapter;
 
         NonUpdatingWatchZonePresenter(int position, Long watchZoneTimestamp) {
@@ -340,7 +339,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
         @Override
         String getTitle() {
-            return WordUtils.capitalize(watchZone.getAddress());
+            return WordUtils.capitalize(watchZone.getLabel());
         }
 
         @Override

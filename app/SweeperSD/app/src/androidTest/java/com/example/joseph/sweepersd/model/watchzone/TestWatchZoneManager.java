@@ -55,7 +55,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
 
             // Create the Limit
             int limitId = 1;
-            String address = "address" + i;
+            String address = "label" + i;
             int[] range = new int[2];
             range[0] = 1;
             range[1] = 50;

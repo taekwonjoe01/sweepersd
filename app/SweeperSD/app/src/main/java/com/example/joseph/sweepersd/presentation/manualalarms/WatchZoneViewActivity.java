@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.MapsActivity;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.AddressValidatorManager;
 import com.google.android.gms.maps.model.LatLng;
@@ -46,7 +46,7 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 Toast.makeText(WatchZoneViewActivity.this, "Add WatchZone", Toast.LENGTH_SHORT).show();
                 startActivityForResult(
-                        new Intent(WatchZoneViewActivity.this, MapsActivity.class), CREATE_ALARM_CODE);
+                        new Intent(WatchZoneViewActivity.this, CreateWatchZoneActivity.class), CREATE_ALARM_CODE);
             }
         });
 
@@ -79,10 +79,11 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case CREATE_ALARM_CODE:
-                LatLng location = data.getParcelableExtra(MapsActivity.LOCATION_KEY);
-                int radius = data.getIntExtra(MapsActivity.RADIUS_KEY, 0);
+                String label = data.getStringExtra(CreateWatchZoneActivity.LABEL_KEY);
+                LatLng location = data.getParcelableExtra(CreateWatchZoneActivity.LOCATION_KEY);
+                int radius = data.getIntExtra(CreateWatchZoneActivity.RADIUS_KEY, 0);
 
-                mAdapter.createAlarm(location, radius);
+                mAdapter.createAlarm(label, location, radius);
                 break;
         }
     }

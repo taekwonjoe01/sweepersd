@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
+
+    <EditText
+        android:id="@+id/edittext_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Label (Home, Work,  etc.)"/>
+
+    <Button
+        android:id="@+id/button_ok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/apptheme_action_button"
+        android:text="OK"
+        android:textColor="@android:color/white"
+        style="@android:style/TextAppearance.Medium"
+        android:padding="10dp"
+        android:layout_gravity="center_horizontal"/>
+
+</LinearLayout>

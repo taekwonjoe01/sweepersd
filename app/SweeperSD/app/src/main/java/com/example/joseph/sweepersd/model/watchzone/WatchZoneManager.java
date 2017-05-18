@@ -124,10 +124,11 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
      * added to the WatchZoneManager asynchronously. If this function returns success, there will be a
      * subsequent call to onWatchZoneCreated(long timestamp).
      */
-    public long createWatchZone(LatLng center, int radius) {
+    public long createWatchZone(String label, LatLng center, int radius) {
         long createdTimestamp = System.currentTimeMillis();
         long lastUpdatedTimestamp = 0;
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, null, center, radius, null);
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center,
+                radius, null);
         boolean watchZoneCreated = mWatchZoneFileHelper.saveWatchZone(watchZone);
 
         if (watchZoneCreated) {
@@ -148,14 +149,16 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
         }
     }
 
-    public boolean updateWatchZone(long createdTimestamp, LatLng center, int radius) {
-        if (mWatchZones.containsKey(createdTimestamp)) {
+    public boolean updateWatchZone(WatchZone watchZoneToUpdate) {
+        if (mWatchZones.containsKey(watchZoneToUpdate.getCreatedTimestamp())) {
             WatchZone newWatchZone =
-                    new WatchZone(createdTimestamp, System.currentTimeMillis(), null,
-                            center, radius, null);
-            boolean watchZoneCreated = mWatchZoneFileHelper.saveWatchZone(newWatchZone);
-            if (watchZoneCreated) {
-                return refreshWatchZone(createdTimestamp);
+                    new WatchZone(watchZoneToUpdate.getCreatedTimestamp(),
+                            System.currentTimeMillis(), watchZoneToUpdate.getLabel(),
+                            watchZoneToUpdate.getCenter(),
+                            watchZoneToUpdate.getRadius(), null);
+            boolean watchZoneUpdated = mWatchZoneFileHelper.saveWatchZone(newWatchZone);
+            if (watchZoneUpdated) {
+                return refreshWatchZone(watchZoneToUpdate.getCreatedTimestamp());
             } else {
                 return false;
             }
@@ -166,7 +169,7 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
 
     public boolean deleteWatchZone(long createdTimestamp) {
         if (mWatchZones.containsKey(createdTimestamp)) {
-            return mWatchZoneFileHelper.deleteWatchZone(mWatchZones.get(createdTimestamp));
+            return mWatchZoneFileHelper.deleteWatchZone(createdTimestamp);
         } else {
             return false;
         }

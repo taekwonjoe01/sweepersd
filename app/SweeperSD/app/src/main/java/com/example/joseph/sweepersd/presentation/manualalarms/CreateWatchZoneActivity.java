@@ -1,17 +1,20 @@
-package com.example.joseph.sweepersd;
+package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.joseph.sweepersd.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -25,10 +28,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
+public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
-    private static final String TAG = MapsActivity.class.getSimpleName();
+    private static final String TAG = CreateWatchZoneActivity.class.getSimpleName();
 
+    public static final String LABEL_KEY = "LABEL_KEY";
     public static final String LOCATION_KEY = "LOCATION_KEY";
     public static final String RADIUS_KEY = "RADIUS_KEY";
 
@@ -41,6 +45,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Circle mMarkerRadius;
 
     private LatLng mLatLng;
+
+    private String mLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,17 +96,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_done:
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(LOCATION_KEY, mLatLng);
-                returnIntent.putExtra(
-                        RADIUS_KEY, getRadiusForProgress(mRadiusSeekbar.getProgress()));
-                returnIntent.putExtra(RADIUS_KEY,
-                        getRadiusForProgress(mRadiusSeekbar.getProgress()));
-                setResult(Activity.RESULT_OK,returnIntent);
-                finish();
+                showCreateLabelDialog();
                 return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        dismissCreateLabelDialog();
     }
 
     /**
@@ -165,6 +171,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    private void showCreateLabelDialog() {
+        DialogFragment fragment = (DialogFragment) getFragmentManager().findFragmentByTag(
+                CreateAlarmLabelDialogFragment.class.getSimpleName());
+        if (fragment == null) {
+            fragment = new CreateAlarmLabelDialogFragment().newInstance(
+                    new CreateAlarmLabelDialogFragment.CreateAlarmLabelDialogListener() {
+                @Override
+                public void onLabelCreated(String label) {
+                    mLabel = label;
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(LABEL_KEY, mLabel);
+                    returnIntent.putExtra(LOCATION_KEY, mLatLng);
+                    returnIntent.putExtra(
+                            RADIUS_KEY, getRadiusForProgress(mRadiusSeekbar.getProgress()));
+                    returnIntent.putExtra(RADIUS_KEY,
+                            getRadiusForProgress(mRadiusSeekbar.getProgress()));
+                    setResult(Activity.RESULT_OK,returnIntent);
+                    finish();
+                }
+            });
+        }
+        fragment.show(getFragmentManager(), CreateAlarmLabelDialogFragment.class.getSimpleName());
+    }
+
+    private void dismissCreateLabelDialog() {
+        DialogFragment fragment = (DialogFragment) getFragmentManager().findFragmentByTag(
+                CreateAlarmLabelDialogFragment.class.getSimpleName());
+        if (fragment != null) {
+            fragment.dismiss();
+        }
     }
 
     private void setAlarmLocation(LatLng location) {

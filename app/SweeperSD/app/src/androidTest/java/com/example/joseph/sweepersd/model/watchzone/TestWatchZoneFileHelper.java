@@ -73,14 +73,14 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
 
         // Create the Limit
         int limitId = 1;
-        String address = "beryl";
+        String label = "beryl";
         int[] range = new int[2];
         range[0] = 1;
         range[1] = 3;
         String descLimit = "descLimit";
         List<LimitSchedule> limitSchedules = new ArrayList<>();
         limitSchedules.add(schedule);
-        Limit limit = new Limit(limitId, address, range, descLimit, limitSchedules);
+        Limit limit = new Limit(limitId, label, range, descLimit, limitSchedules);
 
         return limit;
     }
@@ -109,9 +109,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
-        String address = "1061 beryl st";
+        String label = "1061 beryl st";
         LatLng center = new LatLng(12,12);
-        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+        SweepingAddress swAddress = new SweepingAddress(center, label, limit);
 
         // Create the watchZone
         long createdTimestamp = 1;
@@ -120,7 +120,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
 
         // Save the watchZone.
@@ -150,7 +150,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
-        assertEquals(address, loadedSwAddress.getAddress());
+        assertEquals(label, loadedSwAddress.getAddress());
     }
 
     public void testOverwriteAlarm() {
@@ -164,9 +164,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
-        String address = "1061 beryl st";
+        String label = "1061 beryl st";
         LatLng center = new LatLng(12,12);
-        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+        SweepingAddress swAddress = new SweepingAddress(center, label, limit);
 
         // Create the watchZone
         long createdTimestamp = 1;
@@ -175,7 +175,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
 
         // Save the watchZone.
@@ -208,7 +208,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
-        assertEquals(address, loadedSwAddress.getAddress());
+        assertEquals(label, loadedSwAddress.getAddress());
     }
 
     public void testMultipleAlarms() {
@@ -221,9 +221,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
-        String address = "1061 beryl st";
+        String label = "1061 beryl st";
         LatLng center = new LatLng(12,12);
-        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+        SweepingAddress swAddress = new SweepingAddress(center, label, limit);
 
         // Create the watchZone
         long createdTimestamp = 1;
@@ -233,9 +233,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
-        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
 
         // Save the watchZone.
@@ -269,7 +269,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
-        assertEquals(address, loadedSwAddress.getAddress());
+        assertEquals(label, loadedSwAddress.getAddress());
 
         // Check the Second WatchZone
         assertEquals(createdTimestamp2, loadedWatchZone2.getCreatedTimestamp());
@@ -281,7 +281,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(1, loadedSwAddresses2.size());
         SweepingAddress loadedSwAddress2 = loadedSwAddresses2.get(0);
         assertEquals(center, loadedSwAddress2.getLatLng());
-        assertEquals(address, loadedSwAddress2.getAddress());
+        assertEquals(label, loadedSwAddress2.getAddress());
     }
 
     public void testGetWatchZoneList() {
@@ -295,9 +295,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
-        String address = "1061 beryl st";
+        String label = "1061 beryl st";
         LatLng center = new LatLng(12,12);
-        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+        SweepingAddress swAddress = new SweepingAddress(center, label, limit);
 
         // Create the watchZone
         long createdTimestamp = 1;
@@ -307,16 +307,16 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
-        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
         helper.saveWatchZone(watchZone);
         helper.saveWatchZone(watchZone2);
-        helper.deleteWatchZone(watchZone2);
+        helper.deleteWatchZone(watchZone2.getCreatedTimestamp());
 
 
         boolean countedDown = false;
@@ -345,7 +345,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
-        assertEquals(address, loadedSwAddress.getAddress());
+        assertEquals(label, loadedSwAddress.getAddress());
 
         // Check the Second WatchZone
         assertNull(loadedWatchZone2);
@@ -362,9 +362,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
-        String address = "1061 beryl st";
+        String label = "1061 beryl st";
         LatLng center = new LatLng(12,12);
-        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+        SweepingAddress swAddress = new SweepingAddress(center, label, limit);
 
         // Create the watchZone
         long createdTimestamp = 1;
@@ -374,16 +374,16 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
-        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
         helper.saveWatchZone(watchZone);
         helper.saveWatchZone(watchZone2);
-        helper.deleteWatchZone(watchZone2);
+        helper.deleteWatchZone(watchZone2.getCreatedTimestamp());
 
 
         boolean countedDown = false;
@@ -412,7 +412,7 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         assertEquals(1, loadedSwAddresses.size());
         SweepingAddress loadedSwAddress = loadedSwAddresses.get(0);
         assertEquals(center, loadedSwAddress.getLatLng());
-        assertEquals(address, loadedSwAddress.getAddress());
+        assertEquals(label, loadedSwAddress.getAddress());
 
         // Check the Second WatchZone
         assertNull(loadedWatchZone2);
@@ -430,9 +430,9 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         Limit limit = createTestLimit();
 
         // Create a SweepingAddress
-        String address = "1061 beryl st";
+        String label = "1061 beryl st";
         LatLng center = new LatLng(12,12);
-        SweepingAddress swAddress = new SweepingAddress(center, address, limit);
+        SweepingAddress swAddress = new SweepingAddress(center, label, limit);
 
         // Create the watchZone
         long createdTimestamp = 1;
@@ -442,16 +442,16 @@ public class TestWatchZoneFileHelper extends AndroidTestCase {
         List<SweepingAddress> sweepingAddresses = new ArrayList<>();
         sweepingAddresses.add(swAddress);
 
-        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone = new WatchZone(createdTimestamp, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
-        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, address, center, radius,
+        WatchZone watchZone2 = new WatchZone(createdTimestamp2, lastUpdatedTimestamp, label, center, radius,
                 sweepingAddresses);
 
         // Save the watchZone.
         mOnAlarmUpdatedLatch = new CountDownLatch(2);
         helper.saveWatchZone(watchZone);
         helper.saveWatchZone(watchZone2);
-        helper.deleteWatchZone(watchZone2);
+        helper.deleteWatchZone(watchZone2.getCreatedTimestamp());
 
 
         boolean countedDown = false;

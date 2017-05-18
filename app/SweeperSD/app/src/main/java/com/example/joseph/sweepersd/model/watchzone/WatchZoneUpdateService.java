@@ -131,7 +131,8 @@ public class WatchZoneUpdateService extends IntentService implements
                 alarmAddress = addressSplit[0];
 
                 WatchZone updatedWatchZone = new WatchZone(watchZoneToUpdate.getCreatedTimestamp(),
-                        System.currentTimeMillis(), alarmAddress, watchZoneToUpdate.getCenter(),
+                        System.currentTimeMillis(), watchZoneToUpdate.getLabel(),
+                        watchZoneToUpdate.getCenter(),
                         watchZoneToUpdate.getRadius(), null);
 
                 mIsSaving = true;
@@ -156,7 +157,8 @@ public class WatchZoneUpdateService extends IntentService implements
             Log.d(TAG, "finished generating SweepingAddresses. Size " + sweepingAddresses.size());
 
             WatchZone updatedWatchZone = new WatchZone(watchZoneToUpdate.getCreatedTimestamp(),
-                    System.currentTimeMillis(), alarmAddress, watchZoneToUpdate.getCenter(),
+                    System.currentTimeMillis(), watchZoneToUpdate.getLabel(),
+                    watchZoneToUpdate.getCenter(),
                     watchZoneToUpdate.getRadius(), new ArrayList<>(sweepingAddresses));
 
             mIsSaving = true;

@@ -112,7 +112,7 @@ public class AddressValidatorService extends IntentService {
 
             // This will resave the watchZone, and if it's currently being updated,
             // the update will restart.
-            manager.updateWatchZone(watchZone.getCreatedTimestamp(), watchZone.getCenter(), watchZone.getRadius());
+            manager.updateWatchZone(watchZone);
         }
 
         publishFinished();

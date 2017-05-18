@@ -11,19 +11,19 @@ import java.util.List;
 public class WatchZone {
     private final long mCreatedTimestamp;
     private final long mLastUpdatedTimestamp;
-    private final String mAddress;
+    private final String mLabel;
     private final LatLng mCenter;
     private final int mRadius;
 
     private List<SweepingAddress> mSweepingAddresses;
 
     // TODO make package protected.
-    public WatchZone(long createdTimestamp, long lastUpdatedTimestamp, String address, LatLng center,
+    public WatchZone(long createdTimestamp, long lastUpdatedTimestamp, String label, LatLng center,
                      int radius, List<SweepingAddress> sweepingAddresses) {
         mCreatedTimestamp = createdTimestamp;
         mLastUpdatedTimestamp = lastUpdatedTimestamp;
         mCenter = center;
-        mAddress = address;
+        mLabel = label;
         mRadius = radius;
         setSweepingAddresses(sweepingAddresses);
     }
@@ -32,7 +32,7 @@ public class WatchZone {
         this.mCreatedTimestamp = other.mCreatedTimestamp;
         this.mLastUpdatedTimestamp = other.mLastUpdatedTimestamp;
         this.mCenter = other.mCenter;
-        this.mAddress = other.mAddress;
+        this.mLabel = other.mLabel;
         this.mRadius = other.mRadius;
         List<SweepingAddress> addresses = new ArrayList<>();
         for (SweepingAddress address : other.getSweepingAddresses()) {
@@ -53,8 +53,8 @@ public class WatchZone {
         return mCenter;
     }
 
-    public String getAddress() {
-        return mAddress;
+    public String getLabel() {
+        return mLabel;
     }
 
     public int getRadius() {

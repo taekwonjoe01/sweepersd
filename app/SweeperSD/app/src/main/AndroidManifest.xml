@@ -78,7 +78,7 @@
         </receiver>
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".presentation.manualalarms.CreateWatchZoneActivity"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait" />
         <activity

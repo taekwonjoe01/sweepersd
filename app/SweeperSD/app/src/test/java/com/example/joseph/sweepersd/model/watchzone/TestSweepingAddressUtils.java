@@ -42,12 +42,12 @@ public class TestSweepingAddressUtils {
     public void testGetUniqueLimits() throws Exception {
         List<SweepingAddress> addresses = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            SweepingAddress address = new SweepingAddress(new LatLng(0, 0), "address",
+            SweepingAddress address = new SweepingAddress(new LatLng(0, 0), "label",
                     new Limit(i, "street", new int[2], "limit", null));
             addresses.add(address);
         }
         for (int i = 0; i < 5; i++) {
-            SweepingAddress address = new SweepingAddress(new LatLng(0, 0), "address",
+            SweepingAddress address = new SweepingAddress(new LatLng(0, 0), "label",
                     new Limit(i, "street", new int[2], "limit", null));
             addresses.add(address);
         }

@@ -57,7 +57,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.example.joseph.sweepersd.MapsActivity" />
+            tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
 
         <FrameLayout
             android:id="@+id/layout_no_parked_locations"
