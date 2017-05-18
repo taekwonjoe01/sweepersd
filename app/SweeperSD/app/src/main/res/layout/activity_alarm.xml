@@ -34,6 +34,6 @@
         android:padding="5dp"
         android:src="@drawable/ic_add_white"
         android:elevation="20dp"
-        android:background="@drawable/apptheme_button" />
+        android:background="@drawable/apptheme_action_button" />
 
 </android.support.design.widget.CoordinatorLayout>

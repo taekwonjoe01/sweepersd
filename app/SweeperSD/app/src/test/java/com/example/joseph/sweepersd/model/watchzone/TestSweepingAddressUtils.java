@@ -52,7 +52,7 @@ public class TestSweepingAddressUtils {
             addresses.add(address);
         }
 
-        List<Limit> results = WatchZoneUtils.getUniqueLimits(addresses);
+        List<Limit> results = WatchZoneUtils.getUniqueIdLimits(addresses);
         Assert.assertEquals(10, results.size());
 
         int one = 0;

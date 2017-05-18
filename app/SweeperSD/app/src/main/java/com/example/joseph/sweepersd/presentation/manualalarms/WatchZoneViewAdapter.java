@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -106,12 +105,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
                 return true;
             }
         };
-        holder.mRefreshButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mWatchZoneManager.refreshWatchZone(mWatchZonePresenters.get(presenter.position).watchZoneTimestamp);
-            }
-        });
         if (presenter instanceof NonUpdatingWatchZonePresenter) {
             holder.mLimitRecyclerView.setVisibility(View.VISIBLE);
             holder.mStatus.setVisibility(View.GONE);
@@ -396,7 +389,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         public TextView mAlarmAddress;
         public TextView mRadius;
         public TextView mStatus;
-        public Button mRefreshButton;
         private FrameLayout mViewLayout;
         public View.OnLongClickListener mLongClickListener;
         public View.OnClickListener mOnClickListener;
@@ -411,7 +403,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             mAlarmAddress = (TextView) v.findViewById(R.id.textview_alarm_address);
             mRadius = (TextView) v.findViewById(R.id.textview_alarm_radius);
             mStatus = (TextView) v.findViewById(R.id.textview_status);
-            mRefreshButton = (Button) v.findViewById(R.id.button_refresh);
             mViewLayout = (FrameLayout) v.findViewById(R.id.list_item_layout);
             mLimitRecyclerView = (RecyclerView) v.findViewById(R.id.limit_recycler_view);
 

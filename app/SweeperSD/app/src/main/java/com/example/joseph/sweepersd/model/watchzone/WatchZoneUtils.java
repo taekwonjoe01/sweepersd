@@ -120,7 +120,12 @@ public class WatchZoneUtils {
         schedules.removeAll(schedulesToRemove);
     }
 
-    public static List<Limit> getUniqueLimits(List<SweepingAddress> addresses) {
+    /**
+     * Many sweeping addresses have the same limit. We don't want to show duplicated limits on UI.
+     * @param addresses
+     * @return
+     */
+    public static List<Limit> getUniqueIdLimits(List<SweepingAddress> addresses) {
         List<Limit> results = new ArrayList<>();
         for (SweepingAddress a : addresses) {
             if (a.getLimit() != null) {
@@ -145,7 +150,7 @@ public class WatchZoneUtils {
     }
 
     public static long getNextSweepingTimeFromAddresses(List<SweepingAddress> addresses) {
-        List<Limit> uniqueLimits = WatchZoneUtils.getUniqueLimits(addresses);
+        List<Limit> uniqueLimits = WatchZoneUtils.getUniqueIdLimits(addresses);
         List<SweepingDate> allDates = new ArrayList<>();
         for (Limit l : uniqueLimits) {
             allDates.addAll(

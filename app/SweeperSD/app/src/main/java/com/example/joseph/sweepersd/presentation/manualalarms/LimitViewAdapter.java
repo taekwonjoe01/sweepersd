@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.presentation.manualalarms;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,17 +104,18 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
 
     class LimitPresenter {
         int position;
-        String street;
+        List<Limit> limits;
         SweepingDate date;
 
-        LimitPresenter(int position, String street, SweepingDate date) {
+        LimitPresenter(int position, Limit limit, SweepingDate date) {
             this.position = position;
-            this.street = street;
+            this.limits = new ArrayList<>();
+            this.limits.add(limit);
             this.date = date;
         }
 
         String getStreet() {
-            return WordUtils.capitalize(this.street);
+            return WordUtils.capitalize(this.limits.get(0).getStreet());
         }
 
         String getDate() {
@@ -150,6 +152,28 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
             } else {
                 return "";
             }
+        }
+
+        /**
+         * Used during limit loading. Used to determine if a Limit belongs to this presenter.
+         * Belonging is defined as having the same Street and start time for the next sweeping
+         * date.
+         * @return
+         */
+        boolean insertLimit(Limit l, SweepingDate nextSweepingDate) {
+            boolean result = false;
+            Limit thisLimit = this.limits.get(0);
+            Log.e("Joey", "insertLimit thisStreet=" + thisLimit.getStreet() + " otherStreet=" +
+            l.getStreet() + " this.startTime=" + this.date.getStartTime().getTime().getTime() +
+            " other.startTime=" + nextSweepingDate.getStartTime().getTime().getTime());
+            if (thisLimit.getStreet().equals(l.getStreet()) &&
+                    this.date.getStartTime().getTime().getTime() ==
+                    nextSweepingDate.getStartTime().getTime().getTime()) {
+                this.limits.add(l);
+                result = true;
+            }
+            Log.e("Joey", "result=" + result);
+            return result;
         }
     }
 
@@ -221,13 +245,26 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         protected List<LimitPresenter> doInBackground(Void... params) {
             List<LimitPresenter> results = new ArrayList<>();
 
-            List<Limit> uniqueLimits = WatchZoneUtils.getUniqueLimits(mAddresses);
+            List<Limit> uniqueLimits = WatchZoneUtils.getUniqueIdLimits(mAddresses);
             for (Limit l : uniqueLimits) {
                 List<SweepingDate> sweepingDates =
                         WatchZoneUtils.getTimeOrderedSweepingDatesForLimit(l);
                 if (sweepingDates.size() > 0) {
-                    results.add(new LimitPresenter(results.size(), l.getStreet(),
-                            sweepingDates.get(0)));
+                    // This next bit essentially filters out duplicate LimitPresenters that will
+                    // show the same data. If there are duplicates, they're added to existing
+                    // presenter's list.
+                    SweepingDate nextSweepingDate = sweepingDates.get(0);
+
+                    boolean contains = false;
+                    for (LimitPresenter presenter : results) {
+                        contains = presenter.insertLimit(l, nextSweepingDate);
+                        if (contains) {
+                            break;
+                        }
+                    }
+                    if (!contains) {
+                        results.add(new LimitPresenter(results.size(), l, nextSweepingDate));
+                    }
                 }
             }
 

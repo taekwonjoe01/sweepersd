@@ -3,7 +3,7 @@
     android:layout_width="160dp"
     android:layout_height="match_parent"
     android:id="@+id/list_item_layout"
-    android:background="@drawable/background_apptheme"
+    android:background="@color/app_primary"
     android:elevation="10dp">
 
     <LinearLayout
