@@ -8,6 +8,12 @@
         <item name="colorAccent">@color/app_background</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <!-- To change the popup menu and app text color  -->
+        <item name="android:textColor">@color/app_secondary</item>
+
+        <!-- To change the background of options menu-->
+        <item name="android:itemBackground">@color/app_background</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

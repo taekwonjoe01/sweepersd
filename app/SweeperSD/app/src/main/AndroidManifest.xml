@@ -79,6 +79,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".presentation.manualalarms.WatchZoneDetailsActivity"
+            android:label="@string/title_activity_maps"
             android:screenOrientation="portrait" />
         <activity
             android:name=".SettingsActivity"
@@ -103,7 +104,6 @@
             android:label="@string/title_activity_alarm"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".presentation.manualalarms.WatchZoneDetailsActivity"></activity>
     </application>
 
 </manifest>

@@ -87,7 +87,7 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
 
     @Override
      public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_activity_maps, menu);
+        getMenuInflater().inflate(R.menu.menu_activity_create_watch_zone, menu);
         return true;
     }
 

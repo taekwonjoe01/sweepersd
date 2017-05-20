@@ -155,5 +155,6 @@
     <string name="watch_zone_no_sweeping">No sweeping at this location.</string>
 
     <!-- Strings for Watch Zone Details Activity -->
+    <string name="details_delete_watch_zone">Delete</string>
 
 </resources>

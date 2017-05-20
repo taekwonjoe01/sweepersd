@@ -11,6 +11,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -101,6 +103,23 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
         }
 
         new LoadWatchZoneTask().execute();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_activity_watch_zone_details, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                mWatchZoneManager.deleteWatchZone(mWatchZoneId);
+                finish();
+                return true;
+        }
+        return false;
     }
 
     private class LoadWatchZoneTask extends AsyncTask<Void, Long, Void> {

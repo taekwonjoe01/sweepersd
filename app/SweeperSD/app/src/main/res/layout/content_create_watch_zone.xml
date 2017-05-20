@@ -1,42 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background"
+    android:orientation="vertical">
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:layout_weight=".7">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_margin="30dp"
-        android:orientation="vertical"
-        android:background="@drawable/apptheme_button_primary_default">
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
 
-        <TextView
-            android:id="@+id/radius_display"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/app_secondary"
-            style="@android:style/TextAppearance.Large"
-            android:text="Radius: 50ft"
-            android:layout_gravity="center"/>
-
-        <SeekBar
-            android:id="@+id/seekbar_radius"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:progressTint="@color/app_secondary"
-            android:thumbTint="@color/app_secondary"
-            android:secondaryProgressTint="@color/app_secondary_disabled"
-            android:progress="50"/>
-    </LinearLayout>
-</FrameLayout>
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:background="@drawable/apptheme_button_primary_default">
+
+            <TextView
+                android:id="@+id/radius_display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/app_secondary"
+                style="@android:style/TextAppearance.Large"
+                android:text="Radius: 50ft"
+                android:layout_gravity="center"/>
+
+            <SeekBar
+                android:id="@+id/seekbar_radius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progressTint="@color/app_secondary"
+                android:thumbTint="@color/app_secondary"
+                android:secondaryProgressTint="@color/app_secondary_disabled"
+                android:progress="50"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        style="@android:style/TextAppearance.Small"
+        android:textColor="@color/app_secondary"
+        android:text="Posted Limits" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".3">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/limit_recycler_view"
+            android:scrollbars="vertical"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:fadeScrollbars="false"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#22000000"
+            android:padding="@dimen/alarm_view_item_space"/>
+    </FrameLayout>
+
+</LinearLayout>
 
