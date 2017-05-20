@@ -1,7 +1,9 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -84,6 +86,11 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
                 Log.i(TAG, "Alarm scheduled for " + new Date(alarmTime).toString());*/
+                Intent intent = new Intent(mContext, WatchZoneDetailsActivity.class);
+                Bundle b = new Bundle();
+                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, presenter.watchZoneTimestamp);
+                intent.putExtras(b);
+                mContext.startActivity(intent);
             }
         };
         holder.mLongClickListener = new View.OnLongClickListener() {

@@ -27,27 +27,35 @@
             android:layout_gravity="left|center_vertical"
             style="@android:style/TextAppearance.Small"
             android:textColor="@color/app_secondary"
-            android:text="Upcoming Sweeping:" />
+            android:text="Posted Limits" />
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="0dp"
+            android:layout_weight="30">
 
-            <TextView
-                android:id="@+id/textview_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <LinearLayout
+                android:id="@+id/limit_loading_group"
+                android:orientation="vertical"
                 android:layout_gravity="center"
-                android:gravity="center"
-                style="@android:style/TextAppearance.Medium"
-                android:textColor="@color/app_secondary"
-                android:text="Scanning location. \nProgress: 0%" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateDrawable="@drawable/apptheme_circular_progress_bar"
+                    android:layout_gravity="center|center_vertical"/>
+            </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/limit_recycler_view"
                 android:scrollbars="vertical"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:fadeScrollbars="false"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:background="#22000000"
                 android:padding="@dimen/alarm_view_item_space"
                 android:visibility="gone"/>

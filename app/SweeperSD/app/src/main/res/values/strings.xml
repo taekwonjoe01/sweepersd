@@ -154,4 +154,6 @@
     <string name="title_watch_zone_view_activity">Monitored Locations</string>
     <string name="watch_zone_no_sweeping">No sweeping at this location.</string>
 
+    <!-- Strings for Watch Zone Details Activity -->
+
 </resources>
