@@ -187,8 +187,8 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
 
         public ViewHolder(View v) {
             super(v);
-            mLimitStreet = (TextView) v.findViewById(R.id.limit_street_name);
-            mLimitDate = (TextView) v.findViewById(R.id.limit_date);
+            mLimitStreet = (TextView) v.findViewById(R.id.textview_limit_range_and_street);
+            mLimitDate = (TextView) v.findViewById(R.id.textview_limit_rules);
             mLimitTime = (TextView) v.findViewById(R.id.limit_time);
             mLimitTimer = (TextView) v.findViewById(R.id.limit_timer);
             mViewLayout = (FrameLayout) v.findViewById(R.id.list_item_layout);
@@ -228,7 +228,7 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         }
     }
 
-    public class LoadLimitViewTask extends AsyncTask<Void, Void, List<LimitPresenter>> {
+    private class LoadLimitViewTask extends AsyncTask<Void, Void, List<LimitPresenter>> {
         List<SweepingAddress> mAddresses;
         private String mDescriptionResult;
 

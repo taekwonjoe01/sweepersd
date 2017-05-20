@@ -326,13 +326,13 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             WatchZoneUpdateManager.WatchZoneProgressListener {
         WatchZone watchZone;
 
-        LimitViewAdapter adapter;
+        LimitViewAdapter2 adapter;
 
         NonUpdatingWatchZonePresenter(int position, Long watchZoneTimestamp) {
             super(position, watchZoneTimestamp);
             this.watchZone = mWatchZoneManager.getWatchZone(watchZoneTimestamp);
 
-            this.adapter = new LimitViewAdapter(mContext, this.watchZone);
+            this.adapter = new LimitViewAdapter2(mContext, this.watchZone);
 
             mWatchZoneManager.addWatchZoneProgressListener(this);
         }
@@ -408,8 +408,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             mViewLayout.setOnClickListener(this);
             mViewLayout.setOnLongClickListener(this);
 
-            mLimitRecyclerView.setHasFixedSize(true);
-            mLayoutManager = new LinearLayoutManager(mContext, LinearLayout.HORIZONTAL, false);
+            mLayoutManager = new LinearLayoutManager(mContext, LinearLayout.VERTICAL, false);
             mLimitRecyclerView.setLayoutManager(mLayoutManager);
 
             int itemMargin =
@@ -437,10 +436,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
                 return mLongClickListener.onLongClick(v);
             }
             return false;
-        }
-
-        public void refresh() {
-            mViewLayout.requestLayout();
         }
     }
 }
