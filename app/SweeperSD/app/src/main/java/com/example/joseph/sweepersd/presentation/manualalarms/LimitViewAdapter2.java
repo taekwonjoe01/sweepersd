@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.LimitParser;
+import com.example.joseph.sweepersd.model.limits.LimitSchedule;
 import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
 import com.example.joseph.sweepersd.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.model.watchzone.WatchZoneUtils;
@@ -112,7 +114,19 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
         }
 
         String getRules() {
-            return "TODO";
+            String rule = "";
+            int index = 0;
+            for (LimitSchedule schedule : this.limit.getSchedules()) {
+                if (index != 0) {
+                    rule += ", ";
+                }
+                rule += LimitParser.getPrefix(schedule.getWeekNumber()) + " " +
+                        WordUtils.capitalize(LimitParser.getDay(schedule.getDay())) + " (" +
+                        LimitParser.convertHourToTimeString(schedule.getStartHour()) + "-" +
+                        LimitParser.convertHourToTimeString(schedule.getEndHour()) + ")";
+                index++;
+            }
+            return rule;
         }
     }
 
