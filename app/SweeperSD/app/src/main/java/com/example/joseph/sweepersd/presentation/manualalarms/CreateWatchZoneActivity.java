@@ -5,17 +5,27 @@ import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.model.limits.Limit;
+import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
+import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
+import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -27,6 +37,11 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.apache.commons.lang3.text.WordUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     private static final String TAG = CreateWatchZoneActivity.class.getSimpleName();
@@ -37,6 +52,10 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
 
     private TextView mRadiusDisplay;
     private SeekBar mRadiusSeekbar;
+    private RecyclerView mRecyclerView;
+    private LimitViewAdapter2 mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private WatchZoneViewItemDecoration mLimitViewItemDecoration;
 
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
@@ -62,6 +81,19 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
 
         mRadiusDisplay = (TextView) findViewById(R.id.radius_display);
         mRadiusSeekbar = (SeekBar) findViewById(R.id.seekbar_radius);
+        mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
+        mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        int itemMargin = getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);
+        mLimitViewItemDecoration = new WatchZoneViewItemDecoration(itemMargin);
+
+        mRecyclerView.addItemDecoration(mLimitViewItemDecoration);
+
+        RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
+        if (animator instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+        }
 
         mRadiusDisplay.setText(String.format(getString(R.string.alarm_radius_string),
                 getRadiusForProgress(mRadiusSeekbar.getProgress())));
@@ -83,6 +115,8 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
 
             }
         });
+
+        setTitle(WordUtils.capitalize("Create Watch Zone"));
     }
 
     @Override
@@ -118,6 +152,9 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
                 .addApi(LocationServices.API)
                 .build();
         mGoogleApiClient.connect();
+
+        mAdapter = new LimitViewAdapter2(this, new ArrayList<SweepingAddress>());
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -215,9 +252,96 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
                 .radius(getRadiusForProgress(mRadiusSeekbar.getProgress()))
                 .strokeColor(getResources().getColor(R.color.app_primary))
                 .fillColor(getResources().getColor(R.color.map_radius_fill)));
+
+        if (mScanTask != null) {
+            mScanTask.cancel(false);
+        }
+
+        mAdapter.clearLimits();
+
+        mScanTask = new ScanTask(mLatLng,  mRadiusSeekbar.getProgress());
+        mScanTask.execute();
     }
 
     private int getRadiusForProgress(int progress) {
         return 20 + progress * 2;
+    }
+
+    private ScanTask mScanTask;
+
+    private class ScanTask extends AsyncTask<Void, SweepingAddress, Void> {
+
+        private LatLng mCenter;
+        private int mRadius;
+
+        ScanTask(LatLng center, int radius) {
+            mCenter = center;
+            mRadius = radius;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(ScanTask.this.mCenter,
+                    getRadiusForProgress(ScanTask.this.mRadius));
+
+            LimitDbHelper limitHelper = new LimitDbHelper(CreateWatchZoneActivity.this);
+            if (isCancelled()) {
+                return null;
+            }
+
+            List<SweepingAddress> sweepingAddresses = new ArrayList<>();
+
+            for (int i = 0; i < latLngs.size(); i++) {
+                if (isCancelled()) {
+                    return null;
+                }
+
+                LatLng latLng = latLngs.get(i);
+
+                String add = LocationUtils.getAddressForLatLnt(CreateWatchZoneActivity.this,
+                        latLng);
+                SweepingAddress newAddress = buildSweepingAddress(limitHelper, latLng, add);
+                if (newAddress != null) {
+                    sweepingAddresses.add(newAddress);
+
+                    // int progress = (int) (((double)i / (double)latLngs.size()) * 100);
+                    publishProgress(newAddress);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(SweepingAddress... values) {
+            super.onProgressUpdate(values);
+            if (!isCancelled()) {
+                SweepingAddress newAddress = values[0];
+
+                mMap.addCircle(new CircleOptions()
+                        .center(newAddress.getLatLng())
+                        .radius(1)
+                        .strokeColor(getResources().getColor(R.color.app_primary))
+                        .fillColor(getResources().getColor(R.color.map_radius_fill)));
+                if (newAddress.getLimit() != null) {
+                    mAdapter.addSweepingAddress(newAddress);
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    private SweepingAddress buildSweepingAddress(LimitDbHelper limitHelper, LatLng latLng,
+                                                  String address) {
+        SweepingAddress result = null;
+        if (!TextUtils.isEmpty(address)) {
+            Limit limit = LocationUtils.findLimitForAddress(limitHelper, address);
+            result = new SweepingAddress(latLng, address, limit);
+        }
+        return result;
     }
 }

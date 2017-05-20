@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/app_secondary"
                 style="@android:style/TextAppearance.Large"
-                android:text="Radius: 50ft"
+                android:text="Radius: 50m"
                 android:layout_gravity="center"/>
 
             <SeekBar
@@ -57,7 +57,7 @@
         android:layout_gravity="left|center_vertical"
         style="@android:style/TextAppearance.Small"
         android:textColor="@color/app_secondary"
-        android:text="Posted Limits" />
+        android:text="Scanning For Posted Limits..." />
 
     <FrameLayout
         android:layout_width="match_parent"

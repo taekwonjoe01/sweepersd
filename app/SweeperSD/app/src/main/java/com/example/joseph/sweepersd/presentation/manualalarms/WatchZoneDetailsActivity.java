@@ -1,10 +1,7 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -94,13 +91,6 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                    0);
-        }
 
         new LoadWatchZoneTask().execute();
     }
@@ -140,7 +130,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
     }
 
     private void setAdapter() {
-        mAdapter = new LimitViewAdapter2(this, mWatchZone);
+        mAdapter = new LimitViewAdapter2(this, mWatchZone.getSweepingAddresses());
         mRecyclerView.setAdapter(mAdapter);
     }
 

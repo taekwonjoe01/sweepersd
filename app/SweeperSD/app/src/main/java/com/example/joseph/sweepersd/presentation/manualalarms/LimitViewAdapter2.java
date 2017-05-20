@@ -15,7 +15,6 @@ import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitParser;
 import com.example.joseph.sweepersd.model.limits.LimitSchedule;
 import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
-import com.example.joseph.sweepersd.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.model.watchzone.WatchZoneUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -30,17 +29,40 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
     private static final String TAG = LimitViewAdapter2.class.getSimpleName();
 
     private final Context mContext;
-    private final WatchZone mWatchZone;
+    private final List<SweepingAddress> mSweepingAddresses;
     private List<LimitPresenter> mLimitPresenters;
 
     private AsyncTask<Void, Void, List<LimitPresenter>> mLoadLimitsTask;
 
     private boolean mIsDetached = true;
 
-    public LimitViewAdapter2(Context context, WatchZone watchZone) {
+    public LimitViewAdapter2(Context context, List<SweepingAddress> sweepingAddresses) {
         mContext = context;
-        mWatchZone = watchZone;
+        mSweepingAddresses = sweepingAddresses;
         mLimitPresenters = new ArrayList<>();
+    }
+
+    public void addSweepingAddress(SweepingAddress address) {
+        if (address.getLimit() == null) {
+            return;
+        }
+        boolean isDuplicate = false;
+        for (LimitPresenter p : mLimitPresenters) {
+            if (p.limit.getId() == address.getLimit().getId()) {
+                isDuplicate = true;
+                break;
+            }
+        }
+
+        if (!isDuplicate) {
+            mLimitPresenters.add(new LimitPresenter(mLimitPresenters.size(), address.getLimit()));
+            notifyItemInserted(mLimitPresenters.size()-1);
+        }
+    }
+
+    public void clearLimits() {
+        mLimitPresenters.clear();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -48,7 +70,7 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
         super.onAttachedToRecyclerView(recyclerView);
         mIsDetached = false;
 
-        mLoadLimitsTask = new LoadLimitViewTask(mWatchZone.getSweepingAddresses()).execute();
+        mLoadLimitsTask = new LoadLimitViewTask(mSweepingAddresses).execute();
     }
 
     @Override

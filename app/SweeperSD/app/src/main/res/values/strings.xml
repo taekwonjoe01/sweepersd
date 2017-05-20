@@ -147,7 +147,7 @@
     <string name="title_activity_landing">LandingActivity</string>
     <string name="title_activity_alarm">AlarmActivity</string>
 
-    <string name="alarm_radius_string">Radius: %dft</string>
+    <string name="alarm_radius_string">Radius: %dm</string>
     <string name="alarm_maps_done">Done</string>
 
     <!-- Strings for Watch Zone List Activity -->
