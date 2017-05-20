@@ -78,6 +78,9 @@
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".presentation.manualalarms.WatchZoneDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait" />

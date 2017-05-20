@@ -86,15 +86,20 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
 
                     mAdapter.createAlarm(label, location, radius);
                 }
+                mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                 break;
         }
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        setAdapter();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-
-        setAdapter();
 
         AddressValidatorManager.getInstance(this).addListener(this);
         setProgress(AddressValidatorManager.getInstance(this).getValidationProgress());
@@ -103,8 +108,6 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-
-        mRecyclerView.setAdapter(null);
 
         AddressValidatorManager.getInstance(this).removeListener(this);
     }

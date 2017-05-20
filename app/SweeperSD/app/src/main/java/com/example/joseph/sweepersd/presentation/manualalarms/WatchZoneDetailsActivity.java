@@ -205,6 +205,6 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
                 .radius(mBriefWatchZone.getRadius())
                 .strokeColor(getResources().getColor(R.color.app_primary))
                 .fillColor(getResources().getColor(R.color.map_radius_fill)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mBriefWatchZone.getCenter(), 16f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mBriefWatchZone.getCenter(), 15f));
     }
 }
