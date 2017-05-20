@@ -24,7 +24,7 @@ public class BootupSchedulerService extends IntentService {
 
         WatchZoneManager manager = new WatchZoneManager(this);
         for (long timestamp : manager.getWatchZones()) {
-            WatchZone watchZone = manager.getWatchZone(timestamp);
+            WatchZone watchZone = manager.getWatchZoneComplete(timestamp);
 
             if (watchZone != null) {
                 WatchZoneUtils.scheduleWatchZoneAlarm(this, watchZone);

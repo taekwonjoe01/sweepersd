@@ -158,7 +158,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
         assertTrue(timestamps.contains(timestamp));
         assertEquals(1, timestamps.size());
 
-        WatchZone watchZone = manager.getWatchZone(timestamp);
+        WatchZone watchZone = manager.getWatchZoneComplete(timestamp);
         assertNotNull(watchZone);
         assertEquals(radius, watchZone.getRadius());
         assertEquals(center, watchZone.getCenter());
@@ -243,17 +243,17 @@ public class TestWatchZoneManager extends AndroidTestCase {
         assertTrue(timestamps.contains(timestamp3));
         assertEquals(3, timestamps.size());
 
-        watchZone = manager.getWatchZone(timestamp);
+        watchZone = manager.getWatchZoneComplete(timestamp);
         assertNotNull(watchZone);
         assertEquals(radius, watchZone.getRadius());
         assertEquals(center, watchZone.getCenter());
 
-        watchZone = manager.getWatchZone(timestamp2);
+        watchZone = manager.getWatchZoneComplete(timestamp2);
         assertNotNull(watchZone);
         assertEquals(radius2, watchZone.getRadius());
         assertEquals(center2, watchZone.getCenter());
 
-        watchZone = manager.getWatchZone(timestamp3);
+        watchZone = manager.getWatchZoneComplete(timestamp3);
         assertNotNull(watchZone);
         assertEquals(radius3, watchZone.getRadius());
         assertEquals(center3, watchZone.getCenter());
@@ -336,12 +336,12 @@ public class TestWatchZoneManager extends AndroidTestCase {
         assertFalse(timestamps.contains(timestamp3));
         assertEquals(2, timestamps.size());
 
-        watchZone = manager.getWatchZone(timestamp);
+        watchZone = manager.getWatchZoneComplete(timestamp);
         assertNotNull(watchZone);
         assertEquals(radius, watchZone.getRadius());
         assertEquals(center, watchZone.getCenter());
 
-        watchZone = manager.getWatchZone(timestamp2);
+        watchZone = manager.getWatchZoneComplete(timestamp2);
         assertNotNull(watchZone);
         assertEquals(updatedRadius, watchZone.getRadius());
         assertEquals(updatedLatLng, watchZone.getCenter());

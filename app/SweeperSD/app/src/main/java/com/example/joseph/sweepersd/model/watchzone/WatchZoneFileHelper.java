@@ -128,6 +128,58 @@ public class WatchZoneFileHelper {
         return results;
     }
 
+    public WatchZone loadWatchZoneBrief(long createdTimestamp) {
+        WatchZoneBuilder builder = new WatchZoneBuilder();
+        try {
+            mSemaphore.acquire();
+            try {
+                File dir = new File(getAlarmDirPath(mContext) + createdTimestamp);
+                if (dir.exists()) {
+                    builder.createdTimestamp = createdTimestamp;
+
+                    File alarmDetailsFile = new File(dir.getAbsolutePath() + "/" +
+                            FILE_WATCH_ZONE_DETAILS);
+                    File sweepingLocationsFile = new File(dir.getAbsolutePath() + "/" +
+                            FILE_SWEEPING_LOCATIONS);
+
+                    InputStream ADis = new FileInputStream(alarmDetailsFile);
+
+
+                    if (ADis != null) {
+                        InputStreamReader inputStreamReader = new InputStreamReader(ADis);
+                        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                        String receiveString = bufferedReader.readLine();
+                        String[] parsings = receiveString.split(",");
+                        builder.latitude = Double.parseDouble(parsings[0]);
+                        builder.longitude = Double.parseDouble(parsings[1]);
+
+                        receiveString = bufferedReader.readLine();
+                        builder.label = receiveString;
+
+                        receiveString = bufferedReader.readLine();
+                        builder.radius = Integer.parseInt(receiveString);
+
+                        receiveString = bufferedReader.readLine();
+                        builder.lastUpdatedTimestamp = Long.parseLong(receiveString);
+
+                        ADis.close();
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, e.toString());
+            } catch (IOException e) {
+                Log.e(TAG, e.toString());
+            } finally {
+                mSemaphore.release();
+            }
+        } catch (InterruptedException e) {
+
+        }
+
+        return builder.build();
+    }
+
     public WatchZone loadWatchZone(long createdTimestamp) {
         WatchZoneBuilder builder = new WatchZoneBuilder();
         try {

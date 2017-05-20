@@ -3,9 +3,11 @@ package com.example.joseph.sweepersd.presentation.manualalarms;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -24,8 +26,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
@@ -37,9 +37,9 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
 
     private TextView mRadiusDisplay;
     private SeekBar mRadiusSeekbar;
-    private GoogleMap mMap;
 
     private GoogleApiClient mGoogleApiClient;
+    private GoogleMap mMap;
 
     private Circle mMarkerRadius;
 
@@ -102,6 +102,25 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    0);
+        }
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
 
@@ -121,44 +140,26 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
-
-        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
-            public void onMarkerDragStart(Marker marker) {
-                if (mMarkerRadius != null) {
-                    mMarkerRadius.remove();
-                }
-            }
-
-            @Override
-            public void onMarkerDrag(Marker marker) {
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-                LatLng location = new LatLng(marker.getPosition().latitude,
-                        marker.getPosition().longitude);
-                setAlarmLocation(location);
+            public void onMapClick(LatLng latLng) {
+                setAlarmLocation(latLng);
             }
         });
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (currentLocation != null) {
-            setAlarmLocation(new LatLng(currentLocation.getLatitude(),
-                    currentLocation.getLongitude()));
-        } else {
-            //setAlarmLocation(new LatLng(32.715736, -117.161087));
-            setAlarmLocation(new LatLng(32.803680778620155, -117.25259441882373));
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ) {
+            Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+            if (currentLocation != null) {
+                setAlarmLocation(new LatLng(currentLocation.getLatitude(),
+                        currentLocation.getLongitude()));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 16f));
+            }
         }
     }
 
@@ -209,16 +210,11 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
 
         mLatLng = location;
 
-        LatLng center = mLatLng;
-        mMap.addMarker(new MarkerOptions()
-                .position(center)
-                .draggable(true));
         mMarkerRadius = mMap.addCircle(new CircleOptions()
-                .center(center)
+                .center(mLatLng)
                 .radius(getRadiusForProgress(mRadiusSeekbar.getProgress()))
-                .strokeColor(Color.RED)
-                .fillColor(R.color.map_radius_fill));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 18f));
+                .strokeColor(getResources().getColor(R.color.app_primary))
+                .fillColor(getResources().getColor(R.color.map_radius_fill)));
     }
 
     private int getRadiusForProgress(int progress) {

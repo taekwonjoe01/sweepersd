@@ -1,5 +1,6 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -78,11 +79,13 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case CREATE_ALARM_CODE:
-                String label = data.getStringExtra(CreateWatchZoneActivity.LABEL_KEY);
-                LatLng location = data.getParcelableExtra(CreateWatchZoneActivity.LOCATION_KEY);
-                int radius = data.getIntExtra(CreateWatchZoneActivity.RADIUS_KEY, 0);
+                if (resultCode == Activity.RESULT_OK) {
+                    String label = data.getStringExtra(CreateWatchZoneActivity.LABEL_KEY);
+                    LatLng location = data.getParcelableExtra(CreateWatchZoneActivity.LOCATION_KEY);
+                    int radius = data.getIntExtra(CreateWatchZoneActivity.RADIUS_KEY, 0);
 
-                mAdapter.createAlarm(label, location, radius);
+                    mAdapter.createAlarm(label, location, radius);
+                }
                 break;
         }
     }
@@ -100,6 +103,8 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        mRecyclerView.setAdapter(null);
 
         AddressValidatorManager.getInstance(this).removeListener(this);
     }

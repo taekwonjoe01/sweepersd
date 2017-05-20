@@ -2,8 +2,10 @@ package com.example.joseph.sweepersd.presentation.manualalarms;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -41,6 +43,8 @@ public class CreateAlarmLabelDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Dialog dialog = new Dialog(getActivity());
+        dialog.getWindow().setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.setContentView(R.layout.dialog_create_label);
         dialog.setTitle("Create a Label");
 
@@ -57,6 +61,8 @@ public class CreateAlarmLabelDialogFragment extends DialogFragment {
                 dialog.dismiss();
             }
         });
+
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
     }

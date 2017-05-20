@@ -3,13 +3,16 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
-    android:background="@color/app_background">
+    android:background="@drawable/apptheme_background_rounded">
 
     <EditText
         android:id="@+id/edittext_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/app_secondary"
+        android:background="#22000000"
+        android:padding="3dp"
+        android:layout_marginBottom="10dp"
         android:textColorHint="@color/app_secondary_disabled"
         android:hint="Label (Home, Work,  etc.)"/>
 

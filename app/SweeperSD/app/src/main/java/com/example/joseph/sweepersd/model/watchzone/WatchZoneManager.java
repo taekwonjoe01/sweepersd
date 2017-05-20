@@ -89,7 +89,19 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
         WatchZoneUpdateManager.getInstance(mContext).removeListener(listener);
     }
 
-    public WatchZone getWatchZone(long createdTimestamp) {
+    public WatchZone getWatchZoneBrief(long createdTimestamp) {
+        WatchZone result = null;
+        if (mWatchZones.containsKey(createdTimestamp)) {
+            WatchZone zone = mWatchZones.get(createdTimestamp);
+            if (zone == null) {
+                zone = mWatchZoneFileHelper.loadWatchZoneBrief(createdTimestamp);
+            }
+            result = zone;
+        }
+        return result;
+    }
+
+    public WatchZone getWatchZoneComplete(long createdTimestamp) {
         WatchZone result = null;
         if (mWatchZones.containsKey(createdTimestamp)) {
             WatchZone zone = mWatchZones.get(createdTimestamp);

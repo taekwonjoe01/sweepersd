@@ -24,12 +24,18 @@
             android:id="@+id/radius_display"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/app_secondary"
+            style="@android:style/TextAppearance.Large"
+            android:text="Radius: 50ft"
             android:layout_gravity="center"/>
 
         <SeekBar
             android:id="@+id/seekbar_radius"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:progressTint="@color/app_secondary"
+            android:thumbTint="@color/app_secondary"
+            android:secondaryProgressTint="@color/app_secondary_disabled"
             android:progress="50"/>
     </LinearLayout>
 </FrameLayout>

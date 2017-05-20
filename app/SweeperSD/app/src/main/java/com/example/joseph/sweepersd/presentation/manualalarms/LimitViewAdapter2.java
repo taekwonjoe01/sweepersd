@@ -33,6 +33,8 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
     private final WatchZone mWatchZone;
     private List<LimitPresenter> mLimitPresenters;
 
+    private AsyncTask<Void, Void, List<LimitPresenter>> mLoadLimitsTask;
+
     private boolean mIsDetached = true;
 
     public LimitViewAdapter2(Context context, WatchZone watchZone) {
@@ -46,13 +48,15 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
         super.onAttachedToRecyclerView(recyclerView);
         mIsDetached = false;
 
-        new LoadLimitViewTask(mWatchZone.getSweepingAddresses()).execute();
+        mLoadLimitsTask = new LoadLimitViewTask(mWatchZone.getSweepingAddresses()).execute();
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         mIsDetached = true;
+
+        mLoadLimitsTask.cancel(false);
     }
 
     @Override
@@ -182,6 +186,9 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
 
             List<Limit> uniqueLimits = WatchZoneUtils.getUniqueIdLimits(mAddresses);
             for (Limit l : uniqueLimits) {
+                if (isCancelled()) {
+                    return null;
+                }
                 results.add(new LimitPresenter(results.size(), l));
             }
 
@@ -190,9 +197,12 @@ public class LimitViewAdapter2 extends RecyclerView.Adapter<LimitViewAdapter2.Vi
 
         @Override
         protected void onPostExecute(List<LimitPresenter> results) {
+            super.onPostExecute(results);
+            if (results == null) {
+                return;
+            }
             mLimitPresenters = results;
             notifyDataSetChanged();
-            super.onPostExecute(results);
         }
     }
 }

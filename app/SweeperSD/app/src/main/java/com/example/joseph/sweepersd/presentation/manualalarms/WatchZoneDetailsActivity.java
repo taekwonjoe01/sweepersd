@@ -1,7 +1,10 @@
 package com.example.joseph.sweepersd.presentation.manualalarms;
 
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,14 +17,21 @@ import android.widget.LinearLayout;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.model.watchzone.WatchZoneManager;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 
 import org.apache.commons.lang3.text.WordUtils;
 
-public class WatchZoneDetailsActivity extends AppCompatActivity {
+public class WatchZoneDetailsActivity extends AppCompatActivity implements
+        OnMapReadyCallback {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
     public static final String KEY_WATCHZONE_ID = "KEY_WATCHZONE_ID";
 
     private Long mWatchZoneId;
+    private WatchZone mBriefWatchZone;
     private WatchZone mWatchZone;
 
     private WatchZoneManager mWatchZoneManager;
@@ -31,6 +41,8 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
     private WatchZoneViewItemDecoration mLimitViewItemDecoration;
 
     private LinearLayout mLoadingGroup;
+
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +64,11 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
         mLoadingGroup = (LinearLayout) findViewById(R.id.limit_loading_group);
         mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
@@ -67,12 +84,21 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
 
-        setTitle("Loading...");
+        mBriefWatchZone = mWatchZoneManager.getWatchZoneBrief(mWatchZoneId);
+
+        setTitle(WordUtils.capitalize(mBriefWatchZone.getLabel()));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    0);
+        }
 
         new LoadWatchZoneTask().execute();
     }
@@ -80,7 +106,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
     private class LoadWatchZoneTask extends AsyncTask<Void, Long, Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            mWatchZone = mWatchZoneManager.getWatchZone(mWatchZoneId);
+            mWatchZone = mWatchZoneManager.getWatchZoneComplete(mWatchZoneId);
 
             return null;
         }
@@ -90,10 +116,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
             super.onPostExecute(aVoid);
             setAdapter();
 
-            setTitle(WordUtils.capitalize(mWatchZone.getLabel()));
-
             mLoadingGroup.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -158,4 +181,30 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
             }*/
         }
     };
+
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        setMap();
+    }
+
+    private void setMap() {
+        mMap.clear();
+
+        mMap.addCircle(new CircleOptions()
+                .center(mBriefWatchZone.getCenter())
+                .radius(mBriefWatchZone.getRadius())
+                .strokeColor(getResources().getColor(R.color.app_primary))
+                .fillColor(getResources().getColor(R.color.map_radius_fill)));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mBriefWatchZone.getCenter(), 16f));
+    }
 }

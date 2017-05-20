@@ -38,6 +38,8 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     private final WatchZoneManager mWatchZoneManager;
     private final List<WatchZonePresenter> mWatchZonePresenters;
 
+    private AsyncTask<Void, Long, Void> mLoadWatchZonesTask;
+
     public WatchZoneViewAdapter(Context context) {
         mContext = context;
         mWatchZonePresenters = new CopyOnWriteArrayList<>();
@@ -49,7 +51,21 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             mWatchZonePresenters.add(new LoadingWatchZonePresenter(mWatchZonePresenters.size(), timestamp));
         }
 
-        new LoadWatchZonesTask().execute();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        mLoadWatchZonesTask = new LoadWatchZonesTask();
+        mLoadWatchZonesTask.execute();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+
+        mLoadWatchZonesTask.cancel(false);
     }
 
     @Override
@@ -201,7 +217,10 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
         protected Void doInBackground(Void... params) {
             List<Long> timestamps = mWatchZoneManager.getWatchZones();
             for (Long timestamp : timestamps) {
-                mWatchZoneManager.getWatchZone(timestamp);
+                if (isCancelled()) {
+                    return null;
+                }
+                mWatchZoneManager.getWatchZoneComplete(timestamp);
                 publishProgress(timestamp);
             }
 
@@ -252,14 +271,16 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
     }
 
     class LoadingWatchZonePresenter extends WatchZonePresenter {
+        private WatchZone mWatchZoneBrief;
 
         LoadingWatchZonePresenter(int position, Long watchZoneTimestamp) {
             super(position, watchZoneTimestamp);
+            mWatchZoneBrief = mWatchZoneManager.getWatchZoneBrief(watchZoneTimestamp);
         }
 
         @Override
         String getLabel() {
-            return "";
+            return WordUtils.capitalize(mWatchZoneBrief.getLabel());
         }
 
         @Override
@@ -275,7 +296,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
         UpdatingPresenter(int position, Long watchZone) {
             super(position, watchZone);
-            this.watchZone = mWatchZoneManager.getWatchZone(watchZoneTimestamp);
+            this.watchZone = mWatchZoneManager.getWatchZoneComplete(watchZoneTimestamp);
             mWatchZoneManager.addWatchZoneProgressListener(this);
             setProgress(mWatchZoneManager.getProgressForWatchZone(watchZone));
         }
@@ -323,7 +344,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
 
         NonUpdatingWatchZonePresenter(int position, Long watchZoneTimestamp) {
             super(position, watchZoneTimestamp);
-            this.watchZone = mWatchZoneManager.getWatchZone(watchZoneTimestamp);
+            this.watchZone = mWatchZoneManager.getWatchZoneComplete(watchZoneTimestamp);
             mWatchZoneManager.addWatchZoneProgressListener(this);
         }
 

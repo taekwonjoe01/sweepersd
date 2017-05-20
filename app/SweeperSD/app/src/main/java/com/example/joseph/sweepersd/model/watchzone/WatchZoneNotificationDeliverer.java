@@ -26,7 +26,7 @@ public class WatchZoneNotificationDeliverer extends IntentService {
 
         WatchZoneManager manager = new WatchZoneManager(this);
         long id = Long.parseLong(intent.getType());
-        WatchZone watchZone = manager.getWatchZone(id);
+        WatchZone watchZone = manager.getWatchZoneComplete(id);
 
         if (watchZone != null) {
             long nextSweepingTime = WatchZoneUtils.getNextSweepingTimeFromAddresses(
