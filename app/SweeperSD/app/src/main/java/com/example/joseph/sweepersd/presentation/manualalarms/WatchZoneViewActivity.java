@@ -8,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,7 +34,7 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_alarm);
+        setContentView(R.layout.activity_watch_zone_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -51,7 +50,7 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         });
 
         mRecyclerView = (RecyclerView) findViewById(R.id.alarm_recycler_view);
-        mRecyclerView.setHasFixedSize(true);
+        //mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -62,7 +61,7 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
 
         mAdapter = new WatchZoneViewAdapter(this);
 
-        setTitle("Watch Zones");
+        setTitle(getResources().getString(R.string.title_watch_zone_view_activity));
 
         RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {

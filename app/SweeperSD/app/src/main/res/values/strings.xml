@@ -149,4 +149,9 @@
 
     <string name="alarm_radius_string">Radius: %dft</string>
     <string name="alarm_maps_done">Done</string>
+
+    <!-- Strings for Watch Zone List Activity -->
+    <string name="title_watch_zone_view_activity">Monitored Locations</string>
+    <string name="watch_zone_no_sweeping">No sweeping at this location.</string>
+
 </resources>

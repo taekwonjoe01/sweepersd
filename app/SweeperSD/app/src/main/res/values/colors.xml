@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="app_background">#457f93</color>
+    <color name="app_background_activated">#96d5ea</color>
     <color name="app_primary">#780d34</color>
     <color name="app_primary_activated">#971f4b</color>
     <color name="app_primary_disabled">#533e46</color>
