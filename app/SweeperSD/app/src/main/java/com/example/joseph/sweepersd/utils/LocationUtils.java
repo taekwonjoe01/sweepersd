@@ -58,7 +58,7 @@ public class LocationUtils {
         double metersPerDegreeLng = (p1 * Math.cos(latitudeRadians)) + (p2 * Math.cos(3 * latitudeRadians)) +
                 (p3 * Math.cos(5 * latitudeRadians));
 
-        int meterStep = 20;
+        int meterStep = 25;
         int numSteps = radius / meterStep;
 
         List<LatLng> latLngs = new ArrayList<>();

@@ -162,6 +162,9 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
         super.onPause();
 
         dismissCreateLabelDialog();
+        if (mScanTask != null) {
+            mScanTask.cancel(false);
+        }
     }
 
     /**
@@ -264,7 +267,7 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
     }
 
     private int getRadiusForProgress(int progress) {
-        return 20 + progress * 2;
+        return 30 + progress;
     }
 
     private ScanTask mScanTask;

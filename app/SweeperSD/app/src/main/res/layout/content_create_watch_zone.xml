@@ -57,7 +57,7 @@
         android:layout_gravity="left|center_vertical"
         style="@android:style/TextAppearance.Small"
         android:textColor="@color/app_secondary"
-        android:text="Scanning For Posted Limits..." />
+        android:text="Posted Limits:" />
 
     <FrameLayout
         android:layout_width="match_parent"

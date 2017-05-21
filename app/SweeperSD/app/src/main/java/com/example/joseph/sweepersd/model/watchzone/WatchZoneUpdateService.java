@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by joseph on 9/2/16.
@@ -103,7 +104,7 @@ public class WatchZoneUpdateService extends IntentService implements
         }
         if (watchZoneToUpdate != null ) {
             List<SweepingAddress> oldSweeingAddresses = watchZoneToUpdate.getSweepingAddresses();
-            HashMap<LatLng, SweepingAddress> oldSweepingAddressMap = new HashMap<>();
+            final HashMap<LatLng, SweepingAddress> oldSweepingAddressMap = new HashMap<>();
             List<LatLng> latLngs = new ArrayList<>();
             if (oldSweeingAddresses != null && !oldSweeingAddresses.isEmpty()) {
                 for (SweepingAddress a : watchZoneToUpdate.getSweepingAddresses()) {
@@ -115,7 +116,7 @@ public class WatchZoneUpdateService extends IntentService implements
                         watchZoneToUpdate.getRadius());
             }
 
-            LimitDbHelper limitHelper = new LimitDbHelper(this);
+            final LimitDbHelper limitHelper = new LimitDbHelper(this);
 
             if (mIsCancelled) {
                 return true;
@@ -125,7 +126,7 @@ public class WatchZoneUpdateService extends IntentService implements
             if (address == null) {
                 return false;
             }
-            String[] addressSplit = address.split(",");
+            final String[] addressSplit = address.split(",");
             String alarmAddress = "";
             if (addressSplit.length > 0) {
                 alarmAddress = addressSplit[0];
@@ -139,10 +140,30 @@ public class WatchZoneUpdateService extends IntentService implements
                 helper.saveWatchZone(updatedWatchZone);
             }
 
-            List<SweepingAddress> sweepingAddresses = new ArrayList<>();
+            final List<SweepingAddress> sweepingAddresses = new ArrayList<>();
 
+            final CountDownLatch latch = new CountDownLatch(latLngs.size());
+
+            Log.e("Joey", "Starting " + latLngs.size() + " threads...");
+            Log.e("Joey", "Number of available cores: " + Runtime.getRuntime().availableProcessors());
             for (int i = 0; i < latLngs.size(); i++) {
-                if (mIsCancelled) {
+                final LatLng latLng = latLngs.get(i);
+                final int size = latLngs.size();
+                new LatLngLookupTask(latLng, new LatLngLookupCallback() {
+                    @Override
+                    public void onTaskFinished(String address) {
+                        SweepingAddress sweepingAddress = buildSweepingAddress(oldSweepingAddressMap, limitHelper,
+                                latLng, address);
+                        synchronized (this) {
+                            sweepingAddresses.add(sweepingAddress);
+                            int numDone = size - (int) latch.getCount();
+                            int progress = (int) (((double)numDone / (double)size) * 100);
+                            publishProgress(progress);
+                        }
+                        latch.countDown();
+                    }
+                }).start();
+                /*if (mIsCancelled) {
                     return true;
                 }
                 int progress = (int) (((double)i / (double)latLngs.size()) * 100);
@@ -152,7 +173,12 @@ public class WatchZoneUpdateService extends IntentService implements
 
                 String add = LocationUtils.getAddressForLatLnt(this, latLng);
                 sweepingAddresses.add(buildSweepingAddress(oldSweepingAddressMap,
-                        limitHelper, latLng, add));
+                        limitHelper, latLng, add));*/
+            }
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             Log.d(TAG, "finished generating SweepingAddresses. Size " + sweepingAddresses.size());
 
@@ -170,6 +196,25 @@ public class WatchZoneUpdateService extends IntentService implements
             }
         }
         return false;
+    }
+
+    private interface LatLngLookupCallback {
+        void onTaskFinished(String address);
+    }
+
+    private class LatLngLookupTask extends Thread {
+        private final LatLng mLatLng;
+        private final LatLngLookupCallback mCallback;
+        LatLngLookupTask(LatLng latLng, LatLngLookupCallback callback) {
+            mLatLng = latLng;
+            mCallback = callback;
+        }
+        @Override
+        public void run() {
+            super.run();
+            String add = LocationUtils.getAddressForLatLnt(WatchZoneUpdateService.this, mLatLng);
+            mCallback.onTaskFinished(add);
+        }
     }
 
     private SweepingAddress buildSweepingAddress(HashMap<LatLng, SweepingAddress> oldAddresses,
