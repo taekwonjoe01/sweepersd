@@ -156,5 +156,6 @@
 
     <!-- Strings for Watch Zone Details Activity -->
     <string name="details_delete_watch_zone">Delete</string>
+    <string name="title_activity_test">TestActivity</string>
 
 </resources>

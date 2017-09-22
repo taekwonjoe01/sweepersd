@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * Created by joseph on 9/2/16.
  */
 public class TestWatchZoneManager extends AndroidTestCase {
-    private static final String TAG = TestWatchZoneManager.class.getSimpleName();
+    /*private static final String TAG = TestWatchZoneManager.class.getSimpleName();
     private RenamingDelegatingContext mContext;
 
     @Override
@@ -390,5 +390,5 @@ public class TestWatchZoneManager extends AndroidTestCase {
                 }
             }, 50);
         }
-    }
+    }*/
 }
