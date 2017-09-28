@@ -222,7 +222,7 @@ public class LimitDbHelper extends SQLiteOpenHelper {
             String range = limit.getRange()[0] + "-" + limit.getRange()[1];
             limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_RANGE, range);
             limitValues.put(LimitDbReaderContract.ImportedLimitEntry.COLUMN_LIMIT, limit.getLimit());
-            // insert book
+            // insertLimitSchedules book
             long id = db.insert(LimitDbReaderContract.ImportedLimitEntry.TABLE_NAME, null, limitValues);
 
             for (LimitSchedule schedule : limit.getSchedules()) {

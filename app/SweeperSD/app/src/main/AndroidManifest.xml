@@ -21,6 +21,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+    <service
+        android:name=".revision3.limit.provider.OnDeviceLimitProviderService"
+        android:exported="false" />
         <!--
         <activity
             android:name=".MainActivity"

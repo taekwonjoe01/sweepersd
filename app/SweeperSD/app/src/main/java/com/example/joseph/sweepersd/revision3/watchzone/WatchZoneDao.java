@@ -1,0 +1,48 @@
+package com.example.joseph.sweepersd.revision3.watchzone;
+
+import android.arch.lifecycle.LiveData;
+import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
+import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
+
+import java.util.List;
+
+import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
+
+@Dao
+public interface WatchZoneDao {
+    @Query("SELECT * FROM watchzones")
+    LiveData<List<WatchZone>> getAllWatchZonesLiveData();
+
+    @Query("SELECT * FROM watchzones")
+    List<WatchZone> getAllLimits();
+
+    @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
+    LiveData<List<WatchZonePoint>> getWatchZonePointsLiveData(long uid);
+
+    @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
+    List<WatchZonePoint> getWatchZonePoints(long uid);
+
+    @Query("SELECT * FROM watchzones WHERE uid LIKE :uid")
+    LiveData<WatchZone> getWatchZone(long uid);
+
+    @Insert(onConflict = REPLACE)
+    long insertWatchZone(WatchZone watchZone);
+
+    @Insert(onConflict = REPLACE)
+    void insertWatchZonePoints(List<WatchZonePoint> points);
+
+    @Update(onConflict = REPLACE)
+    void updateWatchZone(WatchZone watchZone);
+
+    @Update(onConflict = REPLACE)
+    void updateWatchZonePoints(List<WatchZonePoint> points);
+
+    @Update(onConflict = REPLACE)
+    void updateWatchZonePoint(WatchZonePoint point);
+
+    @Delete
+    void deleteWatchZone(WatchZone watchZone);
+}

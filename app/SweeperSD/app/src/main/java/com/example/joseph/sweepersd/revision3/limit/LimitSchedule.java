@@ -1,27 +1,39 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.limit;
 
+import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(foreignKeys = @ForeignKey(entity = Limit.class,
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
+@Entity(tableName = "limitSchedules", foreignKeys = @ForeignKey(entity = Limit.class,
         parentColumns = "uid",
-        childColumns = "limitId"))
+        childColumns = "limitId", onDelete=CASCADE))
 public class LimitSchedule {
-    @PrimaryKey
-    private int uid;
+    @PrimaryKey(autoGenerate = true)
+    private long uid;
 
+    @ColumnInfo(name = "startHour")
     private int startHour;
-    private int endHour;
-    private int dayNumber;
-    private int weekNumber;
-    private int limitId;
 
-    public int getUid() {
+    @ColumnInfo(name = "endHour")
+    private int endHour;
+
+    @ColumnInfo(name = "dayNumber")
+    private int dayNumber;
+
+    @ColumnInfo(name = "weekNumber")
+    private int weekNumber;
+
+    @ColumnInfo(name = "limitId", index = true)
+    private long limitId;
+
+    public long getUid() {
         return uid;
     }
 
-    public void setUid(int uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
@@ -41,7 +53,7 @@ public class LimitSchedule {
         return weekNumber;
     }
 
-    public int getLimitId() {
+    public long getLimitId() {
         return limitId;
     }
 
@@ -61,7 +73,7 @@ public class LimitSchedule {
         this.weekNumber = weekNumber;
     }
 
-    public void setLimitId(int limitId) {
+    public void setLimitId(long limitId) {
         this.limitId = limitId;
     }
 }

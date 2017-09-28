@@ -1,19 +1,13 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.limit;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-
-import com.example.joseph.sweepersd.model.limits.LimitSchedule;
-
-import java.util.List;
 
 @Entity(tableName = "limits")
 public class Limit {
-
-    @PrimaryKey
-    private int uid;
+    @PrimaryKey(autoGenerate = true)
+    private long uid;
 
     @ColumnInfo(name = "street")
     private String street;
@@ -27,10 +21,10 @@ public class Limit {
     @ColumnInfo(name = "rawLimitString")
     private String rawLimitString;
 
-    @Ignore
-    private List<LimitSchedule> mSchedules;
+    @ColumnInfo(name = "isPosted")
+    private boolean isPosted;
 
-    public int getUid() {
+    public long getUid() {
         return uid;
     }
 
@@ -50,11 +44,7 @@ public class Limit {
         return rawLimitString;
     }
 
-    public List<LimitSchedule> getmSchedules() {
-        return mSchedules;
-    }
-
-    public void setUid(int uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
@@ -74,7 +64,11 @@ public class Limit {
         this.rawLimitString = rawLimitString;
     }
 
-    public void setmSchedules(List<LimitSchedule> mSchedules) {
-        this.mSchedules = mSchedules;
+    public void setPosted(boolean posted) {
+        this.isPosted = posted;
+    }
+
+    public boolean isPosted() {
+        return isPosted;
     }
 }

@@ -1,9 +1,30 @@
 package com.example.joseph.sweepersd.revision3;
 
 import android.arch.persistence.room.Database;
+import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.content.Context;
 
-@Database(entities = {Limit.class}, version = 1)
+import com.example.joseph.sweepersd.revision3.limit.Limit;
+import com.example.joseph.sweepersd.revision3.limit.LimitDao;
+import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneDao;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZonePoint;
+
+@Database(entities = {Limit.class, LimitSchedule.class, WatchZone.class, WatchZonePoint.class},
+        version = 1)
 public abstract class AppDatabase extends RoomDatabase {
+    private static AppDatabase sInstance;
+
+    public static AppDatabase getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "AppDatabase").build();
+        }
+        return sInstance;
+    }
+
     public abstract LimitDao limitDao();
+
+    public abstract WatchZoneDao watchZoneDao();
 }
