@@ -48,27 +48,27 @@ public class WatchZone {
         return lastSweepingUpdated;
     }
 
-    public void setUid(long uid) {
+    void setUid(long uid) {
         this.uid = uid;
     }
 
-    public void setLabel(String label) {
+    void setLabel(String label) {
         this.label = label;
     }
 
-    public void setCenterLatitude(double centerLatitude) {
+    void setCenterLatitude(double centerLatitude) {
         this.centerLatitude = centerLatitude;
     }
 
-    public void setCenterLongitude(double centerLongitude) {
+    void setCenterLongitude(double centerLongitude) {
         this.centerLongitude = centerLongitude;
     }
 
-    public void setRadius(int radius) {
+    void setRadius(int radius) {
         this.radius = radius;
     }
 
-    public void setLastSweepingUpdated(long lastSweepingUpdated) {
+    void setLastSweepingUpdated(long lastSweepingUpdated) {
         this.lastSweepingUpdated = lastSweepingUpdated;
     }
 }

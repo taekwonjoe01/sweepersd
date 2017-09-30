@@ -33,7 +33,7 @@ public class LimitSchedule {
         return uid;
     }
 
-    public void setUid(long uid) {
+    void setUid(long uid) {
         this.uid = uid;
     }
 
@@ -57,23 +57,23 @@ public class LimitSchedule {
         return limitId;
     }
 
-    public void setStartHour(int startHour) {
+    void setStartHour(int startHour) {
         this.startHour = startHour;
     }
 
-    public void setEndHour(int endHour) {
+    void setEndHour(int endHour) {
         this.endHour = endHour;
     }
 
-    public void setDayNumber(int dayNumber) {
+    void setDayNumber(int dayNumber) {
         this.dayNumber = dayNumber;
     }
 
-    public void setWeekNumber(int weekNumber) {
+    void setWeekNumber(int weekNumber) {
         this.weekNumber = weekNumber;
     }
 
-    public void setLimitId(long limitId) {
+    void setLimitId(long limitId) {
         this.limitId = limitId;
     }
 }

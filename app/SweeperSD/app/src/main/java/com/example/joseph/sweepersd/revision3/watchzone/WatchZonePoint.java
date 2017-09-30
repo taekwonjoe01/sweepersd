@@ -29,6 +29,9 @@ public class WatchZonePoint {
     @ColumnInfo(name = "watchZoneId")
     private long watchZoneId;
 
+    @ColumnInfo(name = "watchZoneUpdatedTimestampMs")
+    private long watchZoneUpdatedTimestampMs;
+
     public long getUid() {
         return uid;
     }
@@ -53,27 +56,35 @@ public class WatchZonePoint {
         return watchZoneId;
     }
 
-    public void setUid(long uid) {
+    public long getWatchZoneUpdatedTimestampMs() {
+        return watchZoneUpdatedTimestampMs;
+    }
+
+    void setUid(long uid) {
         this.uid = uid;
     }
 
-    public void setLongitude(double longitude) {
+    void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
-    public void setLatitude(double latitude) {
+    void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public void setAddress(String address) {
+    void setAddress(String address) {
         this.address = address;
     }
 
-    public void setLimitId(long limitId) {
+    void setLimitId(long limitId) {
         this.limitId = limitId;
     }
 
-    public void setWatchZoneId(long watchZoneId) {
+    void setWatchZoneId(long watchZoneId) {
         this.watchZoneId = watchZoneId;
+    }
+
+    void setWatchZoneUpdatedTimestampMs(long timestamp) {
+        watchZoneUpdatedTimestampMs = timestamp;
     }
 }

@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
     <service
-        android:name=".revision3.limit.provider.OnDeviceLimitProviderService"
+        android:name=".revision3.limit.OnDeviceLimitProviderService"
         android:exported="false" />
         <!--
         <activity

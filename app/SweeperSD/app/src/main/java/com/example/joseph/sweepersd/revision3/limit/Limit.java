@@ -44,27 +44,27 @@ public class Limit {
         return rawLimitString;
     }
 
-    public void setUid(long uid) {
+    void setUid(long uid) {
         this.uid = uid;
     }
 
-    public void setStreet(String street) {
+    void setStreet(String street) {
         this.street = street;
     }
 
-    public void setStartRange(int startRange) {
+    void setStartRange(int startRange) {
         this.startRange = startRange;
     }
 
-    public void setEndRange(int endRange) {
+    void setEndRange(int endRange) {
         this.endRange = endRange;
     }
 
-    public void setRawLimitString(String rawLimitString) {
+    void setRawLimitString(String rawLimitString) {
         this.rawLimitString = rawLimitString;
     }
 
-    public void setPosted(boolean posted) {
+    void setPosted(boolean posted) {
         this.isPosted = posted;
     }
 

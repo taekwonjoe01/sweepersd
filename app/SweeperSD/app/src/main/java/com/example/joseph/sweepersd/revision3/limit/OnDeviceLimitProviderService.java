@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3.limit.provider;
+package com.example.joseph.sweepersd.revision3.limit;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -8,9 +8,8 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
 import com.example.joseph.sweepersd.revision3.Preferences;
-import com.example.joseph.sweepersd.revision3.limit.Limit;
-import com.example.joseph.sweepersd.revision3.limit.LimitDao;
-import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -110,6 +109,15 @@ public class OnDeviceLimitProviderService extends IntentService {
             Log.i(TAG, "Finished service.");
 
             preferences.edit().putBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, true).commit();
+
+            // Any existing WatchZones need to be updated!
+            WatchZoneRepository watchZoneRepository = WatchZoneRepository.getInstance(this);
+            List<WatchZone> watchZones = watchZoneRepository.getWatchZones();
+            for (WatchZone watchZone : watchZones) {
+                watchZoneRepository.updateWatchZone(watchZone, watchZone.getLabel(),
+                        watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
+                        watchZone.getRadius());
+            }
         }
     }
 }

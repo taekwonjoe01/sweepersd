@@ -1,7 +1,4 @@
-package com.example.joseph.sweepersd.revision3.limit.provider;
-
-import com.example.joseph.sweepersd.revision3.limit.Limit;
-import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
+package com.example.joseph.sweepersd.revision3.limit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

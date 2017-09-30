@@ -17,7 +17,7 @@ public interface WatchZoneDao {
     LiveData<List<WatchZone>> getAllWatchZonesLiveData();
 
     @Query("SELECT * FROM watchzones")
-    List<WatchZone> getAllLimits();
+    List<WatchZone> getAllWatchZones();
 
     @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
     LiveData<List<WatchZonePoint>> getWatchZonePointsLiveData(long uid);
@@ -26,23 +26,29 @@ public interface WatchZoneDao {
     List<WatchZonePoint> getWatchZonePoints(long uid);
 
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid")
-    LiveData<WatchZone> getWatchZone(long uid);
+    LiveData<WatchZone> getWatchZoneLiveData(long uid);
+
+    @Query("SELECT * FROM watchzones WHERE uid LIKE :uid")
+    WatchZone getWatchZone(long uid);
 
     @Insert(onConflict = REPLACE)
     long insertWatchZone(WatchZone watchZone);
 
     @Insert(onConflict = REPLACE)
-    void insertWatchZonePoints(List<WatchZonePoint> points);
+    long insertWatchZonePoint(WatchZonePoint point);
+
+    @Insert(onConflict = REPLACE)
+    long[] insertWatchZonePoints(List<WatchZonePoint> points);
 
     @Update(onConflict = REPLACE)
-    void updateWatchZone(WatchZone watchZone);
+    int updateWatchZone(WatchZone watchZone);
 
     @Update(onConflict = REPLACE)
-    void updateWatchZonePoints(List<WatchZonePoint> points);
-
-    @Update(onConflict = REPLACE)
-    void updateWatchZonePoint(WatchZonePoint point);
+    int updateWatchZonePoint(WatchZonePoint point);
 
     @Delete
-    void deleteWatchZone(WatchZone watchZone);
+    int deleteWatchZone(WatchZone watchZone);
+
+    @Delete
+    int deleteWatchZonePoints(List<WatchZonePoint> watchZonePoints);
 }

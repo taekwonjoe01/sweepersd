@@ -7,15 +7,10 @@ import android.preference.PreferenceManager;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
 import com.example.joseph.sweepersd.revision3.Preferences;
-import com.example.joseph.sweepersd.revision3.limit.provider.OnDeviceLimitProviderService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-/**
- * Created by josephhutchins on 9/26/17.
- */
 
 public class LimitRepository {
     private static LimitRepository sInstance;
@@ -51,15 +46,18 @@ public class LimitRepository {
     public synchronized LiveData<List<LimitSchedule>> getLimitSchedules(Limit limit) {
         LiveData<List<LimitSchedule>> results = null;
 
-        List<Limit> cachedLimits = mCachedLimits.getValue();
-        if (cachedLimits.contains(limit)) {
-            if (!mCachedLimitSchedules.containsKey(limit.getUid())) {
-                mCachedLimitSchedules.put(limit.getUid(), loadLimitSchedulesFromDb(limit));
-            }
-            results = mCachedLimitSchedules.get(limit.getUid());
+        if (!mCachedLimitSchedules.containsKey(limit.getUid())) {
+            mCachedLimitSchedules.put(limit.getUid(), loadLimitSchedulesFromDb(limit));
         }
+        results = mCachedLimitSchedules.get(limit.getUid());
 
         return results;
+    }
+
+    public List<Limit> getLimitsForStreet(String street) {
+        LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
+
+        return limitDao.getAllByStreet(street);
     }
 
     private LiveData<List<Limit>> loadLimitsFromDb() {

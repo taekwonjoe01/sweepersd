@@ -47,7 +47,7 @@ public class TestLimitDbHelper extends AndroidTestCase {
         long end = System.nanoTime();
 
         long durationMs = (end - start) / 1000000;
-        Log.d(TAG, "getAllLimits duration: " + durationMs + "ms.");
+        Log.d(TAG, "getAllWatchZones duration: " + durationMs + "ms.");
         assertNotSame(0, limits.size());
 
         limits = mDbHelper.getLimitsForStreet("beryl st");

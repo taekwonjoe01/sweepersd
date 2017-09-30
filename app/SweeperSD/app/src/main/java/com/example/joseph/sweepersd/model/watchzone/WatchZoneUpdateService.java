@@ -23,11 +23,11 @@ public class WatchZoneUpdateService extends IntentService implements
         WatchZoneFileHelper.WatchZoneUpdateListener {
     private static final String TAG = WatchZoneUpdateService.class.getSimpleName();
     public static final String ACTION_ALARM_PROGRESS =
-            "com.example.joseph.sweepersd.ACTION_ALARM_PROGRESS";
+            "com.example.joseph.sweepersd.ACTION_WATCH_ZONE_UPDATE_PROGRESS";
     public static final String ACTION_ALARM_FINISHED =
-            "com.example.joseph.sweepersd.ACTION_ALARM_FINISHED";
-    public static final String ALARM_SUCCESS = "ALARM_SUCCESS";
-    public static final String PARAM_ALARM_ID = "PARAM_ALARM_ID";
+            "com.example.joseph.sweepersd.ACTION_WATCH_ZONE_UPDATE_COMPLETE";
+    public static final String ALARM_SUCCESS = "PARAM_WATCH_ZONE_SUCCESS";
+    public static final String PARAM_ALARM_ID = "PARAM_WATCH_ZONE_ID";
     public static final String PARAM_PROGRESS = "PARAM_PROGRESS";
 
     private long mId;

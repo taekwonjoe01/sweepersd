@@ -42,7 +42,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
             }
         };
         LimitDbHelper helper = new LimitDbHelper(mContext, importer);
-        helper.getAllLimits();
+        helper.getAllWatchZones();
     }
 
     private List<Limit> createTestLimits() {
@@ -108,8 +108,8 @@ public class TestWatchZoneManager extends AndroidTestCase {
         };
         final CountDownLatch progressLatch = new CountDownLatch(9);
         final CountDownLatch completeLatch = new CountDownLatch(1);
-        WatchZoneUpdateManager.WatchZoneProgressListener watchZoneProgressListener =
-                new WatchZoneUpdateManager.WatchZoneProgressListener() {
+        WatchZoneUpdateTask.WatchZoneProgressListener watchZoneProgressListener =
+                new WatchZoneUpdateTask.WatchZoneProgressListener() {
             @Override
             public void onWatchZoneUpdateProgress(long createdTimestamp, int progress) {
                 progressLatch.countDown();
@@ -123,7 +123,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
             }
         };
         MockWatchZoneUpdaterFactory testFactory = new MockWatchZoneUpdaterFactory();
-        WatchZoneUpdateManager.getInstance(mContext).setWatchZoneUpdaterFactory(testFactory);
+        WatchZoneUpdateTask.getInstance(mContext).setWatchZoneUpdaterFactory(testFactory);
 
         manager.addWatchZoneChangeListener(watchZoneChangeListener);
         manager.addWatchZoneProgressListener(watchZoneProgressListener);
@@ -189,7 +189,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
         final CountDownLatch progressLatch2 = new CountDownLatch(18);
         final CountDownLatch completeLatch2 = new CountDownLatch(2);
         watchZoneProgressListener =
-                new WatchZoneUpdateManager.WatchZoneProgressListener() {
+                new WatchZoneUpdateTask.WatchZoneProgressListener() {
                     @Override
                     public void onWatchZoneUpdateProgress(long createdTimestamp, int progress) {
                         progressLatch2.countDown();
@@ -286,7 +286,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
         final CountDownLatch progressLatch3 = new CountDownLatch(18);
         final CountDownLatch completeLatch3 = new CountDownLatch(2);
         watchZoneProgressListener =
-                new WatchZoneUpdateManager.WatchZoneProgressListener() {
+                new WatchZoneUpdateTask.WatchZoneProgressListener() {
                     @Override
                     public void onWatchZoneUpdateProgress(long createdTimestamp, int progress) {
                         progressLatch3.countDown();
@@ -347,17 +347,17 @@ public class TestWatchZoneManager extends AndroidTestCase {
         assertEquals(updatedLatLng, watchZone.getCenter());
     }
 
-    private class MockWatchZoneUpdaterFactory implements WatchZoneUpdateManager.WatchZoneUpdaterFactory {
+    private class MockWatchZoneUpdaterFactory implements WatchZoneUpdateTask.WatchZoneUpdaterFactory {
         @Override
-        public WatchZoneUpdateManager.WatchZoneUpdater createNewWatchZoneUpdater() {
+        public WatchZoneUpdateTask.WatchZoneUpdater createNewWatchZoneUpdater() {
             return new MockWatchZoneUpdater();
         }
     }
 
-    private class MockWatchZoneUpdater implements WatchZoneUpdateManager.WatchZoneUpdater {
+    private class MockWatchZoneUpdater implements WatchZoneUpdateTask.WatchZoneUpdater {
         private final Handler mHandler;
         private int mProgress = 0;
-        private WatchZoneUpdateManager.WatchZoneProgressListener mListener;
+        private WatchZoneUpdateTask.WatchZoneProgressListener mListener;
         private WatchZone mWatchZone;
         public MockWatchZoneUpdater() {
             mHandler = new Handler(Looper.getMainLooper());
@@ -369,7 +369,7 @@ public class TestWatchZoneManager extends AndroidTestCase {
         }
 
         @Override
-        public void updateWatchZone(WatchZone watchZone, WatchZoneUpdateManager.WatchZoneProgressListener listener) {
+        public void updateWatchZone(WatchZone watchZone, WatchZoneUpdateTask.WatchZoneProgressListener listener) {
             mListener = listener;
             mWatchZone = watchZone;
             scheduleWork();
