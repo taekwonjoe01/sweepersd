@@ -65,7 +65,7 @@
             android:value="@string/google_maps_key" />
 
         <service
-            android:name=".model.watchzone.WatchZoneUpdateService"
+            android:name=".model.watchzWatchZoneUpdateServiceTODOvice"
             android:exported="false" />
         <service
             android:name=".model.watchzone.WatchZoneNotificationDeliverer"

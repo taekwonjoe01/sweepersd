@@ -51,7 +51,7 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
                     new WatchZone(666, 0, "Satan's Butthole", new LatLng(0, 0), 666, addresses);
             boolean watchZoneCreated = mWatchZoneFileHelper.saveWatchZone(satan);
 
-            WatchZoneUpdateTask watchZoneUpdateManager = WatchZoneUpdateTask.getInstance(mContext);
+            WatchZoneUpdateTaskTODO watchZoneUpdateManager = WatchZoneUpdateTaskTODO.getInstance(mContext);
             watchZoneUpdateManager.updateWatchZone(satan);
             watchZones.add((long)666);
         }*/
@@ -132,7 +132,7 @@ public class WatchZoneManager implements WatchZoneFileHelper.WatchZoneUpdateList
     }
 
     /**
-     * Create a new watch zone and start a new WatchZoneUpdateService for this watch zone. The watch zone will be
+     * Create a new watch zone and start a new WatchZoneUpdateServiceTODO for this watch zone. The watch zone will be
      * added to the WatchZoneManager asynchronously. If this function returns success, there will be a
      * subsequent call to onWatchZoneCreated(long timestamp).
      */

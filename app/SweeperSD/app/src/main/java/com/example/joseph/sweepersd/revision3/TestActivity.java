@@ -1,22 +1,13 @@
 package com.example.joseph.sweepersd.revision3;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.revision3.limit.Limit;
 import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
-import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
-import com.google.android.gms.maps.model.LatLng;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TestActivity extends AppCompatActivity {
@@ -33,10 +24,12 @@ public class TestActivity extends AppCompatActivity {
         mLimitRepository = LimitRepository.getInstance(this);
         Log.e("Joey" ,"starting..");
 
+        final Handler mHandler = new Handler(Looper.getMainLooper());
+
         mLimitRepository.getLimits().observe(this, new Observer<List<Limit>>() {
             @Override
             public void onChanged(@Nullable List<Limit> limits) {
-                //Log.e("Joey", "onChanged");
+                Log.e("Joey", "onChanged");
 
                 if (limits != null && !limits.isEmpty()) {
                     Log.e("Joey", "number of limits: " + limits.size());
@@ -63,7 +56,19 @@ public class TestActivity extends AppCompatActivity {
             }
         });*/
 
-        WatchZoneRepository repository = WatchZoneRepository.getInstance(this);
+        /*mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("Joey", "Changing Limit in DB. ");
+                List<Limit> limits = mLimitRepository.getLimits().getValue();
+                Limit l = limits.get(0);
+                l.setStartRange(1);
+
+                AppDatabase.getInstance(TestActivity.this).limitDao().updateLimit(l);
+            }
+        }, 10000);*/
+
+        /*WatchZoneRepository repository = WatchZoneRepository.getInstance(this);
         repository.createWatchZone("sampleWatchZone", 32.952848,
                 -117.249217, 200);
 
@@ -74,7 +79,7 @@ public class TestActivity extends AppCompatActivity {
             long end = SystemClock.elapsedRealtime();
             long differenceMillis = end - start;
             Log.e("Joey", "elapsed time " + differenceMillis + " ms");
-        }
+        }*/
     }
 
 }

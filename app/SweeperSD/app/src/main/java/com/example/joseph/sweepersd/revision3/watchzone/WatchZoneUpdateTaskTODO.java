@@ -7,13 +7,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import com.example.joseph.sweepersd.revision3.LocationUtils;
-import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WatchZoneUpdateTask implements
+public class WatchZoneUpdateTaskTODO implements
         WatchZoneUpdater.Listener,
         WatchZoneUpdater.AddressProvider {
     public static final String ACTION_WATCH_ZONE_UPDATE_PROGRESS =
@@ -29,19 +28,11 @@ public class WatchZoneUpdateTask implements
 
     private WatchZoneUpdater mWatchZoneUpdater;
 
-    public interface Listener {
-        void on
-    }
 
-    public WatchZoneUpdateTask(Context context, long watchZoneUid) {
+    public WatchZoneUpdateTaskTODO(Context context, long watchZoneUid) {
         mContext = context;
         mWatchZoneUid = watchZoneUid;
         mThreads = new ArrayList<>();
-    }
-
-    @Override
-    public void onProgress(int progress) {
-        publishProgress(progress);
     }
 
     @Override
@@ -76,9 +67,9 @@ public class WatchZoneUpdateTask implements
             handlers.add(handler);
         }
 
-        mWatchZoneUpdater = new WatchZoneUpdater(this, mWatchZoneUid, handlers,
+        /*mWatchZoneUpdater = new WatchZoneUpdater(this, mWatchZoneUid, handlers,
                 WatchZoneRepository.getInstance(mContext), LimitRepository.getInstance(mContext),
-                this);
+                this);*/
         // Blocks until finished.
         mWatchZoneUpdater.execute();
     }

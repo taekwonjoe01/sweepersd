@@ -40,7 +40,7 @@ public interface LimitDao {
     void insertLimitSchedules(List<LimitSchedule> schedules);
 
     @Update(onConflict = REPLACE)
-    void updateLimit(Limit limit, List<LimitSchedule> schedules);
+    void updateLimit(Limit limit);
 
     @Delete
     void deleteAll(List<Limit> limit);

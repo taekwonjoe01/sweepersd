@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-public class WatchZoneUpdateService extends IntentService implements LifecycleOwner {
-    private static final String TAG = WatchZoneUpdateService.class.getSimpleName();
+public class WatchZoneUpdateServiceTODO extends IntentService implements LifecycleOwner {
+    private static final String TAG = WatchZoneUpdateServiceTODO.class.getSimpleName();
     public static final String ACTION_WATCH_ZONE_UPDATE_PROGRESS =
             "com.example.joseph.sweepersd.ACTION_WATCH_ZONE_UPDATE_PROGRESS";
     public static final String ACTION_WATCH_ZONE_UPDATE_COMPLETE =
@@ -56,7 +56,7 @@ public class WatchZoneUpdateService extends IntentService implements LifecycleOw
     private boolean mShouldRestart = false;
     private boolean mShouldReschedule = false;
 
-    public WatchZoneUpdateService() {
+    public WatchZoneUpdateServiceTODO() {
         super(TAG);
     }
 
@@ -116,7 +116,7 @@ public class WatchZoneUpdateService extends IntentService implements LifecycleOw
             Log.i(TAG, "Reschedule tasks until hitting specified id.");
             if (mRescheduleUntilFullSweepId != id) {
                 WatchZone watchZone = AppDatabase.getInstance(
-                        WatchZoneUpdateService.this).watchZoneDao().getWatchZone(mRescheduleUntilId);
+                        WatchZoneUpdateServiceTODO.this).watchZoneDao().getWatchZone(mRescheduleUntilId);
                 if (watchZone == null) {
                     Log.i(TAG, "Subject of reschedule-until does not exist. Clearing the subject.");
                     mRescheduleUntilId = 0L;
@@ -301,7 +301,7 @@ public class WatchZoneUpdateService extends IntentService implements LifecycleOw
                 public void run() {
                     if (!mIsCancelled) {
                         String address = LocationUtils.getAddressForLatLnt(
-                                WatchZoneUpdateService.this, latLng);
+                                WatchZoneUpdateServiceTODO.this, latLng);
                         WatchZonePoint watchZonePoint = buildWatchZonePoint(oldPointCache,
                                 limitRepository, latLng, address, needsFullRefresh);
                         watchZonePoint.setWatchZoneId(watchZoneToUpdate.getUid());
@@ -401,7 +401,7 @@ public class WatchZoneUpdateService extends IntentService implements LifecycleOw
             point = new WatchZonePoint();
             // Address might be empty string, that's fine.
             point.setAddress(address);
-            point.setValid(isValid);
+            //point.setValid(isValid);
             if (isValid && !TextUtils.isEmpty(address)) {
                 // Attempt to find the limit for the address.
                 Limit limit = LocationUtils.findLimitForAddress(limitRepository, address);
@@ -411,7 +411,7 @@ public class WatchZoneUpdateService extends IntentService implements LifecycleOw
             // At this point, it should be guaranteed there is no null.
             point = oldCachedPoints.get(latLng);
             // Always true, because if it's really not, we are falling back to old data.
-            point.setValid(true);
+            //point.setValid(true);
             if (isValid) {
                 point.setAddress(address);
                 if (!TextUtils.isEmpty(address)) {
@@ -468,7 +468,7 @@ public class WatchZoneUpdateService extends IntentService implements LifecycleOw
     private final BroadcastReceiver mCancelReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            long id = intent.getLongExtra(WatchZoneUpdateService.PARAM_WATCH_ZONE_ID, 0);
+            long id = intent.getLongExtra(WatchZoneUpdateServiceTODO.PARAM_WATCH_ZONE_ID, 0);
 
             mRescheduleUntilId = id;
             if (mId != id) {

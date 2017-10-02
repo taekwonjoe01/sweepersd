@@ -52,7 +52,7 @@ public class Limit {
         this.street = street;
     }
 
-    void setStartRange(int startRange) {
+    public void setStartRange(int startRange) {
         this.startRange = startRange;
     }
 

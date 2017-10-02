@@ -1,24 +1,23 @@
 package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.os.Handler;
-import android.text.TextUtils;
 
-import com.example.joseph.sweepersd.revision3.LocationUtils;
-import com.example.joseph.sweepersd.revision3.limit.Limit;
 import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WatchZoneUpdater {
-    private static final long SEVEN_DAYS = 1000 * 60 * 60 * 24 * 7;
-
     private final List<Handler> mHandlers;
     private final Listener mListener;
-    private final long mWatchZoneUid;
+    private final List<WatchZone> mWatchZonesToUpdate;
+    private final Map<WatchZone, ProgressListener> mProgressListenerMap;
+    private final Map<WatchZone, UpdateProgress> mUpdateProgressMap;
     private final WatchZoneRepository mWatchZoneRepository;
     private final LimitRepository mLimitRepository;
     private final AddressProvider mAddressProvider;
@@ -32,9 +31,12 @@ public class WatchZoneUpdater {
         SUCCESS
     }
 
+    interface ProgressListener {
+        void onProgress(UpdateProgress progress);
+    }
+
     public interface Listener {
-        void onUpdateComplete(Result result);
-        void onProgress(int progress);
+        void onUpdateComplete();
     }
 
     /**
@@ -49,137 +51,174 @@ public class WatchZoneUpdater {
         String getAddressForLatLng(LatLng latLng);
     }
 
-    public WatchZoneUpdater(Listener listener, long watchZoneUid,
+    public WatchZoneUpdater(Listener listener, List<WatchZone> watchZonesToUpdate,
                             List<Handler> threadedHandlers,
                             WatchZoneRepository watchZoneRepository,
                             LimitRepository limitRepository, AddressProvider addressProvider) {
         mListener = listener;
-        mWatchZoneUid = watchZoneUid;
+        mWatchZonesToUpdate = watchZonesToUpdate;
         mHandlers = threadedHandlers;
         mWatchZoneRepository = watchZoneRepository;
         mLimitRepository = limitRepository;
         mAddressProvider = addressProvider;
 
         mIsCancelled.set(false);
+
+        mProgressListenerMap = new HashMap<>();
+        mUpdateProgressMap = new HashMap<>();
     }
 
     public void cancel() {
         mIsCancelled.set(true);
     }
 
-    public void execute() {
-        Result result = update();
-
-        if (mListener != null) {
-            mListener.onUpdateComplete(result);
-        }
+    public Map<WatchZone, UpdateProgress> execute() {
+        return update();
     }
 
-    private Result update() {
+    void registerProgressUpdates(WatchZone watchZone, ProgressListener progressListener) {
+        mProgressListenerMap.put(watchZone, progressListener);
+    }
+
+    void unregisterProgressUpdates(WatchZone watchZone) {
+        mProgressListenerMap.remove(watchZone);
+    }
+
+    private Map<WatchZone, UpdateProgress> update() {
         if (mIsCancelled.get()) {
-            return Result.CANCELLED;
-        }
-
-        if (mWatchZoneUid < 1) {
-            return Result.CORRUPT;
-        }
-
-        WatchZone watchZone = mWatchZoneRepository.getWatchZone(mWatchZoneUid);
-
-        if (watchZone == null) {
-            return Result.CORRUPT;
-        }
-
-        List<WatchZonePoint> watchZonePoints = mWatchZoneRepository.getWatchZonePoints(watchZone);
-
-        if (watchZonePoints == null || watchZonePoints.isEmpty()) {
-            return Result.CORRUPT;
-        }
-
-        if (mIsCancelled.get()) {
-            return Result.CANCELLED;
-        }
-
-        final List<WatchZonePoint> watchZonePointsToUpdate = new ArrayList<>();
-        long currentTimestamp = System.currentTimeMillis();
-
-        for (WatchZonePoint p : watchZonePoints) {
-            long timeSinceUpdate = currentTimestamp - p.getWatchZoneUpdatedTimestampMs();
-            if (timeSinceUpdate > SEVEN_DAYS) {
-                watchZonePointsToUpdate.add(p);
+            for (WatchZone watchZone : mWatchZonesToUpdate) {
+                publishProgress(watchZone, new UpdateProgress(0,
+                        UpdateProgress.Status.CANCELLED));
             }
+            return mUpdateProgressMap;
+        }
+
+        final List<Runnable> runnables = new ArrayList<>();
+        final List<CountDownLatch> countDownLatches = new ArrayList<>();
+
+        for (final WatchZone watchZone : mWatchZonesToUpdate) {
+            final List<WatchZonePoint> watchZonePoints = mWatchZoneRepository.getWatchZonePoints(watchZone);
+
+            if (watchZonePoints == null || watchZonePoints.isEmpty()) {
+                publishProgress(watchZone, new UpdateProgress(0,
+                        UpdateProgress.Status.CORRUPT));
+            } else {
+                final int size = watchZonePoints.size();
+                final CountDownLatch latch = new CountDownLatch(size);
+                for (final WatchZonePoint p : watchZonePoints) {
+                    final WatchZonePointUpdater updater = new WatchZonePointUpdater(p,
+                            mWatchZoneRepository, mLimitRepository, mAddressProvider);
+                    runnables.add(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!mIsCancelled.get()) {
+                                updater.run();
+
+                                synchronized (watchZonePoints) {
+                                    int numDone = size - (int) latch.getCount();
+                                    int progress = (int) (((double) numDone / (double) size) * 100);
+                                    if (latch.getCount() > 0) {
+                                        publishProgress(watchZone, new UpdateProgress(progress,
+                                                UpdateProgress.Status.UPDATING));
+                                    } else {
+                                        publishProgress(watchZone, new UpdateProgress(progress,
+                                                UpdateProgress.Status.COMPLETE));
+                                    }
+                                }
+
+                                latch.countDown();
+                            }
+                        }
+                    });
+                }
+                countDownLatches.add(latch);
+            }
+        }
+
+        if (mIsCancelled.get()) {
+            for (WatchZone watchZone : mWatchZonesToUpdate) {
+                publishProgress(watchZone, new UpdateProgress(0,
+                        UpdateProgress.Status.CANCELLED));
+            }
+            return mUpdateProgressMap;
+        }
+
+        for (WatchZone watchZone : mWatchZonesToUpdate) {
+            publishProgress(watchZone, new UpdateProgress(0,
+                    UpdateProgress.Status.UPDATING));
         }
 
         int handlerIndex = 0;
         int numHandlers = mHandlers.size();
 
-        final int size = watchZonePoints.size();
-        final CountDownLatch latch = new CountDownLatch(size);
-
-        for (final WatchZonePoint p : watchZonePoints) {
+        for (Runnable r : runnables) {
             Handler handler = mHandlers.get(0);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (!mIsCancelled.get()) {
-                        LatLng latLng = new LatLng(p.getLatitude(), p.getLongitude());
-                        String address = mAddressProvider.getAddressForLatLng(latLng);
-
-                        if (address != null) {
-                            p.setAddress(address);
-                            if (!TextUtils.isEmpty(address)) {
-                                Limit limit = LocationUtils.findLimitForAddress(mLimitRepository,
-                                        address);
-                                p.setLimitId(limit != null ? limit.getUid() : 0L);
-                            }
-                            p.setWatchZoneUpdatedTimestampMs(System.currentTimeMillis());
-                        }
-
-                        mWatchZoneRepository.updateWatchZonePoint(p);
-
-                        synchronized (watchZonePoints) {
-                            int numDone = size - (int) latch.getCount();
-                            int progress = (int) (((double) numDone / (double) size) * 100);
-                            publishProgress(progress);
-                        }
-
-                        latch.countDown();
-                    }
-                }
-            });
+            handler.post(r);
             handlerIndex = (handlerIndex + 1) % numHandlers;
         }
 
         try {
-            latch.await();
+            for (CountDownLatch latch : countDownLatches) {
+                latch.await();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return Result.CANCELLED;
         }
 
         if (mIsCancelled.get()) {
-            return Result.CANCELLED;
+            for (WatchZone watchZone : mWatchZonesToUpdate) {
+                UpdateProgress progress = mUpdateProgressMap.get(watchZone);
+                if (UpdateProgress.Status.UPDATING == progress.getStatus()) {
+                    publishProgress(watchZone, new UpdateProgress(progress.getProgress(),
+                            UpdateProgress.Status.CANCELLED));
+                }
+            }
+            return mUpdateProgressMap;
         }
-
-        List<WatchZonePoint> watchZonePointsResult =
-                mWatchZoneRepository.getWatchZonePoints(watchZone);
-        Result result = Result.SUCCESS;
-        for (WatchZonePoint p : watchZonePointsResult) {
-            // This means it wasn't updated during this call to update().
-            if (p.getWatchZoneUpdatedTimestampMs() < currentTimestamp) {
-                result = Result.NETWORK_ERROR;
+        for (WatchZone watchZone : mWatchZonesToUpdate) {
+            UpdateProgress progress = mUpdateProgressMap.get(watchZone);
+            if (UpdateProgress.Status.UPDATING == progress.getStatus()) {
+                publishProgress(watchZone, new UpdateProgress(progress.getProgress(),
+                        UpdateProgress.Status.COMPLETE));
             }
         }
 
-        watchZone.setLastSweepingUpdated(System.currentTimeMillis());
-        mWatchZoneRepository.updateWatchZone(watchZone);
+        //watchZone.setLastSweepingUpdated(System.currentTimeMillis());
+        //mWatchZoneRepository.updateWatchZone(watchZone);
 
-        return result;
+        return mUpdateProgressMap;
     }
 
-    private void publishProgress(int progress) {
-        if (mListener != null) {
-            mListener.onProgress(progress);
+    private void publishProgress(WatchZone watchZone, UpdateProgress progress) {
+        mUpdateProgressMap.put(watchZone, progress);
+        ProgressListener listener = mProgressListenerMap.get(watchZone);
+        if (listener != null) {
+            listener.onProgress(progress);
+        }
+    }
+
+    public static class UpdateProgress {
+        private final int mProgress;
+        private final Status mStatus;
+
+        public enum Status {
+            CORRUPT,
+            UPDATING,
+            CANCELLED,
+            COMPLETE
+        }
+
+        public UpdateProgress(int progress, Status status) {
+            mProgress = progress;
+            mStatus = status;
+        }
+
+        public int getProgress() {
+            return mProgress;
+        }
+
+        public Status getStatus() {
+            return mStatus;
         }
     }
 }

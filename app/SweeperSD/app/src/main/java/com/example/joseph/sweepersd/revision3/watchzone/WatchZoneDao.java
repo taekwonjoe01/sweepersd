@@ -25,10 +25,13 @@ public interface WatchZoneDao {
     @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
     List<WatchZonePoint> getWatchZonePoints(long uid);
 
+    @Query("SELECT * FROM watchzonepoints WHERE uid LIKE :uid LIMIT 1")
+    WatchZonePoint getWatchZonePoint(long uid);
+
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid")
     LiveData<WatchZone> getWatchZoneLiveData(long uid);
 
-    @Query("SELECT * FROM watchzones WHERE uid LIKE :uid")
+    @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
     WatchZone getWatchZone(long uid);
 
     @Insert(onConflict = REPLACE)
