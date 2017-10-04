@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.presentation.manualalarms;
+package com.example.joseph.sweepersd.revision3;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -18,15 +18,17 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.AddressValidatorManager;
+import com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity;
+import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewItemDecoration;
 import com.google.android.gms.maps.model.LatLng;
 
-public class WatchZoneViewActivity extends AppCompatActivity implements
+public class UserZonesActivity extends AppCompatActivity implements
         AddressValidatorManager.ValidatorProgressListener{
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
     private static final int CREATE_ALARM_CODE = 1;
 
     private RecyclerView mRecyclerView;
-    private WatchZoneViewAdapter mAdapter;
+    private UserZonesViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private WatchZoneViewItemDecoration mWatchZoneViewItemDecoration;
 
@@ -44,9 +46,10 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(WatchZoneViewActivity.this, "Add WatchZone", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserZonesActivity.this, "Add", Toast.LENGTH_SHORT).show();
                 startActivityForResult(
-                        new Intent(WatchZoneViewActivity.this, CreateWatchZoneActivity.class), CREATE_ALARM_CODE);
+                        new Intent(UserZonesActivity.this, WatchZoneActivity.class),
+                        CREATE_ALARM_CODE);
             }
         });
 
@@ -60,7 +63,7 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
 
         mRecyclerView.addItemDecoration(mWatchZoneViewItemDecoration);
 
-        mAdapter = new WatchZoneViewAdapter(this);
+        mAdapter = new UserZonesViewAdapter(this);
 
         setTitle(getResources().getString(R.string.title_user_zone_activity));
 

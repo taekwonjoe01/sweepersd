@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.revision3.watchzone;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.text.TextUtils;
 
 @Entity(tableName = "watchzones")
 public class WatchZone {
@@ -70,5 +71,23 @@ public class WatchZone {
 
     void setLastSweepingUpdated(long lastSweepingUpdated) {
         this.lastSweepingUpdated = lastSweepingUpdated;
+    }
+
+    public boolean areSame(WatchZone compareTo) {
+        boolean result = true;
+
+        if (this.uid != compareTo.getUid()) {
+            result = false;
+        } else if (this.radius != compareTo.getRadius()) {
+            result = false;
+        } else if (this.centerLatitude != compareTo.getCenterLatitude()) {
+            result = false;
+        } else if (this.centerLatitude != compareTo.getCenterLongitude()) {
+            result = false;
+        } else if (TextUtils.equals(this.label, compareTo.getLabel())) {
+            result = false;
+        }
+
+        return result;
     }
 }

@@ -2,9 +2,6 @@ package com.example.joseph.sweepersd.revision3.watchzone;
 
 import java.util.List;
 
-/**
- * Created by joseph on 10/1/17.
- */
 
 public class WatchZoneModel {
     private final WatchZone mWatchZone;
@@ -34,5 +31,31 @@ public class WatchZoneModel {
 
     public WatchZoneStatus getStatus() {
         return mStatus;
+    }
+
+    public boolean areSame(WatchZoneModel compareTo) {
+        boolean result = true;
+        if (!this.mWatchZone.areSame(compareTo.getWatchZone())) {
+            result = false;
+        } else if (this.mStatus != compareTo.getStatus()) {
+            result = false;
+        } else if (this.mWatchZonePoints.size() != compareTo.getWatchZonePoints().size()){
+            result = false;
+        } else {
+            int index = 0;
+            List<WatchZonePoint> otherPoints = compareTo.getWatchZonePoints();
+            for (WatchZonePoint p : mWatchZonePoints) {
+                WatchZonePoint otherP = otherPoints.get(index);
+                if (otherP == null) {
+                    result = false;
+                    break;
+                } else if (!p.areSame(otherP)) {
+                    result = false;
+                }
+                index++;
+            }
+        }
+
+        return result;
     }
 }

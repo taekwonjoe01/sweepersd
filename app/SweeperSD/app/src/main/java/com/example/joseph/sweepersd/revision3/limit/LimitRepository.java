@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
-import com.example.joseph.sweepersd.revision3.Preferences;
+import com.example.joseph.sweepersd.revision3.utils.Preferences;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,13 @@ public class LimitRepository {
         return sInstance;
     }
 
-    public synchronized LiveData<List<Limit>> getLimits() {
+    public synchronized void delete() {
+        if (sInstance != null) {
+            sInstance = null;
+        }
+    }
+
+    public synchronized LiveData<List<Limit>> getPostedLimitsLiveData() {
         boolean limitsLoaded = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(
                         Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, false);
         if (!limitsLoaded) {
@@ -43,13 +49,13 @@ public class LimitRepository {
         return mCachedLimits;
     }
 
-    public synchronized LiveData<List<LimitSchedule>> getLimitSchedules(Limit limit) {
+    public synchronized LiveData<List<LimitSchedule>> getLimitSchedulesLiveData(Long limitUid) {
         LiveData<List<LimitSchedule>> results = null;
 
-        if (!mCachedLimitSchedules.containsKey(limit.getUid())) {
-            mCachedLimitSchedules.put(limit.getUid(), loadLimitSchedulesFromDb(limit));
+        if (!mCachedLimitSchedules.containsKey(limitUid)) {
+            mCachedLimitSchedules.put(limitUid, loadLimitSchedulesFromDb(limitUid));
         }
-        results = mCachedLimitSchedules.get(limit.getUid());
+        results = mCachedLimitSchedules.get(limitUid);
 
         return results;
     }
@@ -63,12 +69,12 @@ public class LimitRepository {
     private LiveData<List<Limit>> loadLimitsFromDb() {
         LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
 
-        return limitDao.getAllLimitsLiveData();
+        return limitDao.getAllPostedLimitsLiveData();
     }
 
-    private LiveData<List<LimitSchedule>> loadLimitSchedulesFromDb(Limit limit) {
+    private LiveData<List<LimitSchedule>> loadLimitSchedulesFromDb(Long limitUid) {
         LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
 
-        return limitDao.getLimitSchedulesLiveData(limit.getUid());
+        return limitDao.getLimitSchedulesLiveData(limitUid);
     }
 }

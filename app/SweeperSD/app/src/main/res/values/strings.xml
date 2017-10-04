@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">SweeperSD</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_watch_zone_activity">Street Explorer</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_debug">Debug Activity</string>
 
@@ -151,7 +151,7 @@
     <string name="alarm_maps_done">Done</string>
 
     <!-- Strings for Watch Zone List Activity -->
-    <string name="title_watch_zone_view_activity">Monitored Locations</string>
+    <string name="title_user_zone_activity">Monitored Zones</string>
     <string name="watch_zone_no_sweeping">No sweeping at this location.</string>
 
     <!-- Strings for Watch Zone Details Activity -->

@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.utils;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
@@ -26,7 +26,7 @@ public class TestActivity extends AppCompatActivity {
 
         final Handler mHandler = new Handler(Looper.getMainLooper());
 
-        mLimitRepository.getLimits().observe(this, new Observer<List<Limit>>() {
+        mLimitRepository.getPostedLimitsLiveData().observe(this, new Observer<List<Limit>>() {
             @Override
             public void onChanged(@Nullable List<Limit> limits) {
                 Log.e("Joey", "onChanged");
@@ -47,8 +47,8 @@ public class TestActivity extends AppCompatActivity {
                                     }
                                 }
                             };
-                            mLimitRepository.getLimitSchedules(l).observe(TestActivity.this, observer);
-                            LiveData<List<LimitSchedule>> cachedvalue = mLimitRepository.getLimitSchedules(l);
+                            mLimitRepository.getLimitSchedulesLiveData(l).observe(TestActivity.this, observer);
+                            LiveData<List<LimitSchedule>> cachedvalue = mLimitRepository.getLimitSchedulesLiveData(l);
                             mPostedLimits.put(l, observer);
                         }
                     }
@@ -60,7 +60,7 @@ public class TestActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Log.e("Joey", "Changing Limit in DB. ");
-                List<Limit> limits = mLimitRepository.getLimits().getValue();
+                List<Limit> limits = mLimitRepository.getPostedLimitsLiveData().getValue();
                 Limit l = limits.get(0);
                 l.setStartRange(1);
 

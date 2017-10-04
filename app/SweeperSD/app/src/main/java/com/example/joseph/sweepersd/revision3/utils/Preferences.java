@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.utils;
 
 /**
  * Created by josephhutchins on 9/26/17.

@@ -1,25 +1,29 @@
 package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.text.TextUtils;
+import android.util.Log;
 
-import com.example.joseph.sweepersd.revision3.LocationUtils;
+import com.example.joseph.sweepersd.revision3.utils.LocationUtils;
 import com.example.joseph.sweepersd.revision3.limit.Limit;
-import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.List;
+import java.util.Map;
+
 public class WatchZonePointUpdater implements Runnable {
-    public static final long WATCH_ZONE_UP_TO_DATE_TIME_MS = 1000 * 60 * 60 * 24 * 30;
+    public static final long WATCH_ZONE_UP_TO_DATE_TIME_MS = 1000L * 60L * 60L * 24L * 30L;
     private final WatchZonePoint mWatchZonePoint;
-    private final WatchZoneRepository mWatchZoneRepository;
-    private final LimitRepository mLimitRepository;
+    private final WatchZoneUpdater.WatchZonePointSaveDelegate mSaveDelegate;
+    private final Map<String, List<Limit>> mLimits;
     private final WatchZoneUpdater.AddressProvider mAddressProvider;
 
-    public WatchZonePointUpdater(WatchZonePoint watchZonePoint, WatchZoneRepository watchZoneRepository,
-                                 LimitRepository limitRepository,
+    public WatchZonePointUpdater(WatchZonePoint watchZonePoint,
+                                 WatchZoneUpdater.WatchZonePointSaveDelegate saveDelegate,
+                                 Map<String, List<Limit>> limits,
                                  WatchZoneUpdater.AddressProvider addressProvider) {
         mWatchZonePoint = watchZonePoint;
-        mWatchZoneRepository = watchZoneRepository;
-        mLimitRepository = limitRepository;
+        mSaveDelegate = saveDelegate;
+        mLimits = limits;
         mAddressProvider = addressProvider;
     }
 
@@ -35,14 +39,14 @@ public class WatchZonePointUpdater implements Runnable {
             if (address != null) {
                 mWatchZonePoint.setAddress(address);
                 if (!TextUtils.isEmpty(address)) {
-                    Limit limit = LocationUtils.findLimitForAddress(mLimitRepository,
+                    Limit limit = LocationUtils.findLimitForAddress(mLimits,
                             address);
                     mWatchZonePoint.setLimitId(limit != null ? limit.getUid() : 0L);
                 }
                 mWatchZonePoint.setWatchZoneUpdatedTimestampMs(System.currentTimeMillis());
             }
 
-            mWatchZoneRepository.updateWatchZonePoint(mWatchZonePoint);
+            mSaveDelegate.saveWatchZonePoint(mWatchZonePoint);
         }
     }
 }

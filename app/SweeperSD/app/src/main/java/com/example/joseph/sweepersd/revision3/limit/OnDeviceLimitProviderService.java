@@ -7,8 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
-import com.example.joseph.sweepersd.revision3.Preferences;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
+import com.example.joseph.sweepersd.revision3.utils.Preferences;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
 
 import java.io.BufferedReader;
@@ -112,12 +111,7 @@ public class OnDeviceLimitProviderService extends IntentService {
 
             // Any existing WatchZones need to be updated!
             WatchZoneRepository watchZoneRepository = WatchZoneRepository.getInstance(this);
-            List<WatchZone> watchZones = watchZoneRepository.getWatchZones();
-            for (WatchZone watchZone : watchZones) {
-                watchZoneRepository.updateWatchZone(watchZone, watchZone.getLabel(),
-                        watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
-                        watchZone.getRadius());
-            }
+            watchZoneRepository.triggerRefreshAll();
         }
     }
 }
