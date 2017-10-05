@@ -73,19 +73,21 @@ public class WatchZone {
         this.lastSweepingUpdated = lastSweepingUpdated;
     }
 
-    public boolean areSame(WatchZone compareTo) {
-        boolean result = true;
+    public boolean isChanged(WatchZone compareTo) {
+        boolean result = false;
 
-        if (this.uid != compareTo.getUid()) {
-            result = false;
-        } else if (this.radius != compareTo.getRadius()) {
-            result = false;
-        } else if (this.centerLatitude != compareTo.getCenterLatitude()) {
-            result = false;
-        } else if (this.centerLatitude != compareTo.getCenterLongitude()) {
-            result = false;
-        } else if (TextUtils.equals(this.label, compareTo.getLabel())) {
-            result = false;
+        if (this.uid == compareTo.getUid()) {
+            if (this.radius != compareTo.getRadius()) {
+                result = true;
+            } else if (this.centerLatitude != compareTo.getCenterLatitude()) {
+                result = true;
+            } else if (this.centerLatitude != compareTo.getCenterLongitude()) {
+                result = true;
+            } else if (TextUtils.equals(this.label, compareTo.getLabel())) {
+                result = true;
+            } else if (this.lastSweepingUpdated != compareTo.lastSweepingUpdated) {
+                result = true;
+            }
         }
 
         return result;

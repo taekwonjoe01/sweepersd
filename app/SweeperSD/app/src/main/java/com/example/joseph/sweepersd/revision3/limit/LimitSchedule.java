@@ -76,4 +76,24 @@ public class LimitSchedule {
     void setLimitId(long limitId) {
         this.limitId = limitId;
     }
+
+    public boolean isChanged(LimitSchedule compareTo) {
+        boolean result = false;
+
+        if (this.uid == compareTo.getUid()) {
+            if (this.startHour != compareTo.getStartHour()) {
+                result = true;
+            } else if (this.endHour != compareTo.getEndHour()) {
+                result = true;
+            } else if (this.dayNumber != compareTo.getDayNumber()) {
+                result = true;
+            } else if (this.weekNumber != compareTo.getWeekNumber()) {
+                result = true;
+            } else if (this.limitId != compareTo.getLimitId()) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
 }

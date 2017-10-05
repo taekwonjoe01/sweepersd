@@ -1,15 +1,21 @@
 package com.example.joseph.sweepersd.revision3.watchzone;
 
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
 
 import java.util.GregorianCalendar;
 
-/**
- * Created by joseph on 9/17/16.
- */
+@Entity(tableName = "sweepingDates")
 public class SweepingDate {
+    @PrimaryKey(autoGenerate = true)
+    private long uid;
+
+    @ColumnInfo(name = "watchZoneId")
+    private long watchZoneId;
     private final LimitSchedule mSchedule;
     private final GregorianCalendar mStartTime;
     private final GregorianCalendar mEndTime;

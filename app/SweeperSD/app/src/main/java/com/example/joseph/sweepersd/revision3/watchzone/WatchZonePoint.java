@@ -89,23 +89,23 @@ public class WatchZonePoint {
         watchZoneUpdatedTimestampMs = timestamp;
     }
 
-    public boolean areSame(WatchZonePoint compareTo) {
-        boolean result = true;
+    public boolean isChanged(WatchZonePoint compareTo) {
+        boolean result = false;
 
-        if (this.uid != compareTo.getUid()) {
-            result = false;
-        } else if (this.longitude != compareTo.getLongitude()) {
-            result = false;
-        } else if (this.latitude != compareTo.getLatitude()) {
-            result = false;
-        } else if (TextUtils.equals(this.address, compareTo.getAddress())) {
-            result = false;
-        } else if (this.limitId != compareTo.getLimitId()) {
-            result = false;
-        } else if (this.watchZoneId != compareTo.getWatchZoneId()) {
-            result = false;
-        } else if (this.watchZoneUpdatedTimestampMs != compareTo.getWatchZoneUpdatedTimestampMs()) {
-            result = false;
+        if (this.uid == compareTo.getUid()) {
+            if (this.longitude != compareTo.getLongitude()) {
+                result = true;
+            } else if (this.latitude != compareTo.getLatitude()) {
+                result = true;
+            } else if (TextUtils.equals(this.address, compareTo.getAddress())) {
+                result = true;
+            } else if (this.limitId != compareTo.getLimitId()) {
+                result = true;
+            } else if (this.watchZoneId != compareTo.getWatchZoneId()) {
+                result = true;
+            } else if (this.watchZoneUpdatedTimestampMs != compareTo.getWatchZoneUpdatedTimestampMs()) {
+                result = true;
+            }
         }
 
         return result;

@@ -1,13 +1,8 @@
 package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.SystemClock;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -19,57 +14,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class WatchZoneRepository {
+public class WatchZoneRepository extends LiveData<WatchZoneModel> {
     private static final String TAG = WatchZoneRepository.class.getSimpleName();
 
     private static WatchZoneRepository sInstance;
-    private Context mContext;
 
-    private final Handler mHandler;
-    private final HandlerThread mThread;
-
-    private final MutableLiveData<List<WatchZoneModel>> mCachedWatchZoneModels;
-    private final Map<Long, WatchZoneContainer> mWatchZoneContainerMap;
-
-    private final LiveData<List<WatchZone>> mWatchZonesLiveData;
-    private final Observer<List<WatchZone>> mWatchZoneLiveDataObserver = new Observer<List<WatchZone>>() {
-        @Override
-        public void onChanged(@Nullable final List<WatchZone> watchZones) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    invalidateWatchZones(watchZones);
-                }
-            });
-        }
-    };
-    private final Observer<WatchZoneModel> mWatchZoneModelObserver = new Observer<WatchZoneModel>() {
-        @Override
-        public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
-            updateLiveDataList();
-        }
-    };
-
-    private class WatchZoneContainer {
-        LiveData<List<WatchZonePoint>> watchZonePoints;
-        Observer<List<WatchZonePoint>> pointsObserver;
-        MutableLiveData<WatchZoneModel> watchZoneModel;
-    }
+    private final Context mApplicationContext;
+    private final Map<Long, LiveData<WatchZone>> mCachedWatchZoneLiveDataMap;
+    private final LiveData<List<WatchZone>> mCachedWatchZoneLiveDataList;
 
     private WatchZoneRepository(Context context) {
-        mContext = context.getApplicationContext();
+        mApplicationContext = context.getApplicationContext();
 
-        mThread = new HandlerThread("WatchZoneRepository_thread");
-        mThread.start();
-        mHandler = new Handler(mThread.getLooper());
-
-        mWatchZonesLiveData = loadWatchZonesFromDb();
-        mWatchZoneContainerMap = new HashMap<>();
-        mCachedWatchZoneModels = new MutableLiveData<>();
-
-        mWatchZonesLiveData.observeForever(mWatchZoneLiveDataObserver);
+        mCachedWatchZoneLiveDataList = loadWatchZonesFromDb();
+        mCachedWatchZoneLiveDataMap = new HashMap<>();
     }
 
     public synchronized static WatchZoneRepository getInstance(Context context) {
@@ -84,45 +43,46 @@ public class WatchZoneRepository {
      */
     public synchronized void delete() {
         if (sInstance != null) {
-            mWatchZonesLiveData.removeObserver(mWatchZoneLiveDataObserver);
-            mHandler.removeCallbacksAndMessages(null);
-            mThread.quit();
             sInstance = null;
         }
     }
 
-    public synchronized LiveData<WatchZoneModel> getWatchZoneModelLiveData(Long uid) {
-        return mWatchZoneContainerMap.get(uid).watchZoneModel;
+    public synchronized LiveData<List<WatchZone>> getWatchZonesLiveData() {
+        return mCachedWatchZoneLiveDataList;
     }
 
-    public synchronized LiveData<List<WatchZoneModel>> getAllWatchZoneModelsLiveData() {
-        return mCachedWatchZoneModels;
+    public synchronized LiveData<WatchZone> getWatchZoneLiveData(Long watchZoneUid) {
+        if (!mCachedWatchZoneLiveDataMap.containsKey(watchZoneUid)) {
+            mCachedWatchZoneLiveDataMap.put(watchZoneUid, loadWatchZoneFromDb(watchZoneUid));
+        }
+
+        return mCachedWatchZoneLiveDataMap.get(watchZoneUid);
     }
 
     public synchronized void triggerRefreshAll() {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         List<WatchZone> zones = watchZoneDao.getAllWatchZones();
         for (WatchZone zone : zones) {
-            updateWatchZoneModel(zone.getUid(), zone.getLabel(), zone.getCenterLatitude(),
+            updateWatchZone(zone.getUid(), zone.getLabel(), zone.getCenterLatitude(),
                     zone.getCenterLongitude(), zone.getRadius());
         }
     }
 
     public synchronized void triggerRefresh(Long uid) {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
         WatchZone zone = watchZoneDao.getWatchZone(uid);
         if (zone != null) {
-            updateWatchZoneModel(zone.getUid(), zone.getLabel(), zone.getCenterLatitude(),
+            updateWatchZone(zone.getUid(), zone.getLabel(), zone.getCenterLatitude(),
                     zone.getCenterLongitude(), zone.getRadius());
         }
     }
 
-    public synchronized int updateWatchZoneModel(Long watchZoneUid, String label,
-                                                 double centerLatitude, double centerLongitude,
-                                                 int radius) {
+    public synchronized int updateWatchZone(Long watchZoneUid, String label,
+                                            double centerLatitude, double centerLongitude,
+                                            int radius) {
         int result = 0;
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         boolean invalidateWatchZonePoints = false;
         WatchZone watchZone = watchZoneDao.getWatchZone(watchZoneUid);
@@ -177,7 +137,7 @@ public class WatchZoneRepository {
             watchZone.setRadius(radius);
             watchZone.setLastSweepingUpdated(0L);
 
-            WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+            WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
             result = watchZoneDao.insertWatchZone(watchZone);
 
             if (result > 0) {
@@ -208,7 +168,7 @@ public class WatchZoneRepository {
     }
 
     public synchronized int deleteWatchZone(Long uid) {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         WatchZone watchZone = watchZoneDao.getWatchZone(uid);
         int result = 0;
@@ -219,15 +179,10 @@ public class WatchZoneRepository {
         return result;
     }
 
-    /**
-     * Intended for internal package use only.
-     * @param watchZoneUid
-     * @return
-     */
-    synchronized List<WatchZonePoint> getWatchZonePoints(Long watchZoneUid) {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+    public synchronized LiveData<List<WatchZonePoint>> getWatchZonePointsLiveData(Long watchZoneUid) {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
-        return watchZoneDao.getWatchZonePoints(watchZoneUid);
+        return watchZoneDao.getWatchZonePointsLiveData(watchZoneUid);
     }
 
     /**
@@ -236,135 +191,31 @@ public class WatchZoneRepository {
      * @return
      */
     synchronized int updateWatchZonePoint(WatchZonePoint watchZonePoint) {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
         int result = watchZoneDao.updateWatchZonePoint(watchZonePoint);
 
         return result;
     }
 
     private LiveData<List<WatchZone>> loadWatchZonesFromDb() {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getAllWatchZonesLiveData();
     }
 
+    private LiveData<WatchZone> loadWatchZoneFromDb(Long watchZoneUid) {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+
+        return watchZoneDao.getWatchZoneLiveData(watchZoneUid);
+    }
+
     private LiveData<List<WatchZonePoint>> loadWatchZonePointsFromDb(WatchZone watchZone) {
-        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mContext).watchZoneDao();
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getWatchZonePointsLiveData(watchZone.getUid());
     }
 
-    private void invalidateWatchZones(List<WatchZone> watchZones) {
-        // Clean up old Observer Containers
-        Set<Long> oldUids = mWatchZoneContainerMap.keySet();
-        for (WatchZone watchZone : watchZones) {
-            Long uid = watchZone.getUid();
-            oldUids.remove(uid);
-        }
-        for (Long deletedUid : oldUids) {
-            WatchZoneContainer container = mWatchZoneContainerMap.get(deletedUid);
-
-            container.watchZonePoints.removeObserver(container.pointsObserver);
-            // Set it to null so Observers know it's gone.
-            container.watchZoneModel.postValue(null);
-            container.watchZoneModel.removeObserver(mWatchZoneModelObserver);
-            mWatchZoneContainerMap.remove(deletedUid);
-        }
-
-        // Setup new Observer Containers
-        for (final WatchZone watchZone : watchZones) {
-            if (mWatchZoneContainerMap.containsKey(watchZone.getUid())) {
-                WatchZoneContainer container = mWatchZoneContainerMap.get(watchZone.getUid());
-                WatchZoneModel model = container.watchZoneModel.getValue();
-                if (model != null) {
-                    WatchZone oldZone = model.getWatchZone();
-                    boolean changed = oldZone.getCenterLatitude() != watchZone.getCenterLatitude() ||
-                            oldZone.getCenterLongitude() != watchZone.getCenterLongitude() ||
-                            oldZone.getRadius() != watchZone.getRadius();
-                    if (changed) {
-                        container.watchZonePoints.removeObserver(container.pointsObserver);
-                        container.watchZonePoints = loadWatchZonePointsFromDb(watchZone);
-                        container.watchZonePoints.observeForever(container.pointsObserver);
-                    }
-                }
-            } else {
-                WatchZoneContainer container = new WatchZoneContainer();
-                container.watchZoneModel = new MutableLiveData<>();
-                container.watchZoneModel.observeForever(mWatchZoneModelObserver);
-                container.watchZonePoints = loadWatchZonePointsFromDb(watchZone);
-                container.pointsObserver = new Observer<List<WatchZonePoint>>() {
-                    @Override
-                    public void onChanged(@Nullable final List<WatchZonePoint> watchZonePoints) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                invalidateWatchZoneModel(watchZone, watchZonePoints);
-                            }
-                        });
-                    }
-                };
-                container.watchZonePoints.observeForever(container.pointsObserver);
-                mWatchZoneContainerMap.put(watchZone.getUid(), container);
-            }
-
-            updateLiveDataList();
-        }
-    }
-
-    private void updateLiveDataList() {
-        List<WatchZoneModel> models = new ArrayList<>();
-        for (Long uid : mWatchZoneContainerMap.keySet()) {
-            WatchZoneContainer container = mWatchZoneContainerMap.get(uid);
-            WatchZoneModel model = container.watchZoneModel.getValue();
-            if (model != null) {
-                models.add(model);
-            }
-        }
-        mCachedWatchZoneModels.postValue(models);
-    }
-
-    private void invalidateWatchZoneModel(WatchZone watchZone, List<WatchZonePoint> watchZonePoints) {
-        if (watchZonePoints == null || watchZonePoints.isEmpty()) {
-            Log.w(TAG, "INVALID WatchZone Model detected! Uid: " + watchZone.getUid() + "\nIgnoring");
-            return;
-        }
-        WatchZoneModel.WatchZoneStatus status = null;
-
-        boolean isCreated = true;
-        boolean isUpToDate = true;
-
-        for (WatchZonePoint point : watchZonePoints) {
-            if (point.getAddress() == null) {
-                isCreated = false;
-                isUpToDate = false;
-            } else {
-                long timestamp = point.getWatchZoneUpdatedTimestampMs();
-                long elapsedTime = System.currentTimeMillis() - timestamp;
-                if (elapsedTime > WatchZonePointUpdater.WATCH_ZONE_UP_TO_DATE_TIME_MS) {
-                    isUpToDate = false;
-                }
-            }
-        }
-
-        if (!isCreated) {
-            status = WatchZoneModel.WatchZoneStatus.INCOMPLETE;
-        } else if (!isUpToDate) {
-            status = WatchZoneModel.WatchZoneStatus.OUT_OF_DATE;
-        } else {
-            status = WatchZoneModel.WatchZoneStatus.VALID;
-
-
-        }
-
-        WatchZoneModel model = new WatchZoneModel(watchZone, watchZonePoints,
-                status);
-        WatchZoneContainer container = mWatchZoneContainerMap.get(watchZone.getUid());
-        if (container != null) {
-            container.watchZoneModel.postValue(model);
-        }
-    }
-
     private void scheduleUpdateJob() {
-        WatchZoneUpdateJob.scheduleAppForegroundJob(mContext);
+        WatchZoneUpdateJob.scheduleAppForegroundJob(mApplicationContext);
     }
 }

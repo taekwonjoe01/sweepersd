@@ -16,13 +16,15 @@ public class LimitRepository {
     private static LimitRepository sInstance;
     private Context mContext;
 
-    private final LiveData<List<Limit>> mCachedLimits;
-    private final Map<Long, LiveData<List<LimitSchedule>>> mCachedLimitSchedules;
+    private final LiveData<List<Limit>> mCachedPostedLimitsLiveData;
+    private final Map<Long, LiveData<List<LimitSchedule>>> mCachedLimitSchedulesLiveData;
+    private final Map<Long, LiveData<Limit>> mCachedLimitsLiveData;
 
     private LimitRepository(Context context) {
         mContext = context;
-        mCachedLimits = loadLimitsFromDb();
-        mCachedLimitSchedules = new HashMap<>();
+        mCachedPostedLimitsLiveData = loadPostedLimitsLiveDataFromDb();
+        mCachedLimitSchedulesLiveData = new HashMap<>();
+        mCachedLimitsLiveData = new HashMap<>();
     }
 
     public synchronized static LimitRepository getInstance(Context context) {
@@ -46,18 +48,23 @@ public class LimitRepository {
             mContext.startService(msgIntent);
         }
 
-        return mCachedLimits;
+        return mCachedPostedLimitsLiveData;
+    }
+
+    public synchronized LiveData<Limit> getLimitLiveData(Long limitUid) {
+        if (!mCachedLimitsLiveData.containsKey(limitUid)) {
+            mCachedLimitsLiveData.put(limitUid, loadLimitLiveDataFromDb(limitUid));
+        }
+
+        return mCachedLimitsLiveData.get(limitUid);
     }
 
     public synchronized LiveData<List<LimitSchedule>> getLimitSchedulesLiveData(Long limitUid) {
-        LiveData<List<LimitSchedule>> results = null;
-
-        if (!mCachedLimitSchedules.containsKey(limitUid)) {
-            mCachedLimitSchedules.put(limitUid, loadLimitSchedulesFromDb(limitUid));
+        if (!mCachedLimitSchedulesLiveData.containsKey(limitUid)) {
+            mCachedLimitSchedulesLiveData.put(limitUid, loadLimitSchedulesLiveDataFromDb(limitUid));
         }
-        results = mCachedLimitSchedules.get(limitUid);
 
-        return results;
+        return mCachedLimitSchedulesLiveData.get(limitUid);
     }
 
     public List<Limit> getLimitsForStreet(String street) {
@@ -66,15 +73,21 @@ public class LimitRepository {
         return limitDao.getAllByStreet(street);
     }
 
-    private LiveData<List<Limit>> loadLimitsFromDb() {
+    private LiveData<List<Limit>> loadPostedLimitsLiveDataFromDb() {
         LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
 
         return limitDao.getAllPostedLimitsLiveData();
     }
 
-    private LiveData<List<LimitSchedule>> loadLimitSchedulesFromDb(Long limitUid) {
+    private LiveData<List<LimitSchedule>> loadLimitSchedulesLiveDataFromDb(Long limitUid) {
         LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
 
         return limitDao.getLimitSchedulesLiveData(limitUid);
+    }
+
+    private LiveData<Limit> loadLimitLiveDataFromDb(Long limitUid) {
+        LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
+
+        return limitDao.getLimitLiveData(limitUid);
     }
 }

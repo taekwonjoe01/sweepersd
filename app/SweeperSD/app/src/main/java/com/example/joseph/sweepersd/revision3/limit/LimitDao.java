@@ -34,6 +34,9 @@ public interface LimitDao {
     @Query("SELECT * FROM limits WHERE street LIKE (:streetName)")
     List<Limit> getAllByStreet(String streetName);
 
+    @Query("SELECT * FROM limits WHERE uid LIKE (:uid)")
+    LiveData<Limit> getLimitLiveData(long uid);
+
     @Insert(onConflict = REPLACE)
     long[] insertLimits(List<Limit> limits);
     @Insert(onConflict = REPLACE)

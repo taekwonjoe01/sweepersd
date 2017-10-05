@@ -91,7 +91,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     @Override
     protected void onActive() {
-        mUpdatingWatchZones = new HashMap<>();
         postUpdatedData();
 
         mWatchZoneModels = WatchZoneRepository.getInstance(mApplicationContext)
@@ -139,6 +138,10 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
         if (!preferences.getBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, false)) {
             return;
+        }
+
+        if (mUpdatingWatchZones == null) {
+            mUpdatingWatchZones = new HashMap<>();
         }
 
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();

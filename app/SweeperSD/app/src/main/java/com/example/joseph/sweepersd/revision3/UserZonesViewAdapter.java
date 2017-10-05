@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,9 +24,9 @@ import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZonePoint;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneUtils;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -41,53 +42,51 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     private final AppCompatActivity mActivity;
 
-    private final LiveData<List<WatchZoneModel>> mWatchZoneModels;
     private final WatchZoneModelUpdater mWatchZoneModelUpdater;
 
-    private List<WatchZoneModel> mWatchZoneList;
-
-    private final Map<Long, LiveData<List<LimitSchedule>>> mCachedSchedules;
+    private List<WatchZoneModel> mCurrentList;
 
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
-        mCachedSchedules = new HashMap<>();
 
-        mWatchZoneModels = WatchZoneRepository.getInstance(mActivity).getAllWatchZoneModelsLiveData();
-        mWatchZoneModels.observe(mActivity, new Observer<List<WatchZoneModel>>() {
+        WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, new Observer<WatchZoneModelRepository>() {
             @Override
-            public void onChanged(@Nullable final List<WatchZoneModel> watchZoneModels) {
-                if (watchZoneModels != null) {
-                    if (mWatchZoneList == null) {
-                        mWatchZoneList = watchZoneModels;
-                        notifyItemRangeInserted(0, mWatchZoneList.size());
+            public void onChanged(@Nullable final WatchZoneModelRepository repository) {
+                if (repository != null) {
+                    if (mCurrentList == null) {
+                        mCurrentList = repository.getValue().getWatchZoneModels();
+                        notifyItemRangeInserted(0, mCurrentList.size());
                     } else {
+                        final List<WatchZoneModel> models = repository.getValue().getWatchZoneModels();
                         DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                             @Override
                             public int getOldListSize() {
-                                return mWatchZoneList.size();
+                                return mCurrentList.size();
                             }
 
                             @Override
                             public int getNewListSize() {
-                                return watchZoneModels.size();
+                                return models.size();
                             }
 
                             @Override
                             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                                return mWatchZoneList.get(oldItemPosition).getWatchZone().getUid() ==
-                                        watchZoneModels.get(newItemPosition).getWatchZone().getUid();
+                                return mCurrentList.get(oldItemPosition).getWatchZoneUid() ==
+                                        models.get(newItemPosition).getWatchZoneUid();
                             }
 
                             @Override
                             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                                return mWatchZoneList.get(oldItemPosition).areSame(watchZoneModels.get(newItemPosition));
+                                return !mCurrentList.get(oldItemPosition).isChanged(
+                                        models.get(newItemPosition));
                             }
                         });
-                        mWatchZoneList = watchZoneModels;
+                        mCurrentList = repository.getValue().getWatchZoneModels();
+
                         result.dispatchUpdatesTo(UserZonesViewAdapter.this);
                     }
 
-                    for (WatchZoneModel model : mWatchZoneList) {
+                    /*for (WatchZoneModel model : mCurrentList) {
                         for (WatchZonePoint p : model.getWatchZonePoints()) {
                             if (p.getLimitId() > 0L && !mCachedSchedules.containsKey(p.getLimitId())) {
                                 Log.e("Joey", "Adding new cache for id " + p.getLimitId());
@@ -103,8 +102,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                                             Long limitUid = first.getLimitId();
 
                                             List<Integer> indexesThatCare = new ArrayList<>();
-                                            for (int i = 0; i < mWatchZoneList.size(); i++) {
-                                                WatchZoneModel m = mWatchZoneList.get(i);
+                                            for (int i = 0; i < mCurrentList.size(); i++) {
+                                                WatchZoneModel m = mCurrentList.get(i);
 
                                                 boolean cares = false;
                                                 for (WatchZonePoint p : m.getWatchZonePoints()) {
@@ -127,7 +126,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                                 mCachedSchedules.put(p.getLimitId(), schedules);
                             }
                         }
-                    }
+                    }*/
                 }
             }
         });
@@ -137,7 +136,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             @Override
             public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
                 for (Long uid : longIntegerMap.keySet()) {
-                    int index = mWatchZoneList.indexOf(uid);
+                    int index = mCurrentList.indexOf(uid);
                     if (index >= 0) {
                         notifyItemChanged(index);
                     }
@@ -158,7 +157,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final WatchZoneModel model = mWatchZoneList.get(position);
+        final WatchZoneModel model = mCurrentList.get(position);
         holder.mWatchZoneLabel.setText(model.getWatchZone().getLabel());
         holder.mOnClickListener = new View.OnClickListener() {
             @Override
@@ -220,7 +219,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     @Override
     public int getItemCount() {
-        return mWatchZoneList == null ? 0 : mWatchZoneList.size();
+        return mCurrentList == null ? 0 : mCurrentList.size();
     }
 
     public void createAlarm(String label, LatLng location, int radius) {

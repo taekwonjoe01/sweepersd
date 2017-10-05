@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.revision3.limit;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.text.TextUtils;
 
 @Entity(tableName = "limits")
 public class Limit {
@@ -70,5 +71,23 @@ public class Limit {
 
     public boolean isPosted() {
         return isPosted;
+    }
+
+    public boolean isChanged(Limit compareTo) {
+        boolean result = false;
+
+        if (this.uid == compareTo.getUid()) {
+            if (this.startRange != compareTo.getStartRange()) {
+                result = true;
+            } else if (this.endRange != compareTo.getEndRange()) {
+                result = true;
+            } else if (TextUtils.equals(this.street, compareTo.getStreet())) {
+                result = true;
+            } else if (TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
+                result = true;
+            }
+        }
+
+        return result;
     }
 }
