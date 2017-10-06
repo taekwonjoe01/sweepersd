@@ -55,14 +55,15 @@
                     android:layout_gravity="center"/>
 
                 <ProgressBar
-                    android:id="@+id/progress_loading"
+                    android:id="@+id/progress_updating"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:progressTint="@color/app_secondary"
                     android:secondaryProgressTint="@color/app_secondary_disabled"
                     android:progress="50"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:visibility="invisible" />
             </LinearLayout>
 
             <LinearLayout

@@ -29,8 +29,10 @@
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"/>
         <activity
-            android:name=".revision3.utils.TestActivity"
-            android:label="@string/title_activity_test">
+            android:name=".revision3.LandingActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,10 +40,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".revision3.LandingActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".revision3.utils.TestActivity"
+            android:label="@string/title_activity_test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -54,8 +54,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".revision3.WatchZoneActivity"
-            android:label="@string/title_watch_zone_activity"
+            android:name=".revision3.WatchZoneExplorerActivity"
+            android:label="@string/title_watch_zone_explorer_activity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".revision3.WatchZoneDetailsActivity"
+            android:label="@string/title_watch_zone_details_activity"
             android:screenOrientation="portrait" />
 
         <!--
@@ -69,6 +73,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
         <!--
         <activity
             android:name=".MainActivity"

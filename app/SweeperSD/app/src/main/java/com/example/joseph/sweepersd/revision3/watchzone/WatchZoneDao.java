@@ -34,6 +34,9 @@ public interface WatchZoneDao {
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
     WatchZone getWatchZone(long uid);
 
+    @Query("SELECT uid FROM watchzones")
+    List<Long> getWatchZoneUids();
+
     @Insert(onConflict = REPLACE)
     long insertWatchZone(WatchZone watchZone);
 

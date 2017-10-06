@@ -27,6 +27,8 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
     private List<LimitSchedule> mCurrentList;
     private List<LimitSchedule> mChangeToList;
 
+    private WatchZoneModel.ModelStatus mStatus;
+
     private Observer<List<LimitSchedule>> mDatabaseObserver = new Observer<List<LimitSchedule>>() {
         @Override
         public void onChanged(@Nullable final List<LimitSchedule> limitSchedules) {
@@ -36,7 +38,8 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
                     synchronized (WatchZoneLimitSchedulesModel.this) {
                         if (limitSchedules == null || limitSchedules.isEmpty()) {
                             // Invalid values for this LiveData. Notify observers that this data is invalid.
-                            postValue(null);
+                            mStatus = WatchZoneModel.ModelStatus.INVALID;
+                            postValue(WatchZoneLimitSchedulesModel.this);
                         } else {
                             if (mLimitSchedulesMap == null) {
                                 mLimitSchedulesMap = new HashMap<>();
@@ -69,6 +72,9 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
                             mChangeToList = limitSchedules;
                             result.dispatchUpdatesTo(WatchZoneLimitSchedulesModel.this);
                             mCurrentList = limitSchedules;
+
+                            mStatus = WatchZoneModel.ModelStatus.LOADED;
+                            postValue(WatchZoneLimitSchedulesModel.this);
                         }
                     }
                 }
@@ -80,6 +86,9 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
         mApplicationContext = context.getApplicationContext();
         mHandler = handler;
         mLimitUid = limitUid;
+
+        mStatus = WatchZoneModel.ModelStatus.LOADING;
+        setValue(this);
     }
 
     public synchronized Long getLimitUid() {
@@ -87,11 +96,15 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
     }
 
     public synchronized LimitSchedule getLimitScheduleForLimitScheduleUid(Long limitScheduleUid) {
-        return getValue() == null ? null : mLimitSchedulesMap.get(limitScheduleUid);
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mLimitSchedulesMap.get(limitScheduleUid);
     }
 
     public synchronized List<LimitSchedule> getScheduleList() {
-        return getValue() == null ? null : mCurrentList;
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mCurrentList;
+    }
+
+    public synchronized WatchZoneModel.ModelStatus getStatus() {
+        return mStatus;
     }
 
     public synchronized boolean isChanged(WatchZoneLimitSchedulesModel compareTo) {
@@ -137,7 +150,6 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
             LimitSchedule changedSchedule = mChangeToList.get(i + position);
             schedules.put(changedSchedule.getUid(), changedSchedule);
         }
-        postValue(this);
     }
 
     @Override
@@ -147,7 +159,6 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
             LimitSchedule insertedSchedule = mChangeToList.get(i + position);
             schedules.put(insertedSchedule.getUid(), insertedSchedule);
         }
-        postValue(this);
     }
 
     @Override
@@ -162,6 +173,5 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
             LimitSchedule removedSchedule = mCurrentList.get(i + position);
             schedules.remove(removedSchedule.getUid());
         }
-        postValue(this);
     }
 }

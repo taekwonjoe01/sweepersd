@@ -26,9 +26,14 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
 
     private WatchZoneRepository(Context context) {
         mApplicationContext = context.getApplicationContext();
-
-        mCachedWatchZoneLiveDataList = loadWatchZonesFromDb();
         mCachedWatchZoneLiveDataMap = new HashMap<>();
+
+        List<Long> watchZoneUids = loadWatchZoneUidsFromDb();
+        for (Long uid : watchZoneUids) {
+            mCachedWatchZoneLiveDataMap.put(uid, null);
+        }
+
+        mCachedWatchZoneLiveDataList = loadWatchZonesLiveDataFromDb();
     }
 
     public synchronized static WatchZoneRepository getInstance(Context context) {
@@ -47,13 +52,18 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         }
     }
 
+    public synchronized List<Long> getWatchZoneUids() {
+        return new ArrayList<>(mCachedWatchZoneLiveDataMap.keySet());
+    }
+
     public synchronized LiveData<List<WatchZone>> getWatchZonesLiveData() {
         return mCachedWatchZoneLiveDataList;
     }
 
     public synchronized LiveData<WatchZone> getWatchZoneLiveData(Long watchZoneUid) {
-        if (!mCachedWatchZoneLiveDataMap.containsKey(watchZoneUid)) {
-            mCachedWatchZoneLiveDataMap.put(watchZoneUid, loadWatchZoneFromDb(watchZoneUid));
+        if (!mCachedWatchZoneLiveDataMap.containsKey(watchZoneUid) ||
+                mCachedWatchZoneLiveDataMap.get(watchZoneUid) == null) {
+            mCachedWatchZoneLiveDataMap.put(watchZoneUid, loadWatchZoneLiveDataFromDb(watchZoneUid));
         }
 
         return mCachedWatchZoneLiveDataMap.get(watchZoneUid);
@@ -197,22 +207,28 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         return result;
     }
 
-    private LiveData<List<WatchZone>> loadWatchZonesFromDb() {
+    private LiveData<List<WatchZone>> loadWatchZonesLiveDataFromDb() {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getAllWatchZonesLiveData();
     }
 
-    private LiveData<WatchZone> loadWatchZoneFromDb(Long watchZoneUid) {
+    private LiveData<WatchZone> loadWatchZoneLiveDataFromDb(Long watchZoneUid) {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getWatchZoneLiveData(watchZoneUid);
     }
 
-    private LiveData<List<WatchZonePoint>> loadWatchZonePointsFromDb(WatchZone watchZone) {
+    private LiveData<List<WatchZonePoint>> loadWatchZonePointsLiveDataFromDb(WatchZone watchZone) {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getWatchZonePointsLiveData(watchZone.getUid());
+    }
+
+    private List<Long> loadWatchZoneUidsFromDb() {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+
+        return watchZoneDao.getWatchZoneUids();
     }
 
     private void scheduleUpdateJob() {

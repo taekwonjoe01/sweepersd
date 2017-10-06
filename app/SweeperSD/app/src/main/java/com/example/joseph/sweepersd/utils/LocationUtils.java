@@ -142,7 +142,7 @@ public class LocationUtils {
             result = "";
             if (!addresses.isEmpty()) {
                 Address first = addresses.get(0);
-                for (int i = 0; i < first.getMaxAddressLineIndex(); i++) {
+                for (int i = 0; i <= first.getMaxAddressLineIndex(); i++) {
                     result += first.getAddressLine(i) + ",";
                 }
                 result = result.toLowerCase();

@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,12 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
         NOT_CREATED,
         OUT_OF_DATE,
         VALID
+    }
+
+    enum ModelStatus {
+        LOADING,
+        INVALID,
+        LOADED
     }
 
     private Observer<WatchZone> mWatchZoneDatabaseObserver = new Observer<WatchZone>() {
@@ -69,16 +76,19 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                 @Override
                 public void run() {
                     synchronized (WatchZoneModel.this) {
-                        if (watchZonePointsModel == null) {
+                        ModelStatus modelStatus = watchZonePointsModel.getStatus();
+                        if (modelStatus == ModelStatus.INVALID) {
                             // Invalid value for this LiveData. Notify observers by setting self to
                             // null.
                             mStatus = Status.INVALID_NO_WATCH_ZONE_POINTS;
                             postValue(WatchZoneModel.this);
-                        } else {
-                            setUpWatchZoneLimitModels();
-
-                            // If we're not waiting on any LimitModels to load, we're done!
-                            if (mWatchZoneLimitModelMap.isEmpty()) {
+                        } else if (modelStatus == ModelStatus.LOADED) {
+                            updateWatchZoneLimitModels();
+                            if (!isWatchZoneCreated()) {
+                                mStatus = Status.NOT_CREATED;
+                                postValue(WatchZoneModel.this);
+                            } else if (mWatchZoneLimitModelMap.isEmpty()) {
+                                mStatus = Status.VALID;
                                 postValue(WatchZoneModel.this);
                             }
                         }
@@ -95,15 +105,16 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                 @Override
                 public void run() {
                     synchronized (WatchZoneModel.this) {
-                        if (watchZoneLimitModel == null) {
+                        ModelStatus modelStatus = watchZoneLimitModel.getStatus();
+                        if (modelStatus == ModelStatus.INVALID) {
                             // Invalid value for this LiveData. Notify observers by setting self to
                             // null.
                             mStatus = Status.INVALID_LIMIT;
                             postValue(WatchZoneModel.this);
-                        } else {
+                        } else if (modelStatus == ModelStatus.LOADED){
                             boolean done = true;
                             for (Long limitUid : mWatchZoneLimitModelMap.keySet()) {
-                                if (mWatchZoneLimitModelMap.get(limitUid).getValue() == null) {
+                                if (mWatchZoneLimitModelMap.get(limitUid).getStatus() == ModelStatus.LOADING) {
                                     done = false;
                                 }
                             }
@@ -147,14 +158,15 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
         mWatchZonePointsModel = new WatchZonePointsModel(mApplicationContext, mHandler, mWatchZoneUid);
         mWatchZoneLimitModelMap = new HashMap<>();
         mStatus = Status.LOADING;
+        setValue(this);
     }
 
     public synchronized WatchZone getWatchZone() {
-        return getValue() == null ? null : mWatchZone;
+        return mWatchZone;
     }
 
     public synchronized WatchZonePointsModel getWatchZonePointsModel() {
-        return getValue() == null ? null : mWatchZonePointsModel.getValue();
+        return mWatchZonePointsModel.getValue();
     }
 
     public synchronized Long getWatchZoneUid() {
@@ -162,11 +174,11 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     }
 
     public synchronized Set<Long> getWatchZoneLimitModelUids() {
-        return getValue() == null ? null : mWatchZoneLimitModelMap.keySet();
+        return mWatchZoneLimitModelMap.keySet();
     }
 
     public synchronized WatchZoneLimitModel getWatchZoneLimitModel(Long limitUid) {
-        return getValue() == null ? null : mWatchZoneLimitModelMap.get(limitUid).getValue();
+        return mWatchZoneLimitModelMap.get(limitUid).getValue();
     }
 
     public synchronized Status getStatus() {
@@ -219,8 +231,8 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                 .observeForever(mWatchZoneDatabaseObserver);
         if (mWatchZone != null) {
             mWatchZonePointsModel.observeForever(mWatchZonePointsObserver);
-            if (mWatchZonePointsModel.getValue() != null) {
-                setUpWatchZoneLimitModels();
+            if (mWatchZonePointsModel.getStatus() != ModelStatus.INVALID) {
+                updateWatchZoneLimitModels();
             }
         }
     }
@@ -240,17 +252,41 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
         }
     }
 
-    private void setUpWatchZoneLimitModels() {
+    private boolean isWatchZoneCreated() {
+        for (WatchZonePoint point : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
+            if (point.getAddress() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void updateWatchZoneLimitModels() {
         // Get the unique LimitUid's
         List<Long> uniqueLimitUids = new ArrayList<>();
         for (WatchZonePoint p : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
+            //Log.e("Joey", "Address " + p.getAddress() + " and limitId " + p.getLimitId());
             if (!uniqueLimitUids.contains(p.getLimitId()) &&
                     p.getLimitId() != 0L) {
                 uniqueLimitUids.add(p.getLimitId());
             }
         }
-        if (!uniqueLimitUids.isEmpty()) {
-            for (Long limitId : uniqueLimitUids) {
+        Set<Long> existingLimitUids = mWatchZoneLimitModelMap.keySet();
+        List<Long> limitsToRemove = new ArrayList<>();
+        for (Long existingUid : existingLimitUids) {
+            if (!uniqueLimitUids.contains(existingUid)) {
+                limitsToRemove.add(existingUid);
+            }
+        }
+
+        for (Long toRemoveUid : limitsToRemove) {
+            WatchZoneLimitModel model = mWatchZoneLimitModelMap.get(toRemoveUid);
+            model.removeObserver(mWatchZoneLimitModelObserver);
+            mWatchZoneLimitModelMap.remove(toRemoveUid);
+        }
+
+        for (Long limitId : uniqueLimitUids) {
+            if (!mWatchZoneLimitModelMap.containsKey(limitId)) {
                 WatchZoneLimitModel model = new WatchZoneLimitModel(
                         mApplicationContext, mHandler, limitId);
                 mWatchZoneLimitModelMap.put(limitId, model);

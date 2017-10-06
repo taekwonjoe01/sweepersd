@@ -19,7 +19,6 @@ import android.widget.Toast;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity;
-import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewItemDecoration;
 import com.google.android.gms.maps.model.LatLng;
 
 public class UserZonesActivity extends AppCompatActivity implements
@@ -48,7 +47,7 @@ public class UserZonesActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 Toast.makeText(UserZonesActivity.this, "Add", Toast.LENGTH_SHORT).show();
                 startActivityForResult(
-                        new Intent(UserZonesActivity.this, WatchZoneActivity.class),
+                        new Intent(UserZonesActivity.this, WatchZoneExplorerActivity.class),
                         CREATE_ALARM_CODE);
             }
         });

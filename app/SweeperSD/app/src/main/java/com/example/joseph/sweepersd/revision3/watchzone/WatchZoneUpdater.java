@@ -81,7 +81,7 @@ class WatchZoneUpdater {
             limitHash.put(l.getStreet(), list);
         }
 
-        final List<WatchZonePoint> watchZonePoints = mModel.getWatchZonePoints();
+        final List<WatchZonePoint> watchZonePoints = mModel.getWatchZonePointsModel().getWatchZonePointsList();
 
         mProgress = new UpdateProgress(0, UpdateProgress.Status.UPDATING);
         publishProgress(mProgress);

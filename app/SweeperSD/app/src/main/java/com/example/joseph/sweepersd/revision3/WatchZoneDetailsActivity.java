@@ -1,7 +1,8 @@
 package com.example.joseph.sweepersd.revision3;
 
-import android.os.AsyncTask;
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,40 +11,41 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.LinearLayout;
 
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.model.watchzone.WatchZone;
-import com.example.joseph.sweepersd.model.watchzone.WatchZoneManager;
-import com.example.joseph.sweepersd.presentation.manualalarms.LimitViewAdapter2;
-import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewItemDecoration;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.commons.lang3.text.WordUtils;
 
-public class UserZoneDetailsActivity extends AppCompatActivity implements
+public class WatchZoneDetailsActivity extends AppCompatActivity implements
         OnMapReadyCallback {
-    private static final String TAG = UserZoneDetailsActivity.class.getSimpleName();
+    private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
     public static final String KEY_WATCHZONE_ID = "KEY_WATCHZONE_ID";
 
     private Long mWatchZoneId;
     private WatchZone mBriefWatchZone;
     private WatchZone mWatchZone;
 
-    private WatchZoneManager mWatchZoneManager;
     private RecyclerView mRecyclerView;
-    private LimitViewAdapter2 mAdapter;
+    //private LimitViewAdapter2 mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private WatchZoneViewItemDecoration mLimitViewItemDecoration;
 
     private LinearLayout mLoadingGroup;
 
     private GoogleMap mMap;
+
+    private WatchZoneModel mWatchZoneModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +61,22 @@ public class UserZoneDetailsActivity extends AppCompatActivity implements
             Log.e(TAG, "INVALID WATCH ZONE ID, FINISHING ACTIVITY");
             finish();
         }
-        mWatchZoneManager = new WatchZoneManager(this);
-        mWatchZoneManager.addWatchZoneChangeListener(mWatchZoneChangeListener);
+        WatchZoneModelRepository.getInstance(this).observe(this, new Observer<WatchZoneModelRepository>() {
+            @Override
+            public void onChanged(@Nullable WatchZoneModelRepository repository) {
+                if (!WatchZoneModelRepository.getInstance(WatchZoneDetailsActivity.this)
+                        .watchZoneExists(mWatchZoneId)) {
+                    finish();
+                } else {
+                    boolean showWatchZoneOnMap = mWatchZoneModel == null;
+                    mWatchZoneModel = repository.getWatchZoneModel(mWatchZoneId);
+                    if (showWatchZoneOnMap) {
+                        showWatchZoneOnMap();
+                    }
+                    invalidateUi();
+                }
+            }
+        });
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,16 +101,7 @@ public class UserZoneDetailsActivity extends AppCompatActivity implements
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
 
-        mBriefWatchZone = mWatchZoneManager.getWatchZoneBrief(mWatchZoneId);
-
-        setTitle(WordUtils.capitalize(mBriefWatchZone.getLabel()));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        new LoadWatchZoneTask().execute();
+        setTitle(WordUtils.capitalize("Loading Zone"));
     }
 
     @Override
@@ -107,42 +114,33 @@ public class UserZoneDetailsActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                mWatchZoneManager.deleteWatchZone(mWatchZoneId);
-                finish();
+                WatchZoneRepository.getInstance(this).deleteWatchZone(mWatchZoneId);
                 return true;
         }
         return false;
     }
 
-    private class LoadWatchZoneTask extends AsyncTask<Void, Long, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            mWatchZone = mWatchZoneManager.getWatchZoneComplete(mWatchZoneId);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            setAdapter();
-
-            mLoadingGroup.setVisibility(View.GONE);
-        }
-    }
-
     private void setAdapter() {
-        mAdapter = new LimitViewAdapter2(this, mWatchZone.getSweepingAddresses());
-        mRecyclerView.setAdapter(mAdapter);
+        //mAdapter = new LimitViewAdapter2(this, mWatchZone.getSweepingAddresses());
+        //mRecyclerView.setAdapter(mAdapter);
     }
 
-    private WatchZoneManager.WatchZoneChangeListener mWatchZoneChangeListener =
+    private void invalidateUi() {
+        if (mWatchZoneModel != null) {
+            WatchZone watchZone = mWatchZoneModel.getWatchZone();
+            if (watchZone != null) {
+                setTitle(WordUtils.capitalize(watchZone.getLabel()));
+            }
+        }
+    }
+
+    /*private WatchZoneManager.WatchZoneChangeListener mWatchZoneChangeListener =
             new WatchZoneManager.WatchZoneChangeListener() {
         @Override
         public void onWatchZoneUpdated(long createdTimestamp) {
             Log.d(TAG, "onWatchZoneUpdated " + createdTimestamp);
 
-            /*for (WatchZonePresenter p : mWatchZonePresenters) {
+            for (WatchZonePresenter p : mWatchZonePresenters) {
                 if (p.watchZoneTimestamp == createdTimestamp) {
                     if (mWatchZoneManager.getUpdatingWatchZones().contains(createdTimestamp)) {
                         UpdatingPresenter presenter = new UpdatingPresenter(
@@ -157,23 +155,23 @@ public class UserZoneDetailsActivity extends AppCompatActivity implements
                     }
                     notifyItemChanged(p.position);
                 }
-            }*/
+            }
         }
 
         @Override
         public void onWatchZoneCreated(long createdTimestamp) {
             Log.d(TAG, "onWatchZoneCreated " + createdTimestamp);
-            /*UpdatingPresenter presenter = new UpdatingPresenter(
+            UpdatingPresenter presenter = new UpdatingPresenter(
                     mWatchZonePresenters.size(), createdTimestamp);
             mWatchZonePresenters.add(presenter);
 
-            notifyDataSetChanged();*/
+            notifyDataSetChanged();
         }
 
         @Override
         public void onWatchZoneDeleted(long createdTimestamp) {
             Log.d(TAG, "onWatchZoneDeleted " + createdTimestamp);
-            /*int position = -1;
+            int position = -1;
             for (int i = 0; i < mWatchZonePresenters.size(); i++) {
                 WatchZonePresenter p = mWatchZonePresenters.get(i);
                 Log.d(TAG, "timestamp: " + p.watchZoneTimestamp);
@@ -189,9 +187,9 @@ public class UserZoneDetailsActivity extends AppCompatActivity implements
                     mWatchZonePresenters.get(i).position--;
                 }
                 notifyItemRemoved(position);
-            }*/
+            }
         }
-    };
+    };*/
 
     /**
      * Manipulates the map once available.
@@ -205,17 +203,23 @@ public class UserZoneDetailsActivity extends AppCompatActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        setMap();
+        showWatchZoneOnMap();
     }
 
-    private void setMap() {
-        mMap.clear();
+    private void showWatchZoneOnMap() {
+        if (mWatchZoneModel != null && mMap != null) {
+            WatchZone watchZone = mWatchZoneModel.getWatchZone();
+            if (watchZone != null) {
+                LatLng center = new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude());
+                mMap.clear();
 
-        mMap.addCircle(new CircleOptions()
-                .center(mBriefWatchZone.getCenter())
-                .radius(mBriefWatchZone.getRadius())
-                .strokeColor(getResources().getColor(R.color.app_primary))
-                .fillColor(getResources().getColor(R.color.map_radius_fill)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mBriefWatchZone.getCenter(), 15f));
+                mMap.addCircle(new CircleOptions()
+                        .center(center)
+                        .radius(watchZone.getRadius())
+                        .strokeColor(getResources().getColor(R.color.app_primary))
+                        .fillColor(getResources().getColor(R.color.map_radius_fill)));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 15f));
+            }
+        }
     }
 }

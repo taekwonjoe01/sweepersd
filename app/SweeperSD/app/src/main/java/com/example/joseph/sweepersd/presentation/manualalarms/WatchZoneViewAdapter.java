@@ -404,7 +404,7 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             mAlarmNextSweeping = (TextView) v.findViewById(R.id.textview_next_sweeping);
             mLoadingGroup = (LinearLayout) v.findViewById(R.id.watchzone_loading_group);
             mDetailsGroup = (LinearLayout) v.findViewById(R.id.watchzone_details_group);
-            mLoadingProgress = (ProgressBar) v.findViewById(R.id.progress_loading);
+            mLoadingProgress = (ProgressBar) v.findViewById(R.id.progress_updating);
             mViewLayout = (FrameLayout) v.findViewById(R.id.list_item_layout);
 
             mViewLayout.setOnClickListener(this);

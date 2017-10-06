@@ -134,17 +134,22 @@ public class LocationUtils {
 
     public static String getAddressForLatLnt(Context context, LatLng latLng) {
         String result = null;
+        //Log.e("Joey", "GetAddressForLatLng");
         List<Address> addresses = getAddressesForLatLng(context, latLng);
         if (addresses != null) {
             result = "";
             if (!addresses.isEmpty()) {
+                //Log.e("Joey", "Address.toString(): " + addresses);
                 Address first = addresses.get(0);
-                for (int i = 0; i < first.getMaxAddressLineIndex(); i++) {
+                //Log.e("Joey", "first.toString(): " + first);
+                //Log.e("Joey", "first.getMaxAddressLineIndex(): " + first.getMaxAddressLineIndex());
+                for (int i = 0; i <= first.getMaxAddressLineIndex(); i++) {
                     result += first.getAddressLine(i) + ",";
                 }
                 result = result.toLowerCase();
             }
         }
+        Log.e("Joey", "returning " + result);
         return result;
     }
 
@@ -274,10 +279,13 @@ public class LocationUtils {
         Log.d(TAG, "houseNumber: " + houseNumber + " - Street: " + street);
 
         Limit result = null;
-        for (Limit l : limitsHash.get(street)) {
-            if (street.contains(l.getStreet())) {
-                if (houseNumber >= l.getStartRange() && houseNumber <= l.getEndRange()) {
-                    result = l;
+        List<Limit> limitsForStreet = limitsHash.get(street);
+        if (limitsForStreet != null) {
+            for (Limit l : limitsHash.get(street)) {
+                if (street.contains(l.getStreet())) {
+                    if (houseNumber >= l.getStartRange() && houseNumber <= l.getEndRange()) {
+                        result = l;
+                    }
                 }
             }
         }

@@ -25,6 +25,7 @@ import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.model.limits.Limit;
 import com.example.joseph.sweepersd.model.limits.LimitDbHelper;
 import com.example.joseph.sweepersd.model.watchzone.SweepingAddress;
+import com.example.joseph.sweepersd.revision3.WatchZoneViewItemDecoration;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -69,7 +70,7 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_watch_zone);
+        setContentView(R.layout.activity_watch_zone_explorer);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -119,7 +120,7 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
         setTitle(WordUtils.capitalize("Create Watch Zone"));
     }
 
-    @Override
+    /*@Override
      public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_activity_create_watch_zone, menu);
         return true;
@@ -133,7 +134,7 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
                 return true;
         }
         return false;
-    }
+    }*/
 
     @Override
     protected void onResume() {

@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.presentation.manualalarms;
+package com.example.joseph.sweepersd.revision3;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;

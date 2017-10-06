@@ -17,6 +17,8 @@ public class WatchZoneLimitModel extends LiveData<WatchZoneLimitModel> {
 
     private Limit mLimit;
 
+    private WatchZoneModel.ModelStatus mStatus;
+
     private Observer<Limit> mLimitDatabaseObserver = new Observer<Limit>() {
         @Override
         public void onChanged(@Nullable final Limit limit) {
@@ -27,7 +29,8 @@ public class WatchZoneLimitModel extends LiveData<WatchZoneLimitModel> {
                         if (limit == null) {
                             // Invalid value for this LiveData. Notify observers by setting self to
                             // null.
-                            postValue(null);
+                            mStatus = WatchZoneModel.ModelStatus.INVALID;
+                            postValue(WatchZoneLimitModel.this);
                         } else {
                             if (mLimit == null) {
                                 mSchedulesModel.observeForever(mSchedulesObserver);
@@ -47,11 +50,14 @@ public class WatchZoneLimitModel extends LiveData<WatchZoneLimitModel> {
                 @Override
                 public void run() {
                     synchronized (WatchZoneLimitModel.this) {
-                        if (limitSchedulesModel == null) {
+                        WatchZoneModel.ModelStatus limitSchedulesModelStatus = limitSchedulesModel.getStatus();
+                        if (limitSchedulesModelStatus == WatchZoneModel.ModelStatus.INVALID) {
                             // Invalid value for this LiveData. Notify observers by setting self to
                             // null.
-                            postValue(null);
-                        } else {
+                            mStatus = WatchZoneModel.ModelStatus.INVALID;
+                            postValue(WatchZoneLimitModel.this);
+                        } else if (limitSchedulesModelStatus == WatchZoneModel.ModelStatus.LOADED) {
+                            mStatus = WatchZoneModel.ModelStatus.LOADED;
                             postValue(WatchZoneLimitModel.this);
                         }
                     }
@@ -65,6 +71,9 @@ public class WatchZoneLimitModel extends LiveData<WatchZoneLimitModel> {
         mHandler = handler;
         mLimitUid = limitUid;
         mSchedulesModel = new WatchZoneLimitSchedulesModel(mApplicationContext, mHandler, mLimitUid);
+
+        mStatus = WatchZoneModel.ModelStatus.LOADING;
+        setValue(this);
     }
 
     public synchronized Long getLimitUid() {
@@ -72,11 +81,15 @@ public class WatchZoneLimitModel extends LiveData<WatchZoneLimitModel> {
     }
 
     public synchronized Limit getLimit() {
-        return getValue() == null ? null : mLimit;
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mLimit;
     }
 
     public synchronized WatchZoneLimitSchedulesModel getLimitSchedulesModel() {
-        return getValue() == null ? null : mSchedulesModel.getValue();
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mSchedulesModel.getValue();
+    }
+
+    public synchronized WatchZoneModel.ModelStatus getStatus() {
+        return mStatus;
     }
 
     public synchronized boolean isChanged(WatchZoneLimitModel compareTo) {

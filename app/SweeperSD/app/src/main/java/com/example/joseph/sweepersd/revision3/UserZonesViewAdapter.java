@@ -1,6 +1,5 @@
 package com.example.joseph.sweepersd.revision3;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,18 +19,18 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelUpdater;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZonePoint;
 import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneUtils;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,81 +50,37 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, new Observer<WatchZoneModelRepository>() {
             @Override
             public void onChanged(@Nullable final WatchZoneModelRepository repository) {
-                if (repository != null) {
-                    if (mCurrentList == null) {
-                        mCurrentList = repository.getValue().getWatchZoneModels();
-                        notifyItemRangeInserted(0, mCurrentList.size());
-                    } else {
-                        final List<WatchZoneModel> models = repository.getValue().getWatchZoneModels();
-                        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                            @Override
-                            public int getOldListSize() {
-                                return mCurrentList.size();
-                            }
-
-                            @Override
-                            public int getNewListSize() {
-                                return models.size();
-                            }
-
-                            @Override
-                            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                                return mCurrentList.get(oldItemPosition).getWatchZoneUid() ==
-                                        models.get(newItemPosition).getWatchZoneUid();
-                            }
-
-                            @Override
-                            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                                return !mCurrentList.get(oldItemPosition).isChanged(
-                                        models.get(newItemPosition));
-                            }
-                        });
-                        mCurrentList = repository.getValue().getWatchZoneModels();
-
-                        result.dispatchUpdatesTo(UserZonesViewAdapter.this);
-                    }
-
-                    /*for (WatchZoneModel model : mCurrentList) {
-                        for (WatchZonePoint p : model.getWatchZonePoints()) {
-                            if (p.getLimitId() > 0L && !mCachedSchedules.containsKey(p.getLimitId())) {
-                                Log.e("Joey", "Adding new cache for id " + p.getLimitId());
-                                LiveData<List<LimitSchedule>> schedules =
-                                        LimitRepository.getInstance(mActivity)
-                                                .getLimitSchedulesLiveData(p.getLimitId());
-                                schedules.observe(mActivity, new Observer<List<LimitSchedule>>() {
-                                    @Override
-                                    public void onChanged(@Nullable List<LimitSchedule> limitSchedules) {
-                                        Log.e("Joey", "onChanged");
-                                        if (limitSchedules != null && !limitSchedules.isEmpty()) {
-                                            LimitSchedule first = limitSchedules.get(0);
-                                            Long limitUid = first.getLimitId();
-
-                                            List<Integer> indexesThatCare = new ArrayList<>();
-                                            for (int i = 0; i < mCurrentList.size(); i++) {
-                                                WatchZoneModel m = mCurrentList.get(i);
-
-                                                boolean cares = false;
-                                                for (WatchZonePoint p : m.getWatchZonePoints()) {
-                                                    if (p.getLimitId() == limitUid) {
-                                                        cares = true;
-                                                    }
-                                                }
-
-                                                if (cares) {
-                                                    indexesThatCare.add(i);
-                                                }
-                                            }
-
-                                            for (Integer index : indexesThatCare) {
-                                                notifyItemChanged(index);
-                                            }
-                                        }
-                                    }
-                                });
-                                mCachedSchedules.put(p.getLimitId(), schedules);
-                            }
+                if (mCurrentList == null) {
+                    mCurrentList = repository.getValue().getWatchZoneModels();
+                    notifyItemRangeInserted(0, mCurrentList.size());
+                } else {
+                    final List<WatchZoneModel> models = repository.getValue().getWatchZoneModels();
+                    DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                        @Override
+                        public int getOldListSize() {
+                            return mCurrentList.size();
                         }
-                    }*/
+
+                        @Override
+                        public int getNewListSize() {
+                            return models.size();
+                        }
+
+                        @Override
+                        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                            return mCurrentList.get(oldItemPosition).getWatchZoneUid() ==
+                                    models.get(newItemPosition).getWatchZoneUid();
+                        }
+
+                        @Override
+                        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                            return !mCurrentList.get(oldItemPosition).isChanged(
+                                    models.get(newItemPosition));
+                        }
+                    });
+                    mCurrentList = repository.getValue().getWatchZoneModels();
+
+                    result.dispatchUpdatesTo(UserZonesViewAdapter.this);
                 }
             }
         });
@@ -158,63 +112,75 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final WatchZoneModel model = mCurrentList.get(position);
-        holder.mWatchZoneLabel.setText(model.getWatchZone().getLabel());
-        holder.mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO
-                Intent intent = new Intent(mActivity, UserZoneDetailsActivity.class);
-                Bundle b = new Bundle();
-                b.putLong(UserZoneDetailsActivity.KEY_WATCHZONE_ID, model.getWatchZone().getUid());
-                intent.putExtras(b);
-                mActivity.startActivity(intent);
-            }
-        };
+        WatchZoneModel.Status modelStatus = model.getStatus();
+        String label = modelStatus.toString();
+        if (modelStatus == WatchZoneModel.Status.INVALID_NO_WATCH_ZONE) {
+            // TODO - This watch Zone doesn't exist and this should not happen!
+        } else {
+            WatchZone watchZone = model.getWatchZone();
+            if (watchZone != null) {
+                label = watchZone.getLabel() + " - " + label;
 
-        Map<Long, Integer> progressMap = mWatchZoneModelUpdater.getValue();
-        if (progressMap != null) {
-            Integer progress = progressMap.get(model.getWatchZone().getUid());
-            if (progress != null) {
-                holder.mDetailsGroup.setVisibility(View.GONE);
-                holder.mLoadingGroup.setVisibility(View.VISIBLE);
-                holder.mLoadingProgress.setProgress(progress);
-                return;
-            }
-        }
-        holder.mDetailsGroup.setVisibility(View.VISIBLE);
-        holder.mLoadingGroup.setVisibility(View.INVISIBLE);
-        List<WatchZonePoint> points = model.getWatchZonePoints();
+                holder.mOnClickListener = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(mActivity, WatchZoneDetailsActivity.class);
+                        Bundle b = new Bundle();
+                        b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, model.getWatchZoneUid());
+                        intent.putExtras(b);
+                        mActivity.startActivity(intent);
+                    }
+                };
 
-        if (model.getStatus() == WatchZoneModel.WatchZoneStatus.VALID) {
-            List<LimitSchedule> allLimitsSchedules = new ArrayList<>();
-            boolean fullyLoaded = true;
-            List<Long> uniqueIds = WatchZoneUtils.getUniqueLimitIds(model.getWatchZonePoints());
-            for (Long uid : uniqueIds) {
-                if (uid > 0L) {
-                    List<LimitSchedule> schedulesForId = mCachedSchedules.get(uid).getValue();
-                    if (schedulesForId == null) {
-                        fullyLoaded = false;
-                        break;
-                    }
-                    allLimitsSchedules.addAll(schedulesForId);
-                }
-            }
-            if (fullyLoaded) {
-                long nextSweepingTime = WatchZoneUtils.getNextSweepingTime(allLimitsSchedules);
-                if (nextSweepingTime >= 0) {
-                    String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
-                    if (nextSweepingTime != 0) {
-                        SimpleDateFormat format = new SimpleDateFormat("EEE, MMM dd");
-                        dateString = format.format(nextSweepingTime);
-                    }
-                    holder.mAlarmNextSweeping.setText(dateString);
+                if (modelStatus == WatchZoneModel.Status.LOADING) {
+                    holder.mDetailsGroup.setVisibility(View.GONE);
+                    holder.mLoadingGroup.setVisibility(View.VISIBLE);
+                    holder.mUpdatingProgress.setVisibility(View.GONE);
                 } else {
-                    holder.mAlarmNextSweeping.setText("Unknown");
+                    // Any status could be being updated by the WatchZoneModelUpdater...
+                    Map<Long, Integer> progressMap = mWatchZoneModelUpdater.getValue();
+                    Integer progress = null;
+                    if (progressMap != null) {
+                        progress = progressMap.get(model.getWatchZone().getUid());
+                    }
+
+                    if (progress != null) {
+                        holder.mDetailsGroup.setVisibility(View.GONE);
+                        holder.mLoadingGroup.setVisibility(View.VISIBLE);
+                        holder.mUpdatingProgress.setVisibility(View.VISIBLE);
+                        holder.mUpdatingProgress.setProgress(progress);
+                    } else {
+                        holder.mUpdatingProgress.setProgress(0);
+                        holder.mLoadingGroup.setVisibility(View.INVISIBLE);
+
+                        if (model.getStatus() == WatchZoneModel.Status.VALID) {
+                            holder.mDetailsGroup.setVisibility(View.VISIBLE);
+
+                            // Get all LimitSchedules to determine sweeping dates
+                            List<LimitSchedule> allLimitSchedules = new ArrayList<>();
+                            Log.e("Joey", " keySet.size " + model.getWatchZoneLimitModelUids().size());
+                            for (Long uniqueLimitUid : model.getWatchZoneLimitModelUids()) {
+                                allLimitSchedules.addAll(
+                                        model.getWatchZoneLimitModel(uniqueLimitUid)
+                                                .getLimitSchedulesModel().getScheduleList());
+                            }
+
+                            long nextSweepingTime = WatchZoneUtils.getNextSweepingTime(allLimitSchedules);
+                            Log.e("Joey", "next Sweeping Time: " + nextSweepingTime
+                                    + " allLimitSchedules.size " + allLimitSchedules.size());
+                            String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
+                            if (nextSweepingTime != 0) {
+                                SimpleDateFormat format = new SimpleDateFormat("EEE, MMM dd");
+                                dateString = format.format(nextSweepingTime);
+                            }
+                            holder.mAlarmNextSweeping.setText(dateString);
+                        }
+                    }
                 }
-            } else {
-                holder.mAlarmNextSweeping.setText("Checking...");
             }
         }
+        holder.mWatchZoneLabel.setText(WordUtils.capitalize(label));
+
     }
 
     @Override
@@ -238,7 +204,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         public TextView mAlarmNextSweeping;
         public LinearLayout mLoadingGroup;
         public LinearLayout mDetailsGroup;
-        public ProgressBar mLoadingProgress;
+        public ProgressBar mUpdatingProgress;
         private FrameLayout mViewLayout;
         public View.OnLongClickListener mLongClickListener;
         public View.OnClickListener mOnClickListener;
@@ -255,7 +221,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             mAlarmNextSweeping = (TextView) v.findViewById(R.id.textview_next_sweeping);
             mLoadingGroup = (LinearLayout) v.findViewById(R.id.watchzone_loading_group);
             mDetailsGroup = (LinearLayout) v.findViewById(R.id.watchzone_details_group);
-            mLoadingProgress = (ProgressBar) v.findViewById(R.id.progress_loading);
+            mUpdatingProgress = (ProgressBar) v.findViewById(R.id.progress_updating);
             mViewLayout = (FrameLayout) v.findViewById(R.id.list_item_layout);
 
             mViewLayout.setOnClickListener(this);

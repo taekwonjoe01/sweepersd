@@ -24,6 +24,8 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
     private List<WatchZonePoint> mCurrentList;
     private List<WatchZonePoint> mChangeToList;
 
+    private WatchZoneModel.ModelStatus mStatus;
+
     private Observer<List<WatchZonePoint>> mDatabaseObserver = new Observer<List<WatchZonePoint>>() {
         @Override
         public void onChanged(@Nullable final List<WatchZonePoint> watchZonePoints) {
@@ -33,7 +35,8 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
                     synchronized (WatchZonePointsModel.this) {
                         if (watchZonePoints == null || watchZonePoints.isEmpty()) {
                             // Invalid values for this LiveData. Notify observers that this data is invalid.
-                            postValue(null);
+                            mStatus = WatchZoneModel.ModelStatus.INVALID;
+                            postValue(WatchZonePointsModel.this);
                         } else {
                             if (mWatchZonePointsMap == null) {
                                 mWatchZonePointsMap = new HashMap<>();
@@ -66,6 +69,9 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
                             mChangeToList = watchZonePoints;
                             result.dispatchUpdatesTo(WatchZonePointsModel.this);
                             mCurrentList = watchZonePoints;
+
+                            mStatus = WatchZoneModel.ModelStatus.LOADED;
+                            postValue(WatchZonePointsModel.this);
                         }
                     }
                 }
@@ -77,6 +83,9 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         mApplicationContext = context.getApplicationContext();
         mHandler = handler;
         mWatchZoneUid = watchZoneUid;
+
+        mStatus = WatchZoneModel.ModelStatus.LOADING;
+        setValue(this);
     }
 
     public synchronized Long getWatchZoneUid() {
@@ -84,11 +93,15 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
     }
 
     public synchronized WatchZonePoint getWatchZonePointForWatchZonePointUid(Long watchZonePointUid) {
-        return getValue() == null ? null : mWatchZonePointsMap.get(watchZonePointUid);
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mWatchZonePointsMap.get(watchZonePointUid);
     }
 
     public synchronized List<WatchZonePoint> getWatchZonePointsList() {
-        return getValue() == null ? null : mCurrentList;
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mCurrentList;
+    }
+
+    public synchronized WatchZoneModel.ModelStatus getStatus() {
+        return mStatus;
     }
 
     public synchronized boolean isChanged(WatchZonePointsModel compareTo) {
@@ -134,7 +147,6 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
             WatchZonePoint changedSchedule = mChangeToList.get(i + position);
             points.put(changedSchedule.getUid(), changedSchedule);
         }
-        postValue(this);
     }
 
     @Override
@@ -144,7 +156,6 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
             WatchZonePoint insertedSchedule = mChangeToList.get(i + position);
             points.put(insertedSchedule.getUid(), insertedSchedule);
         }
-        postValue(this);
     }
 
     @Override
@@ -159,6 +170,5 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
             WatchZonePoint removedSchedule = mCurrentList.get(i + position);
             points.remove(removedSchedule.getUid());
         }
-        postValue(this);
     }
 }

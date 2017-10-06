@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
@@ -33,9 +34,6 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         @Override
         public void onChanged(@Nullable final List<WatchZone> watchZones) {
             if (watchZones != null && !watchZones.isEmpty()) {
-                if (mCurrentList == null) {
-                    mCurrentList = new ArrayList<>();
-                }
                 DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                     @Override
                     public int getOldListSize() {
@@ -78,12 +76,19 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         mApplicationContext = context.getApplicationContext();
         mThread = new HandlerThread("WatchZoneModelRepositoryUpdateThread");
         mThread.start();
-        mHandler = new Handler(mThread.getLooper());
+        mHandler = new Handler(/*mThread.getLooper()*/Looper.getMainLooper());
 
         mWatchZoneModelsMap = new HashMap<>();
+        mCurrentList = new ArrayList<>();
+
+        List<Long> watchZoneUids = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
+        for (Long uid : watchZoneUids) {
+            mWatchZoneModelsMap.put(uid, null);
+        }
 
         WatchZoneRepository.getInstance(mApplicationContext).getWatchZonesLiveData()
                 .observeForever(mWatchZoneObserver);
+        setValue(this);
     }
 
     public static synchronized WatchZoneModelRepository getInstance(Context context) {
@@ -118,6 +123,14 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
             result.add(mWatchZoneModelsMap.get(zone.getUid()));
         }
         return result;
+    }
+
+    public synchronized WatchZoneModel getWatchZoneModel(long watchZoneUid) {
+        return mWatchZoneModelsMap.get(watchZoneUid);
+    }
+
+    public synchronized boolean watchZoneExists(long watchZoneUid) {
+        return mWatchZoneModelsMap.containsKey(watchZoneUid);
     }
 
     @Override

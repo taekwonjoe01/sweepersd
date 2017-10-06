@@ -29,11 +29,10 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final Context mApplicationContext;
     private final HandlerThread mThread;
     private final Handler mHandler;
-    private final Observer<List<WatchZoneModel>> mWatchZoneObserver;
+    private final Observer<WatchZoneModelRepository> mRepositoryObserver;
     private final Observer<List<Limit>> mLimitObserver;
+    private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
-    private Map<Long, WatchZoneContainer> mUpdatingWatchZones;
-    private LiveData<List<WatchZoneModel>> mWatchZoneModels;
     private LiveData<List<Limit>> mLimits;
 
 
@@ -42,16 +41,17 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mThread = new HandlerThread("WatchZoneModelUpdater-thread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        mWatchZoneObserver = new Observer<List<WatchZoneModel>>() {
+        mUpdatingWatchZones = new HashMap<>();
+        mRepositoryObserver = new Observer<WatchZoneModelRepository>() {
             @Override
-            public void onChanged(@Nullable List<WatchZoneModel> watchZoneModels) {
-                invalidate(watchZoneModels);
+            public void onChanged(@Nullable WatchZoneModelRepository repository) {
+                invalidate(repository);
             }
         };
         mLimitObserver = new Observer<List<Limit>>() {
             @Override
             public void onChanged(@Nullable List<Limit> limits) {
-                invalidate(mWatchZoneModels.getValue());
+                invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
             }
         };
     }
@@ -90,20 +90,16 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     }
 
     @Override
-    protected void onActive() {
-        postUpdatedData();
-
-        mWatchZoneModels = WatchZoneRepository.getInstance(mApplicationContext)
-                .getAllWatchZoneModelsLiveData();
-        mWatchZoneModels.observeForever(mWatchZoneObserver);
+    protected synchronized void onActive() {
         mLimits = LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData();
         mLimits.observeForever(mLimitObserver);
+        WatchZoneModelRepository.getInstance(mApplicationContext).observeForever(mRepositoryObserver);
     }
 
     @Override
     protected synchronized void onInactive() {
         mLimits.removeObserver(mLimitObserver);
-        mWatchZoneModels.removeObserver(mWatchZoneObserver);
+        WatchZoneModelRepository.getInstance(mApplicationContext).removeObserver(mRepositoryObserver);
         for (Long uid : mUpdatingWatchZones.keySet()) {
             WatchZoneContainer container = mUpdatingWatchZones.get(uid);
             if (container.watchZoneUpdater != null) {
@@ -111,7 +107,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             }
         }
         mUpdatingWatchZones.clear();
-        postUpdatedData();
     }
 
     private class WatchZoneContainer {
@@ -126,11 +121,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 first.getWatchZone().getRadius() != second.getWatchZone().getRadius();
     }
 
-    private synchronized void invalidate(List<WatchZoneModel> models) {
-        if (models == null) {
-            return;
-        }
-
+    private synchronized void invalidate(WatchZoneModelRepository repository) {
         if (mLimits.getValue() == null) {
             return;
         }
@@ -140,13 +131,10 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        if (mUpdatingWatchZones == null) {
-            mUpdatingWatchZones = new HashMap<>();
-        }
-
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
-        for (WatchZoneModel model : models) {
-            if (model.getStatus() != WatchZoneModel.WatchZoneStatus.VALID) {
+        for (WatchZoneModel model : repository.getWatchZoneModels()) {
+            if (model.getStatus() != WatchZoneModel.Status.VALID &&
+                    model.getStatus() != WatchZoneModel.Status.LOADING) {
                 modelsThatNeedUpdate.add(model);
             }
         }
