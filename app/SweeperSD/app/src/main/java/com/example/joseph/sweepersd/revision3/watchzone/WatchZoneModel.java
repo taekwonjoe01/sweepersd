@@ -5,7 +5,6 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,6 +194,8 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                 result = true;
             } else if (this.mWatchZone != null && compareTo.getWatchZone() == null) {
                 result = true;
+            } else if (this.mWatchZone == null && compareTo.getWatchZone() == null) {
+                return false;
             } else if (this.mWatchZone.isChanged(compareTo.getWatchZone())) {
                 result = true;
             } else if (mWatchZonePointsModel.isChanged(compareTo.getWatchZonePointsModel())) {

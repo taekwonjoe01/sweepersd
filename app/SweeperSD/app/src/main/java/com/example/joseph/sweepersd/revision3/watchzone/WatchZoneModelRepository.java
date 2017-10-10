@@ -33,7 +33,7 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
     private final Observer<List<WatchZone>> mWatchZoneObserver = new Observer<List<WatchZone>>() {
         @Override
         public void onChanged(@Nullable final List<WatchZone> watchZones) {
-            if (watchZones != null && !watchZones.isEmpty()) {
+            if (watchZones != null) {
                 DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                     @Override
                     public int getOldListSize() {

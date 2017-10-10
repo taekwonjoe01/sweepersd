@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -158,7 +157,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
                             // Get all LimitSchedules to determine sweeping dates
                             List<LimitSchedule> allLimitSchedules = new ArrayList<>();
-                            Log.e("Joey", " keySet.size " + model.getWatchZoneLimitModelUids().size());
                             for (Long uniqueLimitUid : model.getWatchZoneLimitModelUids()) {
                                 allLimitSchedules.addAll(
                                         model.getWatchZoneLimitModel(uniqueLimitUid)
@@ -166,8 +164,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             }
 
                             long nextSweepingTime = WatchZoneUtils.getNextSweepingTime(allLimitSchedules);
-                            Log.e("Joey", "next Sweeping Time: " + nextSweepingTime
-                                    + " allLimitSchedules.size " + allLimitSchedules.size());
                             String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
                             if (nextSweepingTime != 0) {
                                 SimpleDateFormat format = new SimpleDateFormat("EEE, MMM dd");

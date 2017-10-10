@@ -102,21 +102,19 @@ class WatchZoneUpdater {
                     if (!mIsCancelled.get()) {
                         updater.run();
 
-                        if (mIsCancelled.get()) {
-                            return;
-                        }
-
-                        synchronized (watchZonePoints) {
-                            int numDone = size - (int) latch.getCount();
-                            int progress = (int) (((double) numDone / (double) size) * 100);
-                            if (latch.getCount() > 0) {
-                                mProgress = new UpdateProgress(progress,
-                                        UpdateProgress.Status.UPDATING);
-                            } else {
-                                mProgress = new UpdateProgress(progress,
-                                        UpdateProgress.Status.COMPLETE);
+                        if (!mIsCancelled.get()) {
+                            synchronized (watchZonePoints) {
+                                int numDone = size - (int) latch.getCount();
+                                int progress = (int) (((double) numDone / (double) size) * 100);
+                                if (latch.getCount() > 0) {
+                                    mProgress = new UpdateProgress(progress,
+                                            UpdateProgress.Status.UPDATING);
+                                } else {
+                                    mProgress = new UpdateProgress(progress,
+                                            UpdateProgress.Status.COMPLETE);
+                                }
+                                publishProgress(mProgress);
                             }
-                            publishProgress(mProgress);
                         }
                     }
 

@@ -11,7 +11,6 @@ import android.arch.lifecycle.ServiceLifecycleDispatcher;
 import android.content.ComponentName;
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.util.Map;
 
@@ -64,7 +63,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        Log.e("Joey", "Job Starting");
+        //Log.e("Joey", "Job Starting");
         mWatchZoneModelUpdater = WatchZoneModelUpdater.getInstance(this);
         mDispatcher = new ServiceLifecycleDispatcher(this);
 
@@ -75,7 +74,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
             public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
                 if (longIntegerMap != null) {
                     if (longIntegerMap.isEmpty()) {
-                        Log.e("Joey", "Job Finished");
+                        //Log.e("Joey", "Job Finished");
                         jobFinished(jobParameters, false);
                     }
                 }
@@ -89,7 +88,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
     public boolean onStopJob(JobParameters jobParameters) {
         mDispatcher.onServicePreSuperOnDestroy();
 
-        Log.e("Joey", "Job Terminated");
+        //Log.e("Joey", "Job Terminated");
         return true;
     }
 

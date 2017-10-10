@@ -8,14 +8,16 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import com.example.joseph.sweepersd.revision3.utils.LocationUtils;
-import com.example.joseph.sweepersd.revision3.utils.Preferences;
 import com.example.joseph.sweepersd.revision3.limit.Limit;
 import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
+import com.example.joseph.sweepersd.revision3.utils.LocationUtils;
+import com.example.joseph.sweepersd.revision3.utils.Preferences;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ import java.util.concurrent.CountDownLatch;
 public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implements
         WatchZoneUpdater.AddressProvider,
         WatchZoneUpdater.WatchZonePointSaveDelegate {
+    private static final String TAG = WatchZoneModelUpdater.class.getSimpleName();
     private static WatchZoneModelUpdater sInstance;
 
     private final Context mApplicationContext;
@@ -100,13 +103,18 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     protected synchronized void onInactive() {
         mLimits.removeObserver(mLimitObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).removeObserver(mRepositoryObserver);
+        cancelAll();
+    }
+
+    private synchronized void cancelAll() {
+        List<WatchZoneContainer> toCancel = new ArrayList<>();
         for (Long uid : mUpdatingWatchZones.keySet()) {
             WatchZoneContainer container = mUpdatingWatchZones.get(uid);
-            if (container.watchZoneUpdater != null) {
-                container.watchZoneUpdater.cancel();
-            }
+            toCancel.add(container);
         }
-        mUpdatingWatchZones.clear();
+        for (WatchZoneContainer container : toCancel) {
+            cancelAndRemoveContainer(container);
+        }
     }
 
     private class WatchZoneContainer {
@@ -159,17 +167,24 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         }
 
         for (Long uid : uidsThatNoLongerExist) {
-            WatchZoneUpdater updater = mUpdatingWatchZones.get(uid).watchZoneUpdater;
-            if (updater != null) {
-                updater.cancel();
-            }
-            mUpdatingWatchZones.remove(uid);
+            WatchZoneContainer container = mUpdatingWatchZones.get(uid);
+            cancelAndRemoveContainer(container);
         }
+
+        if (!newModelsToUpdate.isEmpty()) {
+            cancelAll();
+            newModelsToUpdate.clear();
+            for (WatchZoneModel model : modelsThatNeedUpdate) {
+                newModelsToUpdate.add(model);
+            }
+        }
+
+        Collections.reverse(newModelsToUpdate);
 
         for (final WatchZoneModel model : newModelsToUpdate) {
             final Long uid = model.getWatchZone().getUid();
 
-            WatchZoneContainer container = new WatchZoneContainer();
+            final WatchZoneContainer container = new WatchZoneContainer();
             container.watchZoneModel = model;
             container.watchZoneUpdater = null;
             container.progress = 0;
@@ -179,66 +194,80 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    WatchZoneContainer cont = null;
                     synchronized (WatchZoneModelUpdater.this) {
-                        cont = mUpdatingWatchZones.get(uid);
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.getWatchZoneUid());
+                        if (container != containerInMap) {
+                            return;
+                        }
+                    }
+                    int numThreads = Runtime.getRuntime().availableProcessors() * 32;
+                    List<HandlerThread> threads = new ArrayList<>();
+                    List<Handler> handlers = new ArrayList<>();
+                    Log.d(TAG, "Starting " + numThreads + " threads.");
+
+                    for (int i = 0; i < numThreads; i++) {
+                        HandlerThread thread = new HandlerThread("WatchZoneUpdater_" + (i + 1));
+                        thread.start();
+                        Handler handler = new Handler(thread.getLooper());
+
+                        threads.add(thread);
+                        handlers.add(handler);
                     }
 
-                    if (cont != null) {
-                        int numThreads = Runtime.getRuntime().availableProcessors() * 2;
-                        List<HandlerThread> threads = new ArrayList<>();
-                        List<Handler> handlers = new ArrayList<>();
-
-                        for (int i = 0; i < numThreads; i++) {
-                            HandlerThread thread = new HandlerThread("WatchZoneUpdater_" + (i + 1));
-                            thread.start();
-                            Handler handler = new Handler(thread.getLooper());
-
-                            threads.add(thread);
-                            handlers.add(handler);
-                        }
-
-                        cont.watchZoneUpdater = new WatchZoneUpdater(cont.watchZoneModel,
-                                new WatchZoneUpdater.ProgressListener() {
-                                    @Override
-                                    public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
-                                        if (WatchZoneUpdater.UpdateProgress.Status.UPDATING ==
-                                                progress.getStatus()) {
-                                            WatchZoneContainer c = null;
-                                            synchronized (WatchZoneModelUpdater.this) {
-                                                c = mUpdatingWatchZones.get(uid);
-                                                if (c != null) {
-                                                    c.progress = progress.getProgress();
-                                                    postUpdatedData();
-                                                }
-                                            }
-                                        }
+                    container.watchZoneUpdater = new WatchZoneUpdater(container.watchZoneModel,
+                            new WatchZoneUpdater.ProgressListener() {
+                                @Override
+                                public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
+                                    if (WatchZoneUpdater.UpdateProgress.Status.UPDATING ==
+                                            progress.getStatus()) {
+                                        container.progress = progress.getProgress();
+                                        postUpdatedData();
                                     }
-                                }, handlers, WatchZoneModelUpdater.this,
-                                mLimits.getValue(),
-                                WatchZoneModelUpdater.this);
+                                }
+                            }, handlers, WatchZoneModelUpdater.this,
+                            mLimits.getValue(),
+                            WatchZoneModelUpdater.this);
 
+                    boolean cancel = false;
+                    synchronized (WatchZoneModelUpdater.this) {
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.getWatchZoneUid());
+                        if (container != containerInMap) {
+                            cancel = true;
+                        }
+                    }
+                    if (!cancel) {
                         // This will block!
-                        WatchZoneUpdater.UpdateProgress finalProgress = cont.watchZoneUpdater.execute();
+                        WatchZoneUpdater.UpdateProgress finalProgress = container.watchZoneUpdater.execute();
 
-                        if (WatchZoneUpdater.UpdateProgress.Status.CORRUPT == finalProgress.getStatus()) {
+                        if (WatchZoneUpdater.UpdateProgress.Status.CANCELLED == finalProgress.getStatus()) {
                             // TODO is needed?
+                            //Log.e("Joey", "Updater thread cancelled for " + container.watchZoneModel.getWatchZoneUid());
                         }
+                    }
 
-                        for (HandlerThread thread : threads) {
-                            thread.quit();
-                        }
+                    for (HandlerThread thread : threads) {
+                        thread.quit();
+                    }
 
-                        synchronized (WatchZoneModelUpdater.this) {
-                            mUpdatingWatchZones.remove(cont.watchZoneModel.getWatchZone().getUid());
+                    synchronized (WatchZoneModelUpdater.this) {
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.getWatchZoneUid());
+                        if (container == containerInMap) {
+                            mUpdatingWatchZones.remove(container.watchZoneModel.getWatchZoneUid());
+                            postUpdatedData();
                         }
-                        postUpdatedData();
                     }
                 }
             });
         }
 
         postUpdatedData();
+    }
+
+    private synchronized void cancelAndRemoveContainer(WatchZoneContainer container) {
+        if (container.watchZoneUpdater != null) {
+            container.watchZoneUpdater.cancel();
+        }
+        mUpdatingWatchZones.remove(container.watchZoneModel.getWatchZoneUid());
     }
 
     private synchronized void postUpdatedData() {

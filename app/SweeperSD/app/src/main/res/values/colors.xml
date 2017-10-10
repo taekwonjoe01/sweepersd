@@ -10,6 +10,9 @@
     <color name="app_secondary_activated">#ffffff</color>
     <color name="app_secondary_disabled">#bebbbc</color>
 
+    <color name="parking_sign_background">#ffffff</color>
+    <color name="parking_sign_no_parking">#ff0000</color>
+
     <color name="shadow">#55000000</color>
     <color name="white_shadow">#77FFFFFF</color>
 

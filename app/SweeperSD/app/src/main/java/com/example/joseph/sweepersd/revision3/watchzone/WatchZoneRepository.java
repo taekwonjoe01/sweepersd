@@ -184,6 +184,7 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         int result = 0;
         if (watchZone != null) {
             result = watchZoneDao.deleteWatchZone(watchZone);
+            Log.d("Joey", "deleteWatchZone result " + result);
         }
 
         return result;

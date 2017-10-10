@@ -1,12 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="135dp"
+    android:layout_height="200dp"
+    android:background="@drawable/background_no_parking">
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="HELLO WORLD"
-        android:textSize="45sp"/>
+        android:layout_marginTop="0dp"
+        android:layout_gravity="center_horizontal"
+        android:padding="10dp"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="2dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_local_parking_black_24dp"/>
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_do_not_disturb_red_24dp"/>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textview_street"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CHALCEDDONNY ST"
+            android:textColor="@color/parking_sign_no_parking"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:textSize="14sp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/textview_start_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:gravity="center"
+                android:textColor="@color/parking_sign_no_parking"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:id="@+id/textview_start_ampm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AM"
+                android:gravity="center"
+                android:textColor="@color/parking_sign_no_parking"
+                android:textSize="14sp"/>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TO"
+                    android:gravity="center"
+                    android:textColor="@color/parking_sign_no_parking"
+                    android:layout_gravity="top"
+                    android:textSize="8sp"/>
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/textview_end_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="11"
+                android:gravity="center"
+                android:textColor="@color/parking_sign_no_parking"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:id="@+id/textview_end_ampm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AM"
+                android:gravity="center"
+                android:textColor="@color/parking_sign_no_parking"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textview_week_prefix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1st, 2nd, 3rd"
+            android:gravity="center"
+            android:textColor="@color/parking_sign_no_parking"
+            android:layout_gravity="center_horizontal"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/textview_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SATURDAY"
+            android:gravity="center"
+            android:textColor="@color/parking_sign_no_parking"
+            android:layout_gravity="center_horizontal"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EVERY MONTH"
+            android:gravity="center"
+            android:textColor="@color/parking_sign_no_parking"
+            android:layout_gravity="center_horizontal"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+
+
+
 
 </FrameLayout>
