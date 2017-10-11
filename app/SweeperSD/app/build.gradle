@@ -54,4 +54,7 @@ dependencies {
 
     // For vertical seekbar
     compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
+
+    // For Calendar
+    compile 'com.roomorama:caldroid:3.0.1'
 }

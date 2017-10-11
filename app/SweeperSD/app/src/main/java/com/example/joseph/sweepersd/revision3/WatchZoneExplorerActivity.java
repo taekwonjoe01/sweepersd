@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,9 +52,11 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.roomorama.caldroid.CaldroidFragment;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +140,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity implements
                 finish();
             }
         });
+        mSlidingPanelLayout.setAnchorPoint(0.4f);
         mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
@@ -383,7 +387,20 @@ public class WatchZoneExplorerActivity extends AppCompatActivity implements
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.content_posted_limits, container, false);
+            View v = inflater.inflate(R.layout.content_posted_limits_calendar, container, false);
+
+            CaldroidFragment caldroidFragment = new CaldroidFragment();
+            Bundle args = new Bundle();
+            Calendar cal = Calendar.getInstance();
+            args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
+            args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+            args.putInt(CaldroidFragment.THEME_RESOURCE, R.style.CaldroidDefaultDark);
+            caldroidFragment.setArguments(args);
+
+            FragmentTransaction t = getActivity().getSupportFragmentManager().beginTransaction();
+            t.replace(R.id.caldroid_fragment_layout, caldroidFragment);
+            t.commit();
+            return v;
         }
     }
 
@@ -483,7 +500,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity implements
         setAlarmLocation(latLng);
         if (animateCamera) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.5f));
-            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
 
         if (address == null) {

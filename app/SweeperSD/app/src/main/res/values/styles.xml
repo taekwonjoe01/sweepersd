@@ -25,4 +25,53 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="CaldroidDefaultDark" parent="CaldroidDefault">
+        <item name="styleCaldroidViewLayout">@style/CalendarViewLayout</item>
+        <item name="styleCaldroidMonthName">@style/CalendarMonthName</item>
+        <item name="styleCaldroidNormalCell">@style/CalendarNormalCell</item>
+        <item name="styleCaldroidSquareCell">@style/CalendarSquareCell</item>
+        <item name="styleCaldroidWeekdayView">@style/CalendarWeekdayView</item>
+        <item name="styleCaldroidGridView">@style/CalendarGridView</item>
+    </style>
+    <!--
+        TODO Add above items when ready to style.
+        <item name="styleCaldroidLeftArrow">@style/CalendarLeftArrow</item>
+        <item name="styleCaldroidRightArrow">@style/CalendarRightArrow</item>
+    -->
+
+    <style name="CalendarViewLayout">
+        <item name="android:background">@color/app_background</item>
+    </style>
+
+    <style name="CalendarMonthName" parent="CaldroidDefaultMonthName">
+        <item name="android:textColor">@color/app_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="CalendarGridView" parent="CaldroidDefaultGridView">
+        <item name="android:background">@color/app_secondary_disabled</item>
+    </style>
+
+    <style name="CalendarCell" parent="CaldroidDefaultCell">
+        <item name="android:textColor">@color/app_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:background">@drawable/apptheme_background</item>
+    </style>
+
+    <style name="CalendarNormalCell" parent="CalendarCell">
+        <item name="android:padding">5dp</item>
+    </style>
+
+    <style name="CalendarSquareCell" parent="CalendarCell" />
+
+    <style name="CalendarLeftArrow" parent="CalendarCell">
+    </style>
+    <style name="CalendarRightArrow" parent="CalendarCell">
+    </style>
+    <style name="CalendarWeekdayView" parent="CalendarCell">
+        <item name="android:textColor">@color/app_secondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
 </resources>

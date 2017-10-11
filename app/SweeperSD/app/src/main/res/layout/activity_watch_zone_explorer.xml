@@ -127,6 +127,7 @@
                         app:tabTextColor="@color/app_secondary"
                         app:tabSelectedTextColor="@color/app_secondary"
                         app:tabIndicatorColor="@color/app_background_activated"
+                        app:tabBackground="@drawable/apptheme_background"
                         app:tabGravity="fill"/>
                 </com.example.joseph.sweepersd.revision3.WrapContentTabViewPager>
             </LinearLayout>
