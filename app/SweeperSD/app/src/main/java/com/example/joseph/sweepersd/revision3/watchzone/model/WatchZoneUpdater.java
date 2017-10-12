@@ -1,8 +1,11 @@
-package com.example.joseph.sweepersd.revision3.watchzone;
+package com.example.joseph.sweepersd.revision3.watchzone.model;
 
 import android.os.Handler;
 
 import com.example.joseph.sweepersd.revision3.limit.Limit;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZonePoint;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZonePointUpdater;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;

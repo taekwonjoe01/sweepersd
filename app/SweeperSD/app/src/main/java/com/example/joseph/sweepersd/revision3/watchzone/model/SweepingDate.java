@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3.watchzone;
+package com.example.joseph.sweepersd.revision3.watchzone.model;
 
 
 import android.arch.persistence.room.ColumnInfo;

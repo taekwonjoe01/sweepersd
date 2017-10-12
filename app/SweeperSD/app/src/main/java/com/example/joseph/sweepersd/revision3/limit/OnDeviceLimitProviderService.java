@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
 import com.example.joseph.sweepersd.revision3.utils.Preferences;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;

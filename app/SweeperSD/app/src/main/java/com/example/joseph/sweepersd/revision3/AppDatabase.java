@@ -8,9 +8,9 @@ import android.content.Context;
 import com.example.joseph.sweepersd.revision3.limit.Limit;
 import com.example.joseph.sweepersd.revision3.limit.LimitDao;
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneDao;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZonePoint;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneDao;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZonePoint;
 
 @Database(entities = {Limit.class, LimitSchedule.class, WatchZone.class, WatchZonePoint.class},
         version = 1)

@@ -11,13 +11,14 @@ import android.arch.lifecycle.ServiceLifecycleDispatcher;
 import android.content.ComponentName;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.example.joseph.sweepersd.revision3.utils.Jobs;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelUpdater;
 
 import java.util.Map;
 
 public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
-    private static final int WATCH_ZONE_UPDATE_FOREGROUND_JOB_ID = 100;
-    private static final int WATCH_ZONE_UPDATE_BACKGROUND_JOB_ID = 101;
-
     private static final int ONE_DAY = 1000 * 60 * 60 * 24;
     private static final int ONE_MINUTE = 1000 * 60;
     private static final int ONE_HOUR = 1000 * 60 * 60;
@@ -31,11 +32,11 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
-        if (jobScheduler.getPendingJob(WATCH_ZONE_UPDATE_FOREGROUND_JOB_ID) != null) {
+        if (jobScheduler.getPendingJob(Jobs.WATCH_ZONE_UPDATE_FOREGROUND_JOB_ID) != null) {
             return;
         }
 
-                JobInfo.Builder builder = new JobInfo.Builder(WATCH_ZONE_UPDATE_FOREGROUND_JOB_ID,
+        JobInfo.Builder builder = new JobInfo.Builder(Jobs.WATCH_ZONE_UPDATE_FOREGROUND_JOB_ID,
                 new ComponentName(context, WatchZoneUpdateJob.class));
         builder.setMinimumLatency(0L);
         builder.setOverrideDeadline(0L);
@@ -48,11 +49,11 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
-        if (jobScheduler.getPendingJob(WATCH_ZONE_UPDATE_BACKGROUND_JOB_ID) != null) {
+        if (jobScheduler.getPendingJob(Jobs.WATCH_ZONE_UPDATE_BACKGROUND_JOB_ID) != null) {
             return;
         }
 
-        JobInfo.Builder builder = new JobInfo.Builder(WATCH_ZONE_UPDATE_BACKGROUND_JOB_ID,
+        JobInfo.Builder builder = new JobInfo.Builder(Jobs.WATCH_ZONE_UPDATE_BACKGROUND_JOB_ID,
                 new ComponentName(context, WatchZoneUpdateJob.class));
         builder.setPeriodic(ONE_DAY);
         builder.setPersisted(true);
@@ -63,7 +64,6 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        //Log.e("Joey", "Job Starting");
         mWatchZoneModelUpdater = WatchZoneModelUpdater.getInstance(this);
         mDispatcher = new ServiceLifecycleDispatcher(this);
 

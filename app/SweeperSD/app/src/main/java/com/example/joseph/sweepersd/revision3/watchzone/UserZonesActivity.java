@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.app.Activity;
 import android.app.NotificationManager;

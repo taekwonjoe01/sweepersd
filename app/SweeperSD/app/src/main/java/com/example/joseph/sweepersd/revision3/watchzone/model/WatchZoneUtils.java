@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3.watchzone;
+package com.example.joseph.sweepersd.revision3.watchzone.model;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -6,9 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.model.watchzone.WatchZoneAlarmReceiver;
-import com.example.joseph.sweepersd.revision3.limit.Limit;
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneAlarmReceiver;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,6 +21,12 @@ import java.util.TimeZone;
 
 public class WatchZoneUtils {
     private static final String TAG = WatchZoneUtils.class.getSimpleName();
+    private static final int REQUEST_CODE_ALARM = 0;
+
+    public static long TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
+    public static long TWELVE_HOURS = 1000 * 60 * 60 * 12;
+    public static long SIX_HOURS = 1000 * 60 * 60 * 6;
+    public static long ONE_HOUR = 1000 * 60 * 60;
 
     public static SweepingDate findSweepingDate(LimitSchedule schedule) {
         SweepingDate result = null;
@@ -136,7 +141,7 @@ public class WatchZoneUtils {
     }
 
     public static List<SweepingDate> getTimeOrderedSweepingDatesForLimitSchedules(List<LimitSchedule> schedules) {
-        WatchZoneUtils.filterInvalidLimitSchedules(schedules);
+        //WatchZoneUtils.filterInvalidLimitSchedules(schedules);
         List<SweepingDate> sweepingDates = new ArrayList<>();
         for (LimitSchedule s : schedules) {
             sweepingDates.add(WatchZoneUtils.findSweepingDate(s));
@@ -173,15 +178,10 @@ public class WatchZoneUtils {
         dates.removeAll(datesToRemove);
     }
 
-    public static long TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
-    public static long TWELVE_HOURS = 1000 * 60 * 60 * 12;
-    public static long SIX_HOURS = 1000 * 60 * 60 * 6;
-    public static long ONE_HOUR = 1000 * 60 * 60;
-
     public static long getAlarmTimeForSweepingTime(long sweepingTime) {
-        GregorianCalendar today = new GregorianCalendar(
-                TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
-        long timeUntil = sweepingTime - today.getTime().getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        long timeUntil = sweepingTime - calendar.getTimeInMillis();
 
         if (timeUntil > TWENTY_FOUR_HOURS) {
             return sweepingTime - TWENTY_FOUR_HOURS;
@@ -192,19 +192,17 @@ public class WatchZoneUtils {
         } else if (timeUntil > ONE_HOUR) {
             return sweepingTime - ONE_HOUR;
         } else {
-            return today.getTime().getTime();
+            return calendar.getTimeInMillis();
         }
     }
 
-    public static void scheduleWatchZoneAlarm(Context context, WatchZoneModel model) {
-        Log.e("Joey", "Scheduling watch zone alarm. " + model.getWatchZoneUid());
-        if (model.getWatchZoneLimitModelUids().isEmpty()) {
-            Log.e("Joey", "no limits for this watch zone!");
+    public static void scheduleWatchZoneNotification(Context context, WatchZoneModel model) {
+        List<LimitSchedule> allSchedules = new ArrayList<>();
+        for (Long limitUid : model.getWatchZoneLimitModelUids()) {
+            WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
+            allSchedules.addAll(limitModel.getLimitSchedulesModel().getScheduleList());
         }
-        for (Long limitId : model.getWatchZoneLimitModelUids()) {
-            Log.e("Joey", "limit " + limitId);
-        }
-        /*long nextSweepingTime = getNextSweepingTime(model);
+        long nextSweepingTime = getNextSweepingTime(allSchedules);
         if (nextSweepingTime > 0) {
             long alarmTime = getAlarmTimeForSweepingTime(nextSweepingTime);
             AlarmManager alarmMgr;
@@ -212,12 +210,27 @@ public class WatchZoneUtils {
 
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(context, WatchZoneAlarmReceiver.class);
-            intent.setType(model.getWatchZone().getUid() + "");
-            alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+            intent.setType(model.getWatchZoneUid() + "");
+            alarmIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
 
 
             alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
             Log.i(TAG, "Alarm scheduled for " + new Date(alarmTime).toString());
-        }*/
+        }
+    }
+
+    public static void unscheduleWatchZoneNotification(Context context, WatchZoneModel model) {
+        AlarmManager alarmMgr;
+        PendingIntent alarmIntent;
+
+        alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, WatchZoneAlarmReceiver.class);
+        intent.setType(model.getWatchZoneUid() + "");
+        alarmIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, intent,
+                PendingIntent.FLAG_NO_CREATE);
+        if (alarmIntent != null) {
+            alarmMgr.cancel(alarmIntent);
+        }
     }
 }

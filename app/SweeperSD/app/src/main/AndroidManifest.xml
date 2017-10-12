@@ -49,16 +49,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".revision3.UserZonesActivity"
+            android:name=".revision3.watchzone.UserZonesActivity"
             android:label="@string/title_user_zone_activity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".revision3.WatchZoneExplorerActivity"
+            android:name=".revision3.watchzone.WatchZoneExplorerActivity"
             android:label="@string/title_watch_zone_explorer_activity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".revision3.WatchZoneDetailsActivity"
+            android:name=".revision3.watchzone.WatchZoneDetailsActivity"
             android:label="@string/title_watch_zone_details_activity"
             android:screenOrientation="portrait" />
 
@@ -74,6 +74,14 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <receiver
+            android:name=".revision3.watchzone.WatchZoneAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".revision3.watchzone.WatchZoneNotificationJob"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
         <!--
         <activity
             android:name=".MainActivity"
@@ -108,16 +116,9 @@
             android:name=".model.watchzWatchZoneUpdateServiceTODOvice"
             android:exported="false" />
         <service
-            android:name=".model.watchzone.WatchZoneNotificationDeliverer"
-            android:exported="false" />
-        <service
             android:name=".model.AddressValidatorService"
             android:exported="false" />
 
-        <receiver
-            android:name=".model.watchzone.WatchZoneAlarmReceiver"
-            android:enabled="true"
-            android:exported="false" />
 
         <activity
             android:name=".presentation.manualalarms.CreateWatchZoneActivity"

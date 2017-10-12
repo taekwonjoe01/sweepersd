@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
@@ -14,10 +14,10 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;

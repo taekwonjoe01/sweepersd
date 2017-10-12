@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.app.DialogFragment;
 import android.arch.lifecycle.Observer;
@@ -29,14 +29,16 @@ import android.widget.SeekBar;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.presentation.manualalarms.CreateAlarmLabelDialogFragment;
+import com.example.joseph.sweepersd.revision3.LimitViewAdapter;
+import com.example.joseph.sweepersd.revision3.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.revision3.limit.Limit;
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneLimitModel;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelUpdater;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZonePoint;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneLimitModel;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelUpdater;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZonePoint;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneRepository;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;

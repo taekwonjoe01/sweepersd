@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3.watchzone;
+package com.example.joseph.sweepersd.revision3.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
@@ -129,11 +129,12 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 first.getWatchZone().getRadius() != second.getWatchZone().getRadius();
     }
 
-    private synchronized void scheduleValidWatchZones(List<WatchZoneModel> watchZoneModels) {
+    private synchronized void scheduleWatchZoneNotifications(List<WatchZoneModel> watchZoneModels) {
         for (WatchZoneModel model : watchZoneModels) {
-            Log.e("Joey", "model status " + model.getStatus().toString());
             if (model.getStatus() == WatchZoneModel.Status.VALID) {
-                WatchZoneUtils.scheduleWatchZoneAlarm(mApplicationContext, model);
+                WatchZoneUtils.scheduleWatchZoneNotification(mApplicationContext, model);
+            } else if (model.getStatus() != WatchZoneModel.Status.LOADING) {
+                WatchZoneUtils.unscheduleWatchZoneNotification(mApplicationContext, model);
             }
         }
     }
@@ -148,7 +149,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        scheduleValidWatchZones(repository.getWatchZoneModels());
+        scheduleWatchZoneNotifications(repository.getWatchZoneModels());
 
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
         for (WatchZoneModel model : repository.getWatchZoneModels()) {

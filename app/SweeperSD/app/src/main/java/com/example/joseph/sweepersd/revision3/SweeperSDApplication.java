@@ -3,8 +3,8 @@ package com.example.joseph.sweepersd.revision3;
 import android.app.Application;
 
 import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelUpdater;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelUpdater;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneRepository;
 
 public class SweeperSDApplication extends Application {
     public static volatile boolean needsCoarsePermission;

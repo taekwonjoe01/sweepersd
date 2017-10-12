@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3.watchzone;
+package com.example.joseph.sweepersd.revision3.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
 import com.example.joseph.sweepersd.revision3.utils.LocationUtils;
+import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneUpdateJob;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;

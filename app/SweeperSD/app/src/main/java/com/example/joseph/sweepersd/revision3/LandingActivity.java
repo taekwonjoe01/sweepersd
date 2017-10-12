@@ -1,36 +1,17 @@
 package com.example.joseph.sweepersd.revision3;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.SweeperService;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelUpdater;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZonePoint;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneRepository;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.util.List;
-import java.util.Map;
+import com.example.joseph.sweepersd.revision3.watchzone.UserZonesActivity;
 
 /**
  * Opening Activity for SweeperSD.

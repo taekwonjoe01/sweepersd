@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3.watchzone;
+package com.example.joseph.sweepersd.revision3.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
@@ -8,38 +8,41 @@ import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
 
+import com.example.joseph.sweepersd.revision3.limit.LimitRepository;
+import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> implements
+public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedulesModel> implements
         ListUpdateCallback {
     private final Context mApplicationContext;
     private final Handler mHandler;
-    private final Long mWatchZoneUid;
+    private final Long mLimitUid;
 
-    private Map<Long, WatchZonePoint> mWatchZonePointsMap;
+    private Map<Long, LimitSchedule> mLimitSchedulesMap;
 
-    private List<WatchZonePoint> mCurrentList;
-    private List<WatchZonePoint> mChangeToList;
+    private List<LimitSchedule> mCurrentList;
+    private List<LimitSchedule> mChangeToList;
 
     private WatchZoneModel.ModelStatus mStatus;
 
-    private Observer<List<WatchZonePoint>> mDatabaseObserver = new Observer<List<WatchZonePoint>>() {
+    private Observer<List<LimitSchedule>> mDatabaseObserver = new Observer<List<LimitSchedule>>() {
         @Override
-        public void onChanged(@Nullable final List<WatchZonePoint> watchZonePoints) {
+        public void onChanged(@Nullable final List<LimitSchedule> limitSchedules) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    synchronized (WatchZonePointsModel.this) {
-                        if (watchZonePoints == null || watchZonePoints.isEmpty()) {
+                    synchronized (WatchZoneLimitSchedulesModel.this) {
+                        if (limitSchedules == null || limitSchedules.isEmpty()) {
                             // Invalid values for this LiveData. Notify observers that this data is invalid.
                             mStatus = WatchZoneModel.ModelStatus.INVALID;
-                            postValue(WatchZonePointsModel.this);
+                            postValue(WatchZoneLimitSchedulesModel.this);
                         } else {
-                            if (mWatchZonePointsMap == null) {
-                                mWatchZonePointsMap = new HashMap<>();
+                            if (mLimitSchedulesMap == null) {
+                                mLimitSchedulesMap = new HashMap<>();
                             }
                             if (mCurrentList == null) {
                                 mCurrentList = new ArrayList<>();
@@ -47,31 +50,31 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
                             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                                 @Override
                                 public int getOldListSize() {
-                                    return mWatchZonePointsMap == null ? 0 : mCurrentList.size();
+                                    return mCurrentList == null ? 0 : mCurrentList.size();
                                 }
 
                                 @Override
                                 public int getNewListSize() {
-                                    return watchZonePoints.size();
+                                    return limitSchedules.size();
                                 }
 
                                 @Override
                                 public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
                                     return mCurrentList.get(oldItemPosition).getUid()
-                                            == watchZonePoints.get(newItemPosition).getUid();
+                                            == limitSchedules.get(newItemPosition).getUid();
                                 }
 
                                 @Override
                                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                                    return !mCurrentList.get(oldItemPosition).isChanged(watchZonePoints.get(newItemPosition));
+                                    return !mCurrentList.get(oldItemPosition).isChanged(limitSchedules.get(newItemPosition));
                                 }
                             }, false);
-                            mChangeToList = watchZonePoints;
-                            result.dispatchUpdatesTo(WatchZonePointsModel.this);
-                            mCurrentList = watchZonePoints;
+                            mChangeToList = limitSchedules;
+                            result.dispatchUpdatesTo(WatchZoneLimitSchedulesModel.this);
+                            mCurrentList = limitSchedules;
 
                             mStatus = WatchZoneModel.ModelStatus.LOADED;
-                            postValue(WatchZonePointsModel.this);
+                            postValue(WatchZoneLimitSchedulesModel.this);
                         }
                     }
                 }
@@ -79,24 +82,24 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         }
     };
 
-    public WatchZonePointsModel(Context context, Handler handler, Long watchZoneUid) {
+    public WatchZoneLimitSchedulesModel(Context context, Handler handler, Long limitUid) {
         mApplicationContext = context.getApplicationContext();
         mHandler = handler;
-        mWatchZoneUid = watchZoneUid;
+        mLimitUid = limitUid;
 
         mStatus = WatchZoneModel.ModelStatus.LOADING;
         setValue(this);
     }
 
-    public synchronized Long getWatchZoneUid() {
-        return mWatchZoneUid;
+    public synchronized Long getLimitUid() {
+        return mLimitUid;
     }
 
-    public synchronized WatchZonePoint getWatchZonePointForWatchZonePointUid(Long watchZonePointUid) {
-        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mWatchZonePointsMap.get(watchZonePointUid);
+    public synchronized LimitSchedule getLimitScheduleForLimitScheduleUid(Long limitScheduleUid) {
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mLimitSchedulesMap.get(limitScheduleUid);
     }
 
-    public synchronized List<WatchZonePoint> getWatchZonePointsList() {
+    public synchronized List<LimitSchedule> getScheduleList() {
         return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mCurrentList;
     }
 
@@ -104,17 +107,17 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         return mStatus;
     }
 
-    public synchronized boolean isChanged(WatchZonePointsModel compareTo) {
+    public synchronized boolean isChanged(WatchZoneLimitSchedulesModel compareTo) {
         boolean result = false;
 
-        if (this.mWatchZoneUid == compareTo.getWatchZoneUid()) {
-            if (this.getWatchZonePointsList().size() != compareTo.getWatchZonePointsList().size()) {
+        if (this.mLimitUid == compareTo.getLimitUid()) {
+            if (this.getScheduleList().size() != compareTo.getScheduleList().size()) {
                 result = true;
             } else {
                 int index = 0;
-                List<WatchZonePoint> otherList = compareTo.getWatchZonePointsList();
-                for (WatchZonePoint p : getWatchZonePointsList()) {
-                    WatchZonePoint op = otherList.get(index);
+                List<LimitSchedule> otherList = compareTo.getScheduleList();
+                for (LimitSchedule p : getScheduleList()) {
+                    LimitSchedule op = otherList.get(index);
                     if (p.isChanged(op)) {
                         result = true;
                         break;
@@ -129,32 +132,32 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
     @Override
     protected synchronized void onActive() {
         super.onActive();
-        WatchZoneRepository.getInstance(mApplicationContext).getWatchZonePointsLiveData(mWatchZoneUid)
+        LimitRepository.getInstance(mApplicationContext).getLimitSchedulesLiveData(mLimitUid)
                 .observeForever(mDatabaseObserver);
     }
 
     @Override
     protected synchronized void onInactive() {
         super.onInactive();
-        WatchZoneRepository.getInstance(mApplicationContext).getWatchZonePointsLiveData(mWatchZoneUid)
+        LimitRepository.getInstance(mApplicationContext).getLimitSchedulesLiveData(mLimitUid)
                 .removeObserver(mDatabaseObserver);
     }
 
     @Override
     public void onChanged(int position, int count, Object payload) {
-        Map<Long, WatchZonePoint> points = mWatchZonePointsMap;
+        Map<Long, LimitSchedule> schedules = mLimitSchedulesMap;
         for (int i = 0; i < count; i++) {
-            WatchZonePoint changedSchedule = mChangeToList.get(i + position);
-            points.put(changedSchedule.getUid(), changedSchedule);
+            LimitSchedule changedSchedule = mChangeToList.get(i + position);
+            schedules.put(changedSchedule.getUid(), changedSchedule);
         }
     }
 
     @Override
     public void onInserted(int position, int count) {
-        Map<Long, WatchZonePoint> points = mWatchZonePointsMap;
+        Map<Long, LimitSchedule> schedules = mLimitSchedulesMap;
         for (int i = 0; i < count; i++) {
-            WatchZonePoint insertedSchedule = mChangeToList.get(i + position);
-            points.put(insertedSchedule.getUid(), insertedSchedule);
+            LimitSchedule insertedSchedule = mChangeToList.get(i + position);
+            schedules.put(insertedSchedule.getUid(), insertedSchedule);
         }
     }
 
@@ -165,10 +168,10 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
 
     @Override
     public void onRemoved(int position, int count) {
-        Map<Long, WatchZonePoint> points = mWatchZonePointsMap;
+        Map<Long, LimitSchedule> schedules = mLimitSchedulesMap;
         for (int i = 0; i < count; i++) {
-            WatchZonePoint removedSchedule = mCurrentList.get(i + position);
-            points.remove(removedSchedule.getUid());
+            LimitSchedule removedSchedule = mCurrentList.get(i + position);
+            schedules.remove(removedSchedule.getUid());
         }
     }
 }

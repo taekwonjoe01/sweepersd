@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
@@ -19,11 +19,11 @@ import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.revision3.limit.LimitSchedule;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZone;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModel;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneModelUpdater;
-import com.example.joseph.sweepersd.revision3.watchzone.WatchZoneUtils;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelUpdater;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneUtils;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.commons.lang3.text.WordUtils;

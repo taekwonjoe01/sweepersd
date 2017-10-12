@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.revision3;
+package com.example.joseph.sweepersd.revision3.watchzone;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
