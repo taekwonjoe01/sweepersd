@@ -18,13 +18,13 @@ public class ActivityDetectionLiveData extends LiveData<Void> {
     private ActivityRecognitionClient mActivityRecognitionClient;
 
     public ActivityDetectionLiveData(Context context) {
-
+        mContext = context;
     }
 
     @Override
     protected void onActive() {
-        mActivityRecognitionClient = ActivityRecognition.getClient(context);
-        Task task = activityRecognitionClient.requestActivityUpdates(180_000L, pendingIntent);
+        //mActivityRecognitionClient = ActivityRecognition.getClient(context);
+        //Task task = activityRecognitionClient.requestActivityUpdates(180_000L, pendingIntent);
     }
 
     @Override

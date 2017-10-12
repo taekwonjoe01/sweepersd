@@ -5,8 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class SharedPreferencesLiveData extends LiveData<SharedPreferences> {
+public abstract class PreferenceLiveData<T> extends LiveData<T> {
     private final Context mContext;
+    private final String mSharedPreferenceKey;
 
     private SharedPreferences mSharedPreferences;
 
@@ -15,19 +16,24 @@ public class SharedPreferencesLiveData extends LiveData<SharedPreferences> {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
             mSharedPreferences = sharedPreferences;
-            postValue(mSharedPreferences);
+            if (mSharedPreferenceKey.equals(s)) {
+                postValue(getValueFromPreferences(mSharedPreferences, mSharedPreferenceKey));
+            }
         }
     };
 
-    public SharedPreferencesLiveData(Context context) {
+    public abstract T getValueFromPreferences(SharedPreferences sharedPreferences, String key);
+
+    public PreferenceLiveData(Context context, String key) {
         mContext = context;
+        mSharedPreferenceKey = key;
     }
 
     @Override
     protected void onActive() {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         mSharedPreferences.registerOnSharedPreferenceChangeListener(mSharedPreferencesListener);
-        setValue(mSharedPreferences);
+        setValue(getValueFromPreferences(mSharedPreferences, mSharedPreferenceKey));
     }
 
     @Override

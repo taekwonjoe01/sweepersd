@@ -1,11 +1,15 @@
 package com.example.joseph.sweepersd.revision3.limit;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.revision3.AppDatabase;
+import com.example.joseph.sweepersd.revision3.utils.BooleanPreferenceLiveData;
 import com.example.joseph.sweepersd.revision3.utils.Preferences;
 
 import java.util.HashMap;
@@ -20,11 +24,25 @@ public class LimitRepository {
     private final Map<Long, LiveData<List<LimitSchedule>>> mCachedLimitSchedulesLiveData;
     private final Map<Long, LiveData<Limit>> mCachedLimitsLiveData;
 
+    private final BooleanPreferenceLiveData mSharedPreferenceLiveData;
+    private final Observer<Boolean> mSharedPreferencesObserver =
+            new Observer<Boolean>() {
+        @Override
+        public void onChanged(@Nullable Boolean limitsLoaded) {
+            if (!limitsLoaded) {
+                Intent msgIntent = new Intent(mContext, OnDeviceLimitProviderService.class);
+                mContext.startService(msgIntent);
+            }
+        }
+    };
+
     private LimitRepository(Context context) {
         mContext = context;
         mCachedPostedLimitsLiveData = loadPostedLimitsLiveDataFromDb();
         mCachedLimitSchedulesLiveData = new HashMap<>();
         mCachedLimitsLiveData = new HashMap<>();
+        mSharedPreferenceLiveData = new BooleanPreferenceLiveData(mContext, Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED);
+        mSharedPreferenceLiveData.observeForever(mSharedPreferencesObserver);
     }
 
     public synchronized static LimitRepository getInstance(Context context) {
@@ -36,18 +54,12 @@ public class LimitRepository {
 
     public synchronized void delete() {
         if (sInstance != null) {
+            mSharedPreferenceLiveData.removeObserver(mSharedPreferencesObserver);
             sInstance = null;
         }
     }
 
     public synchronized LiveData<List<Limit>> getPostedLimitsLiveData() {
-        boolean limitsLoaded = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(
-                        Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, false);
-        if (!limitsLoaded) {
-            Intent msgIntent = new Intent(mContext, OnDeviceLimitProviderService.class);
-            mContext.startService(msgIntent);
-        }
-
         return mCachedPostedLimitsLiveData;
     }
 
