@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
                 mCurrentList = watchZones;
             }
 
+            Log.e("Joey", "WZMR onChanged");
             postValue(WatchZoneModelRepository.this);
         }
     };

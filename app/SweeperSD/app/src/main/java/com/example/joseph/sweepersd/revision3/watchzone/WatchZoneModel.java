@@ -83,19 +83,61 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                             postValue(WatchZoneModel.this);
                         } else if (modelStatus == ModelStatus.LOADED) {
                             updateWatchZoneLimitModels();
-                            if (!isWatchZoneCreated()) {
+                            checkModelLoadingComplete();
+                            /*if (!isWatchZoneCreated()) {
                                 mStatus = Status.NOT_CREATED;
                                 postValue(WatchZoneModel.this);
                             } else if (mWatchZoneLimitModelMap.isEmpty()) {
                                 mStatus = Status.VALID;
                                 postValue(WatchZoneModel.this);
-                            }
+                            } else if (isWatchZoneCreated()) {
+                                boolean limitsLoaded = true;
+                                for (Long limitUid : getWatchZoneLimitModelUids()) {
+                                    WatchZoneLimitModel limitModel = mWatchZoneLimitModelMap.get(limitUid);
+                                    if (limitModel.getStatus() != ModelStatus.LOADED) {
+
+                                    }
+                                }
+                            }*/
                         }
                     }
                 }
             });
         }
     };
+
+    private synchronized void checkModelLoadingComplete() {
+        if (!isWatchZoneCreated()) {
+            mStatus = Status.NOT_CREATED;
+            postValue(WatchZoneModel.this);
+        } else {
+            if (mWatchZoneLimitModelMap.isEmpty()) {
+                mStatus = Status.VALID;
+                postValue(WatchZoneModel.this);
+            } else {
+                boolean done = true;
+                for (Long limitUid : mWatchZoneLimitModelMap.keySet()) {
+                    WatchZoneLimitModel limitModel = mWatchZoneLimitModelMap.get(limitUid);
+                    if (limitModel.getStatus() == ModelStatus.INVALID) {
+                        mStatus = Status.INVALID_LIMIT;
+                        postValue(WatchZoneModel.this);
+                        done = false;
+                        break;
+                    } else if (limitModel.getStatus() == ModelStatus.LOADING) {
+                        done = false;
+                    }
+                }
+                if (done) {
+                    if (needsUpdate()) {
+                        mStatus = Status.OUT_OF_DATE;
+                    } else {
+                        mStatus = Status.VALID;
+                    }
+                    postValue(WatchZoneModel.this);
+                }
+            }
+        }
+    }
 
     private Observer<WatchZoneLimitModel> mWatchZoneLimitModelObserver = new Observer<WatchZoneLimitModel>() {
         @Override
@@ -104,7 +146,7 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                 @Override
                 public void run() {
                     synchronized (WatchZoneModel.this) {
-                        ModelStatus modelStatus = watchZoneLimitModel.getStatus();
+                        /*ModelStatus modelStatus = watchZoneLimitModel.getStatus();
                         if (modelStatus == ModelStatus.INVALID) {
                             // Invalid value for this LiveData. Notify observers by setting self to
                             // null.
@@ -143,7 +185,8 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                                 }
                                 postValue(WatchZoneModel.this);
                             }
-                        }
+                        }*/
+                        checkModelLoadingComplete();
                     }
                 }
             });
@@ -260,6 +303,18 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
             }
         }
         return true;
+    }
+
+    private boolean needsUpdate() {
+        boolean result = false;
+        for (WatchZonePoint point : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
+            long timestamp = point.getWatchZoneUpdatedTimestampMs();
+            long elapsedTime = System.currentTimeMillis() - timestamp;
+            if (elapsedTime > WatchZonePointUpdater.WATCH_ZONE_UP_TO_DATE_TIME_MS) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     private void updateWatchZoneLimitModels() {

@@ -129,6 +129,15 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 first.getWatchZone().getRadius() != second.getWatchZone().getRadius();
     }
 
+    private synchronized void scheduleValidWatchZones(List<WatchZoneModel> watchZoneModels) {
+        for (WatchZoneModel model : watchZoneModels) {
+            Log.e("Joey", "model status " + model.getStatus().toString());
+            if (model.getStatus() == WatchZoneModel.Status.VALID) {
+                WatchZoneUtils.scheduleWatchZoneAlarm(mApplicationContext, model);
+            }
+        }
+    }
+
     private synchronized void invalidate(WatchZoneModelRepository repository) {
         if (mLimits.getValue() == null) {
             return;
@@ -138,6 +147,8 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         if (!preferences.getBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, false)) {
             return;
         }
+
+        scheduleValidWatchZones(repository.getWatchZoneModels());
 
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
         for (WatchZoneModel model : repository.getWatchZoneModels()) {

@@ -197,6 +197,13 @@ public class WatchZoneUtils {
     }
 
     public static void scheduleWatchZoneAlarm(Context context, WatchZoneModel model) {
+        Log.e("Joey", "Scheduling watch zone alarm. " + model.getWatchZoneUid());
+        if (model.getWatchZoneLimitModelUids().isEmpty()) {
+            Log.e("Joey", "no limits for this watch zone!");
+        }
+        for (Long limitId : model.getWatchZoneLimitModelUids()) {
+            Log.e("Joey", "limit " + limitId);
+        }
         /*long nextSweepingTime = getNextSweepingTime(model);
         if (nextSweepingTime > 0) {
             long alarmTime = getAlarmTimeForSweepingTime(nextSweepingTime);
