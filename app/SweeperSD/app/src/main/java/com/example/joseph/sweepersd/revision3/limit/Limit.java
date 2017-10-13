@@ -25,6 +25,9 @@ public class Limit {
     @ColumnInfo(name = "isPosted")
     private boolean isPosted;
 
+    @ColumnInfo(name = "addressValidatedTimestamp")
+    private long addressValidatedTimestamp;
+
     public long getUid() {
         return uid;
     }
@@ -45,8 +48,16 @@ public class Limit {
         return rawLimitString;
     }
 
+    public long getAddressValidatedTimestamp() {
+        return addressValidatedTimestamp;
+    }
+
     void setUid(long uid) {
         this.uid = uid;
+    }
+
+    void setAddressValidatedTimestamp(long addressValidatedTimestamp) {
+        this.addressValidatedTimestamp = addressValidatedTimestamp;
     }
 
     void setStreet(String street) {

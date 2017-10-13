@@ -25,9 +25,9 @@ import java.util.Map;
 public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
     private static final String TAG = WatchZoneUpdateJob.class.getSimpleName();
 
-    private static final int ONE_DAY = 1000 * 60 * 60 * 24;
-    private static final int ONE_MINUTE = 1000 * 60;
-    private static final int ONE_HOUR = 1000 * 60 * 60;
+    private static final long ONE_DAY = 1000L * 60L * 60L * 24L;
+    private static final long ONE_MINUTE = 1000L * 60L;
+    private static final long ONE_HOUR = 1000L * 60L * 60L;
 
     private ServiceLifecycleDispatcher mDispatcher;
 

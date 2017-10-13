@@ -81,6 +81,7 @@ public class OnDeviceLimitProviderService extends IntentService {
                 } else {
                     limit.setPosted(true);
                 }
+                limit.setAddressValidatedTimestamp(0L);
             }
 
             Log.i(TAG, "Populating limits table.");
@@ -112,6 +113,8 @@ public class OnDeviceLimitProviderService extends IntentService {
             // Any existing WatchZones need to be updated!
             WatchZoneRepository watchZoneRepository = WatchZoneRepository.getInstance(this);
             watchZoneRepository.triggerRefreshAll();
+
+            AddressValidatorJob.scheduleJob(this);
         }
     }
 }

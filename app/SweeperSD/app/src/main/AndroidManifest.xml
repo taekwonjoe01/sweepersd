@@ -82,6 +82,10 @@
             android:name=".revision3.watchzone.WatchZoneNotificationJob"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false" />
+        <service
+            android:name=".revision3.limit.AddressValidatorJob"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
         <!--
         <activity
             android:name=".MainActivity"

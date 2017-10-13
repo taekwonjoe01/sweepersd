@@ -9,4 +9,6 @@ public class Jobs {
     public static final int WATCH_ZONE_UPDATE_BACKGROUND_JOB_ID = 101;
 
     public static final int WATCH_ZONE_NOTIFICATION_JOB = 200;
+
+    public static final int ADDRESS_VALIDATOR_JOB = 300;
 }

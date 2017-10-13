@@ -45,6 +45,9 @@ public interface LimitDao {
     @Update(onConflict = REPLACE)
     void updateLimit(Limit limit);
 
+    @Update(onConflict = REPLACE)
+    void updateLimits(List<Limit> limits);
+
     @Delete
     void deleteAll(List<Limit> limit);
 }
