@@ -38,7 +38,7 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
                 DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                     @Override
                     public int getOldListSize() {
-                        return mCurrentList == null ? 0 : mCurrentList.size();
+                        return mCurrentList.size();
                     }
 
                     @Override
@@ -117,9 +117,6 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
     }
 
     public synchronized List<WatchZoneModel> getWatchZoneModels() {
-        if (mCurrentList == null) {
-            return null;
-        }
         List<WatchZoneModel> result = new ArrayList<>();
         for (WatchZone zone : mCurrentList) {
             result.add(mWatchZoneModelsMap.get(zone.getUid()));

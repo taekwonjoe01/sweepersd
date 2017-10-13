@@ -14,16 +14,21 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.revision3.utils.Jobs;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneModelUpdater;
+import com.example.joseph.sweepersd.revision3.watchzone.model.WatchZoneRepository;
 
+import java.util.List;
 import java.util.Map;
 
 public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
+    private static final String TAG = WatchZoneUpdateJob.class.getSimpleName();
+
     private static final int ONE_DAY = 1000 * 60 * 60 * 24;
     private static final int ONE_MINUTE = 1000 * 60;
     private static final int ONE_HOUR = 1000 * 60 * 60;
 
-    private WatchZoneModelUpdater mWatchZoneModelUpdater;
     private ServiceLifecycleDispatcher mDispatcher;
 
     public static void scheduleAppForegroundJob(Context context) {
@@ -64,22 +69,47 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        mWatchZoneModelUpdater = WatchZoneModelUpdater.getInstance(this);
+        Log.i(TAG, "Starting update job.");
         mDispatcher = new ServiceLifecycleDispatcher(this);
 
         mDispatcher.onServicePreSuperOnCreate();
         mDispatcher.onServicePreSuperOnStart();
-        mWatchZoneModelUpdater.observe(this, new Observer<Map<Long, Integer>>() {
-            @Override
-            public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
-                if (longIntegerMap != null) {
-                    if (longIntegerMap.isEmpty()) {
-                        //Log.e("Joey", "Job Finished");
+
+        if (!WatchZoneRepository.getInstance(this).getWatchZoneUids().isEmpty()) {
+            WatchZoneModelUpdater.getInstance(this).observe(this,
+                    new Observer<Map<Long, Integer>>() {
+                @Override
+                public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
+                    // Do nothing - just observing so this object comes to life.
+                }
+            });
+            WatchZoneModelRepository.getInstance(this).observe(this,
+                    new Observer<WatchZoneModelRepository>() {
+                        @Override
+                public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
+                    boolean finished = false;
+                    if (watchZoneModelRepository != null) {
+                        List<WatchZoneModel> models = watchZoneModelRepository.getWatchZoneModels();
+                        if (models != null && !models.isEmpty()) {
+                            finished = true;
+                            for (WatchZoneModel model : models) {
+                                if (model.getStatus() != WatchZoneModel.Status.VALID) {
+                                    finished = false;
+                                }
+                            }
+                        }
+                    }
+                    if (finished) {
+                        Log.i(TAG, "All jobs up-to-date. Finishing job.");
+                        WatchZoneModelRepository.getInstance(WatchZoneUpdateJob.this).removeObserver(this);
                         jobFinished(jobParameters, false);
                     }
                 }
-            }
-        });
+            });
+        } else {
+            Log.i(TAG, "No WatchZoneModels, finishing job.");
+            jobFinished(jobParameters, false);
+        }
         // Signal that another thread is doing the work.
         return true;
     }
@@ -88,7 +118,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
     public boolean onStopJob(JobParameters jobParameters) {
         mDispatcher.onServicePreSuperOnDestroy();
 
-        //Log.e("Joey", "Job Terminated");
+        Log.i(TAG, "Job interrupted. Rescheduling.");
         return true;
     }
 
