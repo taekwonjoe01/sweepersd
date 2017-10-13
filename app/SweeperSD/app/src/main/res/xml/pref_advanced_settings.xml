@@ -12,53 +12,53 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_key_activity_update_rate" />
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_driving_driving_threshold"
         android:key="@string/pref_key_driving_driving_threshold"
         android:defaultValue="70">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_driving_parked_threshold"
         android:key="@string/pref_key_driving_parked_threshold"
         android:defaultValue="20">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_driving_deciding_driving_threshold"
         android:key="@string/pref_key_driving_deciding_driving_threshold"
         android:defaultValue="70">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_driving_deciding_parked_threshold"
         android:key="@string/pref_key_driving_deciding_parked_threshold"
         android:defaultValue="30">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_parked_driving_threshold"
         android:key="@string/pref_key_parked_driving_threshold"
         android:defaultValue="100">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_parked_parked_threshold"
         android:key="@string/pref_key_parked_parked_threshold"
         android:defaultValue="40">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_parked_deciding_driving_threshold"
         android:key="@string/pref_key_parked_deciding_driving_threshold"
         android:defaultValue="90">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
-    <com.example.joseph.sweepersd.SeekbarPreference
+    <com.example.joseph.sweepersd.archived.SeekbarPreference
         android:title="@string/pref_key_parked_deciding_parked_threshold"
         android:key="@string/pref_key_parked_deciding_parked_threshold"
         android:defaultValue="35">
-    </com.example.joseph.sweepersd.SeekbarPreference>
+    </com.example.joseph.sweepersd.archived.SeekbarPreference>
 
     <ListPreference
         android:defaultValue="40000"

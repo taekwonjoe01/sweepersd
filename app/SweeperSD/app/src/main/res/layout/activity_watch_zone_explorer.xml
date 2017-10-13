@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneDetailsActivity">
+    tools:context=".archived.presentation.manualalarms.WatchZoneDetailsActivity">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
+                tools:context=".archived.presentation.manualalarms.CreateWatchZoneActivity" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -114,7 +114,7 @@
                 android:background="@color/app_background"
                 android:orientation="vertical">
 
-                <com.example.joseph.sweepersd.revision3.WrapContentTabViewPager
+                <com.example.joseph.sweepersd.utils.WrapContentTabViewPager
                     android:id="@+id/tab_viewpager"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
@@ -129,7 +129,7 @@
                         app:tabIndicatorColor="@color/app_background_activated"
                         app:tabBackground="@drawable/apptheme_background"
                         app:tabGravity="fill"/>
-                </com.example.joseph.sweepersd.revision3.WrapContentTabViewPager>
+                </com.example.joseph.sweepersd.utils.WrapContentTabViewPager>
             </LinearLayout>
         </LinearLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>

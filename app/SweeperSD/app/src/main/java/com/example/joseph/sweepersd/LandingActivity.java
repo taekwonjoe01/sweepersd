@@ -9,7 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.presentation.manualalarms.WatchZoneViewActivity;
+import com.example.joseph.sweepersd.archived.SweeperService;
+import com.example.joseph.sweepersd.watchzone.UserZonesActivity;
 
 /**
  * Opening Activity for SweeperSD.
@@ -37,7 +38,7 @@ public class LandingActivity extends AppCompatActivity {
         mManualAlarmsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LandingActivity.this, WatchZoneViewActivity.class));
+                startActivity(new Intent(LandingActivity.this, UserZonesActivity.class));
             }
         });
 
@@ -51,4 +52,5 @@ public class LandingActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(this, SweeperService.class);
         startService(serviceIntent);
     }
+
 }

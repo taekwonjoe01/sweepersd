@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="100"
-    tools:context="com.example.joseph.sweepersd.MainActivity">
+    tools:context="com.example.joseph.sweepersd.archived.MainActivity">
 
     <LinearLayout
         android:orientation="vertical"
@@ -57,7 +57,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
+            tools:context=".archived.presentation.manualalarms.CreateWatchZoneActivity" />
 
         <FrameLayout
             android:id="@+id/layout_no_parked_locations"

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".presentation.manualalarms.WatchZoneDetailsActivity"
+    tools:context=".archived.presentation.manualalarms.WatchZoneDetailsActivity"
     tools:showIn="@layout/activity_watch_zone_details">
 
     <LinearLayout
@@ -24,7 +24,7 @@
             android:layout_height="0dp"
             android:layout_weight="50"
             android:layout_margin="8dp"
-            tools:context="com.example.joseph.sweepersd.presentation.manualalarms.CreateWatchZoneActivity" />
+            tools:context=".archived.presentation.manualalarms.CreateWatchZoneActivity" />
 
 
         <TextView
