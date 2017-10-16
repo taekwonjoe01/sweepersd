@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +46,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     private final WatchZoneModelUpdater mWatchZoneModelUpdater;
 
     private List<WatchZoneModel> mCurrentList;
+    private List<Long> mCurrentUpdatingList;
 
     private Long mExplorerUid = 0L;
 
@@ -111,12 +114,80 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         mWatchZoneModelUpdater.observe(mActivity, new Observer<Map<Long, Integer>>() {
             @Override
             public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
-                for (Long uid : longIntegerMap.keySet()) {
-                    int index = mCurrentList.indexOf(uid);
-                    if (index >= 0) {
-                        notifyItemChanged(index);
-                    }
+                if (mCurrentUpdatingList == null) {
+                    mCurrentUpdatingList = new ArrayList<>();
+
                 }
+                final List<Long> updatingList = new ArrayList<>(longIntegerMap.keySet());
+                DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                    @Override
+                    public int getOldListSize() {
+                        return mCurrentUpdatingList.size();
+                    }
+
+                    @Override
+                    public int getNewListSize() {
+                        return updatingList.size();
+                    }
+
+                    @Override
+                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                        return mCurrentUpdatingList.get(oldItemPosition) ==
+                                updatingList.get(newItemPosition);
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                        return mCurrentUpdatingList.get(oldItemPosition) ==
+                                updatingList.get(newItemPosition);
+                    }
+                });
+                result.dispatchUpdatesTo(new ListUpdateCallback() {
+                    @Override
+                    public void onInserted(int position, int count) {
+                        Long uid = updatingList.get(position);
+                        int foundIndex = -1;
+                        int index = 0;
+                        for (WatchZoneModel model : mCurrentList) {
+                            if (model.getWatchZoneUid() == uid) {
+                                foundIndex = index;
+                                break;
+                            }
+                            index++;
+                        }
+                        if (foundIndex >= 0) {
+                            notifyItemChanged(index);
+                        }
+                    }
+
+                    @Override
+                    public void onRemoved(int position, int count) {
+                        Long uid = mCurrentUpdatingList.get(position);
+                        int foundIndex = -1;
+                        int index = 0;
+                        for (WatchZoneModel model : mCurrentList) {
+                            if (model.getWatchZoneUid() == uid) {
+                                foundIndex = index;
+                                break;
+                            }
+                            index++;
+                        }
+                        if (foundIndex >= 0) {
+                            notifyItemChanged(index);
+                        }
+                    }
+
+                    @Override
+                    public void onMoved(int fromPosition, int toPosition) {
+                        // Doesn't matter
+                    }
+
+                    @Override
+                    public void onChanged(int position, int count, Object payload) {
+                        // Doesn't matter
+                    }
+                });
+                mCurrentUpdatingList = updatingList;
             }
         });
     }
@@ -136,6 +207,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         final WatchZoneModel model = mCurrentList.get(position);
         WatchZoneModel.Status modelStatus = model.getStatus();
         String label = modelStatus.toString();
+        Log.e("Joey", "model label at index " + position + " is " + label);
         if (modelStatus == WatchZoneModel.Status.INVALID_NO_WATCH_ZONE) {
             // TODO - This watch Zone doesn't exist and this should not happen!
         } else {
@@ -167,11 +239,13 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                     }
 
                     if (progress != null) {
+                        Log.e("Joey", "Making visible!");
                         holder.mDetailsGroup.setVisibility(View.GONE);
                         holder.mLoadingGroup.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setProgress(progress);
                     } else {
+                        Log.e("Joey", "Making invisible!");
                         holder.mUpdatingProgress.setProgress(0);
                         holder.mLoadingGroup.setVisibility(View.INVISIBLE);
 
