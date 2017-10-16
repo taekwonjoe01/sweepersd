@@ -61,7 +61,7 @@ public class DebugActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_debug);
 
-        mLaunchMapsButton = (Button) findViewById(R.id.launch_maps);
+        /*mLaunchMapsButton = (Button) findViewById(R.id.launch_maps);
         mSendParkedActivity = (Button) findViewById(R.id.sendParked);
         mSendDrivingActivity = (Button) findViewById(R.id.sendDriving);
         mVehicleText = (TextView) findViewById(R.id.vehicleConfidenceText);
@@ -74,7 +74,7 @@ public class DebugActivity extends AppCompatActivity
         mUnknownText = (TextView) findViewById(R.id.unknownConfidenceText);
         mStatusText = (TextView) findViewById(R.id.statusText);
         mServiceStatusText = (TextView) findViewById(R.id.serviceStatusText);
-        mAddresses = (TextView) findViewById(R.id.addresses);
+        mAddresses = (TextView) findViewById(R.id.addresses);*/
 
         mLaunchMapsButton.setOnClickListener(new View.OnClickListener() {
             @Override

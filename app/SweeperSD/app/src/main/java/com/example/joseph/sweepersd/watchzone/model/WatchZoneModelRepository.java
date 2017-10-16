@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
@@ -20,7 +21,7 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         ListUpdateCallback {
     private static final String TAG = WatchZoneModelRepository.class.getSimpleName();
 
-    private static WatchZoneModelRepository sInstance;
+    private static MutableLiveData<WatchZoneModelRepository> sInstance = new MutableLiveData<>();
 
     private final Context mApplicationContext;
     private final Handler mHandler;
@@ -94,25 +95,31 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
     }
 
     public static synchronized WatchZoneModelRepository getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new WatchZoneModelRepository(context);
+        if (sInstance.getValue() == null) {
+            sInstance.setValue(new WatchZoneModelRepository(context));
         }
+        return sInstance.getValue();
+    }
+
+    public static LiveData<WatchZoneModelRepository> getInstanceLiveData() {
         return sInstance;
     }
 
     public synchronized void delete() {
-        if (sInstance != null) {
+        if (sInstance.getValue() != null) {
             // TODO Remove observers
             WatchZoneRepository.getInstance(mApplicationContext).getWatchZonesLiveData()
                 .removeObserver(mWatchZoneObserver);
             for (Long watchZoneUid : mWatchZoneModelsMap.keySet()) {
                 WatchZoneModel model = mWatchZoneModelsMap.get(watchZoneUid);
-                model.removeObserver(mWatchZoneModelObserver);
+                if (model != null) {
+                    model.removeObserver(mWatchZoneModelObserver);
+                }
             }
 
             mThread.quit();
 
-            sInstance = null;
+            sInstance.setValue(null);
         }
     }
 

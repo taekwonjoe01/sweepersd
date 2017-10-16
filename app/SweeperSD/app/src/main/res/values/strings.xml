@@ -3,7 +3,6 @@
     <string name="title_watch_zone_explorer_activity">Zone Explorer</string>
     <string name="title_watch_zone_details_activity">Zone Details</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="title_activity_debug">Debug Activity</string>
 
     <!-- Strings for Landing page -->
     <string name="landing_button_alarms">Monitor Locations Manually</string>
@@ -157,7 +156,8 @@
 
     <!-- Strings for Watch Zone Details Activity -->
     <string name="details_delete_watch_zone">Delete</string>
-    <string name="title_activity_test">TestActivity</string>
+    <string name="title_activity_test">Test Activity</string>
+    <string name="title_activity_debug">Debug Activity</string>
 
     <string name="explorer_tab_title_limits">Posted Limits</string>
     <string name="explorer_tab_title_calendar">Calendar</string>

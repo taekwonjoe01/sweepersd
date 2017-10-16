@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class WatchZoneRepository extends LiveData<WatchZoneModel> {
     private static final String TAG = WatchZoneRepository.class.getSimpleName();
 
-    private static WatchZoneRepository sInstance;
+    private static MutableLiveData<WatchZoneRepository> sInstance = new MutableLiveData<>();
 
     private final Context mApplicationContext;
     private final Map<Long, LiveData<WatchZone>> mCachedWatchZoneLiveDataMap;
@@ -38,9 +39,13 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
     }
 
     public synchronized static WatchZoneRepository getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new WatchZoneRepository(context);
+        if (sInstance.getValue() == null) {
+            sInstance.setValue(new WatchZoneRepository(context));
         }
+        return sInstance.getValue();
+    }
+
+    public static LiveData<WatchZoneRepository> getInstanceLiveData() {
         return sInstance;
     }
 
@@ -48,8 +53,8 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
      * Intended to only be called by the Application when memory is needed to be trimmed.
      */
     public synchronized void delete() {
-        if (sInstance != null) {
-            sInstance = null;
+        if (sInstance.getValue() != null) {
+            sInstance.setValue(null);
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd;
 import android.app.Application;
 
 import com.example.joseph.sweepersd.limit.LimitRepository;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
@@ -22,6 +23,7 @@ public class SweeperSDApplication extends Application {
     private void trimMemory() {
         WatchZoneRepository.getInstance(this).delete();
         WatchZoneModelUpdater.getInstance(this).delete();
+        WatchZoneModelRepository.getInstance(this).delete();
         LimitRepository.getInstance(this).delete();
     }
 }

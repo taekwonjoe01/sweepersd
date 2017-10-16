@@ -1,6 +1,8 @@
 package com.example.joseph.sweepersd.limit;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.LiveData_LifecycleBoundObserver_LifecycleAdapter;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LimitRepository {
-    private static LimitRepository sInstance;
+    private static MutableLiveData<LimitRepository> sInstance = new MutableLiveData<>();
     private Context mContext;
 
     private final LiveData<List<Limit>> mCachedPostedLimitsLiveData;
@@ -44,16 +46,20 @@ public class LimitRepository {
     }
 
     public synchronized static LimitRepository getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new LimitRepository(context);
+        if (sInstance.getValue() == null) {
+            sInstance.setValue(new LimitRepository(context));
         }
+        return sInstance.getValue();
+    }
+
+    public static LiveData<LimitRepository> getInstanceLiveData() {
         return sInstance;
     }
 
     public synchronized void delete() {
-        if (sInstance != null) {
+        if (sInstance.getValue() != null) {
             mSharedPreferenceLiveData.removeObserver(mSharedPreferencesObserver);
-            sInstance = null;
+            sInstance.setValue(null);
         }
     }
 

@@ -81,6 +81,15 @@
             android:name=".limit.AddressValidatorJob"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false" />
+        <activity
+            android:name=".DebugActivity"
+            android:label="@string/title_activity_debug">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <!-- EXPERIMENTAL
         <activity
