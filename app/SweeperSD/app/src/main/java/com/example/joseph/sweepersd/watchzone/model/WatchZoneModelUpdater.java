@@ -13,6 +13,7 @@ import android.util.Log;
 import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.utils.LocationUtils;
+import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -34,6 +35,8 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final Handler mHandler;
     private final Observer<WatchZoneModelRepository> mRepositoryObserver;
     private final Observer<List<Limit>> mLimitObserver;
+    private final LongPreferenceLiveData mExplorerUidLiveData;
+    private final Observer<Long> mExplorerUidObserver;
     private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
     private LiveData<List<Limit>> mLimits;
@@ -54,6 +57,14 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mLimitObserver = new Observer<List<Limit>>() {
             @Override
             public void onChanged(@Nullable List<Limit> limits) {
+                invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
+            }
+        };
+        mExplorerUidLiveData = new LongPreferenceLiveData(mApplicationContext,
+                Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
+        mExplorerUidObserver = new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long aLong) {
                 invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
             }
         };
@@ -97,10 +108,12 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mLimits = LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData();
         mLimits.observeForever(mLimitObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).observeForever(mRepositoryObserver);
+        mExplorerUidLiveData.observeForever(mExplorerUidObserver);
     }
 
     @Override
     protected synchronized void onInactive() {
+        mExplorerUidLiveData.removeObserver(mExplorerUidObserver);
         mLimits.removeObserver(mLimitObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).removeObserver(mRepositoryObserver);
         cancelAll();
@@ -149,7 +162,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        scheduleWatchZoneNotifications(repository.getWatchZoneModels());
+        List<WatchZoneModel> modelsToSchedule = repository.getWatchZoneModels();
+        for (WatchZoneModel model : repository.getWatchZoneModels()) {
+            if (model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {
+                modelsToSchedule.remove(model);
+            }
+        }
+        scheduleWatchZoneNotifications(modelsToSchedule);
 
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
         for (WatchZoneModel model : repository.getWatchZoneModels()) {
