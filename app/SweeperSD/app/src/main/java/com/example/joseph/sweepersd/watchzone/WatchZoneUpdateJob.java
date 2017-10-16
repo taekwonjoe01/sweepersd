@@ -10,10 +10,13 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ServiceLifecycleDispatcher;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.Jobs;
+import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
@@ -70,6 +73,11 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.i(TAG, "Starting update job.");
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_STARTED,
+                System.currentTimeMillis()).commit();
+
         mDispatcher = new ServiceLifecycleDispatcher(this);
 
         mDispatcher.onServicePreSuperOnCreate();
@@ -102,6 +110,11 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                     if (finished) {
                         Log.i(TAG, "All jobs up-to-date. Finishing job.");
                         WatchZoneModelRepository.getInstance(WatchZoneUpdateJob.this).removeObserver(this);
+
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                                WatchZoneUpdateJob.this);
+                        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
+                                System.currentTimeMillis()).commit();
                         jobFinished(jobParameters, false);
                     }
                 }

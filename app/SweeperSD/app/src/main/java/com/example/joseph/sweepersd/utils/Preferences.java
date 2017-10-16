@@ -6,4 +6,13 @@ package com.example.joseph.sweepersd.utils;
 
 public class Preferences {
     public static final String PREFERENCE_ON_DEVICE_LIMITS_LOADED = "on_device_limits_loaded";
+
+    public static final String PREFERENCE_ADDRESS_VALIDATOR_LAST_STARTED = "address_validator_last_started";
+    public static final String PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED = "address_validator_last_finished";
+
+    public static final String PREFERENCE_WATCH_ZONE_UPDATE_LAST_STARTED = "watch_zone_update_last_started";
+    public static final String PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED = "watch_zone_update_last_finished";
+
+    public static final String PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_STARTED = "watch_zone_notification_last_started";
+    public static final String PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED = "watch_zone_notification_last_finished";
 }

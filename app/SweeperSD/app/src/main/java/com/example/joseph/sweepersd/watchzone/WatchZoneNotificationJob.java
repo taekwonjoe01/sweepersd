@@ -13,7 +13,9 @@ import android.arch.lifecycle.ServiceLifecycleDispatcher;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.PersistableBundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -23,6 +25,7 @@ import com.example.joseph.sweepersd.archived.presentation.manualalarms.WatchZone
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Notifications;
+import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -63,6 +66,9 @@ public class WatchZoneNotificationJob extends JobService implements LifecycleOwn
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.i(TAG, "Starting " + TAG);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_STARTED,
+                System.currentTimeMillis()).commit();
 
         final Long uid = jobParameters.getExtras().getLong(WATCH_ZONE_UID);
 
@@ -73,6 +79,8 @@ public class WatchZoneNotificationJob extends JobService implements LifecycleOwn
         WatchZoneModelRepository.getInstance(this).observe(this, new Observer<WatchZoneModelRepository>() {
             @Override
             public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                        WatchZoneNotificationJob.this);
                 if (watchZoneModelRepository.watchZoneExists(uid)) {
                     WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(uid);
                     if (model != null) {
@@ -90,13 +98,19 @@ public class WatchZoneNotificationJob extends JobService implements LifecycleOwn
                             sendNotification(model.getWatchZone().getLabel(), nextSweepingTime);
                             WatchZoneUtils.scheduleWatchZoneNotification(
                                     WatchZoneNotificationJob.this, model);
+                            preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
+                                    System.currentTimeMillis()).commit();
                             jobFinished(jobParameters, false);
                         } else if (status != WatchZoneModel.Status.LOADING) {
                             // invalid
+                            preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
+                                    System.currentTimeMillis()).commit();
                             jobFinished(jobParameters, false);
                         }
                     }
                 } else {
+                    preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
                     jobFinished(jobParameters, false);
                 }
             }

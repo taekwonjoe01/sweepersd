@@ -6,14 +6,18 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.LocationUtils;
+import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
+import com.example.joseph.sweepersd.utils.Preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +63,9 @@ public class AddressValidatorJob extends JobService {
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.d(TAG, "Starting " + TAG);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_STARTED, System.currentTimeMillis()).commit();
+
         mFinishedLatch = new CountDownLatch(1);
 
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -144,6 +151,11 @@ public class AddressValidatorJob extends JobService {
             public void run() {
                 if (!mIsCancelled.get()) {
                     Log.d(TAG, "Finishing " + TAG);
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                            AddressValidatorJob.this);
+                    preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
+
                     jobFinished(mJobParameters, false);
 
                     mBackgroundThread.quit();
