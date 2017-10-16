@@ -19,6 +19,8 @@ import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
+import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
+import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -43,6 +45,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     private List<WatchZoneModel> mCurrentList;
 
+    private Long mExplorerUid = 0L;
+
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
 
@@ -54,6 +58,15 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                     notifyItemRangeInserted(0, mCurrentList.size());
                 } else {
                     final List<WatchZoneModel> models = repository.getValue().getWatchZoneModels();
+                    WatchZoneModel explorerModel = null;
+                    for (WatchZoneModel model : models) {
+                        if (model.getWatchZoneUid() == mExplorerUid) {
+                            explorerModel = model;
+                        }
+                    }
+                    if (explorerModel != null) {
+                        models.remove(explorerModel);
+                    }
                     DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                         @Override
                         public int getOldListSize() {
@@ -77,9 +90,19 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                                     models.get(newItemPosition));
                         }
                     });
-                    mCurrentList = repository.getValue().getWatchZoneModels();
+                    mCurrentList = models;
 
                     result.dispatchUpdatesTo(UserZonesViewAdapter.this);
+                }
+            }
+        });
+
+        LongPreferenceLiveData explorerPreference = new LongPreferenceLiveData(mActivity, Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
+        explorerPreference.observe(mActivity, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long explorerUid) {
+                if (explorerUid != null) {
+                    mExplorerUid = explorerUid;
                 }
             }
         });

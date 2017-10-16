@@ -15,4 +15,6 @@ public class Preferences {
 
     public static final String PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_STARTED = "watch_zone_notification_last_started";
     public static final String PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED = "watch_zone_notification_last_finished";
+
+    public static final String PREFERENCE_WATCH_ZONE_EXPLORER_UID = "watch_zone_explorer_uid";
 }

@@ -2,9 +2,11 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.app.DialogFragment;
 import android.arch.lifecycle.Observer;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -30,6 +32,7 @@ import android.widget.SeekBar;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAlarmLabelDialogFragment;
 import com.example.joseph.sweepersd.LimitViewAdapter;
+import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
@@ -196,6 +199,8 @@ public class WatchZoneExplorerActivity extends AppCompatActivity implements
                 mCurrentWatchZoneUid = WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                         .createWatchZone(mCurrentLabel,
                         mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
+                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();
                 setAlarmLocation(mLatLng);
                 /*WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this).updateWatchZone(mCurrentWatchZoneUid,
                         mCurrentLabel, mCurrentLatitude, mCurrentLongitude, mCurrentRadius);*/
@@ -428,6 +433,8 @@ public class WatchZoneExplorerActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, 0L).commit();
 
         if (mCurrentWatchZoneUid != 0L && !mSaveOnDestroy) {
             WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
@@ -523,6 +530,8 @@ public class WatchZoneExplorerActivity extends AppCompatActivity implements
         mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
         mCurrentWatchZoneUid = WatchZoneRepository.getInstance(this).createWatchZone(mCurrentLabel,
                 mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();
     }
 
     private void showCreateLabelDialog() {
