@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.watchzone;
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,9 +15,15 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.TabAdapter;
+import com.example.joseph.sweepersd.limit.Limit;
+import com.example.joseph.sweepersd.limit.LimitSchedule;
+import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,23 +34,27 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class WatchZoneDetailsActivity extends AppCompatActivity implements
         OnMapReadyCallback {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
     public static final String KEY_WATCHZONE_ID = "KEY_WATCHZONE_ID";
 
     private Long mWatchZoneId;
-    private WatchZone mBriefWatchZone;
-    private WatchZone mWatchZone;
 
-    private RecyclerView mRecyclerView;
-    //private LimitViewAdapter2 mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private WatchZoneViewItemDecoration mLimitViewItemDecoration;
-
-    private LinearLayout mLoadingGroup;
+    private TabLayout mTabLayout;
+    private WrapContentTabViewPager mTabViewPager;
+    private LimitsTabFragment mLimitsTabFragment;
+    private CalendarTabFragment mCalendarTabFragment;
+    private WatchZoneNotificationsTabFragment mNotificationsTabFragment;
 
     private GoogleMap mMap;
+
+    private List<LatLng> mCurrentFinishedWatchZonePoints = new ArrayList<>();
 
     private WatchZoneModel mWatchZoneModel;
 
@@ -61,6 +72,31 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
             Log.e(TAG, "INVALID WATCH ZONE ID, FINISHING ACTIVITY");
             finish();
         }
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        mTabLayout = findViewById(R.id.tab_layout);
+        mTabViewPager = findViewById(R.id.tab_viewpager);
+        setSupportActionBar(toolbar);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
+        TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
+        mLimitsTabFragment = new LimitsTabFragment();
+        mLimitsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_limits));
+        mCalendarTabFragment = new CalendarTabFragment();
+        mCalendarTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_calendar));
+        mNotificationsTabFragment = new WatchZoneNotificationsTabFragment();
+        mNotificationsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_notifications));
+        tabAdapter.addFragment(mLimitsTabFragment);
+        tabAdapter.addFragment(mCalendarTabFragment);
+        tabAdapter.addFragment(mNotificationsTabFragment);
+        mTabViewPager.setAdapter(tabAdapter);
+        mTabLayout.setupWithViewPager(mTabViewPager);
+
         WatchZoneModelRepository.getInstance(this).observe(this, new Observer<WatchZoneModelRepository>() {
             @Override
             public void onChanged(@Nullable WatchZoneModelRepository repository) {
@@ -77,31 +113,6 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
                 }
             }
         });
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
-        mLoadingGroup = (LinearLayout) findViewById(R.id.limit_loading_group);
-        mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-
-        int itemMargin = getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);
-        mLimitViewItemDecoration = new WatchZoneViewItemDecoration(itemMargin);
-
-        mRecyclerView.addItemDecoration(mLimitViewItemDecoration);
-
-        RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
-        if (animator instanceof SimpleItemAnimator) {
-            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
-        }
-
-        setTitle(WordUtils.capitalize("Loading Zone"));
     }
 
     @Override
@@ -120,76 +131,54 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
         return false;
     }
 
-    private void setAdapter() {
-        //mAdapter = new LimitViewAdapter2(this, mWatchZone.getSweepingAddresses());
-        //mRecyclerView.setAdapter(mAdapter);
-    }
-
     private void invalidateUi() {
         if (mWatchZoneModel != null) {
             WatchZone watchZone = mWatchZoneModel.getWatchZone();
             if (watchZone != null) {
                 setTitle(WordUtils.capitalize(watchZone.getLabel()));
+                List<WatchZonePoint> watchZonePoints = mWatchZoneModel.getWatchZonePointsModel().getWatchZonePointsList();
+                invalidateWatchZonePoints(watchZonePoints);
+
+                Map<Limit, List<LimitSchedule>> limitsAndSchedules = new HashMap<>();
+                for (Long limitUid : mWatchZoneModel.getWatchZoneLimitModelUids()) {
+                    WatchZoneLimitModel limitModel = mWatchZoneModel.getWatchZoneLimitModel(limitUid);
+                    Limit limit = limitModel.getLimit();
+                    if (limitModel != null && limit != null && limitModel
+                            .getLimitSchedulesModel().getScheduleList() != null) {
+                        limitsAndSchedules.put(limit, limitModel
+                                .getLimitSchedulesModel().getScheduleList());
+                    }
+                }
+
+                mLimitsTabFragment.setLimitsAndSchedules(limitsAndSchedules);
             }
         }
     }
 
-    /*private WatchZoneManager.WatchZoneChangeListener mWatchZoneChangeListener =
-            new WatchZoneManager.WatchZoneChangeListener() {
-        @Override
-        public void onWatchZoneUpdated(long createdTimestamp) {
-            Log.d(TAG, "onWatchZoneUpdated " + createdTimestamp);
-
-            for (WatchZonePresenter p : mWatchZonePresenters) {
-                if (p.watchZoneTimestamp == createdTimestamp) {
-                    if (mWatchZoneManager.getUpdatingWatchZones().contains(createdTimestamp)) {
-                        UpdatingPresenter presenter = new UpdatingPresenter(
-                                p.position, createdTimestamp);
-                        mWatchZonePresenters.remove(p.position);
-                        mWatchZonePresenters.add(p.position, presenter);
-                    } else {
-                        NonUpdatingWatchZonePresenter presenter =
-                                new NonUpdatingWatchZonePresenter(p.position, createdTimestamp);
-                        mWatchZonePresenters.remove(p.position);
-                        mWatchZonePresenters.add(p.position, presenter);
-                    }
-                    notifyItemChanged(p.position);
+    private void invalidateWatchZonePoints(final List<WatchZonePoint> watchZonePoints) {
+        if (mMap == null) {
+            return;
+        }
+        if (watchZonePoints != null) {
+            List<WatchZonePoint> finishedPoints = new ArrayList<>();
+            for (WatchZonePoint p : watchZonePoints) {
+                if (p.getAddress() != null) {
+                    finishedPoints.add(p);
+                }
+            }
+            for (WatchZonePoint p : finishedPoints) {
+                LatLng latLng = new LatLng(p.getLatitude(), p.getLongitude());
+                if (!mCurrentFinishedWatchZonePoints.contains(latLng)) {
+                    mCurrentFinishedWatchZonePoints.add(latLng);
+                    mMap.addCircle(new CircleOptions()
+                            .center(latLng)
+                            .radius(1.0)
+                            .strokeColor(getResources().getColor(R.color.app_primary))
+                            .fillColor(getResources().getColor(R.color.map_radius_fill)));
                 }
             }
         }
-
-        @Override
-        public void onWatchZoneCreated(long createdTimestamp) {
-            Log.d(TAG, "onWatchZoneCreated " + createdTimestamp);
-            UpdatingPresenter presenter = new UpdatingPresenter(
-                    mWatchZonePresenters.size(), createdTimestamp);
-            mWatchZonePresenters.add(presenter);
-
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onWatchZoneDeleted(long createdTimestamp) {
-            Log.d(TAG, "onWatchZoneDeleted " + createdTimestamp);
-            int position = -1;
-            for (int i = 0; i < mWatchZonePresenters.size(); i++) {
-                WatchZonePresenter p = mWatchZonePresenters.get(i);
-                Log.d(TAG, "timestamp: " + p.watchZoneTimestamp);
-                if (p.watchZoneTimestamp == createdTimestamp) {
-                    position = i;
-                    Log.d(TAG, "position being set to: " + i);
-                }
-            }
-            if (position > -1) {
-                Log.d(TAG, "removing item at position: " + position);
-                mWatchZonePresenters.remove(position);
-                for (int i = position; i < mWatchZonePresenters.size(); i++) {
-                    mWatchZonePresenters.get(i).position--;
-                }
-                notifyItemRemoved(position);
-            }
-        }
-    };*/
+    }
 
     /**
      * Manipulates the map once available.

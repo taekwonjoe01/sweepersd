@@ -69,8 +69,8 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
-        mLoadingGroup = (LinearLayout) findViewById(R.id.limit_loading_group);
+        //mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
+        //mLoadingGroup = (LinearLayout) findViewById(R.id.limit_loading_group);
         mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
 

@@ -14,6 +14,7 @@
         android:layout_height="match_parent"
         android:weightSum="100"
         android:orientation="vertical"
+        android:padding="4dp"
         android:background="@color/app_background">
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -22,49 +23,31 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="50"
-            android:layout_margin="8dp"
+            android:layout_weight="100"
             tools:context=".archived.presentation.manualalarms.CreateWatchZoneActivity" />
 
-
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            style="@android:style/TextAppearance.Small"
-            android:textColor="@color/app_secondary"
-            android:text="Posted Limits" />
+            android:orientation="vertical">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="30">
-
-            <LinearLayout
-                android:id="@+id/limit_loading_group"
-                android:orientation="vertical"
-                android:layout_gravity="center"
+            <com.example.joseph.sweepersd.utils.WrapContentTabViewPager
+                android:id="@+id/tab_viewpager"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible">
-
-                <ProgressBar
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tab_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:indeterminateDrawable="@drawable/apptheme_circular_progress_bar"
-                    android:layout_gravity="center|center_vertical"/>
-            </LinearLayout>
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/limit_recycler_view"
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:fadeScrollbars="false"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#22000000"
-                android:padding="@dimen/alarm_view_item_space"/>
-        </FrameLayout>
+                    app:tabMode="fixed"
+                    app:tabTextColor="@color/app_secondary"
+                    app:tabSelectedTextColor="@color/app_secondary"
+                    app:tabIndicatorColor="@color/app_background_activated"
+                    app:tabBackground="@drawable/apptheme_background"
+                    app:tabGravity="fill"/>
+            </com.example.joseph.sweepersd.utils.WrapContentTabViewPager>
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
 

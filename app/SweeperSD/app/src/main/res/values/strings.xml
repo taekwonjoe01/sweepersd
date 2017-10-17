@@ -161,5 +161,6 @@
 
     <string name="explorer_tab_title_limits">Posted Limits</string>
     <string name="explorer_tab_title_calendar">Calendar</string>
+    <string name="explorer_tab_title_notifications">Notifications</string>
 
 </resources>
