@@ -1,8 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="135dp"
-    android:layout_height="200dp"
-    android:background="@drawable/background_no_parking">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioGroup
+                android:id="@+id/time_radio_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp">
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="48 hours or less"
+                    android:layout_margin="5dp"
+                    style="@style/AppTheme" />
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24 hours or less"
+                    android:layout_margin="5dp"
+                    style="@style/AppTheme" />
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="12 hours or less"
+                    android:layout_margin="5dp"
+                    style="@style/AppTheme" />
+            </RadioGroup>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/time_radio_group"
+                android:layout_alignTop="@+id/time_radio_group"
+                android:layout_alignBottom="@+id/time_radio_group">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Keep me notified when sweeping is within "
+                    android:layout_gravity="center"
+                    android:gravity="center"/>
+            </FrameLayout>
+
+            <View
+                android:id="@+id/radio_separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/time_radio_group"
+                android:background="@color/app_secondary" />
+
+
+            <RadioGroup
+                android:id="@+id/distance_radio_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/radio_separator"
+                android:layout_alignStart="@+id/time_radio_group"
+                android:layout_marginEnd="10dp">
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="always"
+                    android:layout_margin="5dp"
+                    style="@style/AppTheme" />
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="only when I am nearby"
+                    android:layout_margin="5dp"
+                    style="@style/AppTheme" />
+            </RadioGroup>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/distance_radio_group"
+                android:layout_alignTop="@+id/distance_radio_group"
+                android:layout_alignBottom="@+id/distance_radio_group">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notify me "
+                    android:layout_gravity="center"
+                    android:gravity="center"/>
+            </FrameLayout>
+        </RelativeLayout>
+    </LinearLayout>
 
 </FrameLayout>
