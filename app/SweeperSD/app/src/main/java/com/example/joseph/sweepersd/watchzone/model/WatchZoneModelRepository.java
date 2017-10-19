@@ -136,7 +136,17 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
     }
 
     public synchronized boolean watchZoneExists(long watchZoneUid) {
-        return mWatchZoneModelsMap.containsKey(watchZoneUid);
+        boolean result = mWatchZoneModelsMap.containsKey(watchZoneUid);
+        if (!result) {
+            List<Long> watchZoneUids = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
+            for (Long uid : watchZoneUids) {
+                if (!mWatchZoneModelsMap.containsKey(uid)) {
+                    mWatchZoneModelsMap.put(uid, null);
+                }
+            }
+        }
+        result = mWatchZoneModelsMap.containsKey(watchZoneUid);
+        return result;
     }
 
     @Override

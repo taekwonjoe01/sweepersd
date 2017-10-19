@@ -92,9 +92,9 @@ public class Limit {
                 result = true;
             } else if (this.endRange != compareTo.getEndRange()) {
                 result = true;
-            } else if (TextUtils.equals(this.street, compareTo.getStreet())) {
+            } else if (!TextUtils.equals(this.street, compareTo.getStreet())) {
                 result = true;
-            } else if (TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
+            } else if (!TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
                 result = true;
             }
         }

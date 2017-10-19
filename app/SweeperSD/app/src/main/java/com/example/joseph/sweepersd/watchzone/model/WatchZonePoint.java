@@ -97,7 +97,7 @@ public class WatchZonePoint {
                 result = true;
             } else if (this.latitude != compareTo.getLatitude()) {
                 result = true;
-            } else if (TextUtils.equals(this.address, compareTo.getAddress())) {
+            } else if (!TextUtils.equals(this.address, compareTo.getAddress())) {
                 result = true;
             } else if (this.limitId != compareTo.getLimitId()) {
                 result = true;

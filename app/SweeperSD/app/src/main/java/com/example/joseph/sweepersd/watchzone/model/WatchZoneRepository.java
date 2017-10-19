@@ -30,10 +30,7 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         mApplicationContext = context.getApplicationContext();
         mCachedWatchZoneLiveDataMap = new HashMap<>();
 
-        List<Long> watchZoneUids = loadWatchZoneUidsFromDb();
-        for (Long uid : watchZoneUids) {
-            mCachedWatchZoneLiveDataMap.put(uid, null);
-        }
+        getWatchZoneUids();
 
         mCachedWatchZoneLiveDataList = loadWatchZonesLiveDataFromDb();
     }
@@ -59,6 +56,12 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
     }
 
     public synchronized List<Long> getWatchZoneUids() {
+        List<Long> watchZoneUids = loadWatchZoneUidsFromDb();
+        for (Long uid : watchZoneUids) {
+            if (!mCachedWatchZoneLiveDataMap.containsKey(uid)) {
+                mCachedWatchZoneLiveDataMap.put(uid, null);
+            }
+        }
         return new ArrayList<>(mCachedWatchZoneLiveDataMap.keySet());
     }
 

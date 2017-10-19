@@ -108,7 +108,13 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         boolean result = false;
 
         if (this.mWatchZoneUid == compareTo.getWatchZoneUid()) {
-            if (this.getWatchZonePointsList().size() != compareTo.getWatchZonePointsList().size()) {
+            if (this.getWatchZonePointsList() == null && compareTo.getWatchZonePointsList() == null) {
+                return false;
+            } else if (this.getWatchZonePointsList() == null && compareTo.getWatchZonePointsList() != null) {
+                return true;
+            } else if (this.getWatchZonePointsList() != null && compareTo.getWatchZonePointsList() == null) {
+                return true;
+            } else if (this.getWatchZonePointsList().size() != compareTo.getWatchZonePointsList().size()) {
                 result = true;
             } else {
                 int index = 0;

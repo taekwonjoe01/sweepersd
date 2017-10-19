@@ -81,11 +81,11 @@ public class WatchZone {
                 result = true;
             } else if (this.centerLatitude != compareTo.getCenterLatitude()) {
                 result = true;
-            } else if (this.centerLatitude != compareTo.getCenterLongitude()) {
+            } else if (this.centerLongitude != compareTo.getCenterLongitude()) {
                 result = true;
-            } else if (TextUtils.equals(this.label, compareTo.getLabel())) {
+            } else if (!TextUtils.equals(this.label, compareTo.getLabel())) {
                 result = true;
-            } else if (this.lastSweepingUpdated != compareTo.lastSweepingUpdated) {
+            } else if (this.lastSweepingUpdated != compareTo.getLastSweepingUpdated()) {
                 result = true;
             }
         }
