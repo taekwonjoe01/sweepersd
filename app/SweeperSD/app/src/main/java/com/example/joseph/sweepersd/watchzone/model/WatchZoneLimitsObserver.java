@@ -44,7 +44,10 @@ public class WatchZoneLimitsObserver extends WatchZoneModelObserver<List<WatchZo
             for (Long uid : limitUids) {
                 WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(uid);
                 if (limitModel != null) {
-                    limitModels.add(limitModel);
+                    if (limitModel.getLimitSchedulesModel() != null &&
+                            limitModel.getLimitSchedulesModel().getScheduleList() != null) {
+                        limitModels.add(limitModel);
+                    }
                 }
             }
             if (mLimitModels == null) {
@@ -113,5 +116,9 @@ public class WatchZoneLimitsObserver extends WatchZoneModelObserver<List<WatchZo
                 }
             }
         });
+    }
+
+    public List<WatchZoneLimitModel> getLimitModels() {
+        return mLimitModels;
     }
 }

@@ -23,6 +23,7 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,8 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZoneDetailsActivity extends AppCompatActivity implements
-        OnMapReadyCallback {
+public class WatchZoneDetailsActivity extends AppCompatActivity {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
     public static final String KEY_WATCHZONE_ID = "KEY_WATCHZONE_ID";
 
@@ -52,7 +52,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
     private CalendarTabFragment mCalendarTabFragment;
     private WatchZoneNotificationsTabFragment mNotificationsTabFragment;
 
-    private GoogleMap mMap;
+    private WatchZoneMapFragment mMapFragment;
 
     private List<LatLng> mCurrentFinishedWatchZonePoints = new ArrayList<>();
 
@@ -78,15 +78,14 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
         mTabViewPager = findViewById(R.id.tab_viewpager);
         setSupportActionBar(toolbar);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
+        mMapFragment= (WatchZoneMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.watch_zone_map_fragment);
+        mMapFragment.addWatchZone(mWatchZoneId);
 
         TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
         mLimitsTabFragment = new LimitsTabFragment();
         mLimitsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_limits));
+        mLimitsTabFragment.addWatchZone(mWatchZoneId);
         mCalendarTabFragment = new CalendarTabFragment();
         mCalendarTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_calendar));
         mNotificationsTabFragment = new WatchZoneNotificationsTabFragment();
@@ -97,22 +96,23 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
 
-        WatchZoneModelRepository.getInstance(this).observe(this, new Observer<WatchZoneModelRepository>() {
+        WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneObserver(mWatchZoneId,
+                new WatchZoneObserver.WatchZoneChangedCallback() {
             @Override
-            public void onChanged(@Nullable WatchZoneModelRepository repository) {
-                if (!WatchZoneModelRepository.getInstance(WatchZoneDetailsActivity.this)
-                        .watchZoneExists(mWatchZoneId)) {
-                    finish();
-                } else {
-                    boolean showWatchZoneOnMap = mWatchZoneModel == null;
-                    mWatchZoneModel = repository.getWatchZoneModel(mWatchZoneId);
-                    if (showWatchZoneOnMap) {
-                        showWatchZoneOnMap();
-                    }
-                    invalidateUi();
-                }
+            public void onWatchZoneChanged(WatchZone watchZone) {
+                invalidateUi(watchZone);
             }
-        });
+
+            @Override
+            public void onDataLoaded(WatchZone watchZone) {
+                invalidateUi(watchZone);
+            }
+
+            @Override
+            public void onDataInvalid() {
+                finish();
+            }
+        }));
     }
 
     @Override
@@ -131,84 +131,9 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
         return false;
     }
 
-    private void invalidateUi() {
-        if (mWatchZoneModel != null) {
-            WatchZone watchZone = mWatchZoneModel.getWatchZone();
-            if (watchZone != null) {
-                setTitle(WordUtils.capitalize(watchZone.getLabel()));
-                List<WatchZonePoint> watchZonePoints = mWatchZoneModel.getWatchZonePointsModel().getWatchZonePointsList();
-                invalidateWatchZonePoints(watchZonePoints);
-
-                Map<Limit, List<LimitSchedule>> limitsAndSchedules = new HashMap<>();
-                for (Long limitUid : mWatchZoneModel.getWatchZoneLimitModelUids()) {
-                    WatchZoneLimitModel limitModel = mWatchZoneModel.getWatchZoneLimitModel(limitUid);
-                    Limit limit = limitModel.getLimit();
-                    if (limitModel != null && limit != null && limitModel
-                            .getLimitSchedulesModel().getScheduleList() != null) {
-                        limitsAndSchedules.put(limit, limitModel
-                                .getLimitSchedulesModel().getScheduleList());
-                    }
-                }
-
-                mLimitsTabFragment.setLimitsAndSchedules(limitsAndSchedules);
-            }
-        }
-    }
-
-    private void invalidateWatchZonePoints(final List<WatchZonePoint> watchZonePoints) {
-        if (mMap == null) {
-            return;
-        }
-        if (watchZonePoints != null) {
-            List<WatchZonePoint> finishedPoints = new ArrayList<>();
-            for (WatchZonePoint p : watchZonePoints) {
-                if (p.getAddress() != null) {
-                    finishedPoints.add(p);
-                }
-            }
-            for (WatchZonePoint p : finishedPoints) {
-                LatLng latLng = new LatLng(p.getLatitude(), p.getLongitude());
-                if (!mCurrentFinishedWatchZonePoints.contains(latLng)) {
-                    mCurrentFinishedWatchZonePoints.add(latLng);
-                    mMap.addCircle(new CircleOptions()
-                            .center(latLng)
-                            .radius(1.0)
-                            .strokeColor(getResources().getColor(R.color.app_primary))
-                            .fillColor(getResources().getColor(R.color.map_radius_fill)));
-                }
-            }
-        }
-    }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        showWatchZoneOnMap();
-    }
-
-    private void showWatchZoneOnMap() {
-        if (mWatchZoneModel != null && mMap != null) {
-            WatchZone watchZone = mWatchZoneModel.getWatchZone();
-            if (watchZone != null) {
-                LatLng center = new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude());
-                mMap.clear();
-
-                mMap.addCircle(new CircleOptions()
-                        .center(center)
-                        .radius(watchZone.getRadius())
-                        .strokeColor(getResources().getColor(R.color.app_primary))
-                        .fillColor(getResources().getColor(R.color.map_radius_fill)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 15f));
-            }
-        }
+    private void invalidateUi(WatchZone watchZone) {
+        setTitle(WordUtils.capitalize(watchZone.getLabel()));
+        LatLng latLng = new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude());
+        mMapFragment.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.5f));
     }
 }

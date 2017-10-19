@@ -37,7 +37,12 @@ public abstract class WatchZoneModelObserver<T> implements Observer<WatchZoneMod
                 mCallback.onDataLoaded(data);
             }
         } else if (mIsLoaded) {
-            onRepositoryChanged(getDataFromRepo(watchZoneModelRepository));
+            T data = getDataFromRepo(watchZoneModelRepository);
+            if (data == null) {
+                mCallback.onDataInvalid();
+            } else {
+                onRepositoryChanged(getDataFromRepo(watchZoneModelRepository));
+            }
         }
     }
 

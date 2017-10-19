@@ -134,7 +134,6 @@ public class WatchZoneMapFragment extends Fragment implements OnMapReadyCallback
                 new WatchZoneObserver.WatchZoneChangedCallback() {
             @Override
             public void onWatchZoneChanged(WatchZone watchZone) {
-                Log.e("Joey", "onWatchZoneChanged");
                 presenter.watchZoneCenter.remove();
                 presenter.watchZoneRadius.remove();
                 presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()

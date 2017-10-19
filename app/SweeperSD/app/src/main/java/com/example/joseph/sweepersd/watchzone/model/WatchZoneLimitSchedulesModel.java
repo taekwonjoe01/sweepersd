@@ -111,9 +111,14 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
         boolean result = false;
 
         if (this.mLimitUid == compareTo.getLimitUid()) {
-            if (this.getScheduleList().size() != compareTo.getScheduleList().size()) {
+            if (this.getScheduleList() == null && compareTo.getScheduleList() != null) {
+                return true;
+            } else if (this.getScheduleList() != null && compareTo.getScheduleList() == null) {
+                return true;
+            } else if (this.getScheduleList() != null && compareTo.getScheduleList() != null &&
+                    this.getScheduleList().size() != compareTo.getScheduleList().size()) {
                 result = true;
-            } else {
+            } else if (this.getScheduleList() != null && compareTo.getScheduleList() != null){
                 int index = 0;
                 List<LimitSchedule> otherList = compareTo.getScheduleList();
                 for (LimitSchedule p : getScheduleList()) {

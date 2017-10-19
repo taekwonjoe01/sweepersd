@@ -100,7 +100,8 @@ public class WatchZoneLimitModel extends LiveData<WatchZoneLimitModel> {
                 result = true;
             } else if (this.mLimit != null && compareTo.getLimit() == null) {
                 result = true;
-            } else if (this.mLimit.isChanged(compareTo.getLimit())) {
+            } else if (this.mLimit != null && compareTo.getLimit() != null
+                    && this.mLimit.isChanged(compareTo.getLimit())) {
                 result = true;
             } else if (this.mSchedulesModel.isChanged(compareTo.getLimitSchedulesModel())) {
                 result = true;

@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.utils;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class WrapContentTabViewPager extends ViewPager {
@@ -30,5 +31,15 @@ public class WrapContentTabViewPager extends ViewPager {
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return false;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return false;
     }
 }

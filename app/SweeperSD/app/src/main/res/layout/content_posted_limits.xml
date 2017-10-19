@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="135dp"
-    android:layout_height="200dp"
+    android:layout_width="125dp"
+    android:layout_height="175dp"
     android:background="@drawable/background_no_parking">
 
     <LinearLayout
@@ -13,21 +13,44 @@
         android:orientation="vertical">
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center">
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginLeft="2dp"
-                android:layout_gravity="center"
-                android:background="@drawable/ic_local_parking_black_24dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_gravity="center"
-                android:background="@drawable/ic_do_not_disturb_red_24dp"/>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/ic_local_parking_black_24dp"/>
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/ic_do_not_disturb_red_24dp"/>
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/textview_start_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1000"
+                android:layout_gravity="start|bottom"
+                android:textColor="@color/parking_sign_no_parking"
+                android:textSize="7sp"/>
+
+            <TextView
+                android:id="@+id/textview_end_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1099"
+                android:layout_gravity="end|bottom"
+                android:textColor="@color/parking_sign_no_parking"
+                android:textSize="7sp"/>
         </FrameLayout>
 
         <TextView
@@ -38,7 +61,7 @@
             android:textColor="@color/parking_sign_no_parking"
             android:layout_gravity="center_horizontal"
             android:gravity="center"
-            android:textSize="14sp"/>
+            android:textSize="12sp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -46,13 +69,13 @@
             android:layout_gravity="center_horizontal">
 
             <TextView
-                android:id="@+id/textview_start_range"
+                android:id="@+id/textview_start_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="10"
                 android:gravity="center"
                 android:textColor="@color/parking_sign_no_parking"
-                android:textSize="20sp"/>
+                android:textSize="16sp"/>
 
             <TextView
                 android:id="@+id/textview_start_ampm"
@@ -61,7 +84,7 @@
                 android:text="AM"
                 android:gravity="center"
                 android:textColor="@color/parking_sign_no_parking"
-                android:textSize="14sp"/>
+                android:textSize="12sp"/>
 
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -75,17 +98,17 @@
                     android:gravity="center"
                     android:textColor="@color/parking_sign_no_parking"
                     android:layout_gravity="top"
-                    android:textSize="8sp"/>
+                    android:textSize="7sp"/>
             </FrameLayout>
 
             <TextView
-                android:id="@+id/textview_end_range"
+                android:id="@+id/textview_end_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="11"
                 android:gravity="center"
                 android:textColor="@color/parking_sign_no_parking"
-                android:textSize="20sp"/>
+                android:textSize="16sp"/>
 
             <TextView
                 android:id="@+id/textview_end_ampm"
@@ -94,7 +117,7 @@
                 android:text="AM"
                 android:gravity="center"
                 android:textColor="@color/parking_sign_no_parking"
-                android:textSize="14sp"/>
+                android:textSize="12sp"/>
 
         </LinearLayout>
 
@@ -106,7 +129,7 @@
             android:gravity="center"
             android:textColor="@color/parking_sign_no_parking"
             android:layout_gravity="center_horizontal"
-            android:textSize="14sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/textview_day"
@@ -116,7 +139,7 @@
             android:gravity="center"
             android:textColor="@color/parking_sign_no_parking"
             android:layout_gravity="center_horizontal"
-            android:textSize="14sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -125,7 +148,7 @@
             android:gravity="center"
             android:textColor="@color/parking_sign_no_parking"
             android:layout_gravity="center_horizontal"
-            android:textSize="14sp"/>
+            android:textSize="12sp"/>
     </LinearLayout>
 
 
