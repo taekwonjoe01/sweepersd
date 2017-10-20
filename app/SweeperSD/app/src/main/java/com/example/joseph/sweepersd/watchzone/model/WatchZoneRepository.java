@@ -84,7 +84,8 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         List<WatchZone> zones = watchZoneDao.getAllWatchZones();
         for (WatchZone zone : zones) {
             updateWatchZone(zone.getUid(), zone.getLabel(), zone.getCenterLatitude(),
-                    zone.getCenterLongitude(), zone.getRadius());
+                    zone.getCenterLongitude(), zone.getRadius(), zone.getRemindRange(),
+                    zone.getRemindPolicy());
         }
     }
 
@@ -93,13 +94,14 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         WatchZone zone = watchZoneDao.getWatchZone(uid);
         if (zone != null) {
             updateWatchZone(zone.getUid(), zone.getLabel(), zone.getCenterLatitude(),
-                    zone.getCenterLongitude(), zone.getRadius());
+                    zone.getCenterLongitude(), zone.getRadius(), zone.getRemindRange(),
+                    zone.getRemindPolicy());
         }
     }
 
     public synchronized int updateWatchZone(Long watchZoneUid, String label,
                                             double centerLatitude, double centerLongitude,
-                                            int radius) {
+                                            int radius, int remindRange, int remindPolicy) {
         int result = 0;
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
@@ -115,6 +117,8 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
             watchZone.setCenterLatitude(centerLatitude);
             watchZone.setCenterLongitude(centerLongitude);
             watchZone.setRadius(radius);
+            watchZone.setRemindRange(remindRange);
+            watchZone.setRemindPolicy(remindPolicy);
             result = watchZoneDao.updateWatchZone(watchZone);
             if (result > 0 && invalidateWatchZonePoints) {
                 List<WatchZonePoint> oldPoints = watchZoneDao.getWatchZonePoints(watchZone.getUid());
@@ -155,6 +159,8 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
             watchZone.setCenterLongitude(centerLongitude);
             watchZone.setRadius(radius);
             watchZone.setLastSweepingUpdated(0L);
+            watchZone.setRemindRange(WatchZone.REMIND_RANGE_DEFAULT);
+            watchZone.setRemindPolicy(WatchZone.REMIND_POLICY_DEFAULT);
 
             WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
             result = watchZoneDao.insertWatchZone(watchZone);
@@ -193,7 +199,6 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
         int result = 0;
         if (watchZone != null) {
             result = watchZoneDao.deleteWatchZone(watchZone);
-            Log.d("Joey", "deleteWatchZone result " + result);
         }
 
         return result;

@@ -43,4 +43,8 @@ public class WatchZoneObserver extends WatchZoneModelObserver<WatchZone> {
             mCallback.onWatchZoneChanged(mWatchZone);
         }
     }
+
+    public WatchZone getWatchZone() {
+        return mWatchZone;
+    }
 }

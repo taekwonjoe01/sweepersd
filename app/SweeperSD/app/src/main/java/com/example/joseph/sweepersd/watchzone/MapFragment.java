@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.watchzone;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZoneMapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mGoogleMap;
 
     private Map<Long, WatchZonePresenter> mWatchZones = new HashMap<>();
@@ -133,8 +134,19 @@ public class WatchZoneMapFragment extends Fragment implements OnMapReadyCallback
                 new WatchZoneObserver.WatchZoneChangedCallback() {
             @Override
             public void onWatchZoneChanged(WatchZone watchZone) {
+                Log.e("Joey", "WAtchzone changed!");
                 presenter.watchZoneCenter.remove();
                 presenter.watchZoneRadius.remove();
+
+                if (presenter.watchZonePointsObserver != null) {
+                    for (Circle point : presenter.watchZonePoints) {
+                        point.remove();
+                    }
+                }
+                WatchZoneModelRepository.getInstance(getContext()).removeObserver(
+                        presenter.watchZonePointsObserver);
+                createWatchZonePointsObserver(watchZoneUid, presenter);
+
                 presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
                         .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
                         .radius(watchZone.getRadius())
@@ -159,6 +171,12 @@ public class WatchZoneMapFragment extends Fragment implements OnMapReadyCallback
                 presenter.watchZoneRadius.remove();
             }
         });
+        createWatchZonePointsObserver(watchZoneUid, presenter);
+        WatchZoneModelRepository.getInstance(getContext()).observe(this, presenter.watchZoneObserver);
+        mWatchZones.put(watchZoneUid, presenter);
+    }
+
+    private void createWatchZonePointsObserver(final Long watchZoneUid, final WatchZonePresenter presenter) {
         presenter.watchZonePointsObserver = new WatchZonePointsObserver(watchZoneUid,
                 new WatchZonePointsObserver.WatchZonePointsChangedCallback() {
             @Override
@@ -212,9 +230,8 @@ public class WatchZoneMapFragment extends Fragment implements OnMapReadyCallback
                 }
             }
         });
-        WatchZoneModelRepository.getInstance(getContext()).observe(this, presenter.watchZoneObserver);
-        WatchZoneModelRepository.getInstance(getContext()).observe(this, presenter.watchZonePointsObserver);
-        mWatchZones.put(watchZoneUid, presenter);
+        WatchZoneModelRepository.getInstance(getContext()).observe(this,
+                presenter.watchZonePointsObserver);
     }
 
     private class WatchZonePresenter {

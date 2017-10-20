@@ -132,14 +132,15 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     private class WatchZoneContainer {
         WatchZoneModel watchZoneModel;
+        WatchZone updatingWatchZone;
         WatchZoneUpdater watchZoneUpdater;
         Integer progress;
     }
 
-    private boolean needsRefresh(WatchZoneModel first, WatchZoneModel second) {
-        return first.getWatchZone().getCenterLatitude() != second.getWatchZone().getCenterLatitude() ||
-                first.getWatchZone().getCenterLongitude() != second.getWatchZone().getCenterLongitude() ||
-                first.getWatchZone().getRadius() != second.getWatchZone().getRadius();
+    private boolean needsRefresh(WatchZone first, WatchZone second) {
+        return first.getCenterLatitude() != second.getCenterLatitude() ||
+                first.getCenterLongitude() != second.getCenterLongitude() ||
+                first.getRadius() != second.getRadius();
     }
 
     private synchronized void scheduleWatchZoneNotifications(List<WatchZoneModel> watchZoneModels) {
@@ -184,17 +185,17 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             Long uid = model.getWatchZone().getUid();
             if (!mUpdatingWatchZones.containsKey(uid)) {
                 newModelsToUpdate.add(model);
+                uidsThatNoLongerExist.remove(uid);
             } else {
                 WatchZoneContainer container = mUpdatingWatchZones.get(uid);
-                if (needsRefresh(container.watchZoneModel, model)) {
-                    // Add it to the cancel and remove list...
-                    uidsThatNoLongerExist.add(uid);
+                if (needsRefresh(container.updatingWatchZone, model.getWatchZone())) {
+                    // Keep it on the cancel and remove list...
                     // Then add it back to the to-update list.
                     newModelsToUpdate.add(model);
+                } else {
+                    uidsThatNoLongerExist.remove(uid);
                 }
-
             }
-            uidsThatNoLongerExist.remove(uid);
         }
 
         for (Long uid : uidsThatNoLongerExist) {
@@ -217,6 +218,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
             final WatchZoneContainer container = new WatchZoneContainer();
             container.watchZoneModel = model;
+            container.updatingWatchZone = model.getWatchZone();
             container.watchZoneUpdater = null;
             container.progress = 0;
 

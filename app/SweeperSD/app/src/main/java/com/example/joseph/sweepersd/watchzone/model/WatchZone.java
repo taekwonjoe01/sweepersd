@@ -7,6 +7,15 @@ import android.text.TextUtils;
 
 @Entity(tableName = "watchzones")
 public class WatchZone {
+    public static final int REMIND_RANGE_48_HOURS = 0;
+    public static final int REMIND_RANGE_24_HOURS = 1;
+    public static final int REMIND_RANGE_12_HOURS = 2;
+    public static final int REMIND_RANGE_DEFAULT = REMIND_RANGE_48_HOURS;
+
+    public static final int REMIND_POLICY_ANYWHERE = 0;
+    public static final int REMIND_POLICY_NEARBY = 1;
+    public static final int REMIND_POLICY_DEFAULT = REMIND_POLICY_ANYWHERE;
+
     @PrimaryKey(autoGenerate = true)
     private long uid;
 
@@ -24,6 +33,12 @@ public class WatchZone {
 
     @ColumnInfo(name = "lastSweepingUpdated")
     private long lastSweepingUpdated;
+
+    @ColumnInfo(name = "remindRange")
+    private int remindRange;
+
+    @ColumnInfo(name = "remindPolicy")
+    private int remindPolicy;
 
     public long getUid() {
         return uid;
@@ -47,6 +62,14 @@ public class WatchZone {
 
     public long getLastSweepingUpdated() {
         return lastSweepingUpdated;
+    }
+
+    public int getRemindRange() {
+        return remindRange;
+    }
+
+    public int getRemindPolicy() {
+        return remindPolicy;
     }
 
     void setUid(long uid) {
@@ -73,6 +96,14 @@ public class WatchZone {
         this.lastSweepingUpdated = lastSweepingUpdated;
     }
 
+    void setRemindRange(int remindRange) {
+        this.remindRange = remindRange;
+    }
+
+    void setRemindPolicy(int remindPolicy) {
+        this.remindPolicy = remindPolicy;
+    }
+
     public boolean isChanged(WatchZone compareTo) {
         boolean result = false;
 
@@ -86,6 +117,10 @@ public class WatchZone {
             } else if (!TextUtils.equals(this.label, compareTo.getLabel())) {
                 result = true;
             } else if (this.lastSweepingUpdated != compareTo.getLastSweepingUpdated()) {
+                result = true;
+            } else if (this.remindRange != compareTo.getRemindRange()) {
+                result = true;
+            } else if (this.remindPolicy != compareTo.getRemindPolicy()) {
                 result = true;
             }
         }

@@ -1,44 +1,28 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import android.arch.lifecycle.Observer;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
-import com.example.joseph.sweepersd.limit.Limit;
-import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class WatchZoneDetailsActivity extends AppCompatActivity {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
@@ -50,9 +34,9 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
     private WrapContentTabViewPager mTabViewPager;
     private LimitsTabFragment mLimitsTabFragment;
     private CalendarTabFragment mCalendarTabFragment;
-    private WatchZoneNotificationsTabFragment mNotificationsTabFragment;
+    private NotificationsTabFragment mNotificationsTabFragment;
 
-    private WatchZoneMapFragment mMapFragment;
+    private MapFragment mMapFragment;
 
     private List<LatLng> mCurrentFinishedWatchZonePoints = new ArrayList<>();
 
@@ -78,7 +62,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
         mTabViewPager = findViewById(R.id.tab_viewpager);
         setSupportActionBar(toolbar);
 
-        mMapFragment= (WatchZoneMapFragment) getSupportFragmentManager()
+        mMapFragment= (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.watch_zone_map_fragment);
         mMapFragment.addWatchZone(mWatchZoneId);
 
@@ -89,8 +73,9 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
         mCalendarTabFragment = new CalendarTabFragment();
         mCalendarTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_calendar));
         mCalendarTabFragment.addWatchZone(mWatchZoneId);
-        mNotificationsTabFragment = new WatchZoneNotificationsTabFragment();
+        mNotificationsTabFragment = new NotificationsTabFragment();
         mNotificationsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_notifications));
+        mNotificationsTabFragment.setWatchZoneUid(mWatchZoneId);
         tabAdapter.addFragment(mLimitsTabFragment);
         tabAdapter.addFragment(mCalendarTabFragment);
         tabAdapter.addFragment(mNotificationsTabFragment);

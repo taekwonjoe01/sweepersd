@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,12 +53,9 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
                             mStatus = Status.INVALID_NO_WATCH_ZONE;
                             postValue(WatchZoneModel.this);
                         } else {
-                            boolean changed = mWatchZone == null ||
-                                    mWatchZone.getRadius() != watchZone.getRadius() ||
-                                    mWatchZone.getCenterLongitude() != watchZone.getCenterLongitude() ||
-                                    mWatchZone.getCenterLatitude() != watchZone.getCenterLatitude();
+                            boolean changed = mWatchZone == null || mWatchZone.isChanged(watchZone);
                             if (changed) {
-                                clearObservers();
+                                clearWatchZonePointsObservers();
                                 mWatchZone = watchZone;
                                 mWatchZonePointsModel.observeForever(mWatchZonePointsObserver);
                             }
@@ -229,12 +227,12 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     @Override
     protected synchronized void onInactive() {
         super.onInactive();
-        clearObservers();
-    }
-
-    private void clearObservers() {
         WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneLiveData(mWatchZoneUid)
                 .removeObserver(mWatchZoneDatabaseObserver);
+        clearWatchZonePointsObservers();
+    }
+
+    private void clearWatchZonePointsObservers() {
         mWatchZonePointsModel.removeObserver(mWatchZonePointsObserver);
         for (Long uid : mWatchZoneLimitModelMap.keySet()) {
             mWatchZoneLimitModelMap.get(uid).removeObserver(mWatchZoneLimitModelObserver);
@@ -266,7 +264,6 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
         // Get the unique LimitUid's
         List<Long> uniqueLimitUids = new ArrayList<>();
         for (WatchZonePoint p : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
-            //Log.e("Joey", "Address " + p.getAddress() + " and limitId " + p.getLimitId());
             if (!uniqueLimitUids.contains(p.getLimitId()) &&
                     p.getLimitId() != 0L) {
                 uniqueLimitUids.add(p.getLimitId());

@@ -29,6 +29,7 @@ import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
+import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -45,7 +46,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
     private static final String TAG = WatchZoneExplorerActivity.class.getSimpleName();
 
     private PlaceAutocompleteFragment mPlaceFragment;
-    private WatchZoneMapFragment mMapFragment;
+    private MapFragment mMapFragment;
     private FloatingActionButton mSaveButton;
 
     private SlidingUpPanelLayout mSlidingPanelLayout;
@@ -74,8 +74,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
     private double mCurrentLongitude;
     private int mCurrentRadius;
 
-    private List<LatLng> mCurrentFinishedWatchZonePoints = new ArrayList<>();
-
     private LatLng mLatLng;
 
     private ProgressBar mProgressBar;
@@ -88,7 +86,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_watch_zone_explorer);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mMapFragment= (WatchZoneMapFragment) getSupportFragmentManager()
+        mMapFragment= (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.watch_zone_map_fragment);
         mPlaceFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
@@ -178,14 +176,22 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                if (mCurrentWatchZoneUid == 0L) {
+                    return;
+                }
                 mCurrentRadius = getRadiusForProgress(seekBar.getProgress());
-                WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
+                /*WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                         .deleteWatchZone(mCurrentWatchZoneUid);
                 mCurrentWatchZoneUid = WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                         .createWatchZone(mCurrentLabel,
-                        mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
-                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();
+                        mCurrentLatitude, mCurrentLongitude, mCurrentRadius);*/
+                WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
+                        .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
+                                mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
+                                WatchZone.REMIND_RANGE_DEFAULT,
+                                WatchZone.REMIND_POLICY_DEFAULT);
+                /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
+                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();*/
                 setAlarmLocation(mLatLng);
             }
         });
@@ -264,7 +270,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
                     0);
-        } else {
+        } else if (mCurrentWatchZoneUid == 0L) {
             LocationServices.getFusedLocationProviderClient(this).getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
@@ -289,20 +295,22 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
-        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, 0L).commit();
 
         if (mCurrentWatchZoneUid != 0L && !mSaveOnDestroy) {
             WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
         }
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                WatchZoneExplorerActivity.this);
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, 0L).commit();
     }
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
-        if (mCurrentWatchZoneUid != 0L) {
+        /*if (mCurrentWatchZoneUid != 0L) {
             WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
             mMapFragment.removeWatchZone(mCurrentWatchZoneUid);
             mLimitsTabFragment.removeWatchZone(mCurrentWatchZoneUid);
-        }
+        }*/
 
         setAlarmLocation(latLng);
         if (animateCamera) {
@@ -326,13 +334,25 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         mCurrentLatitude = latLng.latitude;
         mCurrentLongitude = latLng.longitude;
         mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
-        mCurrentWatchZoneUid = WatchZoneRepository.getInstance(this).createWatchZone(mCurrentLabel,
-                mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
-        mMapFragment.addWatchZone(mCurrentWatchZoneUid);
-        mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
-        mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
-        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();
+        if (mCurrentWatchZoneUid == 0L) {
+            mCurrentWatchZoneUid = WatchZoneRepository.getInstance(this).createWatchZone(mCurrentLabel,
+                    mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
+            mMapFragment.addWatchZone(mCurrentWatchZoneUid);
+            mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
+            mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                    WatchZoneExplorerActivity.this);
+            preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID,
+                    mCurrentWatchZoneUid).commit();
+        } else {
+            WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
+                    .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
+                            mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
+                            WatchZone.REMIND_RANGE_DEFAULT,
+                            WatchZone.REMIND_POLICY_DEFAULT);
+        }
+        /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();*/
     }
 
     private void dismissCreateLabelDialog() {
@@ -344,8 +364,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
     }
 
     private void setAlarmLocation(LatLng location) {
-        mCurrentFinishedWatchZonePoints.clear();
-
         mLatLng = location;
 
         mSlidingPanelLayout.getAnchorPoint();

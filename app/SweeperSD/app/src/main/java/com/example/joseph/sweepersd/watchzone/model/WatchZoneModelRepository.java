@@ -63,7 +63,6 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
                 mCurrentList = watchZones;
             }
 
-            Log.e("Joey", "WZMR onChanged");
             postValue(WatchZoneModelRepository.this);
         }
     };

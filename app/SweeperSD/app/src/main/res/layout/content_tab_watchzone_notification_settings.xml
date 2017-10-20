@@ -19,18 +19,21 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="10dp">
                 <RadioButton
+                    android:id="@+id/radiobutton_remind_range_48"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="48 hours or less"
                     android:layout_margin="5dp"
                     style="@style/AppTheme" />
                 <RadioButton
+                    android:id="@+id/radiobutton_remind_range_24"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="24 hours or less"
                     android:layout_margin="5dp"
                     style="@style/AppTheme" />
                 <RadioButton
+                    android:id="@+id/radiobutton_remind_range_12"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="12 hours or less"
@@ -70,12 +73,14 @@
                 android:layout_alignStart="@+id/time_radio_group"
                 android:layout_marginEnd="10dp">
                 <RadioButton
+                    android:id="@+id/radiobutton_remind_policy_always"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="always"
                     android:layout_margin="5dp"
                     style="@style/AppTheme" />
                 <RadioButton
+                    android:id="@+id/radiobutton_remind_policy_nearby"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="only when I am nearby"
