@@ -23,17 +23,7 @@
             android:name=".watchzone.WatchZoneUpdateJob"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"/>
-        <activity
-            android:name=".LandingActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".utils.TestActivity"
             android:label="@string/title_activity_test">
@@ -45,9 +35,16 @@
         </activity>
         <activity
             android:name=".watchzone.UserZonesActivity"
-            android:label="@string/title_user_zone_activity"
+            android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".watchzone.WatchZoneExplorerActivity"
             android:label="@string/title_watch_zone_explorer_activity"
@@ -145,17 +142,6 @@
         <activity
             android:name=".DebugActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".LandingActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".presentation.manualalarms.WatchZoneViewActivity"
             android:label="@string/title_activity_alarm"
