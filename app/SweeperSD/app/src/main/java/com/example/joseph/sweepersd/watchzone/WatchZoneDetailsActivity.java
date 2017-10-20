@@ -88,6 +88,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
         mLimitsTabFragment.addWatchZone(mWatchZoneId);
         mCalendarTabFragment = new CalendarTabFragment();
         mCalendarTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_calendar));
+        mCalendarTabFragment.addWatchZone(mWatchZoneId);
         mNotificationsTabFragment = new WatchZoneNotificationsTabFragment();
         mNotificationsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_notifications));
         tabAdapter.addFragment(mLimitsTabFragment);

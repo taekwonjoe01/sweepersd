@@ -28,7 +28,7 @@ public class WatchZoneUtils {
     public static long SIX_HOURS = 1000 * 60 * 60 * 6;
     public static long ONE_HOUR = 1000 * 60 * 60;
 
-    public static SweepingDate findSweepingDate(LimitSchedule schedule) {
+    public static SweepingDate findNextSweepingDate(LimitSchedule schedule) {
         SweepingDate result = null;
         if (isValidLimitSchedule(schedule)) {
             GregorianCalendar today = new GregorianCalendar(
@@ -123,6 +123,88 @@ public class WatchZoneUtils {
         schedules.removeAll(schedulesToRemove);
     }
 
+    public static List<SweepingDate> getAllSweepingDatesForLimitSchedules(List<LimitSchedule> schedules,
+                                                                          int numDaysInPast,
+                                                                          int numDaysInFuture) {
+        List<SweepingDate> sweepingDates = new ArrayList<>();
+        for (LimitSchedule s : schedules) {
+            sweepingDates.addAll(getAllSweepingDatesForLimitSchedule(s, numDaysInPast, numDaysInFuture));
+        }
+
+        return sweepingDates;
+    }
+
+    public static List<SweepingDate> getAllSweepingDatesForLimitSchedule(LimitSchedule schedule,
+                                                                         int numDaysInPast,
+                                                                         int numDaysInFuture) {
+        List<SweepingDate> results = new ArrayList<>();
+        if (isValidLimitSchedule(schedule)) {
+            GregorianCalendar calendar = new GregorianCalendar(
+                    TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
+
+            for (int j = 0; j < numDaysInPast; j++) {
+                SweepingDate date = checkCalendarForSweeping(schedule, calendar);
+
+                if (date != null) {
+                    results.add(date);
+                }
+
+                calendar.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            calendar = new GregorianCalendar(
+                    TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
+            for (int j = 0; j < numDaysInFuture; j++) {
+                SweepingDate date = checkCalendarForSweeping(schedule, calendar);
+
+                if (date != null) {
+                    results.add(date);
+                }
+
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
+            }
+        }
+
+        return results;
+    }
+
+    private static SweepingDate checkCalendarForSweeping(LimitSchedule schedule,
+                                                         GregorianCalendar calendar) {
+        SweepingDate result = null;
+
+        int dow = calendar.get(Calendar.DAY_OF_WEEK);
+        int dom = calendar.get(Calendar.DAY_OF_MONTH);
+
+        int rangeStart = ((schedule.getWeekNumber() - 1) * 7) + 1;
+        int endRange = ((schedule.getWeekNumber()) * 7) + 1;
+        if (dom >= rangeStart && dom < endRange) {
+            if (dow == schedule.getDayNumber()) {
+                GregorianCalendar potentialStartTime = new GregorianCalendar(
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH),
+                        schedule.getStartHour(),
+                        0,
+                        0);
+                int sweepingLength = schedule.getEndHour() - schedule.getStartHour();
+                if (sweepingLength < 0) {
+                    sweepingLength += 24;
+                }
+                GregorianCalendar potentialEndTime = new GregorianCalendar(
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH),
+                        schedule.getStartHour(),
+                        0,
+                        0);
+                potentialEndTime.add(Calendar.HOUR, sweepingLength);
+
+                result = new SweepingDate(
+                        schedule, potentialStartTime, potentialEndTime);
+            }
+        }
+        return result;
+    }
+
     /**
      * Many sweeping addresses have the same limit. We don't want to show duplicated limits on UI.
      * @param points
@@ -144,7 +226,7 @@ public class WatchZoneUtils {
         //WatchZoneUtils.filterInvalidLimitSchedules(schedules);
         List<SweepingDate> sweepingDates = new ArrayList<>();
         for (LimitSchedule s : schedules) {
-            sweepingDates.add(WatchZoneUtils.findSweepingDate(s));
+            sweepingDates.add(WatchZoneUtils.findNextSweepingDate(s));
         }
         WatchZoneUtils.sortByNextStartTime(sweepingDates);
 

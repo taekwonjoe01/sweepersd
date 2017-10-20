@@ -2,7 +2,6 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -14,15 +13,9 @@ import android.widget.LinearLayout;
 import com.example.joseph.sweepersd.LimitViewAdapter;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
-import com.example.joseph.sweepersd.limit.Limit;
-import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZonePointsObserver;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
 import java.util.List;

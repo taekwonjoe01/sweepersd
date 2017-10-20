@@ -8,10 +8,6 @@ import android.view.ViewGroup;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
 
-/**
- * Created by josephhutchins on 10/17/17.
- */
-
 public class WatchZoneNotificationsTabFragment extends TabFragment {
 
     private String mTabTitle;

@@ -330,6 +330,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                 mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
         mMapFragment.addWatchZone(mCurrentWatchZoneUid);
         mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
+        mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
         preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();
     }
