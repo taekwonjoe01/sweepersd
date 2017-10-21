@@ -6,13 +6,13 @@ import android.support.v7.util.ListUpdateCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WatchZonePointsObserver extends WatchZoneModelObserver<List<WatchZonePoint>> {
+public class WatchZonePointsObserver extends WatchZoneBaseObserver<List<WatchZonePoint>> {
     private final Long mWatchZoneUid;
     private final WatchZonePointsChangedCallback mCallback;
 
     protected List<WatchZonePoint> mWatchZonePoints;
 
-    public interface WatchZonePointsChangedCallback extends WatchZoneModelObserverCallback<List<WatchZonePoint>> {
+    public interface WatchZonePointsChangedCallback extends WatchZoneBaseObserverCallback<List<WatchZonePoint>> {
         void onWatchZonePointAdded(int index);
         void onWatchZonePointRemoved(int index);
         void onWatchZonePointUpdated(int index);

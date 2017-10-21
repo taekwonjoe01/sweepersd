@@ -1,12 +1,12 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-public class WatchZoneObserver extends WatchZoneModelObserver<WatchZone> {
+public class WatchZoneObserver extends WatchZoneBaseObserver<WatchZone> {
     final Long mWatchZoneUid;
     private final WatchZoneChangedCallback mCallback;
 
     protected WatchZone mWatchZone;
 
-    public interface WatchZoneChangedCallback extends WatchZoneModelObserverCallback<WatchZone> {
+    public interface WatchZoneChangedCallback extends WatchZoneBaseObserverCallback<WatchZone> {
         void onWatchZoneChanged(WatchZone watchZone);
     }
 

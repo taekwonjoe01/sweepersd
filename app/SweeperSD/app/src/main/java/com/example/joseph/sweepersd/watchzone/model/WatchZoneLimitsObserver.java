@@ -11,13 +11,13 @@ import java.util.List;
  * Created by joseph on 10/18/17.
  */
 
-public class WatchZoneLimitsObserver extends WatchZoneModelObserver<List<WatchZoneLimitModel>> {
+public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<List<WatchZoneLimitModel>> {
     final Long mWatchZoneUid;
     private final WatchZoneLimitsChangedCallback mCallback;
 
     protected List<WatchZoneLimitModel> mLimitModels;
 
-    public interface WatchZoneLimitsChangedCallback extends WatchZoneModelObserverCallback<List<WatchZoneLimitModel>> {
+    public interface WatchZoneLimitsChangedCallback extends WatchZoneBaseObserverCallback<List<WatchZoneLimitModel>> {
         void onLimitModelAdded(int index);
         void onLimitModelRemoved(int index);
         void onLimitModelUpdated(int index);

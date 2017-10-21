@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.archived.model.limits.Limit;
 import com.example.joseph.sweepersd.archived.model.limits.LimitSchedule;
-import com.example.joseph.sweepersd.watchzone.WatchZoneAlarmReceiver;
+import com.example.joseph.sweepersd.scheduling.AlarmReceiver;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -213,7 +213,7 @@ public class WatchZoneUtils {
             PendingIntent alarmIntent;
 
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(context, WatchZoneAlarmReceiver.class);
+            Intent intent = new Intent(context, AlarmReceiver.class);
             intent.setType(watchZone.getCreatedTimestamp() + "");
             alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 

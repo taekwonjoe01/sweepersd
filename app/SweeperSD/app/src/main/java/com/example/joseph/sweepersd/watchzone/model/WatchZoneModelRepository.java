@@ -10,7 +10,8 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
-import android.util.Log;
+
+import com.example.joseph.sweepersd.scheduling.ScheduleJob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +63,10 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
                 result.dispatchUpdatesTo(WatchZoneModelRepository.this);
                 mCurrentList = watchZones;
             }
+
+            // This will spam call to start a scheduleJob. It should only run if 30 seconds pass
+            // since the last call to schedule the scheduleJob.
+            ScheduleJob.scheduleJob(mApplicationContext);
 
             postValue(WatchZoneModelRepository.this);
         }

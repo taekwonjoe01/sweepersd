@@ -1,52 +1,49 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.arch.lifecycle.Observer;
-import android.support.annotation.Nullable;
+public class WatchZoneModelObserver extends WatchZoneBaseObserver<WatchZoneModel> {
+    private final Long mWatchZoneUid;
+    private final WatchZoneModelChangedCallback mCallback;
 
-/**
- * Created by joseph on 10/18/17.
- */
+    protected WatchZoneModel mWatchZoneModel;
 
-public abstract class WatchZoneModelObserver<T> implements Observer<WatchZoneModelRepository> {
-    private final WatchZoneModelObserverCallback mCallback;
-    private boolean mIsLoaded;
-
-    abstract boolean isValid(WatchZoneModelRepository watchZoneModelRepository);
-    abstract void onRepositoryChanged(T data);
-    abstract T getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository);
-
-    public WatchZoneModelObserver(WatchZoneModelObserverCallback callback) {
-        mCallback = callback;
-        mIsLoaded = false;
+    public interface WatchZoneModelChangedCallback extends WatchZoneBaseObserverCallback<WatchZoneModel> {
+        void onWatchZoneModelChanged(WatchZoneModel model);
     }
 
-    public interface WatchZoneModelObserverCallback<T> {
-        void onDataLoaded(T data);
-        void onDataInvalid();
+    public WatchZoneModelObserver(Long watchZoneUid, WatchZoneModelChangedCallback callback) {
+        super(callback);
+        mWatchZoneUid = watchZoneUid;
+        mCallback = callback;
     }
 
     @Override
-    public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
-        if (!isValid(watchZoneModelRepository)) {
-            mCallback.onDataInvalid();
+    boolean isValid(WatchZoneModelRepository watchZoneModelRepository) {
+        return watchZoneModelRepository.watchZoneExists(mWatchZoneUid);
+    }
+
+    @Override
+    WatchZoneModel getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
+        WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
+        if (model != null) {
+            if (model.getStatus() != WatchZoneModel.Status.LOADING) {
+                if (mWatchZoneModel == null) {
+                    mWatchZoneModel = model;
+                }
+                return model;
+            }
         }
-        if (!mIsLoaded) {
-            T data = getDataFromRepo(watchZoneModelRepository);
-            if (data != null) {
-                mIsLoaded = true;
-                mCallback.onDataLoaded(data);
-            }
-        } else if (mIsLoaded) {
-            T data = getDataFromRepo(watchZoneModelRepository);
-            if (data == null) {
-                mCallback.onDataInvalid();
-            } else {
-                onRepositoryChanged(getDataFromRepo(watchZoneModelRepository));
-            }
+        return null;
+    }
+
+    @Override
+    void onRepositoryChanged(final WatchZoneModel watchZoneModel) {
+        if (mWatchZoneModel.isChanged(watchZoneModel)) {
+            mWatchZoneModel = watchZoneModel;
+            mCallback.onWatchZoneModelChanged(mWatchZoneModel);
         }
     }
 
-    public boolean isLoaded() {
-        return mIsLoaded;
+    public WatchZoneModel getWatchZoneModel() {
+        return mWatchZoneModel;
     }
 }

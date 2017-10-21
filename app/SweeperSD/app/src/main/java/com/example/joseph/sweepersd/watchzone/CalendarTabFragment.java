@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
-import com.example.joseph.sweepersd.watchzone.model.SweepingDate;
+import com.example.joseph.sweepersd.watchzone.model.SweepingEventDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -110,12 +110,12 @@ public class CalendarTabFragment extends TabFragment {
                 WatchZoneLimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
                         .get(index);
                 List<LimitSchedule> schedules = model.getLimitSchedulesModel().getScheduleList();
-                List<SweepingDate> dates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
+                List<SweepingEventDate> dates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
                         schedules, 31, 93);
                 List<Date> calendarDates = new ArrayList<>();
-                for (SweepingDate date : dates) {
+                for (SweepingEventDate date : dates) {
                     ColorDrawable red = new ColorDrawable(Color.RED);
-                    Date calendarDate = new Date(date.getStartTime().getTimeInMillis());
+                    Date calendarDate = new Date(date.getCalendar().getTimeInMillis());
                     mCaldroidFragment.setBackgroundDrawableForDate(red, calendarDate);
                     calendarDates.add(calendarDate);
                 }
@@ -143,12 +143,12 @@ public class CalendarTabFragment extends TabFragment {
             public void onDataLoaded(List<WatchZoneLimitModel> data) {
                 for (WatchZoneLimitModel model : data) {
                     List<LimitSchedule> schedules = model.getLimitSchedulesModel().getScheduleList();
-                    List<SweepingDate> dates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
+                    List<SweepingEventDate> dates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
                             schedules, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
-                    for (SweepingDate date : dates) {
+                    for (SweepingEventDate date : dates) {
                         ColorDrawable red = new ColorDrawable(Color.RED);
-                        Date calendarDate = new Date(date.getStartTime().getTimeInMillis());
+                        Date calendarDate = new Date(date.getCalendar().getTimeInMillis());
                         mCaldroidFragment.setBackgroundDrawableForDate(red, calendarDate);
                         calendarDates.add(calendarDate);
                     }

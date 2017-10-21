@@ -2,7 +2,6 @@ package com.example.joseph.sweepersd;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
-import android.os.Debug;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.limit.AddressValidatorJob;
-import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
@@ -19,7 +17,6 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
 import java.util.Date;
-import java.util.Map;
 
 public class DebugActivity extends AppCompatActivity {
     private Button mScheduleAddressValidator;
@@ -30,6 +27,8 @@ public class DebugActivity extends AppCompatActivity {
     private TextView mWZUTimeFinish;
     private TextView mWZNTimeStart;
     private TextView mWZNTimeFinish;
+    private TextView mSchedTimeStart;
+    private TextView mSchedTimeFinish;
 
     private Button mLimitCacheClear;
     private TextView mLimitCacheSize;
@@ -53,6 +52,8 @@ public class DebugActivity extends AppCompatActivity {
         mWZUTimeFinish = findViewById(R.id.textview_wzu_finished);
         mWZNTimeStart = findViewById(R.id.textview_wzn_started);
         mWZNTimeFinish = findViewById(R.id.textview_wzn_finished);
+        mSchedTimeStart = findViewById(R.id.textview_schedulejob_started);
+        mSchedTimeFinish = findViewById(R.id.textview_schedulejob_finished);
 
         mLimitCacheClear = findViewById(R.id.button_limit_clear);
         mLimitCacheSize = findViewById(R.id.textview_limit_repo);
@@ -197,6 +198,34 @@ public class DebugActivity extends AppCompatActivity {
         });
         LongPreferenceLiveData notifFinished = new LongPreferenceLiveData(this,
                 Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED);
+        notifFinished.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long timestamp) {
+                if (timestamp != null) {
+                    if (timestamp == 0L) {
+                        mWZNTimeFinish.setText("never");
+                    } else {
+                        mWZNTimeFinish.setText(new Date(timestamp).toString());
+                    }
+                }
+            }
+        });
+        LongPreferenceLiveData schedStarted = new LongPreferenceLiveData(this,
+                Preferences.PREFERENCE_SCHEDULE_JOB_LAST_STARTED);
+        notifStarted.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long timestamp) {
+                if (timestamp != null) {
+                    if (timestamp == 0L) {
+                        mWZNTimeStart.setText("never");
+                    } else {
+                        mWZNTimeStart.setText(new Date(timestamp).toString());
+                    }
+                }
+            }
+        });
+        LongPreferenceLiveData schedFinished = new LongPreferenceLiveData(this,
+                Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED);
         notifFinished.observe(this, new Observer<Long>() {
             @Override
             public void onChanged(@Nullable Long timestamp) {

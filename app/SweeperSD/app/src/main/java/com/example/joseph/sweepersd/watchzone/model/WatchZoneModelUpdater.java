@@ -143,16 +143,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 first.getRadius() != second.getRadius();
     }
 
-    private synchronized void scheduleWatchZoneNotifications(List<WatchZoneModel> watchZoneModels) {
-        for (WatchZoneModel model : watchZoneModels) {
-            if (model.getStatus() == WatchZoneModel.Status.VALID) {
-                WatchZoneUtils.scheduleWatchZoneNotification(mApplicationContext, model);
-            } else if (model.getStatus() != WatchZoneModel.Status.LOADING) {
-                WatchZoneUtils.unscheduleWatchZoneNotification(mApplicationContext, model);
-            }
-        }
-    }
-
     private synchronized void invalidate(WatchZoneModelRepository repository) {
         if (mLimits.getValue() == null) {
             return;
@@ -169,7 +159,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 modelsToSchedule.remove(model);
             }
         }
-        scheduleWatchZoneNotifications(modelsToSchedule);
 
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
         for (WatchZoneModel model : repository.getWatchZoneModels()) {
