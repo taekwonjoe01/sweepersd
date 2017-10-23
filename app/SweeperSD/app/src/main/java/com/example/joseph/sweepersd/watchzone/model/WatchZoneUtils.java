@@ -1,9 +1,5 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.arch.lifecycle.Observer;
-import android.content.Context;
-import android.support.annotation.Nullable;
-
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 
 import java.util.ArrayList;
@@ -14,7 +10,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.CountDownLatch;
 
 public class WatchZoneUtils {
     private static final String TAG = WatchZoneUtils.class.getSimpleName();
@@ -25,13 +20,12 @@ public class WatchZoneUtils {
     public static long SIX_HOURS = 1000 * 60 * 60 * 6;
     public static long ONE_HOUR = 1000 * 60 * 60;
 
-    private static final int HOUR_OFFSET_12 = 12;
-    private static final int HOUR_OFFSET_24 = 24;
-    private static final int HOUR_OFFSET_48 = 48;
+    private static final long HOUR_OFFSET_12 = 1000L * 60L * 60L * 12L;
+    private static final long HOUR_OFFSET_24 = 1000L * 60L * 60L * 24L;
+    private static final long HOUR_OFFSET_48 = 1000L * 60L * 60L * 48L;
 
-    public static SweepingEventDate findNextSweepingDate(LimitSchedule schedule, boolean includeEndTime,
-                                                         int startHourOffset) {
-        SweepingEventDate result = null;
+    public static LimitScheduleDate findNextSweepingDate(LimitSchedule schedule, boolean includeEndTime) {
+        LimitScheduleDate result = null;
         if (isValidLimitSchedule(schedule)) {
             GregorianCalendar today = new GregorianCalendar(
                 TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
@@ -53,9 +47,6 @@ public class WatchZoneUtils {
                                 schedule.getStartHour(),
                                 0,
                                 0);
-                        if (startHourOffset > 0) {
-                            potentialStartTime.add(Calendar.HOUR, (startHourOffset * -1));
-                        }
                         int sweepingLength = schedule.getEndHour() - schedule.getStartHour();
                         if (sweepingLength < 0) {
                             sweepingLength += 24;
@@ -70,13 +61,13 @@ public class WatchZoneUtils {
                         potentialEndTime.add(Calendar.HOUR, sweepingLength);
 
                         if (potentialStartTime.getTime().getTime() > today.getTime().getTime()) {
-                            result = new SweepingEventDate(
-                                    schedule, potentialStartTime);
+                            result = new LimitScheduleDate(
+                                    schedule, potentialStartTime, potentialEndTime);
                             break;
                         } else if (includeEndTime &&
                                 potentialEndTime.getTime().getTime() > today.getTime().getTime()) {
-                            result = new SweepingEventDate(
-                                    schedule, potentialEndTime);
+                            result = new LimitScheduleDate(
+                                    schedule, potentialEndTime, potentialEndTime);
                             break;
                         }
                     }
@@ -107,17 +98,12 @@ public class WatchZoneUtils {
                 && schedule.getEndHour() > -1 && schedule.getEndHour() < 24;
     }
 
-    /**
-     * Soonest Sweeping Address will be first.
-     * @param datesToSort
-     * @return
-     */
-    public static void sortByNextEventTime(List<SweepingEventDate> datesToSort) {
-        Collections.sort(datesToSort, new Comparator<SweepingEventDate>() {
+    public static void sortByNextStartTime(List<LimitScheduleDate> datesToSort) {
+        Collections.sort(datesToSort, new Comparator<LimitScheduleDate>() {
             @Override
-            public int compare(SweepingEventDate date1, SweepingEventDate date2) {
-                long val = date1.getCalendar().getTime().getTime() -
-                        date2.getCalendar().getTime().getTime();
+            public int compare(LimitScheduleDate date1, LimitScheduleDate date2) {
+                long val = date1.getStartCalendar().getTime().getTime() -
+                        date2.getStartCalendar().getTime().getTime();
                 return (int)val;
             }
         });
@@ -133,27 +119,27 @@ public class WatchZoneUtils {
         schedules.removeAll(schedulesToRemove);
     }
 
-    public static List<SweepingEventDate> getAllSweepingDatesForLimitSchedules(List<LimitSchedule> schedules,
+    public static List<LimitScheduleDate> getAllSweepingDatesForLimitSchedules(List<LimitSchedule> schedules,
                                                                                int numDaysInPast,
                                                                                int numDaysInFuture) {
-        List<SweepingEventDate> sweepingEventDates = new ArrayList<>();
+        List<LimitScheduleDate> limitScheduleDates = new ArrayList<>();
         for (LimitSchedule s : schedules) {
-            sweepingEventDates.addAll(getAllSweepingDatesForLimitSchedule(s, numDaysInPast, numDaysInFuture));
+            limitScheduleDates.addAll(getAllSweepingDatesForLimitSchedule(s, numDaysInPast, numDaysInFuture));
         }
 
-        return sweepingEventDates;
+        return limitScheduleDates;
     }
 
-    public static List<SweepingEventDate> getAllSweepingDatesForLimitSchedule(LimitSchedule schedule,
+    public static List<LimitScheduleDate> getAllSweepingDatesForLimitSchedule(LimitSchedule schedule,
                                                                               int numDaysInPast,
                                                                               int numDaysInFuture) {
-        List<SweepingEventDate> results = new ArrayList<>();
+        List<LimitScheduleDate> results = new ArrayList<>();
         if (isValidLimitSchedule(schedule)) {
             GregorianCalendar calendar = new GregorianCalendar(
                     TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
 
             for (int j = 0; j < numDaysInPast; j++) {
-                SweepingEventDate date = checkCalendarForSweeping(schedule, calendar);
+                LimitScheduleDate date = checkCalendarForSweeping(schedule, calendar);
 
                 if (date != null) {
                     results.add(date);
@@ -164,7 +150,7 @@ public class WatchZoneUtils {
             calendar = new GregorianCalendar(
                     TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
             for (int j = 0; j < numDaysInFuture; j++) {
-                SweepingEventDate date = checkCalendarForSweeping(schedule, calendar);
+                LimitScheduleDate date = checkCalendarForSweeping(schedule, calendar);
 
                 if (date != null) {
                     results.add(date);
@@ -177,9 +163,9 @@ public class WatchZoneUtils {
         return results;
     }
 
-    private static SweepingEventDate checkCalendarForSweeping(LimitSchedule schedule,
+    private static LimitScheduleDate checkCalendarForSweeping(LimitSchedule schedule,
                                                               GregorianCalendar calendar) {
-        SweepingEventDate result = null;
+        LimitScheduleDate result = null;
 
         int dow = calendar.get(Calendar.DAY_OF_WEEK);
         int dom = calendar.get(Calendar.DAY_OF_MONTH);
@@ -208,11 +194,19 @@ public class WatchZoneUtils {
                         0);
                 potentialEndTime.add(Calendar.HOUR, sweepingLength);
 
-                result = new SweepingEventDate(schedule, potentialStartTime);
+                result = new LimitScheduleDate(schedule, potentialStartTime, potentialEndTime);
             } else if (dow == (schedule.getDayNumber() % 7) + 1) {
                 int sweepingLength = schedule.getEndHour() - schedule.getStartHour();
                 if (sweepingLength < 0) {
-                    sweepingLength += 24;GregorianCalendar potentialEndTime = new GregorianCalendar(
+                    GregorianCalendar potentialStartTime = new GregorianCalendar(
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH),
+                            schedule.getStartHour(),
+                            0,
+                            0);
+                    sweepingLength += 24;
+                    GregorianCalendar potentialEndTime = new GregorianCalendar(
                             calendar.get(Calendar.YEAR),
                             calendar.get(Calendar.MONTH),
                             calendar.get(Calendar.DAY_OF_MONTH),
@@ -221,7 +215,7 @@ public class WatchZoneUtils {
                             0);
                     potentialEndTime.add(Calendar.HOUR, sweepingLength);
 
-                    result = new SweepingEventDate(schedule, potentialEndTime);
+                    result = new LimitScheduleDate(schedule, potentialStartTime, potentialEndTime);
                 }
             }
         }
@@ -245,23 +239,23 @@ public class WatchZoneUtils {
         return results;
     }
 
-    public static List<SweepingEventDate> getTimeOrderedSweepingDatesForLimitSchedules(
-            List<LimitSchedule> schedules, boolean includeEndTime, int startHourOffset) {
-        List<SweepingEventDate> sweepingEventDates = new ArrayList<>();
+    public static List<LimitScheduleDate> getStartTimeOrderedDatesForLimitSchedules(
+            List<LimitSchedule> schedules, boolean includeEndTime) {
+        List<LimitScheduleDate> limitScheduleDates = new ArrayList<>();
         for (LimitSchedule s : schedules) {
-            sweepingEventDates.add(WatchZoneUtils.findNextSweepingDate(s, includeEndTime, startHourOffset));
+            limitScheduleDates.add(WatchZoneUtils.findNextSweepingDate(s, includeEndTime));
         }
-        WatchZoneUtils.sortByNextEventTime(sweepingEventDates);
+        WatchZoneUtils.sortByNextStartTime(limitScheduleDates);
 
-        return sweepingEventDates;
+        return limitScheduleDates;
     }
 
-    public static long getNextSweepingTime(List<LimitSchedule> schedules) {
-        List<SweepingEventDate> allDates = WatchZoneUtils.getTimeOrderedSweepingDatesForLimitSchedules(
-                        schedules, false, 0);
+    public static long getNextSweepingStartTime(List<LimitSchedule> schedules) {
+        List<LimitScheduleDate> allDates = WatchZoneUtils.getStartTimeOrderedDatesForLimitSchedules(
+                        schedules, false);
 
         if (allDates.size() > 0) {
-            return allDates.get(0).getCalendar().getTime().getTime();
+            return allDates.get(0).getStartCalendar().getTime().getTime();
         } else {
             return 0;
         }
@@ -285,6 +279,20 @@ public class WatchZoneUtils {
         }
     }
 
+    public static List<LimitScheduleDate> getStartTimeOrderedDatesForWatchZone(WatchZoneModel model) {
+        List<LimitScheduleDate> results = null;
+        if (model.getStatus() == WatchZoneModel.Status.VALID) {
+            results = new ArrayList<>();
+            List<LimitSchedule> allSchedules = new ArrayList<>();
+            for (Long limitUid : model.getWatchZoneLimitModelUids()) {
+                WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
+                allSchedules.addAll(limitModel.getLimitSchedulesModel().getScheduleList());
+            }
+            results = getStartTimeOrderedDatesForLimitSchedules(allSchedules, true);
+        }
+        return results;
+    }
+
     public static long getNextEventTimestampForWatchZone(WatchZoneModel model) {
         long result = -1L;
         if (model.getStatus() == WatchZoneModel.Status.VALID) {
@@ -293,25 +301,31 @@ public class WatchZoneUtils {
                 WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
                 allSchedules.addAll(limitModel.getLimitSchedulesModel().getScheduleList());
             }
-            int hourOffset = getHourOffset(model.getWatchZone());
-            result = getNextEventTimestampForLimitSchedules(allSchedules, hourOffset);
+            long startOffset = getStartHourOffset(model.getWatchZone());
+            result = getNextEventTimestampForLimitSchedules(allSchedules, startOffset);
         }
         return result;
     }
 
     public static long getNextEventTimestampForLimitSchedules(List<LimitSchedule> schedules,
-                                                              int startHourOffset) {
-        List<SweepingEventDate> allDates = WatchZoneUtils.getTimeOrderedSweepingDatesForLimitSchedules(
-                schedules, true, startHourOffset);
+                                                              long startOffset) {
+        List<LimitScheduleDate> allDates = WatchZoneUtils.getStartTimeOrderedDatesForLimitSchedules(
+                schedules, true);
+        List<Long> timeOrderedTimestamps = new ArrayList<>();
+        for (LimitScheduleDate date : allDates) {
+            timeOrderedTimestamps.add(date.getStartCalendar().getTime().getTime() - startOffset);
+            timeOrderedTimestamps.add(date.getEndCalendar().getTime().getTime());
+        }
+        Collections.sort(timeOrderedTimestamps);
 
-        if (allDates.size() > 0) {
-            return allDates.get(0).getCalendar().getTime().getTime();
+        if (timeOrderedTimestamps.size() > 0) {
+            return timeOrderedTimestamps.get(0);
         } else {
             return -1L;
         }
     }
 
-    private static int getHourOffset(WatchZone watchZone) {
+    public static long getStartHourOffset(WatchZone watchZone) {
         int remindRange = watchZone.getRemindRange();
         switch (remindRange) {
             case WatchZone.REMIND_RANGE_48_HOURS:
@@ -323,33 +337,5 @@ public class WatchZoneUtils {
             default:
                 return HOUR_OFFSET_48;
         }
-    }
-
-    public static List<WatchZoneModel> loadAllWatchZoneModels(final Context context) {
-        List<Long> watchZoneModelUuids = WatchZoneRepository.getInstance(context).getWatchZoneUids();
-        final CountDownLatch latch = new CountDownLatch(watchZoneModelUuids.size());
-
-        for (final Long uid : watchZoneModelUuids) {
-            WatchZoneModelRepository.getInstance(context).getWatchZoneModel(uid).observeForever(
-                    new Observer<WatchZoneModel>() {
-                @Override
-                public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
-                    if (watchZoneModel != null) {
-                        if (watchZoneModel.getStatus() != WatchZoneModel.Status.LOADING) {
-                            latch.countDown();
-                            WatchZoneModelRepository.getInstance(context)
-                                    .getWatchZoneModel(uid).removeObserver(this);
-                        }
-                    }
-                }
-            });
-        }
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return WatchZoneModelRepository.getInstance(context).getWatchZoneModels();
     }
 }

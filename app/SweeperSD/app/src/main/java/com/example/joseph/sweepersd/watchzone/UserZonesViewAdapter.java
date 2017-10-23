@@ -260,7 +260,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                                                 .getLimitSchedulesModel().getScheduleList());
                             }
 
-                            long nextSweepingTime = WatchZoneUtils.getNextSweepingTime(allLimitSchedules);
+                            long nextSweepingTime = WatchZoneUtils.getNextSweepingStartTime(allLimitSchedules);
                             String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
                             if (nextSweepingTime != 0) {
                                 SimpleDateFormat format = new SimpleDateFormat("EEE, MMM dd");

@@ -17,9 +17,18 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.alert.AlertManager;
+import com.example.joseph.sweepersd.alert.AlertNotificationJob;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateWatchZoneActivity;
+import com.example.joseph.sweepersd.utils.Preferences;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.List;
 
 public class UserZonesActivity extends AppCompatActivity implements
         AddressValidatorManager.ValidatorProgressListener{
@@ -74,6 +83,32 @@ public class UserZonesActivity extends AppCompatActivity implements
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
+
+        List<Long> watchZoneUids = WatchZoneRepository.getInstance(this).getWatchZoneUids();
+        WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
+                watchZoneUids, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onWatchZonePointAdded(int index) {
+                // Do nothing
+            }
+            @Override
+            public void onWatchZonePointRemoved(int index) {
+                // Do nothing
+            }
+            @Override
+            public void onWatchZonePointUpdated(int index) {
+                // Do nothing
+            }
+            @Override
+            public void onDataLoaded(List<WatchZoneModel> models) {
+                AlertManager alertManager = new AlertManager(UserZonesActivity.this);
+                alertManager.updateAlertNotification(models);
+            }
+            @Override
+            public void onDataInvalid() {
+                // Do nothing
+            }
+        }));
     }
 
     @Override

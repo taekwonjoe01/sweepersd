@@ -23,10 +23,12 @@
             android:name=".watchzone.WatchZoneUpdateJob"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"/>
-
         <activity
-            android:name=".utils.TestActivity"
-            android:label="@string/title_activity_test">
+            android:name=".watchzone.UserZonesActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,11 +36,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".watchzone.UserZonesActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-
+            android:name=".utils.TestActivity"
+            android:label="@string/title_activity_test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
