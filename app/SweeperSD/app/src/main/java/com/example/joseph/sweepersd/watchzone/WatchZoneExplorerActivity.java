@@ -292,6 +292,10 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         if (address == null) {
             address = LocationUtils.getAddressForLatLnt(
                     WatchZoneExplorerActivity.this, latLng);
+
+            if (address.contains(",")) {
+                address = address.split(",")[0];
+            }
         }
 
         if (TextUtils.isEmpty(address)) {

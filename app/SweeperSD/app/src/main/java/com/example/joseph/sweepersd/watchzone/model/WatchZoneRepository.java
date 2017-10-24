@@ -14,10 +14,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class WatchZoneRepository extends LiveData<WatchZoneModel> {
+public class WatchZoneRepository extends LiveData<WatchZoneRepository> {
     private static final String TAG = WatchZoneRepository.class.getSimpleName();
 
     private static MutableLiveData<WatchZoneRepository> sInstance = new MutableLiveData<>();
@@ -57,10 +59,15 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
 
     public synchronized List<Long> getWatchZoneUids() {
         List<Long> watchZoneUids = loadWatchZoneUidsFromDb();
+        Set<Long> deletedWatchZones = new HashSet<>(mCachedWatchZoneLiveDataMap.keySet());
         for (Long uid : watchZoneUids) {
             if (!mCachedWatchZoneLiveDataMap.containsKey(uid)) {
                 mCachedWatchZoneLiveDataMap.put(uid, null);
             }
+            deletedWatchZones.remove(uid);
+        }
+        for (Long uid : deletedWatchZones) {
+            mCachedWatchZoneLiveDataMap.remove(uid);
         }
         return new ArrayList<>(mCachedWatchZoneLiveDataMap.keySet());
     }
@@ -70,7 +77,8 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
     }
 
     public synchronized LiveData<WatchZone> getWatchZoneLiveData(Long watchZoneUid) {
-        if (!mCachedWatchZoneLiveDataMap.containsKey(watchZoneUid) ||
+        getWatchZoneUids();
+        if (mCachedWatchZoneLiveDataMap.containsKey(watchZoneUid) &&
                 mCachedWatchZoneLiveDataMap.get(watchZoneUid) == null) {
             mCachedWatchZoneLiveDataMap.put(watchZoneUid, loadWatchZoneLiveDataFromDb(watchZoneUid));
         }

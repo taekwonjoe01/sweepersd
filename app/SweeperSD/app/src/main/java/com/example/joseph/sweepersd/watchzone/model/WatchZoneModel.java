@@ -20,6 +20,7 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     private final WatchZonePointsModel mWatchZonePointsModel;
     private final Map<Long, WatchZoneLimitModel> mWatchZoneLimitModelMap;
 
+    private LiveData<WatchZone> mLiveData;
     private WatchZone mWatchZone;
     private Status mStatus;
 
@@ -217,8 +218,8 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     @Override
     protected synchronized void onActive() {
         super.onActive();
-        WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneLiveData(mWatchZoneUid)
-                .observeForever(mWatchZoneDatabaseObserver);
+        mLiveData = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneLiveData(mWatchZoneUid);
+        mLiveData.observeForever(mWatchZoneDatabaseObserver);
         if (mWatchZone != null) {
             mWatchZonePointsModel.observeForever(mWatchZonePointsObserver);
             if (mWatchZonePointsModel.getStatus() != ModelStatus.INVALID) {
@@ -230,8 +231,7 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     @Override
     protected synchronized void onInactive() {
         super.onInactive();
-        WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneLiveData(mWatchZoneUid)
-                .removeObserver(mWatchZoneDatabaseObserver);
+        mLiveData.removeObserver(mWatchZoneDatabaseObserver);
         clearWatchZonePointsObservers();
     }
 

@@ -62,9 +62,8 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
         mDispatcher.onServicePreSuperOnCreate();
         mDispatcher.onServicePreSuperOnStart();
 
-        List<Long> watchZoneUids = WatchZoneRepository.getInstance(this).getWatchZoneUids();
         WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
-                watchZoneUids, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+                new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {

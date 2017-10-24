@@ -102,7 +102,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                             finished = true;
                             for (Long uid : models.keySet()) {
                                 WatchZoneModel model = models.get(uid);
-                                if (model.getStatus() != WatchZoneModel.Status.VALID) {
+                                if (model == null || model.getStatus() != WatchZoneModel.Status.VALID) {
                                     finished = false;
                                 }
                             }

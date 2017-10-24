@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneModel>> {
     private final WatchZoneModelsChangedCallback mCallback;
-    private final List<Long> mWatchZoneUids;
 
     protected Map<Long, WatchZoneModel> mWatchZoneModels;
 
@@ -14,21 +13,14 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Wat
         void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet);
     }
 
-    public WatchZoneModelsObserver(List<Long> watchZoneUids, WatchZoneModelsChangedCallback callback) {
+    public WatchZoneModelsObserver(WatchZoneModelsChangedCallback callback) {
         super(callback);
         mCallback = callback;
-        mWatchZoneUids = watchZoneUids;
     }
 
     @Override
     boolean isValid(WatchZoneModelRepository watchZoneModelRepository) {
-        boolean valid = true;
-        for (Long uid : mWatchZoneUids) {
-            if (!watchZoneModelRepository.watchZoneExists(uid)) {
-                valid = false;
-            }
-        }
-        return valid;
+        return true;
     }
 
     @Override

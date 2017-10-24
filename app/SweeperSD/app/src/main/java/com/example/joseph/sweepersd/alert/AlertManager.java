@@ -13,6 +13,8 @@ import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -50,10 +52,10 @@ public class AlertManager {
                 }
 
                 if (currentSweeping.size() > 0) {
-                    currentLabels.add(model.getWatchZone().getLabel());
+                    currentLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
                 }
                 if (upcomingSweeping.size() > 0) {
-                    upcomingLabels.add(model.getWatchZone().getLabel());
+                    upcomingLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
                 }
             }
         }
