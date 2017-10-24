@@ -13,12 +13,12 @@ import android.widget.LinearLayout;
 import com.example.joseph.sweepersd.LimitViewAdapter;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class LimitsTabFragment extends TabFragment {
@@ -82,8 +82,6 @@ public class LimitsTabFragment extends TabFragment {
         return view;
     }
 
-
-
     public void addWatchZone(Long watchZoneUid) {
         if (mAdapter == null) {
             mWatchZones.put(watchZoneUid, null);
@@ -96,7 +94,8 @@ public class LimitsTabFragment extends TabFragment {
         if (mWatchZones.containsKey(watchZoneUid)) {
             WatchZonePresenter presenter = mWatchZones.get(watchZoneUid);
             if (presenter != null) {
-                for (WatchZoneLimitModel limitModel : presenter.limitsObserver.getLimitModels()) {
+                for (Long uid : presenter.limitsObserver.getLimitModels().keySet()) {
+                    WatchZoneLimitModel limitModel = presenter.limitsObserver.getLimitModels().get(uid);
                     mAdapter.removeLimitModel(limitModel);
                 }
                 WatchZoneModelRepository.getInstance(getContext()).removeObserver(presenter.limitsObserver);
@@ -111,30 +110,30 @@ public class LimitsTabFragment extends TabFragment {
         presenter.limitsObserver = new WatchZoneLimitsObserver(watchZoneUid,
                 new WatchZoneLimitsObserver.WatchZoneLimitsChangedCallback() {
             @Override
-            public void onLimitModelAdded(int index) {
-                mAdapter.addLimitModel(presenter.limitsObserver.getLimitModels().get(index));
+            public void onLimitsChanged(Map<Long, WatchZoneLimitModel> data,
+                                        WatchZoneBaseObserver.ChangeSet changeSet) {
+                for (Long uid : changeSet.removedLimits) {
+                    mAdapter.removeLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
+                }
+                for (Long uid : changeSet.changedLimits) {
+                    mAdapter.updateLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
+                }
+                for (Long uid : changeSet.addedLimits) {
+                    mAdapter.addLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
+                }
             }
 
             @Override
-            public void onLimitModelRemoved(int index) {
-                mAdapter.removeLimitModel(presenter.limitsObserver.getLimitModels().get(index));
-            }
-
-            @Override
-            public void onLimitModelUpdated(int index) {
-                mAdapter.updateLimitModel(presenter.limitsObserver.getLimitModels().get(index));
-            }
-
-            @Override
-            public void onDataLoaded(List<WatchZoneLimitModel> data) {
-                for (WatchZoneLimitModel limitModel : presenter.limitsObserver.getLimitModels()) {
-                    mAdapter.addLimitModel(limitModel);
+            public void onDataLoaded(Map<Long, WatchZoneLimitModel> data) {
+                for (Long uid : presenter.limitsObserver.getLimitModels().keySet()) {
+                    mAdapter.addLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
                 }
             }
 
             @Override
             public void onDataInvalid() {
-                for (WatchZoneLimitModel limitModel : presenter.limitsObserver.getLimitModels()) {
+                for (Long uid : presenter.limitsObserver.getLimitModels().keySet()) {
+                    WatchZoneLimitModel limitModel = presenter.limitsObserver.getLimitModels().get(uid);
                     mAdapter.removeLimitModel(limitModel);
                 }
             }

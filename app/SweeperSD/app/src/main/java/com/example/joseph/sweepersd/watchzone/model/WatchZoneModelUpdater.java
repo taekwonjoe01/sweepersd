@@ -153,15 +153,18 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        List<WatchZoneModel> modelsToSchedule = repository.getWatchZoneModels();
-        for (WatchZoneModel model : repository.getWatchZoneModels()) {
+        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(repository.getWatchZoneModels().values());
+        Map<Long, WatchZoneModel> models = repository.getWatchZoneModels();
+        for (Long uid : models.keySet()) {
+            WatchZoneModel model = models.get(uid);
             if (model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {
                 modelsToSchedule.remove(model);
             }
         }
 
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
-        for (WatchZoneModel model : repository.getWatchZoneModels()) {
+        for (Long uid : models.keySet()) {
+            WatchZoneModel model = models.get(uid);
             if (model.getStatus() != WatchZoneModel.Status.VALID &&
                     model.getStatus() != WatchZoneModel.Status.LOADING) {
                 modelsThatNeedUpdate.add(model);

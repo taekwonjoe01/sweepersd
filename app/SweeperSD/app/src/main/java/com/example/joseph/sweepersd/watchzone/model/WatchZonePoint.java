@@ -110,4 +110,19 @@ public class WatchZonePoint {
 
         return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean result = false;
+        if (obj instanceof WatchZonePoint) {
+            WatchZonePoint other = (WatchZonePoint) obj;
+            result = !isChanged(other);
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

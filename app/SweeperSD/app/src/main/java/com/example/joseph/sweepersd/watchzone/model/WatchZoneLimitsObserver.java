@@ -1,26 +1,17 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Created by joseph on 10/18/17.
- */
-
-public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<List<WatchZoneLimitModel>> {
+public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneLimitModel>> {
     final Long mWatchZoneUid;
     private final WatchZoneLimitsChangedCallback mCallback;
 
-    protected List<WatchZoneLimitModel> mLimitModels;
+    protected Map<Long, WatchZoneLimitModel> mLimitModels;
 
-    public interface WatchZoneLimitsChangedCallback extends WatchZoneBaseObserverCallback<List<WatchZoneLimitModel>> {
-        void onLimitModelAdded(int index);
-        void onLimitModelRemoved(int index);
-        void onLimitModelUpdated(int index);
+    public interface WatchZoneLimitsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, WatchZoneLimitModel>> {
+        void onLimitsChanged(Map<Long, WatchZoneLimitModel> data, ChangeSet changeSet);
     }
 
     public WatchZoneLimitsObserver(Long watchZoneUid, WatchZoneLimitsChangedCallback callback) {
@@ -35,90 +26,59 @@ public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<List<WatchZon
     }
 
     @Override
-    List<WatchZoneLimitModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
+    Map<Long, WatchZoneLimitModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
         WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
         if (model != null) {
-            List<Long> limitUids = new ArrayList<>(model.getWatchZoneLimitModelUids());
-            Collections.sort(limitUids);
-            List<WatchZoneLimitModel> limitModels = new ArrayList<>();
-            for (Long uid : limitUids) {
-                WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(uid);
-                if (limitModel != null) {
-                    if (limitModel.getLimitSchedulesModel() != null &&
-                            limitModel.getLimitSchedulesModel().getScheduleList() != null) {
-                        limitModels.add(limitModel);
+            Map<Long, WatchZoneLimitModel> limitModels = model.getWatchZoneLimitModelMap();
+            boolean ready = true;
+            for (Long uid : limitModels.keySet()) {
+                WatchZoneLimitModel limitModel = limitModels.get(uid);
+                if (limitModel == null) {
+                    ready = false;
+                    break;
+
+                } else {
+                    if (limitModel.getLimitSchedulesModel() == null ||
+                            limitModel.getLimitSchedulesModel().getScheduleMap() == null) {
+                        ready = false;
+                        break;
                     }
                 }
             }
-            if (mLimitModels == null) {
-                mLimitModels = limitModels;
+            if (ready) {
+                if (mLimitModels == null) {
+                    mLimitModels = limitModels;
+                }
+                return limitModels;
             }
-            return limitModels;
         }
         return null;
     }
 
     @Override
-    void onRepositoryChanged(final List<WatchZoneLimitModel> limitModels) {
-        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() {
-                return mLimitModels.size();
-            }
-
-            @Override
-            public int getNewListSize() {
-                return limitModels.size();
-            }
-
-            @Override
-            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return mLimitModels.get(oldItemPosition).getLimitUid() ==
-                        limitModels.get(newItemPosition).getLimitUid();
-            }
-
-            @Override
-            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                return !mLimitModels.get(oldItemPosition).isChanged(
-                        limitModels.get(newItemPosition));
-            }
-        }, true);
-        result.dispatchUpdatesTo(new ListUpdateCallback() {
-            @Override
-            public void onInserted(int position, int count) {
-                for (int i = 0; i < count; i++) {
-                    int index = position + i;
-                    mLimitModels.add(index, limitModels.get(index));
-                    mCallback.onLimitModelAdded(index);
+    void onRepositoryChanged(final Map<Long, WatchZoneLimitModel> limitModels) {
+        ChangeSet changeSet = new ChangeSet();
+        changeSet.addedLimits = new ArrayList<>();
+        changeSet.changedLimits = new ArrayList<>();
+        changeSet.removedLimits = new ArrayList<>(mLimitModels.keySet());
+        for (Long uid : limitModels.keySet()) {
+            changeSet.removedLimits.remove(uid);
+            if (!mLimitModels.containsKey(uid)) {
+                changeSet.addedLimits.add(uid);
+            } else {
+                WatchZoneLimitModel curModel = mLimitModels.get(uid);
+                WatchZoneLimitModel newModel = limitModels.get(uid);
+                if (curModel.isChanged(newModel)) {
+                    changeSet.changedLimits.add(uid);
                 }
             }
+        }
+        mLimitModels = limitModels;
 
-            @Override
-            public void onRemoved(int position, int count) {
-                for (int i = 0; i < count; i++) {
-                    int index = position;
-                    mCallback.onLimitModelRemoved(index);
-                    mLimitModels.remove(index);
-                }
-            }
-
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                WatchZoneLimitModel model = mLimitModels.remove(fromPosition);
-                mLimitModels.add(toPosition, model);
-            }
-
-            @Override
-            public void onChanged(int position, int count, Object payload) {
-                for (int i = 0; i < count; i++) {
-                    int index = position + i;
-                    mCallback.onLimitModelUpdated(index);
-                }
-            }
-        });
+        mCallback.onLimitsChanged(mLimitModels, changeSet);
     }
 
-    public List<WatchZoneLimitModel> getLimitModels() {
+    public Map<Long, WatchZoneLimitModel> getLimitModels() {
         return mLimitModels;
     }
 }

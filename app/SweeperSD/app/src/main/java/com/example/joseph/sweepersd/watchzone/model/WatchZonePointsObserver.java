@@ -1,21 +1,18 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public class WatchZonePointsObserver extends WatchZoneBaseObserver<List<WatchZonePoint>> {
+public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, WatchZonePoint>> {
     private final Long mWatchZoneUid;
     private final WatchZonePointsChangedCallback mCallback;
 
-    protected List<WatchZonePoint> mWatchZonePoints;
+    protected Map<Long, WatchZonePoint> mWatchZonePoints;
 
-    public interface WatchZonePointsChangedCallback extends WatchZoneBaseObserverCallback<List<WatchZonePoint>> {
-        void onWatchZonePointAdded(int index);
-        void onWatchZonePointRemoved(int index);
-        void onWatchZonePointUpdated(int index);
+    public interface WatchZonePointsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, WatchZonePoint>> {
+        void onWatchZonePointsChanged(Map<Long, WatchZonePoint> watchZonePointMap, ChangeSet changeSet);
     }
 
     public WatchZonePointsObserver(Long watchZoneUid, WatchZonePointsChangedCallback callback) {
@@ -30,17 +27,18 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<List<WatchZon
     }
 
     @Override
-    List<WatchZonePoint> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
+    Map<Long, WatchZonePoint> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
         WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
         if (model != null) {
             WatchZonePointsModel pointsModel = model.getWatchZonePointsModel();
             if (pointsModel != null) {
-                List<WatchZonePoint> watchZonePoints = pointsModel.getWatchZonePointsList();
+                Map<Long, WatchZonePoint> watchZonePoints = pointsModel.getWatchZonePointsMap();
                 if (watchZonePoints != null) {
-                    final List<WatchZonePoint> finishedPoints = new ArrayList<>();
-                    for (WatchZonePoint p : watchZonePoints) {
+                    Map<Long, WatchZonePoint> finishedPoints = new HashMap<>();
+                    for (Long uid : watchZonePoints.keySet()) {
+                        WatchZonePoint p = watchZonePoints.get(uid);
                         if (p.getAddress() != null) {
-                            finishedPoints.add(p);
+                            finishedPoints.put(uid, p);
                         }
                     }
                     if (mWatchZonePoints == null) {
@@ -54,65 +52,29 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<List<WatchZon
     }
 
     @Override
-    void onRepositoryChanged(final List<WatchZonePoint> watchZonePoints) {
-        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() {
-                return mWatchZonePoints.size();
-            }
-
-            @Override
-            public int getNewListSize() {
-                return watchZonePoints.size();
-            }
-
-            @Override
-            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return mWatchZonePoints.get(oldItemPosition).getUid() ==
-                        watchZonePoints.get(newItemPosition).getUid();
-            }
-
-            @Override
-            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                return !mWatchZonePoints.get(oldItemPosition).isChanged(
-                        watchZonePoints.get(newItemPosition));
-            }
-        }, false);
-        result.dispatchUpdatesTo(new ListUpdateCallback() {
-            @Override
-            public void onInserted(int position, int count) {
-                for (int i = 0; i < count; i++) {
-                    int index = position + i;
-                    mWatchZonePoints.add(index, watchZonePoints.get(index));
-                    mCallback.onWatchZonePointAdded(index);
+    void onRepositoryChanged(final Map<Long, WatchZonePoint> watchZonePoints) {
+        ChangeSet changeSet = new ChangeSet();
+        changeSet.addedLimits = new ArrayList<>();
+        changeSet.changedLimits = new ArrayList<>();
+        changeSet.removedLimits = new ArrayList<>(mWatchZonePoints.keySet());
+        for (Long uid : watchZonePoints.keySet()) {
+            changeSet.removedLimits.remove(uid);
+            if (!mWatchZonePoints.containsKey(uid)) {
+                changeSet.addedLimits.add(uid);
+            } else {
+                WatchZonePoint curPoint = mWatchZonePoints.get(uid);
+                WatchZonePoint newPoint = watchZonePoints.get(uid);
+                if (curPoint.isChanged(newPoint)) {
+                    changeSet.changedLimits.add(uid);
                 }
             }
+        }
+        mWatchZonePoints = watchZonePoints;
 
-            @Override
-            public void onRemoved(int position, int count) {
-                for (int i = 0; i < count; i++) {
-                    int index = position;
-                    mCallback.onWatchZonePointRemoved(index);
-                    mWatchZonePoints.remove(index);
-                }
-            }
-
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                // Do nothing.
-            }
-
-            @Override
-            public void onChanged(int position, int count, Object payload) {
-                for (int i = 0; i < count; i++) {
-                    int index = position + i;
-                    mCallback.onWatchZonePointUpdated(index);
-                }
-            }
-        });
+        mCallback.onWatchZonePointsChanged(mWatchZonePoints, changeSet);
     }
 
-    public List<WatchZonePoint> getWatchZonePoints() {
+    public Map<Long, WatchZonePoint> getWatchZonePoints() {
         return mWatchZonePoints;
     }
 }

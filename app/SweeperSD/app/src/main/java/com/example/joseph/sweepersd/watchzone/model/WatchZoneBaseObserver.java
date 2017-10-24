@@ -3,6 +3,8 @@ package com.example.joseph.sweepersd.watchzone.model;
 import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
 
+import java.util.List;
+
 /**
  * Created by joseph on 10/18/17.
  */
@@ -23,6 +25,12 @@ public abstract class WatchZoneBaseObserver<T> implements Observer<WatchZoneMode
     public interface WatchZoneBaseObserverCallback<T> {
         void onDataLoaded(T data);
         void onDataInvalid();
+    }
+
+    public static class ChangeSet {
+        public List<Long> addedLimits;
+        public List<Long> changedLimits;
+        public List<Long> removedLimits;
     }
 
     @Override

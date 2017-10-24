@@ -6,7 +6,6 @@ import com.example.joseph.sweepersd.limit.Limit;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +82,8 @@ class WatchZoneUpdater {
             limitHash.put(l.getStreet(), list);
         }
 
-        final List<WatchZonePoint> watchZonePoints = mModel.getWatchZonePointsModel().getWatchZonePointsList();
+        final List<WatchZonePoint> watchZonePoints =
+                new ArrayList<>(mModel.getWatchZonePointsModel().getWatchZonePointsMap().values());
         Collections.shuffle(watchZonePoints);
 
         mProgress = new UpdateProgress(0, UpdateProgress.Status.UPDATING);

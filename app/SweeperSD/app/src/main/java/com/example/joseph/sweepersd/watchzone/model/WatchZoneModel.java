@@ -5,7 +5,6 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -162,6 +161,10 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
         return mWatchZoneLimitModelMap.keySet();
     }
 
+    synchronized Map<Long, WatchZoneLimitModel> getWatchZoneLimitModelMap() {
+        return mWatchZoneLimitModelMap;
+    }
+
     public synchronized WatchZoneLimitModel getWatchZoneLimitModel(Long limitUid) {
         return mWatchZoneLimitModelMap.get(limitUid).getValue();
     }
@@ -240,7 +243,9 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     }
 
     private boolean isWatchZoneCreated() {
-        for (WatchZonePoint point : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
+        Map<Long, WatchZonePoint> points = mWatchZonePointsModel.getWatchZonePointsMap();
+        for (Long uid : points.keySet()) {
+            WatchZonePoint point = points.get(uid);
             if (point.getAddress() == null) {
                 return false;
             }
@@ -250,7 +255,9 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
 
     private boolean needsUpdate() {
         boolean result = false;
-        for (WatchZonePoint point : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
+        Map<Long, WatchZonePoint> points = mWatchZonePointsModel.getWatchZonePointsMap();
+        for (Long uid : points.keySet()) {
+            WatchZonePoint point = points.get(uid);
             long timestamp = point.getWatchZoneUpdatedTimestampMs();
             long elapsedTime = System.currentTimeMillis() - timestamp;
             if (elapsedTime > WatchZonePointUpdater.WATCH_ZONE_UP_TO_DATE_TIME_MS) {
@@ -263,7 +270,9 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
     private void updateWatchZoneLimitModels() {
         // Get the unique LimitUid's
         List<Long> uniqueLimitUids = new ArrayList<>();
-        for (WatchZonePoint p : mWatchZonePointsModel.getValue().getWatchZonePointsList()) {
+        Map<Long, WatchZonePoint> points = mWatchZonePointsModel.getWatchZonePointsMap();
+        for (Long uid : points.keySet()) {
+            WatchZonePoint p = points.get(uid);
             if (!uniqueLimitUids.contains(p.getLimitId()) &&
                     p.getLimitId() != 0L) {
                 uniqueLimitUids.add(p.getLimitId());

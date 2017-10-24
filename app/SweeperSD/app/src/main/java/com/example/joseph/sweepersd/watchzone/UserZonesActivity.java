@@ -22,13 +22,16 @@ import com.example.joseph.sweepersd.alert.AlertNotificationJob;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateWatchZoneActivity;
 import com.example.joseph.sweepersd.utils.Preferences;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UserZonesActivity extends AppCompatActivity implements
         AddressValidatorManager.ValidatorProgressListener{
@@ -88,21 +91,14 @@ public class UserZonesActivity extends AppCompatActivity implements
         WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
                 watchZoneUids, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onWatchZonePointAdded(int index) {
-                // Do nothing
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
+                                        WatchZoneBaseObserver.ChangeSet changeSet) {
+                // Do nothing.
             }
             @Override
-            public void onWatchZonePointRemoved(int index) {
-                // Do nothing
-            }
-            @Override
-            public void onWatchZonePointUpdated(int index) {
-                // Do nothing
-            }
-            @Override
-            public void onDataLoaded(List<WatchZoneModel> models) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
                 AlertManager alertManager = new AlertManager(UserZonesActivity.this);
-                alertManager.updateAlertNotification(models);
+                alertManager.updateAlertNotification(new ArrayList<>(models.values()));
             }
             @Override
             public void onDataInvalid() {

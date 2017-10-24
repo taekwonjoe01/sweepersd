@@ -5,27 +5,20 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 
 import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedulesModel> implements
-        ListUpdateCallback {
+public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedulesModel> {
     private final Context mApplicationContext;
     private final Handler mHandler;
     private final Long mLimitUid;
 
     private Map<Long, LimitSchedule> mLimitSchedulesMap;
-
-    private List<LimitSchedule> mCurrentList;
-    private List<LimitSchedule> mChangeToList;
 
     private WatchZoneModel.ModelStatus mStatus;
 
@@ -36,7 +29,7 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
                 @Override
                 public void run() {
                     synchronized (WatchZoneLimitSchedulesModel.this) {
-                        if (limitSchedules == null || limitSchedules.isEmpty()) {
+                        if (limitSchedules == null) {
                             // Invalid values for this LiveData. Notify observers that this data is invalid.
                             mStatus = WatchZoneModel.ModelStatus.INVALID;
                             postValue(WatchZoneLimitSchedulesModel.this);
@@ -44,34 +37,10 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
                             if (mLimitSchedulesMap == null) {
                                 mLimitSchedulesMap = new HashMap<>();
                             }
-                            if (mCurrentList == null) {
-                                mCurrentList = new ArrayList<>();
+                            mLimitSchedulesMap.clear();
+                            for (LimitSchedule ls : limitSchedules) {
+                                mLimitSchedulesMap.put(ls.getUid(), ls);
                             }
-                            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                                @Override
-                                public int getOldListSize() {
-                                    return mCurrentList == null ? 0 : mCurrentList.size();
-                                }
-
-                                @Override
-                                public int getNewListSize() {
-                                    return limitSchedules.size();
-                                }
-
-                                @Override
-                                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                                    return mCurrentList.get(oldItemPosition).getUid()
-                                            == limitSchedules.get(newItemPosition).getUid();
-                                }
-
-                                @Override
-                                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                                    return !mCurrentList.get(oldItemPosition).isChanged(limitSchedules.get(newItemPosition));
-                                }
-                            }, false);
-                            mChangeToList = limitSchedules;
-                            result.dispatchUpdatesTo(WatchZoneLimitSchedulesModel.this);
-                            mCurrentList = limitSchedules;
 
                             mStatus = WatchZoneModel.ModelStatus.LOADED;
                             postValue(WatchZoneLimitSchedulesModel.this);
@@ -99,8 +68,8 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
         return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mLimitSchedulesMap.get(limitScheduleUid);
     }
 
-    public synchronized List<LimitSchedule> getScheduleList() {
-        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mCurrentList;
+    public synchronized Map<Long, LimitSchedule> getScheduleMap() {
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mLimitSchedulesMap;
     }
 
     public synchronized WatchZoneModel.ModelStatus getStatus() {
@@ -111,23 +80,31 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
         boolean result = false;
 
         if (this.mLimitUid == compareTo.getLimitUid()) {
-            if (this.getScheduleList() == null && compareTo.getScheduleList() != null) {
+            if (this.getScheduleMap() == null && compareTo.getScheduleMap() != null) {
                 return true;
-            } else if (this.getScheduleList() != null && compareTo.getScheduleList() == null) {
+            } else if (this.getScheduleMap() != null && compareTo.getScheduleMap() == null) {
                 return true;
-            } else if (this.getScheduleList() != null && compareTo.getScheduleList() != null &&
-                    this.getScheduleList().size() != compareTo.getScheduleList().size()) {
-                result = true;
-            } else if (this.getScheduleList() != null && compareTo.getScheduleList() != null){
-                int index = 0;
-                List<LimitSchedule> otherList = compareTo.getScheduleList();
-                for (LimitSchedule p : getScheduleList()) {
-                    LimitSchedule op = otherList.get(index);
-                    if (p.isChanged(op)) {
-                        result = true;
-                        break;
+            } else if (this.getScheduleMap() != null && compareTo.getScheduleMap() != null &&
+                    this.getScheduleMap().size() != compareTo.getScheduleMap().size()) {
+                return true;
+            } else if (this.getScheduleMap() != null && compareTo.getScheduleMap() != null){
+                Map<Long, LimitSchedule> otherList = compareTo.getScheduleMap();
+                for (Long uid : mLimitSchedulesMap.keySet()) {
+                    if (!otherList.containsKey(uid)) {
+                        return true;
                     }
-                    index++;
+                }
+                for (Long uid : otherList.keySet()) {
+                    if (!mLimitSchedulesMap.containsKey(uid)) {
+                        return true;
+                    }
+                }
+                for (Long uid : mLimitSchedulesMap.keySet()) {
+                    LimitSchedule mLs = mLimitSchedulesMap.get(uid);
+                    LimitSchedule ls = otherList.get(uid);
+                    if (mLs.isChanged(ls)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -146,37 +123,5 @@ public class WatchZoneLimitSchedulesModel extends LiveData<WatchZoneLimitSchedul
         super.onInactive();
         LimitRepository.getInstance(mApplicationContext).getLimitSchedulesLiveData(mLimitUid)
                 .removeObserver(mDatabaseObserver);
-    }
-
-    @Override
-    public void onChanged(int position, int count, Object payload) {
-        Map<Long, LimitSchedule> schedules = mLimitSchedulesMap;
-        for (int i = 0; i < count; i++) {
-            LimitSchedule changedSchedule = mChangeToList.get(i + position);
-            schedules.put(changedSchedule.getUid(), changedSchedule);
-        }
-    }
-
-    @Override
-    public void onInserted(int position, int count) {
-        Map<Long, LimitSchedule> schedules = mLimitSchedulesMap;
-        for (int i = 0; i < count; i++) {
-            LimitSchedule insertedSchedule = mChangeToList.get(i + position);
-            schedules.put(insertedSchedule.getUid(), insertedSchedule);
-        }
-    }
-
-    @Override
-    public void onMoved(int fromPosition, int toPosition) {
-        // Detect moves is false, so do nothing.
-    }
-
-    @Override
-    public void onRemoved(int position, int count) {
-        Map<Long, LimitSchedule> schedules = mLimitSchedulesMap;
-        for (int i = 0; i < count; i++) {
-            LimitSchedule removedSchedule = mCurrentList.get(i + position);
-            schedules.remove(removedSchedule.getUid());
-        }
     }
 }

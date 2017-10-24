@@ -7,11 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitParser;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,9 +77,10 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     }
 
     private void addSignsForModel(WatchZoneLimitModel limitModel) {
-        List<LimitSchedule> schedules = limitModel.getLimitSchedulesModel().getScheduleList();
+        Map<Long, LimitSchedule> schedules = limitModel.getLimitSchedulesModel().getScheduleMap();
         Map<LimitTuple, List<LimitSchedule>> sortedSchedules = new HashMap<>();
-        for (LimitSchedule s : schedules) {
+        for (Long uid : schedules.keySet()) {
+            LimitSchedule s = schedules.get(uid);
             LimitTuple tuple = new LimitTuple(s.getDayNumber(),
                     s.getStartHour(), s.getEndHour());
             List<LimitSchedule> schedulesForDay = sortedSchedules.get(tuple);

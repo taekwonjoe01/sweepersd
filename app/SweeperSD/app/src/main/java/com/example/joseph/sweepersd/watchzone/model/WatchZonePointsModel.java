@@ -5,24 +5,17 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> implements
-        ListUpdateCallback {
+public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> {
     private final Context mApplicationContext;
     private final Handler mHandler;
     private final Long mWatchZoneUid;
 
     private Map<Long, WatchZonePoint> mWatchZonePointsMap;
-
-    private List<WatchZonePoint> mCurrentList;
-    private List<WatchZonePoint> mChangeToList;
 
     private WatchZoneModel.ModelStatus mStatus;
 
@@ -33,7 +26,7 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
                 @Override
                 public void run() {
                     synchronized (WatchZonePointsModel.this) {
-                        if (watchZonePoints == null || watchZonePoints.isEmpty()) {
+                        if (watchZonePoints == null) {
                             // Invalid values for this LiveData. Notify observers that this data is invalid.
                             mStatus = WatchZoneModel.ModelStatus.INVALID;
                             postValue(WatchZonePointsModel.this);
@@ -41,34 +34,10 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
                             if (mWatchZonePointsMap == null) {
                                 mWatchZonePointsMap = new HashMap<>();
                             }
-                            if (mCurrentList == null) {
-                                mCurrentList = new ArrayList<>();
+                            mWatchZonePointsMap.clear();
+                            for (WatchZonePoint p : watchZonePoints) {
+                                mWatchZonePointsMap.put(p.getUid(), p);
                             }
-                            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                                @Override
-                                public int getOldListSize() {
-                                    return mWatchZonePointsMap == null ? 0 : mCurrentList.size();
-                                }
-
-                                @Override
-                                public int getNewListSize() {
-                                    return watchZonePoints.size();
-                                }
-
-                                @Override
-                                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                                    return mCurrentList.get(oldItemPosition).getUid()
-                                            == watchZonePoints.get(newItemPosition).getUid();
-                                }
-
-                                @Override
-                                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                                    return !mCurrentList.get(oldItemPosition).isChanged(watchZonePoints.get(newItemPosition));
-                                }
-                            }, false);
-                            mChangeToList = watchZonePoints;
-                            result.dispatchUpdatesTo(WatchZonePointsModel.this);
-                            mCurrentList = watchZonePoints;
 
                             mStatus = WatchZoneModel.ModelStatus.LOADED;
                             postValue(WatchZonePointsModel.this);
@@ -96,8 +65,8 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mWatchZonePointsMap.get(watchZonePointUid);
     }
 
-    public synchronized List<WatchZonePoint> getWatchZonePointsList() {
-        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mCurrentList;
+    public synchronized Map<Long, WatchZonePoint> getWatchZonePointsMap() {
+        return getStatus() == WatchZoneModel.ModelStatus.INVALID ? null : mWatchZonePointsMap;
     }
 
     public synchronized WatchZoneModel.ModelStatus getStatus() {
@@ -108,24 +77,32 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         boolean result = false;
 
         if (this.mWatchZoneUid == compareTo.getWatchZoneUid()) {
-            if (this.getWatchZonePointsList() == null && compareTo.getWatchZonePointsList() == null) {
+            if (this.getWatchZonePointsMap() == null && compareTo.getWatchZonePointsMap() == null) {
                 return false;
-            } else if (this.getWatchZonePointsList() == null && compareTo.getWatchZonePointsList() != null) {
+            } else if (this.getWatchZonePointsMap() == null && compareTo.getWatchZonePointsMap() != null) {
                 return true;
-            } else if (this.getWatchZonePointsList() != null && compareTo.getWatchZonePointsList() == null) {
+            } else if (this.getWatchZonePointsMap() != null && compareTo.getWatchZonePointsMap() == null) {
                 return true;
-            } else if (this.getWatchZonePointsList().size() != compareTo.getWatchZonePointsList().size()) {
-                result = true;
+            } else if (this.getWatchZonePointsMap().size() != compareTo.getWatchZonePointsMap().size()) {
+                return true;
             } else {
-                int index = 0;
-                List<WatchZonePoint> otherList = compareTo.getWatchZonePointsList();
-                for (WatchZonePoint p : getWatchZonePointsList()) {
-                    WatchZonePoint op = otherList.get(index);
-                    if (p.isChanged(op)) {
-                        result = true;
-                        break;
+                Map<Long, WatchZonePoint> otherList = compareTo.getWatchZonePointsMap();
+                for (Long uid : mWatchZonePointsMap.keySet()) {
+                    if (!otherList.containsKey(uid)) {
+                        return true;
                     }
-                    index++;
+                }
+                for (Long uid : otherList.keySet()) {
+                    if (!mWatchZonePointsMap.containsKey(uid)) {
+                        return true;
+                    }
+                }
+                for (Long uid : mWatchZonePointsMap.keySet()) {
+                    WatchZonePoint mP = mWatchZonePointsMap.get(uid);
+                    WatchZonePoint p = otherList.get(uid);
+                    if (mP.isChanged(p)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -144,37 +121,5 @@ public class WatchZonePointsModel extends LiveData<WatchZonePointsModel> impleme
         super.onInactive();
         WatchZoneRepository.getInstance(mApplicationContext).getWatchZonePointsLiveData(mWatchZoneUid)
                 .removeObserver(mDatabaseObserver);
-    }
-
-    @Override
-    public void onChanged(int position, int count, Object payload) {
-        Map<Long, WatchZonePoint> points = mWatchZonePointsMap;
-        for (int i = 0; i < count; i++) {
-            WatchZonePoint changedSchedule = mChangeToList.get(i + position);
-            points.put(changedSchedule.getUid(), changedSchedule);
-        }
-    }
-
-    @Override
-    public void onInserted(int position, int count) {
-        Map<Long, WatchZonePoint> points = mWatchZonePointsMap;
-        for (int i = 0; i < count; i++) {
-            WatchZonePoint insertedSchedule = mChangeToList.get(i + position);
-            points.put(insertedSchedule.getUid(), insertedSchedule);
-        }
-    }
-
-    @Override
-    public void onMoved(int fromPosition, int toPosition) {
-        // Detect moves is false, so do nothing.
-    }
-
-    @Override
-    public void onRemoved(int position, int count) {
-        Map<Long, WatchZonePoint> points = mWatchZonePointsMap;
-        for (int i = 0; i < count; i++) {
-            WatchZonePoint removedSchedule = mCurrentList.get(i + position);
-            points.remove(removedSchedule.getUid());
-        }
     }
 }

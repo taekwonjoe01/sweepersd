@@ -32,27 +32,29 @@ public class AlertManager {
         for (WatchZoneModel model : models) {
             List<LimitScheduleDate> sweepingDates =
                     WatchZoneUtils.getStartTimeOrderedDatesForWatchZone(model);
-            List<LimitScheduleDate> currentSweeping = new ArrayList<>();
-            List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
-            long now = new GregorianCalendar(
-                    TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
-            long startOffset = WatchZoneUtils.getStartHourOffset(model.getWatchZone());
-            for (LimitScheduleDate date : sweepingDates) {
-                long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
-                long startTime = date.getStartCalendar().getTime().getTime();
-                long endTime = date.getEndCalendar().getTime().getTime();
-                if (startTime <= now && endTime >= now) {
-                    currentSweeping.add(date);
-                } else if (warningTime <= now && endTime >= now) {
-                    upcomingSweeping.add(date);
+            if (sweepingDates != null) {
+                List<LimitScheduleDate> currentSweeping = new ArrayList<>();
+                List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
+                long now = new GregorianCalendar(
+                        TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
+                long startOffset = WatchZoneUtils.getStartHourOffset(model.getWatchZone());
+                for (LimitScheduleDate date : sweepingDates) {
+                    long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
+                    long startTime = date.getStartCalendar().getTime().getTime();
+                    long endTime = date.getEndCalendar().getTime().getTime();
+                    if (startTime <= now && endTime >= now) {
+                        currentSweeping.add(date);
+                    } else if (warningTime <= now && endTime >= now) {
+                        upcomingSweeping.add(date);
+                    }
                 }
-            }
 
-            if (currentSweeping.size() > 0) {
-                currentLabels.add(model.getWatchZone().getLabel());
-            }
-            if (upcomingSweeping.size() > 0) {
-                upcomingLabels.add(model.getWatchZone().getLabel());
+                if (currentSweeping.size() > 0) {
+                    currentLabels.add(model.getWatchZone().getLabel());
+                }
+                if (upcomingSweeping.size() > 0) {
+                    upcomingLabels.add(model.getWatchZone().getLabel());
+                }
             }
         }
         if (!currentLabels.isEmpty() || !upcomingLabels.isEmpty()) {

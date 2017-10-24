@@ -286,7 +286,8 @@ public class WatchZoneUtils {
             List<LimitSchedule> allSchedules = new ArrayList<>();
             for (Long limitUid : model.getWatchZoneLimitModelUids()) {
                 WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
-                allSchedules.addAll(limitModel.getLimitSchedulesModel().getScheduleList());
+                allSchedules.addAll(new ArrayList<>(
+                        limitModel.getLimitSchedulesModel().getScheduleMap().values()));
             }
             results = getStartTimeOrderedDatesForLimitSchedules(allSchedules, true);
         }
@@ -299,7 +300,8 @@ public class WatchZoneUtils {
             List<LimitSchedule> allSchedules = new ArrayList<>();
             for (Long limitUid : model.getWatchZoneLimitModelUids()) {
                 WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
-                allSchedules.addAll(limitModel.getLimitSchedulesModel().getScheduleList());
+                allSchedules.addAll(new ArrayList<>(
+                        limitModel.getLimitSchedulesModel().getScheduleMap().values()));
             }
             long startOffset = getStartHourOffset(model.getWatchZone());
             result = getNextEventTimestampForLimitSchedules(allSchedules, startOffset);

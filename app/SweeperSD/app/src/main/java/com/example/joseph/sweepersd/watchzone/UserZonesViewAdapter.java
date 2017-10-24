@@ -57,10 +57,13 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             @Override
             public void onChanged(@Nullable final WatchZoneModelRepository repository) {
                 if (mCurrentList == null) {
-                    mCurrentList = repository.getValue().getWatchZoneModels();
+                    mCurrentList = new ArrayList<>(
+                            repository.getValue().getWatchZoneModels().values());
                     notifyItemRangeInserted(0, mCurrentList.size());
                 } else {
-                    final List<WatchZoneModel> models = repository.getValue().getWatchZoneModels();
+
+                    final List<WatchZoneModel> models = new ArrayList<>(
+                            repository.getValue().getWatchZoneModels().values());
                     WatchZoneModel explorerModel = null;
                     for (WatchZoneModel model : models) {
                         if (model.getWatchZoneUid() == mExplorerUid) {
@@ -255,9 +258,9 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             // Get all LimitSchedules to determine sweeping dates
                             List<LimitSchedule> allLimitSchedules = new ArrayList<>();
                             for (Long uniqueLimitUid : model.getWatchZoneLimitModelUids()) {
-                                allLimitSchedules.addAll(
+                                allLimitSchedules.addAll(new ArrayList<>(
                                         model.getWatchZoneLimitModel(uniqueLimitUid)
-                                                .getLimitSchedulesModel().getScheduleList());
+                                                .getLimitSchedulesModel().getScheduleMap().values()));
                             }
 
                             long nextSweepingTime = WatchZoneUtils.getNextSweepingStartTime(allLimitSchedules);

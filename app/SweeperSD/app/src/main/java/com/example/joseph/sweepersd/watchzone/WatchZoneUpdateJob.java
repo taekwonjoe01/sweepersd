@@ -97,10 +97,11 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                 public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
                     boolean finished = false;
                     if (watchZoneModelRepository != null) {
-                        List<WatchZoneModel> models = watchZoneModelRepository.getWatchZoneModels();
+                        Map<Long, WatchZoneModel> models = watchZoneModelRepository.getWatchZoneModels();
                         if (models != null && !models.isEmpty()) {
                             finished = true;
-                            for (WatchZoneModel model : models) {
+                            for (Long uid : models.keySet()) {
+                                WatchZoneModel model = models.get(uid);
                                 if (model.getStatus() != WatchZoneModel.Status.VALID) {
                                     finished = false;
                                 }

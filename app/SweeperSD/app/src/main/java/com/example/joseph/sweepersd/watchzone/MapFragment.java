@@ -3,13 +3,13 @@ package com.example.joseph.sweepersd.watchzone;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
@@ -91,9 +91,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 if (presenter.watchZoneRadius != null) {
                     presenter.watchZoneRadius.remove();
                 }
-                if (presenter.watchZonePoints != null) {
-                    for (Circle c : presenter.watchZonePoints) {
-                        c.remove();
+                if (presenter.pointsToCircleMap != null) {
+                    for (Long uid : presenter.pointsToCircleMap.keySet()) {
+                        Circle point = presenter.pointsToCircleMap.get(uid);
+                        point.remove();
                     }
                 }
                 WatchZoneModelRepository.getInstance(getContext()).removeObserver(presenter.watchZoneObserver);
@@ -134,12 +135,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 new WatchZoneObserver.WatchZoneChangedCallback() {
             @Override
             public void onWatchZoneChanged(WatchZone watchZone) {
-                Log.e("Joey", "WAtchzone changed!");
                 presenter.watchZoneCenter.remove();
                 presenter.watchZoneRadius.remove();
 
                 if (presenter.watchZonePointsObserver != null) {
-                    for (Circle point : presenter.watchZonePoints) {
+                    for (Long uid : presenter.pointsToCircleMap.keySet()) {
+                        Circle point = presenter.pointsToCircleMap.get(uid);
                         point.remove();
                     }
                 }
@@ -167,8 +168,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
             @Override
             public void onDataInvalid() {
-                presenter.watchZoneCenter.remove();
-                presenter.watchZoneRadius.remove();
+                if (presenter.watchZoneCenter != null) {
+                    presenter.watchZoneCenter.remove();
+                }
+                if (presenter.watchZoneRadius != null) {
+                    presenter.watchZoneRadius.remove();
+                }
             }
         });
         createWatchZonePointsObserver(watchZoneUid, presenter);
@@ -180,53 +185,56 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         presenter.watchZonePointsObserver = new WatchZonePointsObserver(watchZoneUid,
                 new WatchZonePointsObserver.WatchZonePointsChangedCallback() {
             @Override
-            public void onWatchZonePointAdded(int index) {
-                WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(index);
-                CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(p.getLatitude(), p.getLongitude()))
-                        .radius(1.0)
-                        .strokeColor(getResources().getColor(R.color.app_primary))
-                        .fillColor(getResources().getColor(R.color.map_radius_fill));
-                presenter.watchZonePoints.add(index, mGoogleMap.addCircle(circleOptions));
-            }
+            public void onWatchZonePointsChanged(Map<Long, WatchZonePoint> watchZonePointMap,
+                                                 WatchZoneBaseObserver.ChangeSet changeSet) {
+                for (Long uid : changeSet.removedLimits) {
+                    Circle circle = presenter.pointsToCircleMap.remove(uid);
+                    circle.remove();
+                }
+                for (Long uid : changeSet.changedLimits) {
+                    Circle circle = presenter.pointsToCircleMap.remove(uid);
+                    circle.remove();
 
-            @Override
-            public void onWatchZonePointRemoved(int index) {
-                Circle circle = presenter.watchZonePoints.remove(index);
-                circle.remove();
-            }
-
-            @Override
-            public void onWatchZonePointUpdated(int index) {
-                Circle circle = presenter.watchZonePoints.remove(index);
-                circle.remove();
-
-                WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(index);
-                CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(p.getLatitude(), p.getLongitude()))
-                        .radius(1.0)
-                        .strokeColor(getResources().getColor(R.color.app_primary))
-                        .fillColor(getResources().getColor(R.color.map_radius_fill));
-                presenter.watchZonePoints.add(index, mGoogleMap.addCircle(circleOptions));
-            }
-
-            @Override
-            public void onDataLoaded(List<WatchZonePoint> watchZonePoints) {
-                presenter.watchZonePoints = new ArrayList<>();
-                for (WatchZonePoint p : watchZonePoints) {
+                    WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid);
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
                             .strokeColor(getResources().getColor(R.color.app_primary))
                             .fillColor(getResources().getColor(R.color.map_radius_fill));
-                    presenter.watchZonePoints.add(mGoogleMap.addCircle(circleOptions));
+                    presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
+                }
+                for (Long uid : changeSet.addedLimits) {
+                    WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid);
+                    CircleOptions circleOptions = new CircleOptions()
+                            .center(new LatLng(p.getLatitude(), p.getLongitude()))
+                            .radius(1.0)
+                            .strokeColor(getResources().getColor(R.color.app_primary))
+                            .fillColor(getResources().getColor(R.color.map_radius_fill));
+                    presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
+                }
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZonePoint> watchZonePoints) {
+                presenter.pointsToCircleMap = new HashMap<>();
+                for (Long uid : watchZonePoints.keySet()) {
+                    WatchZonePoint p = watchZonePoints.get(uid);
+                    CircleOptions circleOptions = new CircleOptions()
+                            .center(new LatLng(p.getLatitude(), p.getLongitude()))
+                            .radius(1.0)
+                            .strokeColor(getResources().getColor(R.color.app_primary))
+                            .fillColor(getResources().getColor(R.color.map_radius_fill));
+                    presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
                 }
             }
 
             @Override
             public void onDataInvalid() {
-                for (Circle point : presenter.watchZonePoints) {
-                    point.remove();
+                if (presenter.pointsToCircleMap != null) {
+                    for (Long uid : presenter.pointsToCircleMap.keySet()) {
+                        Circle point = presenter.pointsToCircleMap.get(uid);
+                        point.remove();
+                    }
                 }
             }
         });
@@ -237,7 +245,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private class WatchZonePresenter {
         Marker watchZoneCenter;
         Circle watchZoneRadius;
-        List<Circle> watchZonePoints;
+        Map<Long, Circle> pointsToCircleMap;
         WatchZoneObserver watchZoneObserver;
         WatchZonePointsObserver watchZonePointsObserver;
     }

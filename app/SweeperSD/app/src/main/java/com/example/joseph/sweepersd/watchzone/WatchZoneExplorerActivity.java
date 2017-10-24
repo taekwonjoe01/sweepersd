@@ -2,11 +2,9 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.app.DialogFragment;
 import android.arch.lifecycle.Observer;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -27,7 +25,6 @@ import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAla
 import com.example.joseph.sweepersd.archived.utils.LocationUtils;
 import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
-import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
@@ -218,32 +215,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                 mTransparentSliderView.setLayoutParams(lp);*/
             }
         });
-
-        WatchZoneModelRepository.getInstance(this).observe(this,
-                new Observer<WatchZoneModelRepository>() {
-            @Override
-            public void onChanged(@Nullable WatchZoneModelRepository repository) {
-                if (repository.watchZoneExists(mCurrentWatchZoneUid)) {
-                    WatchZoneModel thisModel = repository.getWatchZoneModel(mCurrentWatchZoneUid);
-                    if (thisModel != null) {
-
-                        Map<Limit, List<LimitSchedule>> limitsAndSchedules = new HashMap<>();
-                        for (Long limitUid : thisModel.getWatchZoneLimitModelUids()) {
-                            WatchZoneLimitModel limitModel = thisModel.getWatchZoneLimitModel(limitUid);
-                            Limit limit = limitModel.getLimit();
-                            if (limitModel != null && limit != null && limitModel
-                                    .getLimitSchedulesModel().getScheduleList() != null) {
-                                limitsAndSchedules.put(limit, limitModel
-                                        .getLimitSchedulesModel().getScheduleList());
-                            }
-                        }
-
-                    }
-                } else {
-
-                }
-            }
-        });
         WatchZoneModelUpdater.getInstance(this).observe(this, new Observer<Map<Long, Integer>>() {
             @Override
             public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
@@ -300,9 +271,9 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
             WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
         }
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+        /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
                 WatchZoneExplorerActivity.this);
-        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, 0L).commit();
+        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, 0L).commit();*/
     }
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
@@ -340,10 +311,10 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
             mMapFragment.addWatchZone(mCurrentWatchZoneUid);
             mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
             mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+            /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
                     WatchZoneExplorerActivity.this);
             preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID,
-                    mCurrentWatchZoneUid).commit();
+                    mCurrentWatchZoneUid).commit();*/
         } else {
             WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                     .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,

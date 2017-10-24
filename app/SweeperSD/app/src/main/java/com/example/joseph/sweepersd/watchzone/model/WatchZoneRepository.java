@@ -122,7 +122,8 @@ public class WatchZoneRepository extends LiveData<WatchZoneModel> {
             result = watchZoneDao.updateWatchZone(watchZone);
             if (result > 0 && invalidateWatchZonePoints) {
                 List<WatchZonePoint> oldPoints = watchZoneDao.getWatchZonePoints(watchZone.getUid());
-                watchZoneDao.deleteWatchZonePoints(oldPoints);
+                int numDeleted = watchZoneDao.deleteWatchZonePoints(oldPoints);
+                Log.e("Joey", "deleted watchzonePoints: " + numDeleted);
 
                 List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(
                         new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()),

@@ -15,11 +15,12 @@ import com.example.joseph.sweepersd.scheduling.ScheduleJob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository> implements
-        ListUpdateCallback {
+public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository> {
     private static final String TAG = WatchZoneModelRepository.class.getSimpleName();
 
     private static MutableLiveData<WatchZoneModelRepository> sInstance = new MutableLiveData<>();
@@ -30,38 +31,34 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
 
     private final Map<Long, WatchZoneModel> mWatchZoneModelsMap;
 
-    private List<WatchZone> mCurrentList;
-    private List<WatchZone> mChangeToList;
-
     private final Observer<List<WatchZone>> mWatchZoneObserver = new Observer<List<WatchZone>>() {
         @Override
         public void onChanged(@Nullable final List<WatchZone> watchZones) {
+            // In this observer, we are only detecting insertions or deletions. Changes to the
+            // models themselves are handled in the WatchZoneModels.
+            List<Long> existingWatchZones = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
+            Set<Long> deletedWatchZones = new HashSet<>(mWatchZoneModelsMap.keySet());
+            for (Long uid : existingWatchZones) {
+                if (!mWatchZoneModelsMap.containsKey(uid)) {
+                    mWatchZoneModelsMap.put(uid, null);
+                }
+                deletedWatchZones.remove(uid);
+            }
+            for (Long deletedUid : deletedWatchZones) {
+                WatchZoneModel deletedModel = mWatchZoneModelsMap.remove(deletedUid);
+                if (deletedModel != null) {
+                    deletedModel.removeObserver(mWatchZoneModelObserver);
+                }
+            }
             if (watchZones != null) {
-                DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                    @Override
-                    public int getOldListSize() {
-                        return mCurrentList.size();
+                for (WatchZone watchZone : watchZones) {
+                    WatchZoneModel model = mWatchZoneModelsMap.get(watchZone.getUid());
+                    if (model == null) {
+                        model = new WatchZoneModel(mApplicationContext, mHandler, watchZone.getUid());
+                        model.observeForever(mWatchZoneModelObserver);
+                        mWatchZoneModelsMap.put(watchZone.getUid(), model);
                     }
-
-                    @Override
-                    public int getNewListSize() {
-                        return watchZones.size();
-                    }
-
-                    @Override
-                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                        return mCurrentList.get(oldItemPosition).getUid()
-                                == watchZones.get(newItemPosition).getUid();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        return !mCurrentList.get(oldItemPosition).isChanged(watchZones.get(newItemPosition));
-                    }
-                }, false);
-                mChangeToList = watchZones;
-                result.dispatchUpdatesTo(WatchZoneModelRepository.this);
-                mCurrentList = watchZones;
+                }
             }
 
             // This will spam call to start a scheduleJob. It should only run if 30 seconds pass
@@ -75,6 +72,11 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
     private final Observer<WatchZoneModel> mWatchZoneModelObserver = new Observer<WatchZoneModel>() {
         @Override
         public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
+            // This will spam call to start a scheduleJob. It should only run if 30 seconds pass
+            // since the last call to schedule the scheduleJob.
+            ScheduleJob.scheduleJob(mApplicationContext);
+
+            // WatchZoneModel changes trigger this repository to issue a change.
             postValue(WatchZoneModelRepository.this);
         }
     };
@@ -86,7 +88,6 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         mHandler = new Handler(/*mThread.getLooper()*/Looper.getMainLooper());
 
         mWatchZoneModelsMap = new HashMap<>();
-        mCurrentList = new ArrayList<>();
 
         List<Long> watchZoneUids = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
         for (Long uid : watchZoneUids) {
@@ -127,12 +128,8 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         }
     }
 
-    public synchronized List<WatchZoneModel> getWatchZoneModels() {
-        List<WatchZoneModel> result = new ArrayList<>();
-        for (WatchZone zone : mCurrentList) {
-            result.add(mWatchZoneModelsMap.get(zone.getUid()));
-        }
-        return result;
+    public synchronized Map<Long, WatchZoneModel> getWatchZoneModels() {
+        return mWatchZoneModelsMap;
     }
 
     public synchronized WatchZoneModel getWatchZoneModel(long watchZoneUid) {
@@ -163,38 +160,5 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
     protected void onInactive() {
         super.onInactive();
         // Do nothing, because we're a singleton and want to exist until delete is called.
-    }
-
-    @Override
-    public void onChanged(int position, int count, Object payload) {
-        // Do nothing. If an item has changed, its WatchZoneModel will handle the updates.
-    }
-
-    @Override
-    public void onInserted(int position, int count) {
-        Map<Long, WatchZoneModel> models = mWatchZoneModelsMap;
-        for (int i = 0; i < count; i++) {
-            WatchZone insertedSchedule = mChangeToList.get(i + position);
-            WatchZoneModel model = new WatchZoneModel(mApplicationContext, mHandler,
-                    insertedSchedule.getUid());
-            model.observeForever(mWatchZoneModelObserver);
-            models.put(model.getWatchZoneUid(), model);
-        }
-        postValue(this);
-    }
-
-    @Override
-    public void onMoved(int fromPosition, int toPosition) {
-        // Detect moves is false, so do nothing.
-    }
-
-    @Override
-    public void onRemoved(int position, int count) {
-        Map<Long, WatchZoneModel> models = mWatchZoneModelsMap;
-        for (int i = 0; i < count; i++) {
-            WatchZone removedWatchZone = mCurrentList.get(i + position);
-            models.remove(removedWatchZone.getUid());
-        }
-        postValue(this);
     }
 }

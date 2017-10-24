@@ -15,12 +15,15 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ScheduleJob extends JobService implements LifecycleOwner {
     private static final String TAG = ScheduleJob.class.getSimpleName();
@@ -61,21 +64,15 @@ public class ScheduleJob extends JobService implements LifecycleOwner {
         WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
                 watchZoneUids, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onWatchZonePointAdded(int index) {
-                // This will be rescheduled if this happens.
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
+                                        WatchZoneBaseObserver.ChangeSet changeSet) {
+                // Do nothing.
             }
+
             @Override
-            public void onWatchZonePointRemoved(int index) {
-                // This will be rescheduled if this happens.
-            }
-            @Override
-            public void onWatchZonePointUpdated(int index) {
-                // This will be rescheduled if this happens.
-            }
-            @Override
-            public void onDataLoaded(List<WatchZoneModel> models) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
                 ScheduleManager scheduleManager = new ScheduleManager(ScheduleJob.this);
-                scheduleManager.scheduleWatchZones(models);
+                scheduleManager.scheduleWatchZones(new ArrayList<WatchZoneModel>(models.values()));
                 preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED,
                         System.currentTimeMillis()).commit();
                 jobFinished(jobParameters, false);

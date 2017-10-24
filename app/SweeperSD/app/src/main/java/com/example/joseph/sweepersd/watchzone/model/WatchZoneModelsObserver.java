@@ -1,21 +1,17 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class WatchZoneModelsObserver extends WatchZoneBaseObserver<List<WatchZoneModel>> {
+public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneModel>> {
     private final WatchZoneModelsChangedCallback mCallback;
     private final List<Long> mWatchZoneUids;
 
-    protected List<WatchZoneModel> mWatchZoneModels;
+    protected Map<Long, WatchZoneModel> mWatchZoneModels;
 
-    public interface WatchZoneModelsChangedCallback extends WatchZoneBaseObserverCallback<List<WatchZoneModel>> {
-        void onWatchZonePointAdded(int index);
-        void onWatchZonePointRemoved(int index);
-        void onWatchZonePointUpdated(int index);
+    public interface WatchZoneModelsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, WatchZoneModel>> {
+        void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet);
     }
 
     public WatchZoneModelsObserver(List<Long> watchZoneUids, WatchZoneModelsChangedCallback callback) {
@@ -36,86 +32,55 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<List<WatchZon
     }
 
     @Override
-    List<WatchZoneModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
-        List<WatchZoneModel> results = new ArrayList<>();
-        for (Long uid : mWatchZoneUids) {
+    Map<Long, WatchZoneModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
+        Map<Long, WatchZoneModel> modelMap = watchZoneModelRepository.getWatchZoneModels();
+        boolean ready = true;
+        for (Long uid : modelMap.keySet()) {
             WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(uid);
-            if (model != null) {
-                if (model.getStatus() != WatchZoneModel.Status.LOADING) {
-                    results.add(model);
+            if (model == null) {
+                ready = false;
+                break;
+            } else {
+                if (model.getStatus() == WatchZoneModel.Status.LOADING) {
+                    ready = false;
+                    break;
                 }
             }
         }
-        if (results.size() != mWatchZoneUids.size()) {
-            results = null;
-        } else {
+        if (ready) {
             if (mWatchZoneModels == null) {
-                mWatchZoneModels = results;
+                mWatchZoneModels = modelMap;
             }
+            return modelMap;
+        } else {
+            return null;
         }
-        return results;
     }
 
     @Override
-    void onRepositoryChanged(final List<WatchZoneModel> watchZoneModels) {
-        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() {
-                return mWatchZoneModels.size();
-            }
-
-            @Override
-            public int getNewListSize() {
-                return watchZoneModels.size();
-            }
-
-            @Override
-            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return mWatchZoneModels.get(oldItemPosition).getWatchZoneUid() ==
-                        watchZoneModels.get(newItemPosition).getWatchZoneUid();
-            }
-
-            @Override
-            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                return !mWatchZoneModels.get(oldItemPosition).isChanged(
-                        watchZoneModels.get(newItemPosition));
-            }
-        }, false);
-        result.dispatchUpdatesTo(new ListUpdateCallback() {
-            @Override
-            public void onInserted(int position, int count) {
-                for (int i = 0; i < count; i++) {
-                    int index = position + i;
-                    mWatchZoneModels.add(index, watchZoneModels.get(index));
-                    mCallback.onWatchZonePointAdded(index);
+    void onRepositoryChanged(final Map<Long, WatchZoneModel> watchZoneModels) {
+        ChangeSet changeSet = new ChangeSet();
+        changeSet.addedLimits = new ArrayList<>();
+        changeSet.changedLimits = new ArrayList<>();
+        changeSet.removedLimits = new ArrayList<>(mWatchZoneModels.keySet());
+        for (Long uid : watchZoneModels.keySet()) {
+            changeSet.removedLimits.remove(uid);
+            if (!mWatchZoneModels.containsKey(uid)) {
+                changeSet.addedLimits.add(uid);
+            } else {
+                WatchZoneModel curModel = mWatchZoneModels.get(uid);
+                WatchZoneModel newModel = watchZoneModels.get(uid);
+                if (curModel.isChanged(newModel)) {
+                    changeSet.changedLimits.add(uid);
                 }
             }
+        }
+        mWatchZoneModels = watchZoneModels;
 
-            @Override
-            public void onRemoved(int position, int count) {
-                for (int i = 0; i < count; i++) {
-                    int index = position;
-                    mCallback.onWatchZonePointRemoved(index);
-                    mWatchZoneModels.remove(index);
-                }
-            }
-
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                // Do nothing.
-            }
-
-            @Override
-            public void onChanged(int position, int count, Object payload) {
-                for (int i = 0; i < count; i++) {
-                    int index = position + i;
-                    mCallback.onWatchZonePointUpdated(index);
-                }
-            }
-        });
+        mCallback.onModelsChanged(mWatchZoneModels, changeSet);
     }
 
-    public List<WatchZoneModel> getWatchZoneModels() {
+    public Map<Long, WatchZoneModel> getWatchZoneModels() {
         return mWatchZoneModels;
     }
 }
