@@ -61,6 +61,78 @@ public class OnDeviceLimitProviderService extends IntentService {
         } catch (IOException e) {
             Log.e(TAG, e.toString());
         }
+
+        Limit workLimit = new Limit();
+        workLimit.setStreet("highland dr");
+        workLimit.setStartRange(0);
+        workLimit.setEndRange(1000);
+        workLimit.setRawLimitString("some garbage");
+
+        List<LimitSchedule> workSchedule = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            int day = i + 1;
+            LimitSchedule first = new LimitSchedule();
+            first.setDayNumber(day);
+            first.setWeekNumber(1);
+            first.setStartHour(8);
+            first.setEndHour(11);
+            LimitSchedule second = new LimitSchedule();
+            second.setDayNumber(day);
+            second.setWeekNumber(2);
+            second.setStartHour(8);
+            second.setEndHour(11);
+            LimitSchedule third = new LimitSchedule();
+            third.setDayNumber(day);
+            third.setWeekNumber(3);
+            third.setStartHour(8);
+            third.setEndHour(11);
+            LimitSchedule fourth = new LimitSchedule();
+            fourth.setDayNumber(day);
+            fourth.setWeekNumber(4);
+            fourth.setStartHour(8);
+            fourth.setEndHour(11);
+            workSchedule.add(first);
+            workSchedule.add(second);
+            workSchedule.add(third);
+            workSchedule.add(fourth);
+        }
+        limitsAndSchedules.put(workLimit, workSchedule);
+
+        Limit homeLimit = new Limit();
+        workLimit.setStreet("via kino");
+        workLimit.setStartRange(0);
+        workLimit.setEndRange(10000);
+        workLimit.setRawLimitString("some garbage");
+
+        List<LimitSchedule> homeSchedule = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            int day = i + 1;
+            LimitSchedule first = new LimitSchedule();
+            first.setDayNumber(day);
+            first.setWeekNumber(1);
+            first.setStartHour(8);
+            first.setEndHour(11);
+            LimitSchedule second = new LimitSchedule();
+            second.setDayNumber(day);
+            second.setWeekNumber(2);
+            second.setStartHour(8);
+            second.setEndHour(11);
+            LimitSchedule third = new LimitSchedule();
+            third.setDayNumber(day);
+            third.setWeekNumber(3);
+            third.setStartHour(8);
+            third.setEndHour(11);
+            LimitSchedule fourth = new LimitSchedule();
+            fourth.setDayNumber(day);
+            fourth.setWeekNumber(4);
+            fourth.setStartHour(8);
+            fourth.setEndHour(11);
+            homeSchedule.add(first);
+            homeSchedule.add(second);
+            homeSchedule.add(third);
+            homeSchedule.add(fourth);
+        }
+        limitsAndSchedules.put(homeLimit, homeSchedule);
         Log.i(TAG, "Finished parsing on-device files. Found " + limitsAndSchedules.size() + " limits.");
 
         if (parseSuccessful) {

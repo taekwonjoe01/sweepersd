@@ -144,8 +144,6 @@ public class WatchZoneUpdateService extends IntentService implements
 
             final CountDownLatch latch = new CountDownLatch(latLngs.size());
 
-            Log.e("Joey", "Starting " + latLngs.size() + " threads...");
-            Log.e("Joey", "Number of available cores: " + Runtime.getRuntime().availableProcessors());
             for (int i = 0; i < latLngs.size(); i++) {
                 final LatLng latLng = latLngs.get(i);
                 final int size = latLngs.size();

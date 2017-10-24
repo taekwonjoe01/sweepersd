@@ -266,7 +266,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
                         if (WatchZoneUpdater.UpdateProgress.Status.CANCELLED == finalProgress.getStatus()) {
                             // TODO is needed?
-                            //Log.e("Joey", "Updater thread cancelled for " + container.watchZoneModel.getWatchZoneUid());
                         }
                     }
 

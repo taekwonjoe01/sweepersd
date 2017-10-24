@@ -164,8 +164,6 @@ public class NotificationsTabFragment extends TabFragment {
 
         mPolicyNearby.setChecked(false);
         mPolicyAlways.setChecked(false);
-        Log.e("Joey", "RemindRange" + watchZone.getRemindRange());
-        Log.e("Joey", "remindPolicy" + watchZone.getRemindRange());
         switch (watchZone.getRemindRange()) {
             case WatchZone.REMIND_RANGE_48_HOURS:
                 mRemind48Hour.setChecked(true);

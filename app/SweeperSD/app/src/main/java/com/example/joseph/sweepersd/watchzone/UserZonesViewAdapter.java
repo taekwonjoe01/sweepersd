@@ -210,7 +210,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         final WatchZoneModel model = mCurrentList.get(position);
         WatchZoneModel.Status modelStatus = model.getStatus();
         String label = modelStatus.toString();
-        Log.e("Joey", "model label at index " + position + " is " + label);
         if (modelStatus == WatchZoneModel.Status.INVALID_NO_WATCH_ZONE) {
             // TODO - This watch Zone doesn't exist and this should not happen!
         } else {
@@ -242,13 +241,11 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                     }
 
                     if (progress != null) {
-                        Log.e("Joey", "Making visible!");
                         holder.mDetailsGroup.setVisibility(View.GONE);
                         holder.mLoadingGroup.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setProgress(progress);
                     } else {
-                        Log.e("Joey", "Making invisible!");
                         holder.mUpdatingProgress.setProgress(0);
                         holder.mLoadingGroup.setVisibility(View.INVISIBLE);
 
