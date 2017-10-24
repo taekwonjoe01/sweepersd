@@ -23,13 +23,8 @@ import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAlarmLabelDialogFragment;
 import com.example.joseph.sweepersd.archived.utils.LocationUtils;
-import com.example.joseph.sweepersd.limit.Limit;
-import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.common.api.Status;
@@ -43,8 +38,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class WatchZoneExplorerActivity extends AppCompatActivity {
@@ -82,7 +75,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch_zone_explorer);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mMapFragment= (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.watch_zone_map_fragment);
         mPlaceFragment = (PlaceAutocompleteFragment)
@@ -94,8 +86,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         mRadiusSeekbar = findViewById(R.id.seekbar_radius);
         mDragLayout = findViewById(R.id.drag_view);
         mProgressBar = findViewById(R.id.progress_updating);
-        //mRecyclerView = findViewById(R.id.limit_recycler_view);
-        //mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
 
         mMapFragment.setMapPadding(0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_top),
                 0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_bottom));
@@ -149,17 +139,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         tabAdapter.addFragment(mCalendarTabFragment);
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
-        //mRecyclerView.setLayoutManager(mLayoutManager);
-
-        //int itemMargin = getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);
-        //mLimitViewItemDecoration = new WatchZoneViewItemDecoration(itemMargin);
-
-        //mRecyclerView.addItemDecoration(mLimitViewItemDecoration);
-
-        /*RecyclerView.ItemAnimator animator = mRecyclerView.getItemAnimator();
-        if (animator instanceof SimpleItemAnimator) {
-            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
-        }*/
 
         mRadiusSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -177,42 +156,21 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                     return;
                 }
                 mCurrentRadius = getRadiusForProgress(seekBar.getProgress());
-                /*WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
-                        .deleteWatchZone(mCurrentWatchZoneUid);
-                mCurrentWatchZoneUid = WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
-                        .createWatchZone(mCurrentLabel,
-                        mCurrentLatitude, mCurrentLongitude, mCurrentRadius);*/
                 WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                         .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
                                 mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
                                 WatchZone.REMIND_RANGE_DEFAULT,
                                 WatchZone.REMIND_POLICY_DEFAULT);
-                /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
-                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();*/
                 setAlarmLocation(mLatLng);
             }
         });
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                //mSlidingPanelLayout.setParallaxOffset();
-                //mSlidingPanelLayout.setPanelHeight(findViewById(R.id.drag_view).getHeight());
-
-
-
                 ViewGroup.MarginLayoutParams saveButtonLayoutParams =
                         (ViewGroup.MarginLayoutParams) mSaveButton.getLayoutParams();
                 mSlidingPanelLayout.setPanelHeight(mSaveButton.getHeight()
-                        //+ saveButtonLayoutParams.topMargin
                         + saveButtonLayoutParams.bottomMargin);
-
-
-
-                //mSlidingPanelLayout.setParallaxOffset(mDragLayout.getHeight());
-                //mSlidingPanelLayout.setAnchorPoint(0.5f);
-                /*ViewGroup.LayoutParams lp = mTransparentSliderView.getLayoutParams();
-                lp.height = mDragLayout.getHeight();
-                mTransparentSliderView.setLayoutParams(lp);*/
             }
         });
         WatchZoneModelUpdater.getInstance(this).observe(this, new Observer<Map<Long, Integer>>() {
@@ -270,19 +228,9 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         if (mCurrentWatchZoneUid != 0L && !mSaveOnDestroy) {
             WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
         }
-
-        /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
-                WatchZoneExplorerActivity.this);
-        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, 0L).commit();*/
     }
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
-        /*if (mCurrentWatchZoneUid != 0L) {
-            WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
-            mMapFragment.removeWatchZone(mCurrentWatchZoneUid);
-            mLimitsTabFragment.removeWatchZone(mCurrentWatchZoneUid);
-        }*/
-
         setAlarmLocation(latLng);
         if (animateCamera) {
             mMapFragment.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.5f));
@@ -315,10 +263,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
             mMapFragment.addWatchZone(mCurrentWatchZoneUid);
             mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
             mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
-            /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
-                    WatchZoneExplorerActivity.this);
-            preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID,
-                    mCurrentWatchZoneUid).commit();*/
         } else {
             WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                     .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
@@ -326,8 +270,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                             WatchZone.REMIND_RANGE_DEFAULT,
                             WatchZone.REMIND_POLICY_DEFAULT);
         }
-        /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
-        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID, mCurrentWatchZoneUid).commit();*/
     }
 
     private void dismissCreateLabelDialog() {
