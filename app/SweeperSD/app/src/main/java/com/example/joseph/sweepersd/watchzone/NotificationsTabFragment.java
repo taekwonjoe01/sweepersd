@@ -158,12 +158,6 @@ public class NotificationsTabFragment extends TabFragment {
     }
 
     private void setPresentation(WatchZone watchZone) {
-        mRemind48Hour.setChecked(false);
-        mRemind24Hour.setChecked(false);
-        mRemind12Hour.setChecked(false);
-
-        mPolicyNearby.setChecked(false);
-        mPolicyAlways.setChecked(false);
         switch (watchZone.getRemindRange()) {
             case WatchZone.REMIND_RANGE_48_HOURS:
                 mRemind48Hour.setChecked(true);

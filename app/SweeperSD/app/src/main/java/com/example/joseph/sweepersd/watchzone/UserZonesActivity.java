@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
@@ -17,23 +16,11 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.alert.AlertManager;
-import com.example.joseph.sweepersd.alert.AlertNotificationJob;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateWatchZoneActivity;
-import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-public class UserZonesActivity extends AppCompatActivity implements
+public class UserZonesActivity extends WatchZoneBaseActivity implements
         AddressValidatorManager.ValidatorProgressListener{
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
     private static final int CREATE_ALARM_CODE = 1;
@@ -46,7 +33,7 @@ public class UserZonesActivity extends AppCompatActivity implements
     private Menu mOptionsMenu;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch_zone_list);
 
@@ -86,24 +73,6 @@ public class UserZonesActivity extends AppCompatActivity implements
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
-
-        WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
-                new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-            @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data,
-                                        WatchZoneBaseObserver.ChangeSet changeSet) {
-                // Do nothing.
-            }
-            @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
-                AlertManager alertManager = new AlertManager(UserZonesActivity.this);
-                alertManager.updateAlertNotification(new ArrayList<>(models.values()));
-            }
-            @Override
-            public void onDataInvalid() {
-                // Do nothing
-            }
-        }));
     }
 
     @Override

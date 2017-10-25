@@ -138,29 +138,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 new WatchZoneObserver.WatchZoneChangedCallback() {
             @Override
             public void onWatchZoneChanged(WatchZone watchZone) {
-                presenter.watchZoneCenter.remove();
-                presenter.watchZoneRadius.remove();
-
-                if (presenter.watchZonePointsObserver != null) {
-                    for (Long uid : presenter.pointsToCircleMap.keySet()) {
-                        Circle point = presenter.pointsToCircleMap.get(uid);
-                        point.remove();
-                    }
+                boolean refreshMap = false;
+                if (presenter.oldWatchZone.getRadius() != watchZone.getRadius() ||
+                        presenter.oldWatchZone.getCenterLatitude() != watchZone.getCenterLatitude() ||
+                        presenter.oldWatchZone.getCenterLongitude() != watchZone.getCenterLongitude()) {
+                    refreshMap = true;
                 }
-                WatchZoneModelRepository.getInstance(getContext()).removeObserver(
-                        presenter.watchZonePointsObserver);
-                createWatchZonePointsObserver(watchZoneUid, presenter);
+                if (refreshMap) {
+                    presenter.watchZoneCenter.remove();
+                    presenter.watchZoneRadius.remove();
 
-                presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
-                        .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
-                        .radius(watchZone.getRadius())
-                        .strokeColor(getResources().getColor(R.color.app_primary))
-                        .fillColor(getResources().getColor(R.color.map_radius_fill)));
-                presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
+                    if (presenter.watchZonePointsObserver != null) {
+                        for (Long uid : presenter.pointsToCircleMap.keySet()) {
+                            Circle point = presenter.pointsToCircleMap.get(uid);
+                            point.remove();
+                        }
+                    }
+                    WatchZoneModelRepository.getInstance(getContext()).removeObserver(
+                            presenter.watchZonePointsObserver);
+                    createWatchZonePointsObserver(watchZoneUid, presenter);
+
+                    presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
+                            .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
+                            .radius(watchZone.getRadius())
+                            .strokeColor(getResources().getColor(R.color.app_primary))
+                            .fillColor(getResources().getColor(R.color.map_radius_fill)));
+                    presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
+                }
             }
             @Override
             public void onDataLoaded(WatchZone watchZone) {
+                presenter.oldWatchZone = watchZone;
                 presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
                         .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
                         .radius(watchZone.getRadius())
@@ -248,6 +257,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private class WatchZonePresenter {
         Marker watchZoneCenter;
         Circle watchZoneRadius;
+        WatchZone oldWatchZone;
         Map<Long, Circle> pointsToCircleMap;
         WatchZoneObserver watchZoneObserver;
         WatchZonePointsObserver watchZonePointsObserver;

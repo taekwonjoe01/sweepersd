@@ -10,7 +10,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +42,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.Map;
 
-public class WatchZoneExplorerActivity extends AppCompatActivity {
+public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private static final String TAG = WatchZoneExplorerActivity.class.getSimpleName();
     private static final LatLng SAN_DIEGO_CENTER = new LatLng(32.720330, -117.157383);
     private static final double SAN_DIEGO_RADIUS_METERS = 120701.0; // 75 miles
@@ -81,7 +80,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
     private boolean mSaveOnDestroy;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch_zone_explorer);
 

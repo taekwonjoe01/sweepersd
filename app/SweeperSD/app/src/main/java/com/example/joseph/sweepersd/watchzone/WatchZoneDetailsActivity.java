@@ -2,7 +2,6 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -26,7 +25,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WatchZoneDetailsActivity extends AppCompatActivity {
+public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
     public static final String KEY_WATCHZONE_ID = "KEY_WATCHZONE_ID";
 
@@ -45,7 +44,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
     private WatchZoneModel mWatchZoneModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch_zone_details);
 

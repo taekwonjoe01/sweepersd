@@ -90,6 +90,8 @@ public class AlertManager {
                 }
                 sendNotification(message);
             }
+        } else {
+            cancelNotification();
         }
     }
 
@@ -109,7 +111,12 @@ public class AlertManager {
 
         NotificationManager notificationManager = (NotificationManager)
                 mApplicationContext.getSystemService(mApplicationContext.NOTIFICATION_SERVICE);
-        notificationManager.cancel(Notifications.NOTIFICATION_WATCH_ZONE_STREET_SWEEPING);
         notificationManager.notify(Notifications.NOTIFICATION_WATCH_ZONE_STREET_SWEEPING, builder.build());
+    }
+
+    private void cancelNotification() {
+        NotificationManager notificationManager = (NotificationManager)
+                mApplicationContext.getSystemService(mApplicationContext.NOTIFICATION_SERVICE);
+        notificationManager.cancel(Notifications.NOTIFICATION_WATCH_ZONE_STREET_SWEEPING);
     }
 }
