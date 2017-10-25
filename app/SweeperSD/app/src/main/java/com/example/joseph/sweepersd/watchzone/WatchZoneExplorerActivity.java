@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
@@ -243,6 +244,10 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
     }
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
+        if (!SAN_DIEGO_BOUNDS.contains(latLng)) {
+            Toast.makeText(this, "You can only set zones near San Diego!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         setAlarmLocation(latLng);
 
         if (address == null) {
