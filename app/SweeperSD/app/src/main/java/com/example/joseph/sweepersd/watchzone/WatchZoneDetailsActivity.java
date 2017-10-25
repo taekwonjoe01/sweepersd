@@ -18,6 +18,8 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.maps.android.SphericalUtil;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -120,6 +122,13 @@ public class WatchZoneDetailsActivity extends AppCompatActivity {
     private void invalidateUi(WatchZone watchZone) {
         setTitle(WordUtils.capitalize(watchZone.getLabel()));
         LatLng latLng = new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude());
-        mMapFragment.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.5f));
+        Log.e("Joey", "radius " + watchZone.getRadius());
+
+        LatLng southWest = SphericalUtil.computeOffset(latLng,
+                ((double)watchZone.getRadius()) * Math.sqrt(2), 225);
+        LatLng northEast = SphericalUtil.computeOffset(latLng,
+                ((double)watchZone.getRadius()) * Math.sqrt(2), 45);
+        LatLngBounds bounds = new LatLngBounds(southWest, northEast);
+        mMapFragment.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 10));
     }
 }

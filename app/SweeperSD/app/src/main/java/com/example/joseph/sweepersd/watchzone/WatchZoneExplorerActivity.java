@@ -44,6 +44,13 @@ import java.util.Map;
 
 public class WatchZoneExplorerActivity extends AppCompatActivity {
     private static final String TAG = WatchZoneExplorerActivity.class.getSimpleName();
+    private static final LatLng SAN_DIEGO_CENTER = new LatLng(32.720330, -117.157383);
+    private static final double SAN_DIEGO_RADIUS_METERS = 120701.0; // 75 miles
+    private static final LatLngBounds SAN_DIEGO_BOUNDS = new LatLngBounds(
+            SphericalUtil.computeOffset(SAN_DIEGO_CENTER,
+            SAN_DIEGO_RADIUS_METERS * Math.sqrt(2), 225),
+            SphericalUtil.computeOffset(SAN_DIEGO_CENTER,
+            SAN_DIEGO_RADIUS_METERS * Math.sqrt(2), 45));
 
     private PlaceAutocompleteFragment mPlaceFragment;
     private MapFragment mMapFragment;
@@ -97,12 +104,7 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                 setCurrentZone(null, latLng, true);
             }
         });
-        LatLng targetNorthEast = SphericalUtil.computeOffset(new LatLng(32.720330, -117.157383),
-                120701.0 * Math.sqrt(2), 45);
-        LatLng targetSouthWest = SphericalUtil.computeOffset(new LatLng(32.720330, -117.157383),
-                120701.0 * Math.sqrt(2), 225);
-        LatLngBounds bounds = new LatLngBounds(targetSouthWest, targetNorthEast);
-        mPlaceFragment.setBoundsBias(bounds);
+        mPlaceFragment.setBoundsBias(SAN_DIEGO_BOUNDS);
         mPlaceFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
@@ -219,6 +221,8 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                     }
                 }
             });
+        } else {
+            mMapFragment.animateCamera(CameraUpdateFactory.newLatLngBounds(SAN_DIEGO_BOUNDS, 0));
         }
     }
 
@@ -240,10 +244,6 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
         setAlarmLocation(latLng);
-        if (animateCamera) {
-            mMapFragment.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.5f));
-            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
-        }
 
         if (address == null) {
             address = LocationUtils.getAddressForLatLnt(
@@ -265,6 +265,18 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
         mCurrentLatitude = latLng.latitude;
         mCurrentLongitude = latLng.longitude;
         mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
+
+        if (animateCamera) {
+            LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
+            LatLng southWest = SphericalUtil.computeOffset(center,
+                    mCurrentRadius * Math.sqrt(2), 225);
+            LatLng northEast = SphericalUtil.computeOffset(center,
+                    mCurrentRadius * Math.sqrt(2), 45);
+            LatLngBounds bounds = new LatLngBounds(southWest, northEast);
+            mMapFragment.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 10));
+            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        }
+
         if (mCurrentWatchZoneUid == 0L) {
             mCurrentWatchZoneUid = WatchZoneRepository.getInstance(this).createWatchZone(mCurrentLabel,
                     mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
