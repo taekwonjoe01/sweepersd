@@ -35,7 +35,9 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.android.SphericalUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.Map;
@@ -95,6 +97,12 @@ public class WatchZoneExplorerActivity extends AppCompatActivity {
                 setCurrentZone(null, latLng, true);
             }
         });
+        LatLng targetNorthEast = SphericalUtil.computeOffset(new LatLng(32.720330, -117.157383),
+                120701.0 * Math.sqrt(2), 45);
+        LatLng targetSouthWest = SphericalUtil.computeOffset(new LatLng(32.720330, -117.157383),
+                120701.0 * Math.sqrt(2), 225);
+        LatLngBounds bounds = new LatLngBounds(targetSouthWest, targetNorthEast);
+        mPlaceFragment.setBoundsBias(bounds);
         mPlaceFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
