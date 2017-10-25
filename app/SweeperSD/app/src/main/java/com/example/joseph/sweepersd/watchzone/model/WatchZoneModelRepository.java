@@ -8,12 +8,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 
 import com.example.joseph.sweepersd.scheduling.ScheduleJob;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

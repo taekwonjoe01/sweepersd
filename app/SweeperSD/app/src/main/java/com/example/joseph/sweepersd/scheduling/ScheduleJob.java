@@ -19,10 +19,8 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class ScheduleJob extends JobService implements LifecycleOwner {
@@ -37,12 +35,12 @@ public class ScheduleJob extends JobService implements LifecycleOwner {
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
-        if (jobScheduler.getPendingJob(Jobs.WATCH_ZONE_NOTIFICATION_JOB) != null) {
+        if (jobScheduler.getPendingJob(Jobs.SCHEDULE_JOB) != null) {
             return;
         }
         Log.i(TAG, "Building " + TAG);
 
-        JobInfo.Builder builder = new JobInfo.Builder(Jobs.WATCH_ZONE_NOTIFICATION_JOB,
+        JobInfo.Builder builder = new JobInfo.Builder(Jobs.SCHEDULE_JOB,
                 new ComponentName(context, ScheduleJob.class));
         builder.setMinimumLatency(30000L);
         jobScheduler.schedule(builder.build());
