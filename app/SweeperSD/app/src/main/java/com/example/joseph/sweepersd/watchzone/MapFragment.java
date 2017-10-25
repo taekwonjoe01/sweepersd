@@ -67,7 +67,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mGoogleMap.setOnMapLongClickListener(mLongClickListener);
         }
         if (mCameraUpdate != null) {
-            mGoogleMap.moveCamera(mCameraUpdate);
+            mGoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    mGoogleMap.animateCamera(mCameraUpdate);
+                }
+            });
         }
     }
 
