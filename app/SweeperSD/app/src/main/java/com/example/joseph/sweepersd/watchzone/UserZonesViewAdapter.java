@@ -105,6 +105,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             if (index >=0) {
                                 notifyItemChanged(index);
                             }
+                            Log.e("Joey", "watchZoneChanged");
                         }
 
                         @Override
@@ -121,6 +122,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             // performance might suffer if a lot of deletions happen.
                         }
                     });
+                    Log.e("Joey", "added WZ observer");
                     WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
                 }
             }
@@ -142,6 +144,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             if (index >=0) {
                                 notifyItemChanged(index);
                             }
+                            Log.e("Joey", "watchZoneChanged");
                         }
 
                         @Override
@@ -158,6 +161,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             // performance might suffer if a lot of deletions happen.
                         }
                     });
+                    Log.e("Joey", "added WZ observer");
                     WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
                 }
 
@@ -184,6 +188,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     }
 
     public void setWatchZoneProgress(Map<Long, Integer> watchZoneProgress) {
+        Log.e("Joey", "progress");
         if (mCurrentList != null && mUpdatingProgressMap != null) {
             List<Long> removedWatchZones = new ArrayList<>(mUpdatingProgressMap.keySet());
             for (Long uid : watchZoneProgress.keySet()) {
@@ -296,13 +301,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         return mCurrentList == null ? 0 : mCurrentList.size();
     }
 
-    public void createAlarm(String label, LatLng location, int radius) {
-        // TODO
-        //mWatchZoneManager.createWatchZone(label, location, radius);
-    }
-
-
-
     public static class ViewHolder extends RecyclerView.ViewHolder implements
             View.OnClickListener, View.OnLongClickListener {
         private final Context mContext;
@@ -316,10 +314,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         private FrameLayout mViewLayout;
         public View.OnLongClickListener mLongClickListener;
         public View.OnClickListener mOnClickListener;
-
-        //public RecyclerView mLimitRecyclerView;
-        //private RecyclerView.LayoutManager mLayoutManager;
-        //private WatchZoneViewItemDecoration mLimitViewItemDecoration;
 
         public ViewHolder(Context context, View v) {
             super(v);

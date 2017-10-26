@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneModel>> {
@@ -24,7 +25,7 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Wat
 
     @Override
     Map<Long, WatchZoneModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
-        Map<Long, WatchZoneModel> modelMap = watchZoneModelRepository.getWatchZoneModels();
+        Map<Long, WatchZoneModel> modelMap = new HashMap<>(watchZoneModelRepository.getWatchZoneModels());
         boolean ready = true;
         for (Long uid : modelMap.keySet()) {
             WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(uid);

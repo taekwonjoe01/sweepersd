@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, Wat
     Map<Long, WatchZoneLimitModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
         WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
         if (model != null) {
-            Map<Long, WatchZoneLimitModel> limitModels = model.getWatchZoneLimitModelMap();
+            Map<Long, WatchZoneLimitModel> limitModels = new HashMap<>(model.getWatchZoneLimitModelMap());
             boolean ready = true;
             for (Long uid : limitModels.keySet()) {
                 WatchZoneLimitModel limitModel = limitModels.get(uid);

@@ -218,9 +218,10 @@ public class LocationUtils {
         return result;
     }*/
 
+    // TODO this will work in anywhere on earth... probably don't want to.
     public static Limit findLimitForAddress(Map<String, List<Limit>> limitsHash, String address) {
         Limit result = null;
-        if (address != null && address.contains("ca") && address.contains("san diego")) {
+        if (address != null) {
             String[] split = address.split(",");
             if (split.length > 1) {
                 String streetAddress = split[0];

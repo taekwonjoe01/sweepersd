@@ -99,10 +99,10 @@ public class OnDeviceLimitProviderService extends IntentService {
         limitsAndSchedules.put(workLimit, workSchedule);
 
         Limit homeLimit = new Limit();
-        workLimit.setStreet("via kino");
-        workLimit.setStartRange(0);
-        workLimit.setEndRange(10000);
-        workLimit.setRawLimitString("some garbage");
+        homeLimit.setStreet("via kino");
+        homeLimit.setStartRange(0);
+        homeLimit.setEndRange(10000);
+        homeLimit.setRawLimitString("some garbage");
 
         List<LimitSchedule> homeSchedule = new ArrayList<>();
         for (int i = 0; i < 7; i++) {

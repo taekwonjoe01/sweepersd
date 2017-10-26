@@ -78,23 +78,6 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case CREATE_ALARM_CODE:
-                if (resultCode == Activity.RESULT_OK) {
-                    String label = data.getStringExtra(CreateWatchZoneActivity.LABEL_KEY);
-                    LatLng location = data.getParcelableExtra(CreateWatchZoneActivity.LOCATION_KEY);
-                    int radius = data.getIntExtra(CreateWatchZoneActivity.RADIUS_KEY, 0);
-
-                    mAdapter.createAlarm(label, location, radius);
-                }
-                mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-                break;
-        }
-    }
-
-    @Override
     public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
         if (mAdapter != null) {
             mAdapter.setWatchZoneProgress(progressMap);

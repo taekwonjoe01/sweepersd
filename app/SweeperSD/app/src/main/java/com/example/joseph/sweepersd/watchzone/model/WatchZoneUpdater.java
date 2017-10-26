@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import android.os.Handler;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.limit.Limit;
 import com.google.android.gms.maps.model.LatLng;
@@ -74,6 +75,9 @@ class WatchZoneUpdater {
         }
         Map<String, List<Limit>> limitHash = new HashMap<>();
         for (Limit l : mLimits) {
+            if (l.getStreet().equals("highland dr")) {
+                Log.e("Joey", "found highland dr!");
+            }
             List<Limit> list = limitHash.get(l.getStreet());
             if (list == null) {
                 list = new ArrayList<>();

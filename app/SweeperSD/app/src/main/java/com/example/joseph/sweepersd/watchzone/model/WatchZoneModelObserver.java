@@ -1,5 +1,7 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
+import android.util.Log;
+
 public class WatchZoneModelObserver extends WatchZoneBaseObserver<WatchZoneModel> {
     private final Long mWatchZoneUid;
     private final WatchZoneModelChangedCallback mCallback;
@@ -37,10 +39,7 @@ public class WatchZoneModelObserver extends WatchZoneBaseObserver<WatchZoneModel
 
     @Override
     void onRepositoryChanged(final WatchZoneModel watchZoneModel) {
-        if (mWatchZoneModel.isChanged(watchZoneModel)) {
-            mWatchZoneModel = watchZoneModel;
-            mCallback.onWatchZoneModelChanged(mWatchZoneModel);
-        }
+        mCallback.onWatchZoneModelChanged(mWatchZoneModel);
     }
 
     public WatchZoneModel getWatchZoneModel() {
