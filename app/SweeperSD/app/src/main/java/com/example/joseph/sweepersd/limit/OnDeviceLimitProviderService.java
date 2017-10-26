@@ -185,8 +185,6 @@ public class OnDeviceLimitProviderService extends IntentService {
             // Any existing WatchZones need to be updated!
             WatchZoneRepository watchZoneRepository = WatchZoneRepository.getInstance(this);
             watchZoneRepository.triggerRefreshAll();
-
-            AddressValidatorJob.scheduleJob(this);
         }
     }
 }

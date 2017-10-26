@@ -127,7 +127,6 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
     private void invalidateUi(WatchZone watchZone) {
         setTitle(WordUtils.capitalize(watchZone.getLabel()));
         LatLng latLng = new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude());
-        Log.e("Joey", "radius " + watchZone.getRadius());
 
         LatLng southWest = SphericalUtil.computeOffset(latLng,
                 ((double)watchZone.getRadius()) * Math.sqrt(2), 225);

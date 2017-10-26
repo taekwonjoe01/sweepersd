@@ -6,6 +6,7 @@ package com.example.joseph.sweepersd.utils;
 
 public class Preferences {
     public static final String PREFERENCE_ON_DEVICE_LIMITS_LOADED = "on_device_limits_loaded";
+    public static final String PREFERENCE_ON_DEVICE_LIMITS_VALIDATED = "on_device_limits_validated";
 
     public static final String PREFERENCE_ADDRESS_VALIDATOR_LAST_STARTED = "address_validator_last_started";
     public static final String PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED = "address_validator_last_finished";

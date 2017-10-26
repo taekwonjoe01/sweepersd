@@ -34,6 +34,7 @@ public class AddressValidatorJob extends JobService {
     private static final String TAG = AddressValidatorJob.class.getSimpleName();
     private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     private static final long ONE_HOUR = 1000L * 60L * 60L;
+    private static final long TEN_SECONDS = 1000L * 10L;
 
     private Handler mMainHandler;
     private Handler mBackgroundHandler;
@@ -52,6 +53,24 @@ public class AddressValidatorJob extends JobService {
         }
 
         JobInfo.Builder builder = new JobInfo.Builder(Jobs.ADDRESS_VALIDATOR_JOB,
+                new ComponentName(context, AddressValidatorJob.class));
+        builder.setMinimumLatency(0L);
+        builder.setOverrideDeadline(0L);
+        builder.setPersisted(true);
+        builder.setBackoffCriteria(TEN_SECONDS, JobInfo.BACKOFF_POLICY_LINEAR);
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        jobScheduler.schedule(builder.build());
+    }
+
+    public static void scheduleMonthlyJob(Context context) {
+        JobScheduler jobScheduler =
+                (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
+        if (jobScheduler.getPendingJob(Jobs.ADDRESS_VALIDATOR_MONTHLY_JOB) != null) {
+            return;
+        }
+
+        JobInfo.Builder builder = new JobInfo.Builder(Jobs.ADDRESS_VALIDATOR_MONTHLY_JOB,
                 new ComponentName(context, AddressValidatorJob.class));
         builder.setPeriodic(ONE_MONTH);
         builder.setPersisted(true);
@@ -155,6 +174,8 @@ public class AddressValidatorJob extends JobService {
                             AddressValidatorJob.this);
                     preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED,
                             System.currentTimeMillis()).commit();
+                    preferences.edit().putBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_VALIDATED,
+                            true).commit();
 
                     jobFinished(mJobParameters, false);
 

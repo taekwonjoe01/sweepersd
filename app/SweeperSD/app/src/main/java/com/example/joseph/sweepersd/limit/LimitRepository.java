@@ -1,7 +1,6 @@
 package com.example.joseph.sweepersd.limit;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.LiveData_LifecycleBoundObserver_LifecycleAdapter;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
@@ -24,8 +23,8 @@ public class LimitRepository {
     private final Map<Long, LiveData<List<LimitSchedule>>> mCachedLimitSchedulesLiveData;
     private final Map<Long, LiveData<Limit>> mCachedLimitsLiveData;
 
-    private final BooleanPreferenceLiveData mSharedPreferenceLiveData;
-    private final Observer<Boolean> mSharedPreferencesObserver =
+    private final BooleanPreferenceLiveData mLimitsLoadedPreferenceLiveData;
+    private final Observer<Boolean> mLimitsLoadedObserver =
             new Observer<Boolean>() {
         @Override
         public void onChanged(@Nullable Boolean limitsLoaded) {
@@ -35,14 +34,30 @@ public class LimitRepository {
             }
         }
     };
+    private final BooleanPreferenceLiveData mLimitsValidatedPrefrenceLiveData;
+    private final Observer<Boolean> mLimitsValidatedObserver =
+            new Observer<Boolean>() {
+        @Override
+        public void onChanged(@Nullable Boolean limitsValidated) {
+            Boolean limitsLoaded = mLimitsLoadedPreferenceLiveData.getValue();
+            if (limitsLoaded != null && limitsLoaded) {
+                if (!limitsValidated) {
+                    AddressValidatorJob.scheduleJob(mContext);
+                }
+                AddressValidatorJob.scheduleMonthlyJob(mContext);
+            }
+        }
+    };
 
     private LimitRepository(Context context) {
         mContext = context;
         mCachedPostedLimitsLiveData = loadPostedLimitsLiveDataFromDb();
         mCachedLimitSchedulesLiveData = new HashMap<>();
         mCachedLimitsLiveData = new HashMap<>();
-        mSharedPreferenceLiveData = new BooleanPreferenceLiveData(mContext, Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED);
-        mSharedPreferenceLiveData.observeForever(mSharedPreferencesObserver);
+        mLimitsLoadedPreferenceLiveData = new BooleanPreferenceLiveData(mContext, Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED);
+        mLimitsLoadedPreferenceLiveData.observeForever(mLimitsLoadedObserver);
+        mLimitsValidatedPrefrenceLiveData = new BooleanPreferenceLiveData(mContext, Preferences.PREFERENCE_ON_DEVICE_LIMITS_VALIDATED);
+        mLimitsValidatedPrefrenceLiveData.observeForever(mLimitsValidatedObserver);
     }
 
     public synchronized static LimitRepository getInstance(Context context) {
@@ -58,7 +73,8 @@ public class LimitRepository {
 
     public synchronized void delete() {
         if (sInstance.getValue() != null) {
-            mSharedPreferenceLiveData.removeObserver(mSharedPreferencesObserver);
+            mLimitsLoadedPreferenceLiveData.removeObserver(mLimitsLoadedObserver);
+            mLimitsValidatedPrefrenceLiveData.removeObserver(mLimitsValidatedObserver);
             sInstance.setValue(null);
         }
     }

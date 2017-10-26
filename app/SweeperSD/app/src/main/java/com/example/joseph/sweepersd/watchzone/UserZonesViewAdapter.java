@@ -26,6 +26,7 @@ import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
@@ -59,6 +60,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
+                // This is only capable of detecting insertions or deletions.
+                // Changes must be detected directly.
                 List<Long> modelUids = new ArrayList<>(data.keySet());
                 Collections.sort(modelUids);
                 final List<WatchZoneModel> sortedModels = new ArrayList<>();
@@ -85,34 +88,41 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
                     @Override
                     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        return !mCurrentList.get(oldItemPosition).isChanged(
-                                sortedModels.get(newItemPosition));
+                        // Save cycles because this update can only be an insertion or deletion.
+                        return true;
                     }
                 }, false);
                 mCurrentList = sortedModels;
 
                 result.dispatchUpdatesTo(UserZonesViewAdapter.this);
-                result.dispatchUpdatesTo(new ListUpdateCallback() {
-                    @Override
-                    public void onInserted(int position, int count) {
+                // DiffUtil won't detect changes because each WatchZoneModel is a hard reference.
+                for (Long uid : changeSet.addedLimits) {
+                    final WatchZoneModelObserver modelObserver = new WatchZoneModelObserver(uid,
+                            new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
+                        @Override
+                        public void onWatchZoneModelChanged(WatchZoneModel model) {
+                            int index = mCurrentList.indexOf(model);
+                            if (index >=0) {
+                                notifyItemChanged(index);
+                            }
+                        }
 
-                    }
+                        @Override
+                        public void onDataLoaded(WatchZoneModel data) {
+                            int index = mCurrentList.indexOf(data);
+                            if (index >=0) {
+                                notifyItemChanged(index);
+                            }
+                        }
 
-                    @Override
-                    public void onRemoved(int position, int count) {
-
-                    }
-
-                    @Override
-                    public void onMoved(int fromPosition, int toPosition) {
-
-                    }
-
-                    @Override
-                    public void onChanged(int position, int count, Object payload) {
-
-                    }
-                });
+                        @Override
+                        public void onDataInvalid() {
+                            // TODO probably need a solution. After activity dies, these will be cleaned up automatically, but
+                            // performance might suffer if a lot of deletions happen.
+                        }
+                    });
+                    WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
+                }
             }
 
             @Override
@@ -123,6 +133,32 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                 for (Long uid : modelUids) {
                     WatchZoneModel model = data.get(uid);
                     sortedModels.add(model);
+
+                    final WatchZoneModelObserver modelObserver = new WatchZoneModelObserver(uid,
+                            new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
+                        @Override
+                        public void onWatchZoneModelChanged(WatchZoneModel model) {
+                            int index = mCurrentList.indexOf(model);
+                            if (index >=0) {
+                                notifyItemChanged(index);
+                            }
+                        }
+
+                        @Override
+                        public void onDataLoaded(WatchZoneModel data) {
+                            int index = mCurrentList.indexOf(data);
+                            if (index >=0) {
+                                notifyItemChanged(index);
+                            }
+                        }
+
+                        @Override
+                        public void onDataInvalid() {
+                            // TODO probably need a solution. After activity dies, these will be cleaned up automatically, but
+                            // performance might suffer if a lot of deletions happen.
+                        }
+                    });
+                    WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
                 }
 
                 mCurrentList = sortedModels;
@@ -298,20 +334,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
             mViewLayout.setOnClickListener(this);
             mViewLayout.setOnLongClickListener(this);
-
-            //mLayoutManager = new LinearLayoutManager(mActivity, LinearLayout.VERTICAL, false);
-            //mLimitRecyclerView.setLayoutManager(mLayoutManager);
-
-            //int itemMargin =
-                   // mActivity.getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);
-            //mLimitViewItemDecoration = new WatchZoneViewItemDecoration(itemMargin);
-
-            //mLimitRecyclerView.addItemDecoration(mLimitViewItemDecoration);
-
-            /*RecyclerView.ItemAnimator animator = mLimitRecyclerView.getItemAnimator();
-            if (animator instanceof SimpleItemAnimator) {
-                ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
-            }*/
         }
 
         @Override

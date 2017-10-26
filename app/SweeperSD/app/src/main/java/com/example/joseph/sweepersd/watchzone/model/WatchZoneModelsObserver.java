@@ -1,7 +1,6 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneModel>> {
@@ -59,12 +58,6 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Wat
             changeSet.removedLimits.remove(uid);
             if (!mWatchZoneModels.containsKey(uid)) {
                 changeSet.addedLimits.add(uid);
-            } else {
-                WatchZoneModel curModel = mWatchZoneModels.get(uid);
-                WatchZoneModel newModel = watchZoneModels.get(uid);
-                if (curModel.isChanged(newModel)) {
-                    changeSet.changedLimits.add(uid);
-                }
             }
         }
         mWatchZoneModels = watchZoneModels;

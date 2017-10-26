@@ -117,6 +117,7 @@ public class DebugActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 AddressValidatorJob.scheduleJob(DebugActivity.this);
+                AddressValidatorJob.scheduleMonthlyJob(DebugActivity.this);
             }
         });
 

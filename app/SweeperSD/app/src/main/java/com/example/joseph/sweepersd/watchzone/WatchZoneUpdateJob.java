@@ -48,6 +48,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                 new ComponentName(context, WatchZoneUpdateJob.class));
         builder.setMinimumLatency(0L);
         builder.setOverrideDeadline(0L);
+        builder.setPersisted(true);
         builder.setBackoffCriteria(ONE_MINUTE, JobInfo.BACKOFF_POLICY_LINEAR);
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         jobScheduler.schedule(builder.build());
