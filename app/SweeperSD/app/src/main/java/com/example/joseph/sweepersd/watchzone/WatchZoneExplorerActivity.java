@@ -183,21 +183,18 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                         + saveButtonLayoutParams.bottomMargin);
             }
         });
-        WatchZoneModelUpdater.getInstance(this).observe(this, new Observer<Map<Long, Integer>>() {
-            @Override
-            public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
-                if (longIntegerMap != null) {
-                    if (longIntegerMap.containsKey(mCurrentWatchZoneUid)) {
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mProgressBar.setProgress(longIntegerMap.get(mCurrentWatchZoneUid));
-                    } else {
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                    }
-                }
-            }
-        });
         mSaveOnDestroy = false;
         mCurrentWatchZoneUid = 0L;
+    }
+
+    @Override
+    public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
+        if (progressMap.containsKey(mCurrentWatchZoneUid)) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mProgressBar.setProgress(progressMap.get(mCurrentWatchZoneUid));
+        } else {
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

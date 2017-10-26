@@ -24,6 +24,7 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();
@@ -100,6 +101,11 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
                 finish();
             }
         }));
+    }
+
+    @Override
+    public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
+
     }
 
     @Override

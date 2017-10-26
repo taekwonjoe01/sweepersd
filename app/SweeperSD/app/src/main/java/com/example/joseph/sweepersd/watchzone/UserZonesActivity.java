@@ -20,6 +20,8 @@ import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateWatchZoneActivity;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Map;
+
 public class UserZonesActivity extends WatchZoneBaseActivity implements
         AddressValidatorManager.ValidatorProgressListener{
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
@@ -89,6 +91,13 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
                 }
                 mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                 break;
+        }
+    }
+
+    @Override
+    public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
+        if (mAdapter != null) {
+            mAdapter.setWatchZoneProgress(progressMap);
         }
     }
 

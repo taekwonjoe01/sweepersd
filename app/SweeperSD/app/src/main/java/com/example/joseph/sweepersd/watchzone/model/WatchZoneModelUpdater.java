@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
     private LiveData<List<Limit>> mLimits;
-
 
     private WatchZoneModelUpdater(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -157,7 +157,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         Map<Long, WatchZoneModel> models = repository.getWatchZoneModels();
         for (Long uid : models.keySet()) {
             WatchZoneModel model = models.get(uid);
-            if (model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {
+            if (model != null && model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {
                 modelsToSchedule.remove(model);
             }
         }
@@ -165,7 +165,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
         for (Long uid : models.keySet()) {
             WatchZoneModel model = models.get(uid);
-            if (model.getStatus() != WatchZoneModel.Status.VALID &&
+            if (model != null && model.getStatus() != WatchZoneModel.Status.VALID &&
                     model.getStatus() != WatchZoneModel.Status.LOADING) {
                 modelsThatNeedUpdate.add(model);
             }
@@ -203,7 +203,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             }
         }
 
-        Collections.reverse(newModelsToUpdate);
+        Collections.sort(newModelsToUpdate, new Comparator<WatchZoneModel>() {
+            @Override
+            public int compare(WatchZoneModel t1, WatchZoneModel t2) {
+                long diff = t2.getWatchZoneUid() - t1.getWatchZoneUid();
+                return diff < 0 ? -1 : diff > 0 ? 1 : 0;
+            }
+        });
 
         for (final WatchZoneModel model : newModelsToUpdate) {
             final Long uid = model.getWatchZone().getUid();

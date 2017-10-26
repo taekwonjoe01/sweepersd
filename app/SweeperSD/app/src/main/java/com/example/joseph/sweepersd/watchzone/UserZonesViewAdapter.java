@@ -48,12 +48,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     private final AppCompatActivity mActivity;
 
-    private final WatchZoneModelUpdater mWatchZoneModelUpdater;
-
     private List<WatchZoneModel> mCurrentList;
-    private List<Long> mCurrentUpdatingList;
-
-    private Long mExplorerUid = 0L;
+    private Map<Long, Integer> mUpdatingProgressMap;
 
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
@@ -96,6 +92,27 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                 mCurrentList = sortedModels;
 
                 result.dispatchUpdatesTo(UserZonesViewAdapter.this);
+                result.dispatchUpdatesTo(new ListUpdateCallback() {
+                    @Override
+                    public void onInserted(int position, int count) {
+
+                    }
+
+                    @Override
+                    public void onRemoved(int position, int count) {
+
+                    }
+
+                    @Override
+                    public void onMoved(int fromPosition, int toPosition) {
+
+                    }
+
+                    @Override
+                    public void onChanged(int position, int count, Object payload) {
+
+                    }
+                });
             }
 
             @Override
@@ -124,94 +141,35 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             @Override
             public void onChanged(@Nullable Long explorerUid) {
                 if (explorerUid != null) {
-                    mExplorerUid = explorerUid;
+                    //mExplorerUid = explorerUid;
                 }
             }
         });
+    }
 
-        mWatchZoneModelUpdater = WatchZoneModelUpdater.getInstance(mActivity);
-        mWatchZoneModelUpdater.observe(mActivity, new Observer<Map<Long, Integer>>() {
-            @Override
-            public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
-                if (mCurrentList == null) {
-                    return;
-                }
-                if (mCurrentUpdatingList == null) {
-                    mCurrentUpdatingList = new ArrayList<>();
-
-                }
-                final List<Long> updatingList = new ArrayList<>(longIntegerMap.keySet());
-                DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                    @Override
-                    public int getOldListSize() {
-                        return mCurrentUpdatingList.size();
-                    }
-
-                    @Override
-                    public int getNewListSize() {
-                        return updatingList.size();
-                    }
-
-                    @Override
-                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                        return mCurrentUpdatingList.get(oldItemPosition) ==
-                                updatingList.get(newItemPosition);
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        return mCurrentUpdatingList.get(oldItemPosition) ==
-                                updatingList.get(newItemPosition);
-                    }
-                });
-                result.dispatchUpdatesTo(new ListUpdateCallback() {
-                    @Override
-                    public void onInserted(int position, int count) {
-                        Long uid = updatingList.get(position);
-                        int foundIndex = -1;
-                        int index = 0;
-                        for (WatchZoneModel model : mCurrentList) {
-                            if (model.getWatchZoneUid() == uid) {
-                                foundIndex = index;
-                                break;
-                            }
-                            index++;
-                        }
-                        if (foundIndex >= 0) {
-                            notifyItemChanged(index);
-                        }
-                    }
-
-                    @Override
-                    public void onRemoved(int position, int count) {
-                        Long uid = mCurrentUpdatingList.get(position);
-                        int foundIndex = -1;
-                        int index = 0;
-                        for (WatchZoneModel model : mCurrentList) {
-                            if (model.getWatchZoneUid() == uid) {
-                                foundIndex = index;
-                                break;
-                            }
-                            index++;
-                        }
-                        if (foundIndex >= 0) {
-                            notifyItemChanged(index);
-                        }
-                    }
-
-                    @Override
-                    public void onMoved(int fromPosition, int toPosition) {
-                        // Doesn't matter
-                    }
-
-                    @Override
-                    public void onChanged(int position, int count, Object payload) {
-                        // Doesn't matter
-                    }
-                });
-                mCurrentUpdatingList = updatingList;
+    public void setWatchZoneProgress(Map<Long, Integer> watchZoneProgress) {
+        if (mCurrentList != null && mUpdatingProgressMap != null) {
+            List<Long> removedWatchZones = new ArrayList<>(mUpdatingProgressMap.keySet());
+            for (Long uid : watchZoneProgress.keySet()) {
+                removedWatchZones.remove(uid);
             }
-        });
+            for (WatchZoneModel model : mCurrentList) {
+                if (removedWatchZones.contains(model.getWatchZoneUid())) {
+                    int index = mCurrentList.indexOf(model);
+                    notifyItemChanged(index);
+                }
+            }
+        }
+        mUpdatingProgressMap = watchZoneProgress;
+        if (mCurrentList == null) {
+            return;
+        }
+        for (WatchZoneModel model : mCurrentList) {
+            if (mUpdatingProgressMap.containsKey(model.getWatchZoneUid())) {
+                int index = mCurrentList.indexOf(model);
+                notifyItemChanged(index);
+            }
+        }
     }
 
     @Override
@@ -256,10 +214,9 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                     holder.mUpdatingProgress.setVisibility(View.GONE);
                 } else {
                     // Any status could be being updated by the WatchZoneModelUpdater...
-                    Map<Long, Integer> progressMap = mWatchZoneModelUpdater.getValue();
                     Integer progress = null;
-                    if (progressMap != null) {
-                        progress = progressMap.get(model.getWatchZone().getUid());
+                    if (mUpdatingProgressMap != null) {
+                        progress = mUpdatingProgressMap.get(model.getWatchZone().getUid());
                     }
 
                     if (progress != null) {
