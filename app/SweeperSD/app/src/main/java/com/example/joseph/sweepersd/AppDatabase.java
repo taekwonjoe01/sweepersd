@@ -5,6 +5,8 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
+import com.example.joseph.sweepersd.alert.geofence.Geofence;
+import com.example.joseph.sweepersd.alert.geofence.GeofenceDao;
 import com.example.joseph.sweepersd.experimental.activityrecognition.ActivityReport;
 import com.example.joseph.sweepersd.experimental.activityrecognition.ActivityReportDao;
 import com.example.joseph.sweepersd.limit.Limit;
@@ -15,7 +17,7 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneDao;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
 
 @Database(entities = {Limit.class, LimitSchedule.class, WatchZone.class, WatchZonePoint.class,
-        ActivityReport.class},
+        ActivityReport.class, Geofence.class},
         version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase sInstance;
@@ -33,4 +35,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract WatchZoneDao watchZoneDao();
 
     public abstract ActivityReportDao activityReportDao();
+
+    public abstract GeofenceDao geofenceDao();
 }

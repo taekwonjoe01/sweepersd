@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.utils.PendingIntents;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
@@ -14,7 +15,6 @@ import java.util.List;
 
 public class ScheduleManager {
     private static final String TAG = ScheduleManager.class.getSimpleName();
-    private static final int REQUEST_CODE_ALARM = 0;
 
     private final Context mApplicationContext;
 
@@ -46,9 +46,8 @@ public class ScheduleManager {
 
         alarmMgr = (AlarmManager) mApplicationContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(mApplicationContext, AlarmReceiver.class);
-        alarmIntent = PendingIntent.getBroadcast(mApplicationContext, REQUEST_CODE_ALARM, intent,
+        alarmIntent = PendingIntent.getBroadcast(mApplicationContext, PendingIntents.REQUEST_CODE_ALARM, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-
 
         alarmMgr.set(AlarmManager.RTC_WAKEUP, timestamp, alarmIntent);
         Log.i(TAG, "Alarm scheduled for " + new Date(timestamp).toString());
