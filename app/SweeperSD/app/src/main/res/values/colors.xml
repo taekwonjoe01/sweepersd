@@ -17,4 +17,10 @@
     <color name="white_shadow">#77FFFFFF</color>
 
     <color name="map_radius_fill">#66457f93</color>
+
+    <color name="background_userzones_upcoming">#c17900</color>
+    <color name="background_userzones_upcoming_activated">#ffd95a</color>
+
+    <color name="background_userzones_now">#8e0000</color>
+    <color name="background_userzones_now_activated">#ff5f52</color>
 </resources>

@@ -27,13 +27,6 @@
                 style="@android:style/TextAppearance.Large"
                 android:textColor="@color/app_secondary"
                 android:text="1061 Beryl Street" />
-
-            <Switch
-                android:id="@+id/switch_enable_alarm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/apptheme_action_button"
-                android:padding="2dp"/>
         </LinearLayout>
 
         <FrameLayout
@@ -46,7 +39,7 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="invisible">
+                android:visibility="gone">
 
                 <ProgressBar
                     android:layout_width="wrap_content"
@@ -72,13 +65,6 @@
                 android:layout_gravity="left|center_vertical"
                 android:layout_height="wrap_content"
                 android:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@android:style/TextAppearance.Small"
-                    android:textColor="@color/app_secondary"
-                    android:text="Next Sweeping: " />
 
                 <TextView
                     android:id="@+id/textview_next_sweeping"

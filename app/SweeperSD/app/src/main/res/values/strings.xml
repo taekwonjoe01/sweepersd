@@ -152,7 +152,7 @@
 
     <!-- Strings for Watch Zone List Activity -->
     <string name="title_user_zone_activity">Saved Zones</string>
-    <string name="watch_zone_no_sweeping">No sweeping at this location.</string>
+    <string name="watch_zone_no_sweeping">There is no street sweeping in this zone.</string>
 
     <!-- Strings for Watch Zone Details Activity -->
     <string name="details_delete_watch_zone">Delete</string>

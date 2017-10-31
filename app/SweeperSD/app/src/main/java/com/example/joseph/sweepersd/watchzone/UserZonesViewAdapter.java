@@ -33,13 +33,16 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 import com.google.android.gms.maps.model.LatLng;
+import com.roomorama.caldroid.CaldroidFragment;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -220,18 +223,22 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        holder.mViewLayout.setBackground(
+                mActivity.getResources().getDrawable(R.drawable.apptheme_background));
         final WatchZoneModel model = mCurrentList.get(position);
         WatchZoneModel.Status modelStatus = WatchZoneModel.Status.LOADING;
+        String label = modelStatus.toString();
         if (model != null) {
             modelStatus = model.getStatus();
         }
-        String label = modelStatus.toString();
         if (modelStatus == WatchZoneModel.Status.INVALID_NO_WATCH_ZONE) {
             // TODO - This watch Zone doesn't exist and this should not happen!
         } else if (model != null) {
+            Log.e("Joey", "Not null model");
             WatchZone watchZone = model.getWatchZone();
             if (watchZone != null) {
-                label = watchZone.getLabel() + " - " + label;
+                Log.e("Joey", "Not null zone");
+                label = watchZone.getLabel();
 
                 holder.mOnClickListener = new View.OnClickListener() {
                     @Override
@@ -256,13 +263,15 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                     }
 
                     if (progress != null) {
+                        Log.e("Joey", "Loading");
                         holder.mDetailsGroup.setVisibility(View.GONE);
                         holder.mLoadingGroup.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setProgress(progress);
                     } else {
+                        Log.e("Joey", "Not Loading");
                         holder.mUpdatingProgress.setProgress(0);
-                        holder.mLoadingGroup.setVisibility(View.INVISIBLE);
+                        holder.mLoadingGroup.setVisibility(View.GONE);
 
                         if (model.getStatus() == WatchZoneModel.Status.VALID) {
                             holder.mDetailsGroup.setVisibility(View.VISIBLE);
@@ -278,8 +287,30 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             long nextSweepingTime = WatchZoneUtils.getNextSweepingStartTime(allLimitSchedules);
                             String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
                             if (nextSweepingTime != 0) {
-                                SimpleDateFormat format = new SimpleDateFormat("EEE, MMM dd");
-                                dateString = format.format(nextSweepingTime);
+                                if (nextSweepingTime < System.currentTimeMillis()) {
+                                    holder.mViewLayout.setBackground(
+                                            mActivity.getResources().getDrawable(R.drawable.background_userzones_now));
+                                    dateString = "Street sweeping is happening now.";
+                                } else {
+                                    long timeLeft = nextSweepingTime - System.currentTimeMillis();
+                                    if (timeLeft < 1000L * 60L * 60L * 24L) {
+                                        holder.mViewLayout.setBackground(
+                                                mActivity.getResources().getDrawable(R.drawable.background_userzones_upcoming));
+                                        Calendar sweeping = Calendar.getInstance();
+                                        sweeping.setTime(new Date(nextSweepingTime));
+                                        Calendar now = Calendar.getInstance();
+                                        if (sweeping.get(Calendar.DATE) != now.get(Calendar.DATE)) {
+                                            dateString = "Next sweeping will occur tomorrow at " +
+                                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
+                                        } else {
+                                            dateString = "Next sweeping will occur today at " +
+                                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
+                                        }
+                                    } else {
+                                        dateString = "Next sweeping will occur on " +
+                                                new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));
+                                    }
+                                }
                             }
                             holder.mAlarmNextSweeping.setText(dateString);
                         }
@@ -301,12 +332,11 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         private final Context mContext;
 
         public TextView mWatchZoneLabel;
-        public Switch mAlarmEnabled;
         public TextView mAlarmNextSweeping;
         public LinearLayout mLoadingGroup;
         public LinearLayout mDetailsGroup;
         public ProgressBar mUpdatingProgress;
-        private FrameLayout mViewLayout;
+        public FrameLayout mViewLayout;
         public View.OnLongClickListener mLongClickListener;
         public View.OnClickListener mOnClickListener;
 
@@ -314,7 +344,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             super(v);
             mContext = context;
             mWatchZoneLabel = (TextView) v.findViewById(R.id.textview_watchzone_label);
-            mAlarmEnabled = (Switch) v.findViewById(R.id.switch_enable_alarm);
             mAlarmNextSweeping = (TextView) v.findViewById(R.id.textview_next_sweeping);
             mLoadingGroup = (LinearLayout) v.findViewById(R.id.watchzone_loading_group);
             mDetailsGroup = (LinearLayout) v.findViewById(R.id.watchzone_details_group);

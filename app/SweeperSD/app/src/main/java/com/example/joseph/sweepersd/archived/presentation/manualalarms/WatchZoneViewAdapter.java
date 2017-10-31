@@ -400,7 +400,6 @@ public class WatchZoneViewAdapter extends RecyclerView.Adapter<WatchZoneViewAdap
             super(v);
             mContext = context;
             mWatchZoneLabel = (TextView) v.findViewById(R.id.textview_watchzone_label);
-            mAlarmEnabled = (Switch) v.findViewById(R.id.switch_enable_alarm);
             mAlarmNextSweeping = (TextView) v.findViewById(R.id.textview_next_sweeping);
             mLoadingGroup = (LinearLayout) v.findViewById(R.id.watchzone_loading_group);
             mDetailsGroup = (LinearLayout) v.findViewById(R.id.watchzone_details_group);
