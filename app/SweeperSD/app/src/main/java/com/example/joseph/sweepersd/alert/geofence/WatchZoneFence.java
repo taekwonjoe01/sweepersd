@@ -4,8 +4,8 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(tableName = "geofences")
-public class Geofence {
+@Entity(tableName = "watchzonefences")
+public class WatchZoneFence {
     @PrimaryKey(autoGenerate = true)
     private long uid;
 

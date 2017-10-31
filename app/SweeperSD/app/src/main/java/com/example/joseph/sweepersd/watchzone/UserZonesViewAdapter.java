@@ -105,7 +105,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             if (index >=0) {
                                 notifyItemChanged(index);
                             }
-                            Log.e("Joey", "watchZoneChanged");
                         }
 
                         @Override
@@ -122,7 +121,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             // performance might suffer if a lot of deletions happen.
                         }
                     });
-                    Log.e("Joey", "added WZ observer");
                     WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
                 }
             }
@@ -144,7 +142,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             if (index >=0) {
                                 notifyItemChanged(index);
                             }
-                            Log.e("Joey", "watchZoneChanged");
                         }
 
                         @Override
@@ -161,7 +158,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                             // performance might suffer if a lot of deletions happen.
                         }
                     });
-                    Log.e("Joey", "added WZ observer");
                     WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
                 }
 
@@ -188,7 +184,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     }
 
     public void setWatchZoneProgress(Map<Long, Integer> watchZoneProgress) {
-        Log.e("Joey", "progress");
         if (mCurrentList != null && mUpdatingProgressMap != null) {
             List<Long> removedWatchZones = new ArrayList<>(mUpdatingProgressMap.keySet());
             for (Long uid : watchZoneProgress.keySet()) {

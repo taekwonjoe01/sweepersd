@@ -71,6 +71,9 @@ public class OnDeviceLimitProviderService extends IntentService {
         List<LimitSchedule> workSchedule = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             int day = i + 1;
+            if (day == 1 || day == 7) {
+                continue;
+            }
             LimitSchedule first = new LimitSchedule();
             first.setDayNumber(day);
             first.setWeekNumber(1);
@@ -107,6 +110,9 @@ public class OnDeviceLimitProviderService extends IntentService {
         List<LimitSchedule> homeSchedule = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             int day = i + 1;
+            if (day == 1 || day == 7) {
+                continue;
+            }
             LimitSchedule first = new LimitSchedule();
             first.setDayNumber(day);
             first.setWeekNumber(1);

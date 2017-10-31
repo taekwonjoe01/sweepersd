@@ -11,6 +11,7 @@ import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.PendingIntents;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
@@ -30,28 +31,32 @@ public class GeofenceManager {
     }
 
     public void updateGeofences(List<WatchZoneModel> models) {
-        GeofenceDao dao = AppDatabase.getInstance(mApplicationContext).geofenceDao();
-        List<Geofence> geofences = dao.getAllGeofences();
+        WatchZoneFenceDao dao = AppDatabase.getInstance(mApplicationContext).watchZoneFenceDao();
+        List<WatchZoneFence> watchZoneFences = dao.getAllGeofences();
 
-        Map<Long, Geofence> existingGeofences = new HashMap<>();
-        for (Geofence geofence : geofences) {
-            existingGeofences.put(geofence.getWatchZoneId(), geofence);
+        Map<Long, WatchZoneFence> existingGeofences = new HashMap<>();
+        for (WatchZoneFence watchZoneFence : watchZoneFences) {
+            existingGeofences.put(watchZoneFence.getWatchZoneId(), watchZoneFence);
         }
 
         Set<Long> orphans = new HashSet<>(existingGeofences.keySet());
         List<WatchZoneModel> newModels = new ArrayList<>();
         for (WatchZoneModel model : models) {
             orphans.remove(model.getWatchZoneUid());
-            if (!existingGeofences.containsKey(model.getWatchZoneUid())) {
+            if (!existingGeofences.containsKey(model.getWatchZoneUid())
+                    && model.getWatchZone().getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
                 newModels.add(model);
-            } else {
-                Geofence geofence = existingGeofences.get(model.getWatchZoneUid());
+            } else if (existingGeofences.containsKey(model.getWatchZoneUid())){
+                WatchZoneFence watchZoneFence = existingGeofences.get(model.getWatchZoneUid());
                 WatchZone watchZone = model.getWatchZone();
-                if (geofence.getCenterLatitude() != watchZone.getCenterLatitude() ||
-                        geofence.getCenterLongitude() != geofence.getCenterLongitude()
-                        || geofence.getRadius() != watchZone.getRadius()) {
+                if (watchZoneFence.getCenterLatitude() != watchZone.getCenterLatitude() ||
+                        watchZoneFence.getCenterLongitude() != watchZoneFence.getCenterLongitude()
+                        || watchZoneFence.getRadius() != watchZone.getRadius() ||
+                        watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_ANYWHERE) {
                     orphans.add(model.getWatchZoneUid());
-                    newModels.add(model);
+                    if (watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
+                        newModels.add(model);
+                    }
                 }
             }
         }
@@ -61,27 +66,29 @@ public class GeofenceManager {
                     getGeofencesPendingIntent());
 
             for (Long orphaned : orphans) {
-                Geofence geofence = existingGeofences.get(orphaned);
-                dao.delete(geofence);
+                WatchZoneFence watchZoneFence = existingGeofences.get(orphaned);
+                dao.delete(watchZoneFence);
                 existingGeofences.remove(orphaned);
             }
             for (WatchZoneModel model : newModels) {
-                Geofence newGeofence = new Geofence();
-                newGeofence.setWatchZoneId(model.getWatchZoneUid());
-                newGeofence.setInRegion(false);
-                newGeofence.setCenterLatitude(model.getWatchZone().getCenterLatitude());
-                newGeofence.setCenterLongitude(model.getWatchZone().getCenterLongitude());
-                newGeofence.setRadius(model.getWatchZone().getRadius());
-                dao.insertGeofence(newGeofence);
-                existingGeofences.put(model.getWatchZoneUid(), newGeofence);
+                WatchZoneFence newWatchZoneFence = new WatchZoneFence();
+                newWatchZoneFence.setWatchZoneId(model.getWatchZoneUid());
+                newWatchZoneFence.setInRegion(false);
+                newWatchZoneFence.setCenterLatitude(model.getWatchZone().getCenterLatitude());
+                newWatchZoneFence.setCenterLongitude(model.getWatchZone().getCenterLongitude());
+                newWatchZoneFence.setRadius(model.getWatchZone().getRadius());
+                long uid = dao.insertGeofence(newWatchZoneFence);
+                newWatchZoneFence.setUid(uid);
+                existingGeofences.put(model.getWatchZoneUid(), newWatchZoneFence);
             }
 
             List<com.google.android.gms.location.Geofence> gmsFences = new ArrayList<>();
-            for (Geofence fence : existingGeofences.values()) {
+            for (WatchZoneFence fence : existingGeofences.values()) {
                 gmsFences.add(new com.google.android.gms.location.Geofence.Builder()
                         // Set the request ID of the geofence. This is a string to identify this
                         // geofence.
-                        .setRequestId(Long.toString(fence.getWatchZoneId()))
+                        .setRequestId(Long.toString(fence.getUid()))
+                        .setExpirationDuration(Geofence.NEVER_EXPIRE)
                         .setCircularRegion(
                                 fence.getCenterLatitude(),
                                 fence.getCenterLongitude(),
@@ -91,20 +98,22 @@ public class GeofenceManager {
                                 com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT)
                         .build());
             }
-            if (ActivityCompat.checkSelfPermission(mApplicationContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
+            if (!gmsFences.isEmpty()) {
+                if (ActivityCompat.checkSelfPermission(mApplicationContext,
+                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                LocationServices.getGeofencingClient(mApplicationContext).addGeofences(
+                        getGeofencingRequest(gmsFences),
+                        getGeofencesPendingIntent());
             }
-            LocationServices.getGeofencingClient(mApplicationContext).addGeofences(
-                    getGeofencingRequest(gmsFences),
-                    getGeofencesPendingIntent());
         }
     }
 

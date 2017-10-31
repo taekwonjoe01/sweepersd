@@ -5,11 +5,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.utils.Notifications;
 import com.example.joseph.sweepersd.watchzone.UserZonesActivity;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
+import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
@@ -28,34 +31,50 @@ public class AlertManager {
         mApplicationContext = context.getApplicationContext();
     }
 
-    public void updateAlertNotification(List<WatchZoneModel> models) {
+    public void updateAlertNotification(List<WatchZoneModel> models, List<WatchZoneFence> fences) {
         List<String> currentLabels = new ArrayList<>();
         List<String> upcomingLabels = new ArrayList<>();
         for (WatchZoneModel model : models) {
-            List<LimitScheduleDate> sweepingDates =
-                    WatchZoneUtils.getStartTimeOrderedDatesForWatchZone(model);
-            if (sweepingDates != null) {
-                List<LimitScheduleDate> currentSweeping = new ArrayList<>();
-                List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
-                long now = new GregorianCalendar(
-                        TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
-                long startOffset = WatchZoneUtils.getStartHourOffset(model.getWatchZone());
-                for (LimitScheduleDate date : sweepingDates) {
-                    long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
-                    long startTime = date.getStartCalendar().getTime().getTime();
-                    long endTime = date.getEndCalendar().getTime().getTime();
-                    if (startTime <= now && endTime >= now) {
-                        currentSweeping.add(date);
-                    } else if (warningTime <= now && endTime >= now) {
-                        upcomingSweeping.add(date);
+            boolean isInBounds = false;
+            if (model.getWatchZone().getRemindPolicy() == WatchZone.REMIND_POLICY_ANYWHERE) {
+                isInBounds = true;
+            } else if (model.getWatchZone().getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
+                WatchZoneFence fence = null;
+                for (WatchZoneFence f : fences) {
+                    if (f.getWatchZoneId() == model.getWatchZoneUid()) {
+                        fence = f;
                     }
                 }
-
-                if (currentSweeping.size() > 0) {
-                    currentLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
+                if (fence != null && fence.isInRegion()) {
+                    isInBounds = true;
                 }
-                if (upcomingSweeping.size() > 0) {
-                    upcomingLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
+            }
+            if (isInBounds) {
+                List<LimitScheduleDate> sweepingDates =
+                        WatchZoneUtils.getStartTimeOrderedDatesForWatchZone(model);
+                if (sweepingDates != null) {
+                    List<LimitScheduleDate> currentSweeping = new ArrayList<>();
+                    List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
+                    long now = new GregorianCalendar(
+                            TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
+                    long startOffset = WatchZoneUtils.getStartHourOffset(model.getWatchZone());
+                    for (LimitScheduleDate date : sweepingDates) {
+                        long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
+                        long startTime = date.getStartCalendar().getTime().getTime();
+                        long endTime = date.getEndCalendar().getTime().getTime();
+                        if (startTime <= now && endTime >= now) {
+                            currentSweeping.add(date);
+                        } else if (warningTime <= now && endTime >= now) {
+                            upcomingSweeping.add(date);
+                        }
+                    }
+
+                    if (currentSweeping.size() > 0) {
+                        currentLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
+                    }
+                    if (upcomingSweeping.size() > 0) {
+                        upcomingLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
+                    }
                 }
             }
         }

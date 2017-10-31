@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.joseph.sweepersd.alert.AlertNotificationJob;
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceJob;
 
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
@@ -12,5 +13,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         // Wake up the app!
         ScheduleJob.scheduleJob(context);
         AlertNotificationJob.scheduleJob(context);
+        WatchZoneFenceJob.scheduleJob(context);
     }
 }

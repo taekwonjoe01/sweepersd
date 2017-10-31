@@ -6,21 +6,27 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ServiceLifecycleDispatcher;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
+import com.example.joseph.sweepersd.watchzone.WatchZoneBaseActivity;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class AlertNotificationJob extends JobService implements LifecycleOwner {
@@ -29,6 +35,9 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
     private static final String WATCH_ZONE_UID = "WATCH_ZONE_UID";
 
     private ServiceLifecycleDispatcher mDispatcher;
+
+    private boolean mWatchZoneModelsLoaded;
+    private boolean mWatchZoneFencesLoaded;
 
     public static void scheduleJob(Context context) {
         Log.i(TAG, "Scheduling " + TAG);
@@ -69,10 +78,14 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
             }
             @Override
             public void onDataLoaded(Map<Long, WatchZoneModel> models) {
-                AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
-                alertManager.updateAlertNotification(new ArrayList<>(models.values()));
-                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
-                        System.currentTimeMillis()).commit();
+                mWatchZoneModelsLoaded = true;
+                if (mWatchZoneFencesLoaded) {
+                    AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
+                    alertManager.updateAlertNotification(new ArrayList<>(models.values()),
+                            WatchZoneFenceRepository.getInstance(AlertNotificationJob.this).getFencesLiveData().getValue());
+                    preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
+                }
                 jobFinished(jobParameters, false);
             }
             @Override
@@ -80,6 +93,26 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
                 // Do nothing
             }
         }));
+        WatchZoneFenceRepository.getInstance(this).getFencesLiveData().observe(this,
+                new Observer<List<WatchZoneFence>>() {
+                    @Override
+                    public void onChanged(@Nullable List<WatchZoneFence> watchZoneFences) {
+                        if (watchZoneFences != null) {
+                            mWatchZoneFencesLoaded = true;
+                            if (mWatchZoneModelsLoaded) {
+                                AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
+                                alertManager.updateAlertNotification(new ArrayList<>(
+                                                WatchZoneModelRepository.getInstance(
+                                                        AlertNotificationJob.this).getWatchZoneModels().values()),
+                                        watchZoneFences);
+                                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
+                                        System.currentTimeMillis()).commit();
+                            }
+                        }
+                    }
+                });
+        mWatchZoneFencesLoaded = false;
+        mWatchZoneModelsLoaded = false;
 
         // Signal that another thread is doing the work.
         return true;

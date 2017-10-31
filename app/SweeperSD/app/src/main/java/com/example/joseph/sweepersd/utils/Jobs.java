@@ -14,4 +14,6 @@ public class Jobs {
     public static final int ADDRESS_VALIDATOR_MONTHLY_JOB = 301;
 
     public static final int ALERT_JOB = 400;
+
+    public static final int GEOFENCE_JOB = 400;
 }

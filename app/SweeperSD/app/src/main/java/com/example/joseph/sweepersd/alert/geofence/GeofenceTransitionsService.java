@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.AppDatabase;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
@@ -28,36 +29,22 @@ public class GeofenceTransitionsService extends IntentService {
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         List<Geofence> triggeringFences = geofencingEvent.getTriggeringGeofences();
-        List<Long> triggeringWatchZoneUids = new ArrayList<>();
-        for (Geofence fence : triggeringFences) {
-            triggeringWatchZoneUids.add(Long.parseLong(fence.getRequestId()));
+        WatchZoneFenceDao dao = AppDatabase.getInstance(this).watchZoneFenceDao();
+        List<WatchZoneFence> fences = new ArrayList<>();
+        for (Geofence geofence : triggeringFences) {
+            long uid = Long.parseLong(geofence.getRequestId());
+            WatchZoneFence fence = dao.getFenceForUid(uid);
+            if (fence != null) {
+                if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                    fence.setInRegion(true);
+                } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                    fence.setInRegion(false);
+                }
+                fences.add(fence);
+            }
         }
-        /*Long watchZoneUid = triggeringFences.get(0).getRequestId();
-        geofencingEvent.getTriggeringLocation();
 
-        // Test that the reported transition was of interest.
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-
-            // Get the geofences that were triggered. A single event can trigger
-            // multiple geofences.
-            List triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
-            // Get the transition details as a String.
-            String geofenceTransitionDetails = getGeofenceTransitionDetails(
-                    this,
-                    geofenceTransition,
-                    triggeringGeofences
-            );
-
-            // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
-            Log.i(TAG, geofenceTransitionDetails);
-        } else {
-            // Log the error.
-            Log.e(TAG, getString(R.string.geofence_transition_invalid_type,
-                    geofenceTransition));
-        }*/
+        dao.updateGeofences(fences);
     }
 }
 
