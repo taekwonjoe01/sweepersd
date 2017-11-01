@@ -13,7 +13,6 @@ import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
@@ -24,8 +23,6 @@ import com.google.maps.android.SphericalUtil;
 
 import org.apache.commons.lang3.text.WordUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
@@ -139,6 +136,6 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         LatLng northEast = SphericalUtil.computeOffset(latLng,
                 ((double)watchZone.getRadius()) * Math.sqrt(2), 45);
         LatLngBounds bounds = new LatLngBounds(southWest, northEast);
-        mMapFragment.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 10));
+        mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 0));
     }
 }

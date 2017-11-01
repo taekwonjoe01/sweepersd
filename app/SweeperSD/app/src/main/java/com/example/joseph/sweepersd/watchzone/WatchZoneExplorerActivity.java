@@ -1,16 +1,15 @@
 package com.example.joseph.sweepersd.watchzone;
 
 import android.app.DialogFragment;
-import android.arch.lifecycle.Observer;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -22,10 +21,10 @@ import android.widget.Toast;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAlarmLabelDialogFragment;
-import com.example.joseph.sweepersd.archived.utils.LocationUtils;
+import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
@@ -108,6 +107,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mPlaceFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
+                Log.e("Joey", "onPlaceSelected");
                 setCurrentZone(place.getAddress().toString(), place.getLatLng(),
                         true);
             }
@@ -171,7 +171,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                                 mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
                                 WatchZone.REMIND_RANGE_DEFAULT,
                                 WatchZone.REMIND_POLICY_DEFAULT);
-                setAlarmLocation(mLatLng);
             }
         });
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -218,8 +217,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                     }
                 }
             });
-        } else {
-            mMapFragment.animateCamera(CameraUpdateFactory.newLatLngBounds(SAN_DIEGO_BOUNDS, 0));
+        } else if (mCurrentWatchZoneUid == 0L) {
+            mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(SAN_DIEGO_BOUNDS, 0));
         }
     }
 
@@ -244,7 +243,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             Toast.makeText(this, "You can only set zones near San Diego!", Toast.LENGTH_SHORT).show();
             return;
         }
-        setAlarmLocation(latLng);
+        mLatLng = latLng;
+        Log.e("Joey", "setCurrentZone");
 
         if (address == null) {
             address = LocationUtils.getAddressForLatLnt(
@@ -253,38 +253,47 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             if (address.contains(",")) {
                 address = address.split(",")[0];
             }
+        } else {
+            if (address.contains(",")) {
+                address = address.split(",")[0];
+            }
         }
 
         if (TextUtils.isEmpty(address)) {
-            mPlaceFragment.setText(latLng.latitude + ", "
-                    + latLng.longitude);
-        } else {
-            mPlaceFragment.setText(address);
+            address = latLng.latitude + ", "
+                    + latLng.longitude;
         }
+        mPlaceFragment.setText(address);
 
         mCurrentLabel = address;
-        mCurrentLatitude = latLng.latitude;
-        mCurrentLongitude = latLng.longitude;
+        mCurrentLatitude = mLatLng.latitude;
+        mCurrentLongitude = mLatLng.longitude;
         mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
 
         if (animateCamera) {
+            Log.e("Joey", "animating " + mCurrentRadius);
             LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
             LatLng southWest = SphericalUtil.computeOffset(center,
                     mCurrentRadius * Math.sqrt(2), 225);
             LatLng northEast = SphericalUtil.computeOffset(center,
                     mCurrentRadius * Math.sqrt(2), 45);
+            Log.e("Joey", "sw " + southWest.latitude + " " + southWest.longitude);
+            Log.e("Joey", "ne " + northEast.latitude + " " + northEast.longitude);
             LatLngBounds bounds = new LatLngBounds(southWest, northEast);
-            mMapFragment.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 10));
+            mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 10));
             mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
 
         if (mCurrentWatchZoneUid == 0L) {
-            mCurrentWatchZoneUid = WatchZoneRepository.getInstance(this).createWatchZone(mCurrentLabel,
+            Log.e("Joey", "creating " + mCurrentLabel + " " + mCurrentLatitude + " " +  mCurrentLongitude + " " + mCurrentRadius);
+            mCurrentWatchZoneUid = WatchZoneModelRepository.getInstance(this).createWatchZone(mCurrentLabel,
                     mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
+            Log.e("Joey", "created " + mCurrentWatchZoneUid);
             mMapFragment.addWatchZone(mCurrentWatchZoneUid);
             mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
             mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
         } else {
+            Log.e("Joey", "updating");
             WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                     .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
                             mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
@@ -299,13 +308,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         if (fragment != null) {
             fragment.dismiss();
         }
-    }
-
-    private void setAlarmLocation(LatLng location) {
-        mLatLng = location;
-
-        mSlidingPanelLayout.getAnchorPoint();
-        mSlidingPanelLayout.getPanelState();
     }
 
     private int getRadiusForProgress(int progress) {

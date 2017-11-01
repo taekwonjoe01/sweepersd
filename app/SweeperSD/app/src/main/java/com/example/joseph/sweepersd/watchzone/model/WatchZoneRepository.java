@@ -159,7 +159,7 @@ public class WatchZoneRepository extends LiveData<WatchZoneRepository> {
     public synchronized long createWatchZone(String label, double centerLatitude,
                                               double centerLongitude, int radius) {
         long startTime = SystemClock.elapsedRealtime();
-        long result = 0;
+        long result = -1;
         if (!TextUtils.isEmpty(label)) {
             WatchZone watchZone = new WatchZone();
             watchZone.setLabel(label);

@@ -125,7 +125,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    public void animateCamera(CameraUpdate update) {
+    public void animateCameraBounds(CameraUpdate update) {
         mCameraUpdate = update;
         if (mGoogleMap != null) {
             mGoogleMap.animateCamera(mCameraUpdate);

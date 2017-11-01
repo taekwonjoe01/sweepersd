@@ -7,16 +7,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
@@ -28,19 +25,14 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
-import com.google.android.gms.maps.model.LatLng;
-import com.roomorama.caldroid.CaldroidFragment;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -234,10 +226,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         if (modelStatus == WatchZoneModel.Status.INVALID_NO_WATCH_ZONE) {
             // TODO - This watch Zone doesn't exist and this should not happen!
         } else if (model != null) {
-            Log.e("Joey", "Not null model");
             WatchZone watchZone = model.getWatchZone();
             if (watchZone != null) {
-                Log.e("Joey", "Not null zone");
                 label = watchZone.getLabel();
 
                 holder.mOnClickListener = new View.OnClickListener() {
@@ -263,13 +253,11 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                     }
 
                     if (progress != null) {
-                        Log.e("Joey", "Loading");
                         holder.mDetailsGroup.setVisibility(View.GONE);
                         holder.mLoadingGroup.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setVisibility(View.VISIBLE);
                         holder.mUpdatingProgress.setProgress(progress);
                     } else {
-                        Log.e("Joey", "Not Loading");
                         holder.mUpdatingProgress.setProgress(0);
                         holder.mLoadingGroup.setVisibility(View.GONE);
 
