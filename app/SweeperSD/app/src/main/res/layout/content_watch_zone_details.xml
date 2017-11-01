@@ -14,8 +14,25 @@
         android:layout_height="match_parent"
         android:weightSum="100"
         android:orientation="vertical"
-        android:padding="4dp"
+        android:paddingRight="4dp"
+        android:paddingLeft="4dp"
+        android:paddingBottom="4dp"
         android:background="@color/app_background">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_gravity="bottom">
+
+            <ProgressBar
+                android:id="@+id/progress_updating"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:progressTint="@color/app_primary"
+                android:secondaryProgressTint="@color/app_primary"
+                android:progress="0"
+                android:visibility="invisible" />
+        </FrameLayout>
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"

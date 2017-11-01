@@ -6,6 +6,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
@@ -40,9 +42,7 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
 
     private MapFragment mMapFragment;
 
-    private List<LatLng> mCurrentFinishedWatchZonePoints = new ArrayList<>();
-
-    private WatchZoneModel mWatchZoneModel;
+    private ProgressBar mProgressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +62,7 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         mTabLayout = findViewById(R.id.tab_layout);
         mTabViewPager = findViewById(R.id.tab_viewpager);
+        mProgressBar = findViewById(R.id.progress_updating);
         setSupportActionBar(toolbar);
 
         mMapFragment= (MapFragment) getSupportFragmentManager()
@@ -105,7 +106,12 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
 
     @Override
     public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
-
+        if (progressMap.containsKey(mWatchZoneId)) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mProgressBar.setProgress(progressMap.get(mWatchZoneId));
+        } else {
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
