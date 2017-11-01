@@ -171,7 +171,7 @@ public class WatchZoneUtils {
         int dom = calendar.get(Calendar.DAY_OF_MONTH);
 
         int rangeStart = ((schedule.getWeekNumber() - 1) * 7) + 1;
-        int endRange = ((schedule.getWeekNumber()) * 7) + 1;
+        int endRange = ((schedule.getWeekNumber()) * 7);
         if (dom >= rangeStart && dom < (endRange + 1)) {
             if (dow == schedule.getDayNumber()) {
                 GregorianCalendar potentialStartTime = new GregorianCalendar(
