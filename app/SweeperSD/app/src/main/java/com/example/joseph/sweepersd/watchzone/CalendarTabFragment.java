@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
-import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
@@ -25,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class CalendarTabFragment extends TabFragment {
 
@@ -91,17 +92,6 @@ public class CalendarTabFragment extends TabFragment {
         }
     }
 
-    public void removeWatchZone(Long watchZoneUid) {
-        if (mWatchZones.containsKey(watchZoneUid)) {
-            WatchZonePresenter presenter = mWatchZones.get(watchZoneUid);
-            if (presenter != null) {
-                WatchZoneModelRepository.getInstance(getContext()).removeObserver(presenter.watchZoneLimitsObserver);
-            }
-
-            mWatchZones.remove(watchZoneUid);
-        }
-    }
-
     private void createPresenter(final Long watchZoneUid) {
         final WatchZonePresenter presenter = new WatchZonePresenter();
         presenter.sweepingDates = new HashMap<>();
@@ -111,12 +101,19 @@ public class CalendarTabFragment extends TabFragment {
             public void onLimitsChanged(Map<Long, WatchZoneLimitModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
-                    WatchZoneLimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
-                            .get(uid);
-                    List<Date> dates = presenter.sweepingDates.remove(model);
-                    if (dates != null) {
-                        for (Date date : dates) {
-                            mCaldroidFragment.clearBackgroundDrawableForDate(date);
+                    WatchZoneLimitModel removedModel = null;
+                    for (WatchZoneLimitModel model : presenter.sweepingDates.keySet()) {
+                        if (model.getLimitUid() == uid) {
+                            removedModel = model;
+                            break;
+                        }
+                    }
+                    if (removedModel != null) {
+                        List<Date> dates = presenter.sweepingDates.remove(removedModel);
+                        if (dates != null) {
+                            for (Date date : dates) {
+                                mCaldroidFragment.clearBackgroundDrawableForDate(date);
+                            }
                         }
                     }
                 }
@@ -192,7 +189,15 @@ public class CalendarTabFragment extends TabFragment {
             }
             @Override
             public void onDataInvalid() {
-
+                Set<WatchZoneLimitModel> invalidModels = new HashSet<>(presenter.sweepingDates.keySet());
+                for (WatchZoneLimitModel model : invalidModels) {
+                    List<Date> dates = presenter.sweepingDates.remove(model);
+                    if (dates != null) {
+                        for (Date date : dates) {
+                            mCaldroidFragment.clearBackgroundDrawableForDate(date);
+                        }
+                    }
+                }
             }
         });
         WatchZoneModelRepository.getInstance(getActivity()).observe(getActivity(),

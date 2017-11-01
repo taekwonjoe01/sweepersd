@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,21 +90,6 @@ public class LimitsTabFragment extends TabFragment {
         }
     }
 
-    public void removeWatchZone(Long watchZoneUid) {
-        if (mWatchZones.containsKey(watchZoneUid)) {
-            WatchZonePresenter presenter = mWatchZones.get(watchZoneUid);
-            if (presenter != null) {
-                for (Long uid : presenter.limitsObserver.getLimitModels().keySet()) {
-                    WatchZoneLimitModel limitModel = presenter.limitsObserver.getLimitModels().get(uid);
-                    mAdapter.removeLimitModel(limitModel);
-                }
-                WatchZoneModelRepository.getInstance(getContext()).removeObserver(presenter.limitsObserver);
-            }
-
-            mWatchZones.remove(watchZoneUid);
-        }
-    }
-
     private void createPresenter(final Long watchZoneUid) {
         final WatchZonePresenter presenter = new WatchZonePresenter();
         presenter.limitsObserver = new WatchZoneLimitsObserver(watchZoneUid,
@@ -114,7 +98,7 @@ public class LimitsTabFragment extends TabFragment {
             public void onLimitsChanged(Map<Long, WatchZoneLimitModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
-                    mAdapter.removeLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
+                    mAdapter.removeLimitModel(uid);
                 }
                 for (Long uid : changeSet.changedLimits) {
                     mAdapter.updateLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
@@ -133,10 +117,7 @@ public class LimitsTabFragment extends TabFragment {
 
             @Override
             public void onDataInvalid() {
-                for (Long uid : presenter.limitsObserver.getLimitModels().keySet()) {
-                    WatchZoneLimitModel limitModel = presenter.limitsObserver.getLimitModels().get(uid);
-                    mAdapter.removeLimitModel(limitModel);
-                }
+                mAdapter.removeAll();
             }
         });
         WatchZoneModelRepository.getInstance(getContext()).observe(this, presenter.limitsObserver);

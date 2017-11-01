@@ -107,7 +107,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mPlaceFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                Log.e("Joey", "onPlaceSelected");
                 setCurrentZone(place.getAddress().toString(), place.getLatLng(),
                         true);
             }
@@ -244,7 +243,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             return;
         }
         mLatLng = latLng;
-        Log.e("Joey", "setCurrentZone");
 
         if (address == null) {
             address = LocationUtils.getAddressForLatLnt(
@@ -271,29 +269,23 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
 
         if (animateCamera) {
-            Log.e("Joey", "animating " + mCurrentRadius);
             LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
             LatLng southWest = SphericalUtil.computeOffset(center,
                     mCurrentRadius * Math.sqrt(2), 225);
             LatLng northEast = SphericalUtil.computeOffset(center,
                     mCurrentRadius * Math.sqrt(2), 45);
-            Log.e("Joey", "sw " + southWest.latitude + " " + southWest.longitude);
-            Log.e("Joey", "ne " + northEast.latitude + " " + northEast.longitude);
             LatLngBounds bounds = new LatLngBounds(southWest, northEast);
             mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 10));
             mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
 
         if (mCurrentWatchZoneUid == 0L) {
-            Log.e("Joey", "creating " + mCurrentLabel + " " + mCurrentLatitude + " " +  mCurrentLongitude + " " + mCurrentRadius);
             mCurrentWatchZoneUid = WatchZoneModelRepository.getInstance(this).createWatchZone(mCurrentLabel,
                     mCurrentLatitude, mCurrentLongitude, mCurrentRadius);
-            Log.e("Joey", "created " + mCurrentWatchZoneUid);
             mMapFragment.addWatchZone(mCurrentWatchZoneUid);
             mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
             mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
         } else {
-            Log.e("Joey", "updating");
             WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
                     .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
                             mCurrentLatitude, mCurrentLongitude, mCurrentRadius,

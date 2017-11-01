@@ -50,6 +50,8 @@ public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, Wat
                     mLimitModels = limitModels;
                 }
                 return limitModels;
+            } else if (mLimitModels != null) {
+                return mLimitModels;
             }
         }
         return null;

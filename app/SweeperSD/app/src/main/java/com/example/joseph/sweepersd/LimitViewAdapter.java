@@ -2,6 +2,7 @@ package com.example.joseph.sweepersd;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +15,10 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.ViewHolder> {
     private static final String TAG = LimitViewAdapter.class.getSimpleName();
@@ -34,15 +37,31 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         }
     }
 
-    public void removeLimitModel(WatchZoneLimitModel limitModel) {
-        if (mMap.containsKey(limitModel)) {
+    public void removeLimitModel(Long uid) {
+        WatchZoneLimitModel removedModel = null;
+        for (WatchZoneLimitModel model : mMap.keySet()) {
+            if (model.getLimitUid() == uid) {
+                removedModel = model;
+                break;
+            }
+        }
+        if (removedModel != null) {
+            removeSignsForModel(removedModel);
+        }
+    }
 
+    public void removeAll() {
+        Log.e("Joey", "removing all");
+        Set<WatchZoneLimitModel> models = new HashSet<>(mMap.keySet());
+        for (WatchZoneLimitModel model : models) {
+            removeSignsForModel(model);
         }
     }
 
     public void updateLimitModel(WatchZoneLimitModel limitModel) {
         if (mMap.containsKey(limitModel)) {
-
+            removeSignsForModel(limitModel);
+            addSignsForModel(limitModel);
         }
     }
 
@@ -138,6 +157,7 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     }
 
     private void removeSignsForModel(WatchZoneLimitModel limitModel) {
+        Log.e("Joey", "removing signs for model");
         List<PostedSign> signs = mMap.remove(limitModel);
         if (signs != null && !signs.isEmpty()) {
             int indexOfFirst = mPostedSigns.indexOf(signs.get(0));

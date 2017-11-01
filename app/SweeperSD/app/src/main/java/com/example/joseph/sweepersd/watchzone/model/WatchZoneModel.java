@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -289,6 +290,7 @@ public class WatchZoneModel extends LiveData<WatchZoneModel> {
         for (Long toRemoveUid : limitsToRemove) {
             WatchZoneLimitModel model = mWatchZoneLimitModelMap.get(toRemoveUid);
             model.removeObserver(mWatchZoneLimitModelObserver);
+            Log.e("Joey", "Removing limitModels");
             mWatchZoneLimitModelMap.remove(toRemoveUid);
         }
 
