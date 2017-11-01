@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.scheduling.ScheduleJob;
 
@@ -34,7 +33,6 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         public void onChanged(@Nullable final List<WatchZone> watchZones) {
             // In this observer, we are only detecting insertions or deletions. Changes to the
             // models themselves are handled in the WatchZoneModels.
-            Log.e("Joey", "onChanged");
             List<Long> existingWatchZones = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
             Set<Long> deletedWatchZones = new HashSet<>(mWatchZoneModelsMap.keySet());
             for (Long uid : existingWatchZones) {
@@ -45,7 +43,6 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
             }
             for (Long deletedUid : deletedWatchZones) {
                 WatchZoneModel deletedModel = mWatchZoneModelsMap.remove(deletedUid);
-                Log.e("Joey", "Deleting watch zone " + deletedUid);
                 if (deletedModel != null) {
                     deletedModel.removeObserver(mWatchZoneModelObserver);
                 }

@@ -2,7 +2,6 @@ package com.example.joseph.sweepersd;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +50,6 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     }
 
     public void removeAll() {
-        Log.e("Joey", "removing all");
         Set<WatchZoneLimitModel> models = new HashSet<>(mMap.keySet());
         for (WatchZoneLimitModel model : models) {
             removeSignsForModel(model);
@@ -157,7 +155,6 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     }
 
     private void removeSignsForModel(WatchZoneLimitModel limitModel) {
-        Log.e("Joey", "removing signs for model");
         List<PostedSign> signs = mMap.remove(limitModel);
         if (signs != null && !signs.isEmpty()) {
             int indexOfFirst = mPostedSigns.indexOf(signs.get(0));

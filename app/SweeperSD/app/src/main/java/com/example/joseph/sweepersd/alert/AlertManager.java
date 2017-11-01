@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
@@ -80,11 +79,8 @@ public class AlertManager {
         }
         if (!currentLabels.isEmpty() || !upcomingLabels.isEmpty()) {
             if (upcomingLabels.isEmpty()) {
-                if (currentLabels.size() <= 2) {
+                if (currentLabels.size() == 1) {
                     String message = "Current Sweeping at " + currentLabels.get(0);
-                    if (currentLabels.size() == 2) {
-                        message += "\nCurrent Sweeping at " + currentLabels.get(1);
-                    }
                     sendNotification(message);
                 } else {
                     String message = "Current Sweeping at " + currentLabels.size() + " zones.";
@@ -98,14 +94,11 @@ public class AlertManager {
                     message += "Current Sweeping at " + currentLabels.size() + " zones.";
                 }
                 if (currentLabels.isEmpty()) {
-                    message += "Upcoming Sweeping at " + upcomingLabels.get(0);
-                    if (upcomingLabels.size() == 2) {
-                        message += "\nUpcoming Sweeping at " + upcomingLabels.get(1);
+                    if (upcomingLabels.size() == 1) {
+                        message += "Upcoming Sweeping at " + upcomingLabels.get(0);
                     } else if (!upcomingLabels.isEmpty()) {
-                        message += "\nand " + upcomingLabels.size() + " other zones.";
+                        message += "Upcoming sweeping at " + upcomingLabels.size() + " zones.";
                     }
-                } else if (!upcomingLabels.isEmpty()) {
-                    message += "\nUpcoming Sweeping at " + upcomingLabels.get(0);
                 }
                 sendNotification(message);
             }

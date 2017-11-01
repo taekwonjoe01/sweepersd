@@ -16,7 +16,6 @@ import android.util.Log;
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.LocationUtils;
-import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 
 import java.util.ArrayList;
@@ -139,7 +138,7 @@ public class AddressValidatorJob extends JobService {
                     updatedLimit.setAddressValidatedTimestamp(timestamp);
                 }
                 limitDao.updateLimits(updatedLimits);
-                Log.d(TAG, "Updated limit database.");
+                Log.d(TAG, "Updated limit database with " + updatedLimits.size() + " limits.");
 
                 if (!mIsCancelled.get()) {
                     postFinished();
