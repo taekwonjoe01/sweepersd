@@ -13,6 +13,9 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public interface LimitDao {
+    @Query("SELECT * from limits WHERE isPosted IS 1 LIMIT 999")
+    LiveData<List<LimitModel>> loadLimitModels();
+
     @Query("SELECT * FROM limits")
     LiveData<List<Limit>> getAllLimitsLiveData();
 

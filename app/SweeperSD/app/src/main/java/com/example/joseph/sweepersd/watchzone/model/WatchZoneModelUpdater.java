@@ -51,13 +51,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mRepositoryObserver = new Observer<WatchZoneModelRepository>() {
             @Override
             public void onChanged(@Nullable WatchZoneModelRepository repository) {
-                invalidate(repository);
+                //invalidate(repository);
             }
         };
         mLimitObserver = new Observer<List<Limit>>() {
             @Override
             public void onChanged(@Nullable List<Limit> limits) {
-                invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
+                //invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
             }
         };
         mExplorerUidLiveData = new LongPreferenceLiveData(mApplicationContext,
@@ -65,7 +65,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mExplorerUidObserver = new Observer<Long>() {
             @Override
             public void onChanged(@Nullable Long aLong) {
-                invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
+                //invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
             }
         };
     }
@@ -105,8 +105,8 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     @Override
     protected synchronized void onActive() {
-        mLimits = LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData();
-        mLimits.observeForever(mLimitObserver);
+        //mLimits = LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData();
+        //mLimits.observeForever(mLimitObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).observeForever(mRepositoryObserver);
         mExplorerUidLiveData.observeForever(mExplorerUidObserver);
     }

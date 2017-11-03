@@ -3,7 +3,10 @@ package com.example.joseph.sweepersd.limit;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.Relation;
 import android.text.TextUtils;
+
+import java.util.List;
 
 @Entity(tableName = "limits")
 public class Limit {

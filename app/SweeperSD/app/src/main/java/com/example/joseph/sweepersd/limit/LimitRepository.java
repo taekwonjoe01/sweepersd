@@ -19,7 +19,7 @@ public class LimitRepository {
     private static MutableLiveData<LimitRepository> sInstance = new MutableLiveData<>();
     private Context mContext;
 
-    private final LiveData<List<Limit>> mCachedPostedLimitsLiveData;
+    private final LiveData<List<LimitModel>> mCachedPostedLimitsLiveData;
     private final Map<Long, LiveData<List<LimitSchedule>>> mCachedLimitSchedulesLiveData;
     private final Map<Long, LiveData<Limit>> mCachedLimitsLiveData;
 
@@ -79,7 +79,7 @@ public class LimitRepository {
         }
     }
 
-    public synchronized LiveData<List<Limit>> getPostedLimitsLiveData() {
+    public synchronized LiveData<List<LimitModel>> getPostedLimitsLiveData() {
         return mCachedPostedLimitsLiveData;
     }
 
@@ -105,10 +105,10 @@ public class LimitRepository {
         return limitDao.getAllByStreet(street);
     }
 
-    private LiveData<List<Limit>> loadPostedLimitsLiveDataFromDb() {
+    private LiveData<List<LimitModel>> loadPostedLimitsLiveDataFromDb() {
         LimitDao limitDao = AppDatabase.getInstance(mContext).limitDao();
 
-        return limitDao.getAllPostedLimitsLiveData();
+        return limitDao.loadLimitModels();
     }
 
     private LiveData<List<LimitSchedule>> loadLimitSchedulesLiveDataFromDb(Long limitUid) {
