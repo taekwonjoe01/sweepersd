@@ -44,11 +44,11 @@ dependencies {
     androidTestCompile 'com.android.support:support-annotations:26.1.0'
     androidTestCompile 'com.android.support.test:runner:1.0.1'
     androidTestCompile 'com.android.support.test:rules:1.0.1'
-    implementation 'android.arch.lifecycle:runtime:1.0.3'
-    implementation 'android.arch.lifecycle:extensions:1.0.0-alpha9-1'
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha9-1"
-    implementation 'android.arch.persistence.room:runtime:1.0.0-alpha9-1'
-    annotationProcessor "android.arch.persistence.room:compiler:1.0.0-alpha9-1"
+    implementation 'android.arch.lifecycle:runtime:1.0.0-rc1'
+    implementation 'android.arch.lifecycle:extensions:1.0.0-rc1'
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-rc1"
+    implementation 'android.arch.persistence.room:runtime:1.0.0-rc1'
+    annotationProcessor "android.arch.persistence.room:compiler:1.0.0-rc1"
 
     // Required for Sliding drawer from bottom of screen
     compile 'com.sothree.slidinguppanel:library:3.4.0'
