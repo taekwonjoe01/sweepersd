@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.watchzone.model;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.text.TextUtils;
 
@@ -27,7 +28,7 @@ public class WatchZonePoint {
     @ColumnInfo(name = "limitId")
     private long limitId;
 
-    @ColumnInfo(name = "watchZoneId")
+    @ColumnInfo(name = "watchZoneId", index = true)
     private long watchZoneId;
 
     @ColumnInfo(name = "watchZoneUpdatedTimestampMs")

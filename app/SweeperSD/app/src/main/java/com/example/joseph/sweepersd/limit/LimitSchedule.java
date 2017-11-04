@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.limit;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
@@ -33,7 +34,7 @@ public class LimitSchedule {
         return uid;
     }
 
-    void setUid(long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
@@ -57,23 +58,23 @@ public class LimitSchedule {
         return limitId;
     }
 
-    void setStartHour(int startHour) {
+    public void setStartHour(int startHour) {
         this.startHour = startHour;
     }
 
-    void setEndHour(int endHour) {
+    public void setEndHour(int endHour) {
         this.endHour = endHour;
     }
 
-    void setDayNumber(int dayNumber) {
+    public void setDayNumber(int dayNumber) {
         this.dayNumber = dayNumber;
     }
 
-    void setWeekNumber(int weekNumber) {
+    public void setWeekNumber(int weekNumber) {
         this.weekNumber = weekNumber;
     }
 
-    void setLimitId(long limitId) {
+    public void setLimitId(long limitId) {
         this.limitId = limitId;
     }
 

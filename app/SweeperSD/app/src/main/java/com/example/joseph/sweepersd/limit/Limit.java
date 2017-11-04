@@ -55,15 +55,15 @@ public class Limit {
         return addressValidatedTimestamp;
     }
 
-    void setUid(long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
-    void setAddressValidatedTimestamp(long addressValidatedTimestamp) {
+    public void setAddressValidatedTimestamp(long addressValidatedTimestamp) {
         this.addressValidatedTimestamp = addressValidatedTimestamp;
     }
 
-    void setStreet(String street) {
+    public void setStreet(String street) {
         this.street = street;
     }
 
@@ -71,15 +71,15 @@ public class Limit {
         this.startRange = startRange;
     }
 
-    void setEndRange(int endRange) {
+    public void setEndRange(int endRange) {
         this.endRange = endRange;
     }
 
-    void setRawLimitString(String rawLimitString) {
+    public void setRawLimitString(String rawLimitString) {
         this.rawLimitString = rawLimitString;
     }
 
-    void setPosted(boolean posted) {
+    public void setPosted(boolean posted) {
         this.isPosted = posted;
     }
 
