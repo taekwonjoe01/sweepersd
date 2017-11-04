@@ -3,7 +3,6 @@ package com.example.joseph.sweepersd.watchzone.model;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
-import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.text.TextUtils;
 
@@ -62,31 +61,31 @@ public class WatchZonePoint {
         return watchZoneUpdatedTimestampMs;
     }
 
-    void setUid(long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
-    void setLongitude(double longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
-    void setLatitude(double latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    void setAddress(String address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
-    void setLimitId(long limitId) {
+    public void setLimitId(long limitId) {
         this.limitId = limitId;
     }
 
-    void setWatchZoneId(long watchZoneId) {
+    public void setWatchZoneId(long watchZoneId) {
         this.watchZoneId = watchZoneId;
     }
 
-    void setWatchZoneUpdatedTimestampMs(long timestamp) {
+    public void setWatchZoneUpdatedTimestampMs(long timestamp) {
         watchZoneUpdatedTimestampMs = timestamp;
     }
 

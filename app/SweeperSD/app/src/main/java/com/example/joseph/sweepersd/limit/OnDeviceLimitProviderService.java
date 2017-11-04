@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -189,8 +188,8 @@ public class OnDeviceLimitProviderService extends IntentService {
             preferences.edit().putBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, true).commit();
 
             // Any existing WatchZones need to be updated!
-            WatchZoneRepository watchZoneRepository = WatchZoneRepository.getInstance(this);
-            watchZoneRepository.triggerRefreshAll();
+            /*WatchZoneRepository watchZoneRepository = WatchZoneRepository.getInstance(this);
+            watchZoneRepository.triggerRefreshAll();*/
         }
     }
 }

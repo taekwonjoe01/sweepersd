@@ -72,35 +72,35 @@ public class WatchZone {
         return remindPolicy;
     }
 
-    void setUid(long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
-    void setLabel(String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
-    void setCenterLatitude(double centerLatitude) {
+    public void setCenterLatitude(double centerLatitude) {
         this.centerLatitude = centerLatitude;
     }
 
-    void setCenterLongitude(double centerLongitude) {
+    public void setCenterLongitude(double centerLongitude) {
         this.centerLongitude = centerLongitude;
     }
 
-    void setRadius(int radius) {
+    public void setRadius(int radius) {
         this.radius = radius;
     }
 
-    void setLastSweepingUpdated(long lastSweepingUpdated) {
+    public void setLastSweepingUpdated(long lastSweepingUpdated) {
         this.lastSweepingUpdated = lastSweepingUpdated;
     }
 
-    void setRemindRange(int remindRange) {
+    public void setRemindRange(int remindRange) {
         this.remindRange = remindRange;
     }
 
-    void setRemindPolicy(int remindPolicy) {
+    public void setRemindPolicy(int remindPolicy) {
         this.remindPolicy = remindPolicy;
     }
 
