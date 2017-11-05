@@ -1,17 +1,20 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
+import com.example.joseph.sweepersd.limit.LimitModel;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneLimitModel>> {
+public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, LimitModel>, ZoneModel> {
     final Long mWatchZoneUid;
     private final WatchZoneLimitsChangedCallback mCallback;
 
-    protected Map<Long, WatchZoneLimitModel> mLimitModels;
+    protected Map<Long, LimitModel> mLimitModels;
 
-    public interface WatchZoneLimitsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, WatchZoneLimitModel>> {
-        void onLimitsChanged(Map<Long, WatchZoneLimitModel> data, ChangeSet changeSet);
+    public interface WatchZoneLimitsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, LimitModel>> {
+        void onLimitsChanged(Map<Long, LimitModel> data, ChangeSet changeSet);
     }
 
     public WatchZoneLimitsObserver(Long watchZoneUid, WatchZoneLimitsChangedCallback callback) {
@@ -21,44 +24,31 @@ public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, Wat
     }
 
     @Override
-    boolean isValid(WatchZoneModelRepository watchZoneModelRepository) {
-        return watchZoneModelRepository.watchZoneExists(mWatchZoneUid);
+    boolean isValid(ZoneModel zoneModel) {
+        return zoneModel != null;
     }
 
     @Override
-    Map<Long, WatchZoneLimitModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
-        WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
-        if (model != null) {
-            Map<Long, WatchZoneLimitModel> limitModels = new HashMap<>(model.getWatchZoneLimitModelMap());
-            boolean ready = true;
-            for (Long uid : limitModels.keySet()) {
-                WatchZoneLimitModel limitModel = limitModels.get(uid);
-                if (limitModel == null) {
-                    ready = false;
-                    break;
-
-                } else {
-                    if (limitModel.getLimitSchedulesModel() == null ||
-                            limitModel.getLimitSchedulesModel().getScheduleMap() == null) {
-                        ready = false;
-                        break;
+    Map<Long, LimitModel> getData(ZoneModel zoneModel) {
+        HashMap<Long, LimitModel> results = new HashMap<>();
+        for (PointModel point : zoneModel.points) {
+            List<LimitModel> models = point.limitModels;
+            if (models != null && !models.isEmpty()) {
+                for (LimitModel model : models) {
+                    if (!results.containsKey(model.limit.getUid())) {
+                        results.put(model.limit.getUid(), model);
                     }
                 }
             }
-            if (ready) {
-                if (mLimitModels == null) {
-                    mLimitModels = limitModels;
-                }
-                return limitModels;
-            } else if (mLimitModels != null) {
-                return mLimitModels;
-            }
         }
-        return null;
+        if (mLimitModels == null) {
+            mLimitModels = results;
+        }
+        return results;
     }
 
     @Override
-    void onRepositoryChanged(final Map<Long, WatchZoneLimitModel> limitModels) {
+    void onPossibleChangeDetected(Map<Long, LimitModel> limitModels) {
         ChangeSet changeSet = new ChangeSet();
         changeSet.addedLimits = new ArrayList<>();
         changeSet.changedLimits = new ArrayList<>();
@@ -68,8 +58,8 @@ public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, Wat
             if (!mLimitModels.containsKey(uid)) {
                 changeSet.addedLimits.add(uid);
             } else {
-                WatchZoneLimitModel curModel = mLimitModels.get(uid);
-                WatchZoneLimitModel newModel = limitModels.get(uid);
+                LimitModel curModel = mLimitModels.get(uid);
+                LimitModel newModel = limitModels.get(uid);
                 if (curModel.isChanged(newModel)) {
                     changeSet.changedLimits.add(uid);
                 }
@@ -80,7 +70,7 @@ public class WatchZoneLimitsObserver extends WatchZoneBaseObserver<Map<Long, Wat
         mCallback.onLimitsChanged(mLimitModels, changeSet);
     }
 
-    public Map<Long, WatchZoneLimitModel> getLimitModels() {
+    public Map<Long, LimitModel> getLimitModels() {
         return mLimitModels;
     }
 }

@@ -1,15 +1,13 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.util.Log;
-
-public class WatchZoneModelObserver extends WatchZoneBaseObserver<WatchZoneModel> {
+public class WatchZoneModelObserver extends WatchZoneBaseObserver<WatchZone, ZoneModel> {
     private final Long mWatchZoneUid;
     private final WatchZoneModelChangedCallback mCallback;
 
-    protected WatchZoneModel mWatchZoneModel;
+    protected WatchZone mWatchZone;
 
-    public interface WatchZoneModelChangedCallback extends WatchZoneBaseObserverCallback<WatchZoneModel> {
-        void onWatchZoneModelChanged(WatchZoneModel model);
+    public interface WatchZoneModelChangedCallback extends WatchZoneBaseObserverCallback<WatchZone> {
+        void onWatchZoneModelChanged(WatchZone watchZone);
     }
 
     public WatchZoneModelObserver(Long watchZoneUid, WatchZoneModelChangedCallback callback) {
@@ -19,30 +17,28 @@ public class WatchZoneModelObserver extends WatchZoneBaseObserver<WatchZoneModel
     }
 
     @Override
-    boolean isValid(WatchZoneModelRepository watchZoneModelRepository) {
-        return watchZoneModelRepository.watchZoneExists(mWatchZoneUid);
+    boolean isValid(ZoneModel zoneModel) {
+        return zoneModel != null;
     }
 
     @Override
-    WatchZoneModel getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
-        WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
-        if (model != null) {
-            if (model.getStatus() != WatchZoneModel.Status.LOADING) {
-                if (mWatchZoneModel == null) {
-                    mWatchZoneModel = model;
-                }
-                return model;
-            }
+    WatchZone getData(ZoneModel zoneModel) {
+        if (mWatchZone == null) {
+            mWatchZone = zoneModel.watchZone;
         }
-        return null;
+        return zoneModel.watchZone;
     }
 
     @Override
-    void onRepositoryChanged(final WatchZoneModel watchZoneModel) {
-        mCallback.onWatchZoneModelChanged(mWatchZoneModel);
+    void onPossibleChangeDetected(WatchZone watchZone) {
+        boolean isChanged = mWatchZone.isChanged(watchZone);
+        mWatchZone = watchZone;
+        if (isChanged) {
+            mCallback.onWatchZoneModelChanged(mWatchZone);
+        }
     }
 
-    public WatchZoneModel getWatchZoneModel() {
-        return mWatchZoneModel;
+    public WatchZone getWatchZone() {
+        return mWatchZone;
     }
 }

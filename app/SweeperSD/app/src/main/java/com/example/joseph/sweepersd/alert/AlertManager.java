@@ -12,8 +12,8 @@ import com.example.joseph.sweepersd.utils.Notifications;
 import com.example.joseph.sweepersd.watchzone.UserZonesActivity;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -30,17 +30,17 @@ public class AlertManager {
         mApplicationContext = context.getApplicationContext();
     }
 
-    public void updateAlertNotification(List<WatchZoneModel> models, List<WatchZoneFence> fences) {
+    public void updateAlertNotification(List<ZoneModel> models, List<WatchZoneFence> fences) {
         List<String> currentLabels = new ArrayList<>();
         List<String> upcomingLabels = new ArrayList<>();
-        for (WatchZoneModel model : models) {
+        for (ZoneModel model : models) {
             boolean isInBounds = false;
-            if (model.getWatchZone().getRemindPolicy() == WatchZone.REMIND_POLICY_ANYWHERE) {
+            if (model.watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_ANYWHERE) {
                 isInBounds = true;
-            } else if (model.getWatchZone().getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
+            } else if (model.watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
                 WatchZoneFence fence = null;
                 for (WatchZoneFence f : fences) {
-                    if (f.getWatchZoneId() == model.getWatchZoneUid()) {
+                    if (f.getWatchZoneId() == model.watchZone.getUid()) {
                         fence = f;
                     }
                 }
@@ -56,7 +56,7 @@ public class AlertManager {
                     List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
                     long now = new GregorianCalendar(
                             TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
-                    long startOffset = WatchZoneUtils.getStartHourOffset(model.getWatchZone());
+                    long startOffset = WatchZoneUtils.getStartHourOffset(model.watchZone);
                     for (LimitScheduleDate date : sweepingDates) {
                         long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
                         long startTime = date.getStartCalendar().getTime().getTime();
@@ -69,10 +69,10 @@ public class AlertManager {
                     }
 
                     if (currentSweeping.size() > 0) {
-                        currentLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
+                        currentLabels.add(WordUtils.capitalize(model.watchZone.getLabel()));
                     }
                     if (upcomingSweeping.size() > 0) {
-                        upcomingLabels.add(WordUtils.capitalize(model.getWatchZone().getLabel()));
+                        upcomingLabels.add(WordUtils.capitalize(model.watchZone.getLabel()));
                     }
                 }
             }

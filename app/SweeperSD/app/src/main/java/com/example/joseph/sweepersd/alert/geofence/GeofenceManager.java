@@ -10,7 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.PendingIntents;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
@@ -30,7 +30,7 @@ public class GeofenceManager {
         mApplicationContext = context.getApplicationContext();
     }
 
-    public void updateGeofences(List<WatchZoneModel> models) {
+    public void updateGeofences(List<ZoneModel> models) {
         WatchZoneFenceDao dao = AppDatabase.getInstance(mApplicationContext).watchZoneFenceDao();
         List<WatchZoneFence> watchZoneFences = dao.getAllGeofences();
 
@@ -40,20 +40,20 @@ public class GeofenceManager {
         }
 
         Set<Long> orphans = new HashSet<>(existingGeofences.keySet());
-        List<WatchZoneModel> newModels = new ArrayList<>();
-        for (WatchZoneModel model : models) {
-            orphans.remove(model.getWatchZoneUid());
-            if (!existingGeofences.containsKey(model.getWatchZoneUid())
-                    && model.getWatchZone().getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
+        List<ZoneModel> newModels = new ArrayList<>();
+        for (ZoneModel model : models) {
+            orphans.remove(model.watchZone.getUid());
+            if (!existingGeofences.containsKey(model.watchZone.getUid())
+                    && model.watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
                 newModels.add(model);
-            } else if (existingGeofences.containsKey(model.getWatchZoneUid())){
-                WatchZoneFence watchZoneFence = existingGeofences.get(model.getWatchZoneUid());
-                WatchZone watchZone = model.getWatchZone();
+            } else if (existingGeofences.containsKey(model.watchZone.getUid())){
+                WatchZoneFence watchZoneFence = existingGeofences.get(model.watchZone.getUid());
+                WatchZone watchZone = model.watchZone;
                 if (watchZoneFence.getCenterLatitude() != watchZone.getCenterLatitude() ||
                         watchZoneFence.getCenterLongitude() != watchZoneFence.getCenterLongitude()
                         || watchZoneFence.getRadius() != watchZone.getRadius() ||
                         watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_ANYWHERE) {
-                    orphans.add(model.getWatchZoneUid());
+                    orphans.add(model.watchZone.getUid());
                     if (watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
                         newModels.add(model);
                     }
@@ -70,16 +70,16 @@ public class GeofenceManager {
                 dao.delete(watchZoneFence);
                 existingGeofences.remove(orphaned);
             }
-            for (WatchZoneModel model : newModels) {
+            for (ZoneModel model : newModels) {
                 WatchZoneFence newWatchZoneFence = new WatchZoneFence();
-                newWatchZoneFence.setWatchZoneId(model.getWatchZoneUid());
+                newWatchZoneFence.setWatchZoneId(model.watchZone.getUid());
                 newWatchZoneFence.setInRegion(false);
-                newWatchZoneFence.setCenterLatitude(model.getWatchZone().getCenterLatitude());
-                newWatchZoneFence.setCenterLongitude(model.getWatchZone().getCenterLongitude());
-                newWatchZoneFence.setRadius(model.getWatchZone().getRadius());
+                newWatchZoneFence.setCenterLatitude(model.watchZone.getCenterLatitude());
+                newWatchZoneFence.setCenterLongitude(model.watchZone.getCenterLongitude());
+                newWatchZoneFence.setRadius(model.watchZone.getRadius());
                 long uid = dao.insertGeofence(newWatchZoneFence);
                 newWatchZoneFence.setUid(uid);
-                existingGeofences.put(model.getWatchZoneUid(), newWatchZoneFence);
+                existingGeofences.put(model.watchZone.getUid(), newWatchZoneFence);
             }
 
             List<com.google.android.gms.location.Geofence> gmsFences = new ArrayList<>();

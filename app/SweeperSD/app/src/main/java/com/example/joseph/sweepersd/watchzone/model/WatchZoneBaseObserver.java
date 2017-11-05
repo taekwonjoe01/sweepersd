@@ -5,17 +5,13 @@ import android.support.annotation.Nullable;
 
 import java.util.List;
 
-/**
- * Created by joseph on 10/18/17.
- */
-
-public abstract class WatchZoneBaseObserver<T> implements Observer<WatchZoneModelRepository> {
+public abstract class WatchZoneBaseObserver<T, U> implements Observer<U> {
     private final WatchZoneBaseObserverCallback mCallback;
     private boolean mIsLoaded;
 
-    abstract boolean isValid(WatchZoneModelRepository watchZoneModelRepository);
-    abstract void onRepositoryChanged(T data);
-    abstract T getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository);
+    abstract boolean isValid(U data);
+    abstract void onPossibleChangeDetected(T data);
+    abstract T getData(U data);
 
     public WatchZoneBaseObserver(WatchZoneBaseObserverCallback callback) {
         mCallback = callback;
@@ -34,23 +30,15 @@ public abstract class WatchZoneBaseObserver<T> implements Observer<WatchZoneMode
     }
 
     @Override
-    public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
-        if (!isValid(watchZoneModelRepository)) {
+    public void onChanged(@Nullable U data) {
+        if (!isValid(data)) {
             mCallback.onDataInvalid();
         }
         if (!mIsLoaded) {
-            T data = getDataFromRepo(watchZoneModelRepository);
-            if (data != null) {
-                mIsLoaded = true;
-                mCallback.onDataLoaded(data);
-            }
+            mIsLoaded = true;
+            mCallback.onDataLoaded(getData(data));
         } else if (mIsLoaded) {
-            T data = getDataFromRepo(watchZoneModelRepository);
-            if (data == null) {
-                mCallback.onDataInvalid();
-            } else {
-                onRepositoryChanged(getDataFromRepo(watchZoneModelRepository));
-            }
+            onPossibleChangeDetected(getData(data));
         }
     }
 

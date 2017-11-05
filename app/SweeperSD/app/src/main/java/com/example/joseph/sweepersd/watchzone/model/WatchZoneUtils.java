@@ -1,5 +1,6 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
+import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class WatchZoneUtils {
@@ -279,31 +281,30 @@ public class WatchZoneUtils {
         }
     }
 
-    public static List<LimitScheduleDate> getStartTimeOrderedDatesForWatchZone(WatchZoneModel model) {
+    public static List<LimitScheduleDate> getStartTimeOrderedDatesForWatchZone(ZoneModel model) {
         List<LimitScheduleDate> results = null;
-        if (model.getStatus() == WatchZoneModel.Status.VALID) {
-            results = new ArrayList<>();
+        Map<Long, LimitModel> limitModels = model.getUniqueLimitModels();
+        if (!limitModels.isEmpty()) {
             List<LimitSchedule> allSchedules = new ArrayList<>();
-            for (Long limitUid : model.getWatchZoneLimitModelUids()) {
-                WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
-                allSchedules.addAll(new ArrayList<>(
-                        limitModel.getLimitSchedulesModel().getScheduleMap().values()));
+            for (Long limitUid : limitModels.keySet()) {
+                LimitModel limitModel = limitModels.get(limitUid);
+                allSchedules.addAll(limitModel.schedules);
             }
             results = getStartTimeOrderedDatesForLimitSchedules(allSchedules, true);
         }
         return results;
     }
 
-    public static long getNextEventTimestampForWatchZone(WatchZoneModel model) {
+    public static long getNextEventTimestampForWatchZone(ZoneModel model) {
         long result = -1L;
-        if (model.getStatus() == WatchZoneModel.Status.VALID) {
+        Map<Long, LimitModel> limitModels = model.getUniqueLimitModels();
+        if (!limitModels.isEmpty()) {
             List<LimitSchedule> allSchedules = new ArrayList<>();
-            for (Long limitUid : model.getWatchZoneLimitModelUids()) {
-                WatchZoneLimitModel limitModel = model.getWatchZoneLimitModel(limitUid);
-                allSchedules.addAll(new ArrayList<>(
-                        limitModel.getLimitSchedulesModel().getScheduleMap().values()));
+            for (Long limitUid : limitModels.keySet()) {
+                LimitModel limitModel = limitModels.get(limitUid);
+                allSchedules.addAll(limitModel.schedules);
             }
-            long startOffset = getStartHourOffset(model.getWatchZone());
+            long startOffset = getStartHourOffset(model.watchZone);
             result = getNextEventTimestampForLimitSchedules(allSchedules, startOffset);
         }
         return result;

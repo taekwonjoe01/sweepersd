@@ -8,10 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.joseph.sweepersd.R;
+import com.example.joseph.sweepersd.watchzone.model.PointModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePointsObserver;
 import com.google.android.gms.maps.CameraUpdate;
@@ -100,8 +101,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         point.remove();
                     }
                 }
-                WatchZoneModelRepository.getInstance(getContext()).removeObserver(presenter.watchZoneObserver);
-                WatchZoneModelRepository.getInstance(getContext()).removeObserver(presenter.watchZonePointsObserver);
+                WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid).removeObserver(presenter.watchZoneObserver);
+                WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid).removeObserver(presenter.watchZonePointsObserver);
             }
 
             mWatchZones.remove(watchZoneUid);
@@ -134,10 +135,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void createPresenter(final Long watchZoneUid) {
         final WatchZonePresenter presenter = new WatchZonePresenter();
-        presenter.watchZoneObserver = new WatchZoneObserver(watchZoneUid,
-                new WatchZoneObserver.WatchZoneChangedCallback() {
+        presenter.watchZoneObserver = new WatchZoneModelObserver(watchZoneUid,
+                new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
             @Override
-            public void onWatchZoneChanged(WatchZone watchZone) {
+            public void onWatchZoneModelChanged(WatchZone watchZone) {
                 boolean refreshMap = false;
                 if (presenter.oldWatchZone.getRadius() != watchZone.getRadius() ||
                         presenter.oldWatchZone.getCenterLatitude() != watchZone.getCenterLatitude() ||
@@ -154,7 +155,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             point.remove();
                         }
                     }
-                    WatchZoneModelRepository.getInstance(getContext()).removeObserver(
+                    WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid).removeObserver(
                             presenter.watchZonePointsObserver);
                     createWatchZonePointsObserver(watchZoneUid, presenter);
 
@@ -189,7 +190,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
         createWatchZonePointsObserver(watchZoneUid, presenter);
-        WatchZoneModelRepository.getInstance(getContext()).observe(this, presenter.watchZoneObserver);
+        WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid)
+                .observe(this, presenter.watchZoneObserver);
         mWatchZones.put(watchZoneUid, presenter);
     }
 
@@ -197,7 +199,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         presenter.watchZonePointsObserver = new WatchZonePointsObserver(watchZoneUid,
                 new WatchZonePointsObserver.WatchZonePointsChangedCallback() {
             @Override
-            public void onWatchZonePointsChanged(Map<Long, WatchZonePoint> watchZonePointMap,
+            public void onWatchZonePointsChanged(Map<Long, PointModel> watchZonePointMap,
                                                  WatchZoneBaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
                     Circle circle = presenter.pointsToCircleMap.remove(uid);
@@ -207,7 +209,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     Circle circle = presenter.pointsToCircleMap.remove(uid);
                     circle.remove();
 
-                    WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid);
+                    WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid).point;
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
@@ -216,7 +218,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
                 }
                 for (Long uid : changeSet.addedLimits) {
-                    WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid);
+                    WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid).point;
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
@@ -227,10 +229,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
 
             @Override
-            public void onDataLoaded(Map<Long, WatchZonePoint> watchZonePoints) {
+            public void onDataLoaded(Map<Long, PointModel> watchZonePoints) {
                 presenter.pointsToCircleMap = new HashMap<>();
                 for (Long uid : watchZonePoints.keySet()) {
-                    WatchZonePoint p = watchZonePoints.get(uid);
+                    WatchZonePoint p = watchZonePoints.get(uid).point;
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
@@ -250,7 +252,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         });
-        WatchZoneModelRepository.getInstance(getContext()).observe(this,
+        WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid).observe(this,
                 presenter.watchZonePointsObserver);
     }
 
@@ -259,7 +261,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Circle watchZoneRadius;
         WatchZone oldWatchZone;
         Map<Long, Circle> pointsToCircleMap;
-        WatchZoneObserver watchZoneObserver;
+        WatchZoneModelObserver watchZoneObserver;
         WatchZonePointsObserver watchZonePointsObserver;
     }
 }

@@ -2,15 +2,16 @@ package com.example.joseph.sweepersd.watchzone.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, WatchZoneModel>> {
+public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, ZoneModel>, List<ZoneModel>> {
     private final WatchZoneModelsChangedCallback mCallback;
 
-    protected Map<Long, WatchZoneModel> mWatchZoneModels;
+    protected Map<Long, ZoneModel> mWatchZoneModels;
 
-    public interface WatchZoneModelsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, WatchZoneModel>> {
-        void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet);
+    public interface WatchZoneModelsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, ZoneModel>> {
+        void onModelsChanged(Map<Long, ZoneModel> data, ChangeSet changeSet);
     }
 
     public WatchZoneModelsObserver(WatchZoneModelsChangedCallback callback) {
@@ -19,38 +20,12 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Wat
     }
 
     @Override
-    boolean isValid(WatchZoneModelRepository watchZoneModelRepository) {
-        return true;
+    boolean isValid(List<ZoneModel> data) {
+        return data != null;
     }
 
     @Override
-    Map<Long, WatchZoneModel> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
-        Map<Long, WatchZoneModel> modelMap = new HashMap<>(watchZoneModelRepository.getWatchZoneModels());
-        boolean ready = true;
-        for (Long uid : modelMap.keySet()) {
-            WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(uid);
-            if (model == null) {
-                ready = false;
-                break;
-            } else {
-                if (model.getStatus() == WatchZoneModel.Status.LOADING) {
-                    ready = false;
-                    break;
-                }
-            }
-        }
-        if (ready) {
-            if (mWatchZoneModels == null) {
-                mWatchZoneModels = modelMap;
-            }
-            return modelMap;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    void onRepositoryChanged(final Map<Long, WatchZoneModel> watchZoneModels) {
+    void onPossibleChangeDetected(Map<Long, ZoneModel> watchZoneModels) {
         ChangeSet changeSet = new ChangeSet();
         changeSet.addedLimits = new ArrayList<>();
         changeSet.changedLimits = new ArrayList<>();
@@ -59,6 +34,13 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Wat
             changeSet.removedLimits.remove(uid);
             if (!mWatchZoneModels.containsKey(uid)) {
                 changeSet.addedLimits.add(uid);
+            } else {
+                ZoneModel oldModel = mWatchZoneModels.get(uid);
+                ZoneModel newModel = watchZoneModels.get(uid);
+                Boolean isChanged = oldModel.isChanged(newModel);
+                if (isChanged) {
+                    changeSet.changedLimits.add(uid);
+                }
             }
         }
         mWatchZoneModels = watchZoneModels;
@@ -66,7 +48,19 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Wat
         mCallback.onModelsChanged(mWatchZoneModels, changeSet);
     }
 
-    public Map<Long, WatchZoneModel> getWatchZoneModels() {
+    @Override
+    Map<Long, ZoneModel> getData(List<ZoneModel> data) {
+        HashMap<Long, ZoneModel> results = new HashMap<>();
+        for (ZoneModel model : data) {
+            results.put(model.watchZone.getUid(), model);
+        }
+        if (mWatchZoneModels == null) {
+            mWatchZoneModels = results;
+        }
+        return results;
+    }
+
+    public Map<Long, ZoneModel> getWatchZoneModels() {
         return mWatchZoneModels;
     }
 }

@@ -10,8 +10,8 @@ import android.widget.RadioButton;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
 public class NotificationsTabFragment extends TabFragment {
@@ -27,7 +27,7 @@ public class NotificationsTabFragment extends TabFragment {
 
     private Long mWatchZoneUid = 0L;
 
-    private WatchZoneObserver mWatchZoneObserver;
+    private WatchZoneModelObserver mWatchZoneObserver;
 
     public NotificationsTabFragment() {
     }
@@ -121,15 +121,15 @@ public class NotificationsTabFragment extends TabFragment {
 
     private void setPresentation() {
         if (mWatchZoneObserver != null) {
-            WatchZoneModelRepository.getInstance(getActivity()).removeObserver(mWatchZoneObserver);
+            WatchZoneModelRepository.getInstance(getActivity()).getZoneModelForUid(mWatchZoneUid).removeObserver(mWatchZoneObserver);
         }
 
         setEnabled(false);
 
-        mWatchZoneObserver = new WatchZoneObserver(mWatchZoneUid,
-                new WatchZoneObserver.WatchZoneChangedCallback() {
+        mWatchZoneObserver = new WatchZoneModelObserver(mWatchZoneUid,
+                new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
             @Override
-            public void onWatchZoneChanged(WatchZone watchZone) {
+            public void onWatchZoneModelChanged(WatchZone watchZone) {
                 setPresentation(watchZone);
             }
 
@@ -144,7 +144,7 @@ public class NotificationsTabFragment extends TabFragment {
                 setEnabled(false);
             }
         });
-        WatchZoneModelRepository.getInstance(getActivity()).observe(getActivity(), mWatchZoneObserver);
+        WatchZoneModelRepository.getInstance(getActivity()).getZoneModelForUid(mWatchZoneUid).observe(getActivity(), mWatchZoneObserver);
     }
 
     private void setEnabled(boolean enabled) {

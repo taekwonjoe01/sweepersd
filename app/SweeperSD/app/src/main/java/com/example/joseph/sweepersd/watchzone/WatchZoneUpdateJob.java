@@ -17,12 +17,13 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
-import java.util.List;
 import java.util.Map;
 
 public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
@@ -92,27 +93,28 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                     // Do nothing - just observing so this object comes to life.
                 }
             });
-            WatchZoneModelRepository.getInstance(this).observe(this,
-                    new Observer<WatchZoneModelRepository>() {
-                        @Override
-                public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
+            WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this,
+                    new WatchZoneModelsObserver(new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+                @Override
+                public void onModelsChanged(Map<Long, ZoneModel> data, WatchZoneBaseObserver.ChangeSet changeSet) {
+                }
+
+                @Override
+                public void onDataLoaded(Map<Long, ZoneModel> data) {
                     boolean finished = false;
-                    if (watchZoneModelRepository != null) {
-                        Map<Long, WatchZoneModel> models = watchZoneModelRepository.getWatchZoneModels();
+                    if (data != null) {
+                        Map<Long, ZoneModel> models = data;
                         if (models != null && !models.isEmpty()) {
                             finished = true;
-                            for (Long uid : models.keySet()) {
-                                WatchZoneModel model = models.get(uid);
+                            /*for (Long uid : models.keySet()) {
+                                ZoneModel model = models.get(uid);
                                 if (model == null || model.getStatus() != WatchZoneModel.Status.VALID) {
                                     finished = false;
                                 }
-                            }
+                            }*/
                         }
                     }
                     if (finished) {
-                        Log.i(TAG, "All jobs up-to-date. Finishing job.");
-                        WatchZoneModelRepository.getInstance(WatchZoneUpdateJob.this).removeObserver(this);
-
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
                                 WatchZoneUpdateJob.this);
                         preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
@@ -120,7 +122,12 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                         jobFinished(jobParameters, false);
                     }
                 }
-            });
+
+                @Override
+                public void onDataInvalid() {
+
+                }
+            }));
         } else {
             Log.i(TAG, "No WatchZoneModels, finishing job.");
             jobFinished(jobParameters, false);

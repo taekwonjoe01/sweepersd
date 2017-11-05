@@ -13,7 +13,6 @@ import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.WatchZoneUpdateJob;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
 import java.util.Date;
@@ -99,10 +98,10 @@ public class DebugActivity extends AppCompatActivity {
         mWZMRCacheClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                WatchZoneModelRepository.getInstance(DebugActivity.this).delete();
+                //WatchZoneModelRepository.getInstance(DebugActivity.this).delete();
             }
         });
-        WatchZoneModelRepository.getInstanceLiveData().observe(this, new Observer<WatchZoneModelRepository>() {
+        /*WatchZoneModelRepository.getInstanceLiveData().observe(this, new Observer<WatchZoneModelRepository>() {
             @Override
             public void onChanged(@Nullable WatchZoneModelRepository watchZoneModelRepository) {
                 if (watchZoneModelRepository == null) {
@@ -111,7 +110,8 @@ public class DebugActivity extends AppCompatActivity {
                     mWZMCacheSize.setText("allocated");
                 }
             }
-        });
+        });*/
+        mWZMCacheSize.setText("TODO");
 
         mScheduleAddressValidator.setOnClickListener(new View.OnClickListener() {
             @Override

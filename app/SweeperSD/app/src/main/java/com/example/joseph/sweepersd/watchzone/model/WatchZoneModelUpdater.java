@@ -11,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.limit.Limit;
-import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
@@ -34,7 +33,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final Context mApplicationContext;
     private final HandlerThread mThread;
     private final Handler mHandler;
-    private final Observer<WatchZoneModelRepository> mRepositoryObserver;
+    private final WatchZoneModelsObserver mModelsObserver;
     private final Observer<List<Limit>> mLimitObserver;
     private final LongPreferenceLiveData mExplorerUidLiveData;
     private final Observer<Long> mExplorerUidObserver;
@@ -48,12 +47,22 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mUpdatingWatchZones = new HashMap<>();
-        mRepositoryObserver = new Observer<WatchZoneModelRepository>() {
+        mModelsObserver = new WatchZoneModelsObserver(new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onChanged(@Nullable WatchZoneModelRepository repository) {
-                //invalidate(repository);
+            public void onModelsChanged(Map<Long, ZoneModel> data, WatchZoneBaseObserver.ChangeSet changeSet) {
+
             }
-        };
+
+            @Override
+            public void onDataLoaded(Map<Long, ZoneModel> data) {
+
+            }
+
+            @Override
+            public void onDataInvalid() {
+
+            }
+        });
         mLimitObserver = new Observer<List<Limit>>() {
             @Override
             public void onChanged(@Nullable List<Limit> limits) {
@@ -107,7 +116,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     protected synchronized void onActive() {
         //mLimits = LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData();
         //mLimits.observeForever(mLimitObserver);
-        WatchZoneModelRepository.getInstance(mApplicationContext).observeForever(mRepositoryObserver);
+        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mModelsObserver);
         mExplorerUidLiveData.observeForever(mExplorerUidObserver);
     }
 
@@ -115,7 +124,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     protected synchronized void onInactive() {
         mExplorerUidLiveData.removeObserver(mExplorerUidObserver);
         mLimits.removeObserver(mLimitObserver);
-        WatchZoneModelRepository.getInstance(mApplicationContext).removeObserver(mRepositoryObserver);
+        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mModelsObserver);
         cancelAll();
     }
 
@@ -153,8 +162,8 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(repository.getWatchZoneModels().values());
-        Map<Long, WatchZoneModel> models = repository.getWatchZoneModels();
+        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(/*repository.getWatchZoneModels().values()*/);
+        Map<Long, WatchZoneModel> models = new HashMap<>();//mModelsObserver.getWatchZoneModels();
         for (Long uid : models.keySet()) {
             WatchZoneModel model = models.get(uid);
             if (model != null && model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {

@@ -1,18 +1,17 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, WatchZonePoint>> {
+public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, PointModel>, ZoneModel> {
     private final Long mWatchZoneUid;
     private final WatchZonePointsChangedCallback mCallback;
 
-    protected Map<Long, WatchZonePoint> mWatchZonePoints;
+    protected Map<Long, PointModel> mWatchZonePoints;
 
-    public interface WatchZonePointsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, WatchZonePoint>> {
-        void onWatchZonePointsChanged(Map<Long, WatchZonePoint> watchZonePointMap, ChangeSet changeSet);
+    public interface WatchZonePointsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, PointModel>> {
+        void onWatchZonePointsChanged(Map<Long, PointModel> watchZonePointMap, ChangeSet changeSet);
     }
 
     public WatchZonePointsObserver(Long watchZoneUid, WatchZonePointsChangedCallback callback) {
@@ -22,37 +21,26 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, Wat
     }
 
     @Override
-    boolean isValid(WatchZoneModelRepository watchZoneModelRepository) {
-        return watchZoneModelRepository.watchZoneExists(mWatchZoneUid);
+    boolean isValid(ZoneModel zoneModel) {
+        return zoneModel != null;
     }
 
     @Override
-    Map<Long, WatchZonePoint> getDataFromRepo(WatchZoneModelRepository watchZoneModelRepository) {
-        WatchZoneModel model = watchZoneModelRepository.getWatchZoneModel(mWatchZoneUid);
-        if (model != null) {
-            WatchZonePointsModel pointsModel = model.getWatchZonePointsModel();
-            if (pointsModel != null) {
-                Map<Long, WatchZonePoint> watchZonePoints = pointsModel.getWatchZonePointsMap();
-                if (watchZonePoints != null) {
-                    Map<Long, WatchZonePoint> finishedPoints = new HashMap<>();
-                    for (Long uid : watchZonePoints.keySet()) {
-                        WatchZonePoint p = watchZonePoints.get(uid);
-                        if (p.getAddress() != null) {
-                            finishedPoints.put(uid, p);
-                        }
-                    }
-                    if (mWatchZonePoints == null) {
-                        mWatchZonePoints = finishedPoints;
-                    }
-                    return finishedPoints;
-                }
+    Map<Long, PointModel> getData(ZoneModel zoneModel) {
+        HashMap<Long, PointModel> results = new HashMap<>();
+        for (PointModel model : zoneModel.points) {
+            if (model.point.getAddress() != null) {
+                results.put(model.point.getUid(), model);
             }
         }
-        return null;
+        if (mWatchZonePoints == null) {
+            mWatchZonePoints = results;
+        }
+        return results;
     }
 
     @Override
-    void onRepositoryChanged(final Map<Long, WatchZonePoint> watchZonePoints) {
+    void onPossibleChangeDetected(Map<Long, PointModel> watchZonePoints) {
         ChangeSet changeSet = new ChangeSet();
         changeSet.addedLimits = new ArrayList<>();
         changeSet.changedLimits = new ArrayList<>();
@@ -62,8 +50,8 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, Wat
             if (!mWatchZonePoints.containsKey(uid)) {
                 changeSet.addedLimits.add(uid);
             } else {
-                WatchZonePoint curPoint = mWatchZonePoints.get(uid);
-                WatchZonePoint newPoint = watchZonePoints.get(uid);
+                PointModel curPoint = mWatchZonePoints.get(uid);
+                PointModel newPoint = watchZonePoints.get(uid);
                 if (curPoint.isChanged(newPoint)) {
                     changeSet.changedLimits.add(uid);
                 }
@@ -74,7 +62,7 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, Wat
         mCallback.onWatchZonePointsChanged(mWatchZonePoints, changeSet);
     }
 
-    public Map<Long, WatchZonePoint> getWatchZonePoints() {
+    public Map<Long, PointModel> getWatchZonePoints() {
         return mWatchZonePoints;
     }
 }

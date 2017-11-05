@@ -7,9 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.limit.LimitParser;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,23 +23,23 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     private static final String TAG = LimitViewAdapter.class.getSimpleName();
 
     private List<PostedSign> mPostedSigns;
-    private Map<WatchZoneLimitModel, List<PostedSign>> mMap;
+    private Map<LimitModel, List<PostedSign>> mMap;
 
     public LimitViewAdapter() {
         mPostedSigns = new ArrayList<>();
         mMap = new HashMap<>();
     }
 
-    public void addLimitModel(WatchZoneLimitModel limitModel) {
+    public void addLimitModel(LimitModel limitModel) {
         if (!mMap.containsKey(limitModel)) {
             addSignsForModel(limitModel);
         }
     }
 
     public void removeLimitModel(Long uid) {
-        WatchZoneLimitModel removedModel = null;
-        for (WatchZoneLimitModel model : mMap.keySet()) {
-            if (model.getLimitUid() == uid) {
+        LimitModel removedModel = null;
+        for (LimitModel model : mMap.keySet()) {
+            if (model.limit.getUid() == uid) {
                 removedModel = model;
                 break;
             }
@@ -50,13 +50,13 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
     }
 
     public void removeAll() {
-        Set<WatchZoneLimitModel> models = new HashSet<>(mMap.keySet());
-        for (WatchZoneLimitModel model : models) {
+        Set<LimitModel> models = new HashSet<>(mMap.keySet());
+        for (LimitModel model : models) {
             removeSignsForModel(model);
         }
     }
 
-    public void updateLimitModel(WatchZoneLimitModel limitModel) {
+    public void updateLimitModel(LimitModel limitModel) {
         if (mMap.containsKey(limitModel)) {
             removeSignsForModel(limitModel);
             addSignsForModel(limitModel);
@@ -93,8 +93,11 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         return mPostedSigns.size();
     }
 
-    private void addSignsForModel(WatchZoneLimitModel limitModel) {
-        Map<Long, LimitSchedule> schedules = limitModel.getLimitSchedulesModel().getScheduleMap();
+    private void addSignsForModel(LimitModel limitModel) {
+        Map<Long, LimitSchedule> schedules = new HashMap<>();
+        for (LimitSchedule schedule : limitModel.schedules) {
+            schedules.put(schedule.getUid(), schedule);
+        }
         Map<LimitTuple, List<LimitSchedule>> sortedSchedules = new HashMap<>();
         for (Long uid : schedules.keySet()) {
             LimitSchedule s = schedules.get(uid);
@@ -111,9 +114,9 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         List<PostedSign> signsToAdd = new ArrayList<>();
         for (LimitTuple tuple : sortedSchedules.keySet()) {
             PostedSign newSign = new PostedSign();
-            newSign.startRange = Integer.toString(limitModel.getLimit().getStartRange());
-            newSign.endRange = Integer.toString(limitModel.getLimit().getEndRange());
-            newSign.street = limitModel.getLimit().getStreet();
+            newSign.startRange = Integer.toString(limitModel.limit.getStartRange());
+            newSign.endRange = Integer.toString(limitModel.limit.getEndRange());
+            newSign.street = limitModel.limit.getStreet();
             newSign.day = LimitParser.getDay(tuple.day);
             newSign.startTime = tuple.startHour < 13 ? Integer.toString(tuple.startHour) :
                     Integer.toString(tuple.startHour - 12);
@@ -131,9 +134,9 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
             }
             Collections.sort(weekNumbers);
 
-            /*if (weekNumbers.size() > 3) {
+            if (weekNumbers.size() > 3) {
                 newSign.prefix = "EVERY";
-            } else {*/
+            } else {
                 newSign.prefix = "";
                 for (Integer number : weekNumbers) {
                     if (!newSign.prefix.equals("")) {
@@ -141,7 +144,7 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
                     }
                     newSign.prefix += LimitParser.getPrefix(number);
                 }
-            //}
+            }
 
             signsToAdd.add(newSign);
         }
@@ -154,7 +157,7 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         notifyItemRangeInserted(itemRangeStart, signsToAdd.size());
     }
 
-    private void removeSignsForModel(WatchZoneLimitModel limitModel) {
+    private void removeSignsForModel(LimitModel limitModel) {
         List<PostedSign> signs = mMap.remove(limitModel);
         if (signs != null && !signs.isEmpty()) {
             int indexOfFirst = mPostedSigns.indexOf(signs.get(0));

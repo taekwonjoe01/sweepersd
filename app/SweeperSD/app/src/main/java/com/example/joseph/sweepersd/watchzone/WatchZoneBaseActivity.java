@@ -4,7 +4,6 @@ import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.alert.AlertManager;
 import com.example.joseph.sweepersd.alert.geofence.GeofenceManager;
@@ -12,10 +11,10 @@ import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.scheduling.ScheduleManager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +30,10 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
+        WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> models,
+            public void onModelsChanged(Map<Long, ZoneModel> models,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 AlertManager alertManager = new AlertManager(WatchZoneBaseActivity.this);
                 alertManager.updateAlertNotification(new ArrayList<>(models.values()),
@@ -45,7 +44,7 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
                 geofenceManager.updateGeofences(new ArrayList<>(models.values()));
             }
             @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
+            public void onDataLoaded(Map<Long, ZoneModel> models) {
                 ScheduleManager scheduleManager = new ScheduleManager(WatchZoneBaseActivity.this);
                 scheduleManager.scheduleWatchZones(new ArrayList<>(models.values()));
                 GeofenceManager geofenceManager = new GeofenceManager(WatchZoneBaseActivity.this);
@@ -82,7 +81,7 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
                         AlertManager alertManager = new AlertManager(WatchZoneBaseActivity.this);
                         alertManager.updateAlertNotification(new ArrayList<>(
                                 WatchZoneModelRepository.getInstance(
-                                        WatchZoneBaseActivity.this).getWatchZoneModels().values()),
+                                        WatchZoneBaseActivity.this).getZoneModelsLiveData().getValue()),
                                 watchZoneFences);
                     }
                 }

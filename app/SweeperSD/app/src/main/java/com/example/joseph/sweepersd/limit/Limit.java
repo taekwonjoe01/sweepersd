@@ -3,10 +3,7 @@ package com.example.joseph.sweepersd.limit;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.Relation;
 import android.text.TextUtils;
-
-import java.util.List;
 
 @Entity(tableName = "limits")
 public class Limit {
@@ -90,16 +87,16 @@ public class Limit {
     public boolean isChanged(Limit compareTo) {
         boolean result = false;
 
-        if (this.uid == compareTo.getUid()) {
-            if (this.startRange != compareTo.getStartRange()) {
-                result = true;
-            } else if (this.endRange != compareTo.getEndRange()) {
-                result = true;
-            } else if (!TextUtils.equals(this.street, compareTo.getStreet())) {
-                result = true;
-            } else if (!TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
-                result = true;
-            }
+        if (this.uid != compareTo.getUid()) {
+            result = true;
+        } else if (this.startRange != compareTo.getStartRange()) {
+            result = true;
+        } else if (this.endRange != compareTo.getEndRange()) {
+            result = true;
+        } else if (!TextUtils.equals(this.street, compareTo.getStreet())) {
+            result = true;
+        } else if (!TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
+            result = true;
         }
 
         return result;

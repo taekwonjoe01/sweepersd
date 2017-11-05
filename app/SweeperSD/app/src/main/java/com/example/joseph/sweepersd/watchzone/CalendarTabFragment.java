@@ -11,10 +11,10 @@ import android.view.ViewGroup;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
+import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
@@ -98,12 +98,12 @@ public class CalendarTabFragment extends TabFragment {
         presenter.watchZoneLimitsObserver = new WatchZoneLimitsObserver(watchZoneUid,
                 new WatchZoneLimitsObserver.WatchZoneLimitsChangedCallback() {
             @Override
-            public void onLimitsChanged(Map<Long, WatchZoneLimitModel> data,
+            public void onLimitsChanged(Map<Long, LimitModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
-                    WatchZoneLimitModel removedModel = null;
-                    for (WatchZoneLimitModel model : presenter.sweepingDates.keySet()) {
-                        if (model.getLimitUid() == uid) {
+                    LimitModel removedModel = null;
+                    for (LimitModel model : presenter.sweepingDates.keySet()) {
+                        if (model.limit.getUid() == uid) {
                             removedModel = model;
                             break;
                         }
@@ -118,7 +118,7 @@ public class CalendarTabFragment extends TabFragment {
                     }
                 }
                 for (Long uid : changeSet.changedLimits) {
-                    WatchZoneLimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
+                    LimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
                             .get(uid);
                     List<Date> dates = presenter.sweepingDates.remove(model);
                     if (dates != null) {
@@ -127,8 +127,7 @@ public class CalendarTabFragment extends TabFragment {
                         }
                     }
 
-                    Map<Long, LimitSchedule> schedules = model.getLimitSchedulesModel().getScheduleMap();
-                    List<LimitSchedule> schedulesList = new ArrayList<>(schedules.values());
+                    List<LimitSchedule> schedulesList = model.schedules;
                     List<LimitScheduleDate> scheduleDates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
                             schedulesList, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
@@ -144,10 +143,9 @@ public class CalendarTabFragment extends TabFragment {
                     presenter.sweepingDates.put(model, calendarDates);
                 }
                 for (Long uid : changeSet.addedLimits) {
-                    WatchZoneLimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
+                    LimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
                             .get(uid);
-                    Map<Long, LimitSchedule> schedules = model.getLimitSchedulesModel().getScheduleMap();
-                    List<LimitSchedule> schedulesList = new ArrayList<>(schedules.values());
+                    List<LimitSchedule> schedulesList = model.schedules;
                     List<LimitScheduleDate> dates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
                             schedulesList, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
@@ -165,12 +163,11 @@ public class CalendarTabFragment extends TabFragment {
                 mCaldroidFragment.refreshView();
             }
             @Override
-            public void onDataLoaded(Map<Long, WatchZoneLimitModel> data) {
+            public void onDataLoaded(Map<Long, LimitModel> data) {
                 for (Long uid : data.keySet()) {
-                    WatchZoneLimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
+                    LimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
                             .get(uid);
-                    Map<Long, LimitSchedule> schedules = model.getLimitSchedulesModel().getScheduleMap();
-                    List<LimitSchedule> schedulesList = new ArrayList<>(schedules.values());
+                    List<LimitSchedule> schedulesList = model.schedules;
                     List<LimitScheduleDate> dates = WatchZoneUtils.getAllSweepingDatesForLimitSchedules(
                             schedulesList, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
@@ -189,8 +186,8 @@ public class CalendarTabFragment extends TabFragment {
             }
             @Override
             public void onDataInvalid() {
-                Set<WatchZoneLimitModel> invalidModels = new HashSet<>(presenter.sweepingDates.keySet());
-                for (WatchZoneLimitModel model : invalidModels) {
+                Set<LimitModel> invalidModels = new HashSet<>(presenter.sweepingDates.keySet());
+                for (LimitModel model : invalidModels) {
                     List<Date> dates = presenter.sweepingDates.remove(model);
                     if (dates != null) {
                         for (Date date : dates) {
@@ -200,13 +197,13 @@ public class CalendarTabFragment extends TabFragment {
                 }
             }
         });
-        WatchZoneModelRepository.getInstance(getActivity()).observe(getActivity(),
+        WatchZoneModelRepository.getInstance(getActivity()).getZoneModelForUid(watchZoneUid).observe(getActivity(),
                 presenter.watchZoneLimitsObserver);
         mWatchZones.put(watchZoneUid, presenter);
     }
 
     private class WatchZonePresenter {
         WatchZoneLimitsObserver watchZoneLimitsObserver;
-        Map<WatchZoneLimitModel, List<Date>> sweepingDates;
+        Map<LimitModel, List<Date>> sweepingDates;
     }
 }

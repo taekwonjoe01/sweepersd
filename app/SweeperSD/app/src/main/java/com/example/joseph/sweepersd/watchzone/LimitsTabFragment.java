@@ -13,8 +13,8 @@ import android.widget.LinearLayout;
 import com.example.joseph.sweepersd.LimitViewAdapter;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
+import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 
@@ -95,7 +95,7 @@ public class LimitsTabFragment extends TabFragment {
         presenter.limitsObserver = new WatchZoneLimitsObserver(watchZoneUid,
                 new WatchZoneLimitsObserver.WatchZoneLimitsChangedCallback() {
             @Override
-            public void onLimitsChanged(Map<Long, WatchZoneLimitModel> data,
+            public void onLimitsChanged(Map<Long, LimitModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
                     mAdapter.removeLimitModel(uid);
@@ -109,7 +109,7 @@ public class LimitsTabFragment extends TabFragment {
             }
 
             @Override
-            public void onDataLoaded(Map<Long, WatchZoneLimitModel> data) {
+            public void onDataLoaded(Map<Long, LimitModel> data) {
                 for (Long uid : presenter.limitsObserver.getLimitModels().keySet()) {
                     mAdapter.addLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
                 }
@@ -120,7 +120,8 @@ public class LimitsTabFragment extends TabFragment {
                 mAdapter.removeAll();
             }
         });
-        WatchZoneModelRepository.getInstance(getContext()).observe(this, presenter.limitsObserver);
+        WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid)
+                .observe(this, presenter.limitsObserver);
         mWatchZones.put(watchZoneUid, presenter);
     }
 

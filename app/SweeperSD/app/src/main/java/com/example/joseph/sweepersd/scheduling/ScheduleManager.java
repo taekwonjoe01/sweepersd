@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.PendingIntents;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.Date;
 import java.util.List;
@@ -22,15 +22,13 @@ public class ScheduleManager {
         mApplicationContext = context.getApplicationContext();
     }
 
-    public long scheduleWatchZones(List<WatchZoneModel> watchZoneModels) {
+    public long scheduleWatchZones(List<ZoneModel> watchZoneModels) {
         long nextEventTimestamp = -1L;
-        for (WatchZoneModel model : watchZoneModels) {
-            if (model.getStatus() == WatchZoneModel.Status.VALID) {
-                long nextTimestamp = WatchZoneUtils.getNextEventTimestampForWatchZone(model);
-                if (nextTimestamp != -1L) {
-                    if (nextEventTimestamp == -1L || nextTimestamp < nextEventTimestamp) {
-                        nextEventTimestamp = nextTimestamp;
-                    }
+        for (ZoneModel model : watchZoneModels) {
+            long nextTimestamp = WatchZoneUtils.getNextEventTimestampForWatchZone(model);
+            if (nextTimestamp != -1L) {
+                if (nextEventTimestamp == -1L || nextTimestamp < nextEventTimestamp) {
+                    nextEventTimestamp = nextTimestamp;
                 }
             }
         }

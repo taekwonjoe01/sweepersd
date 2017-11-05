@@ -19,11 +19,10 @@ import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.watchzone.WatchZoneBaseActivity;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,15 +68,16 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
         mDispatcher.onServicePreSuperOnCreate();
         mDispatcher.onServicePreSuperOnStart();
 
-        WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneModelsObserver(
+        WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data,
+            public void onModelsChanged(Map<Long, ZoneModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 // Do nothing. Will be rescheduled if happens
             }
+
             @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
+            public void onDataLoaded(Map<Long, ZoneModel> models) {
                 mWatchZoneModelsLoaded = true;
                 if (mWatchZoneFencesLoaded) {
                     AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
@@ -103,7 +103,7 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
                                 AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
                                 alertManager.updateAlertNotification(new ArrayList<>(
                                                 WatchZoneModelRepository.getInstance(
-                                                        AlertNotificationJob.this).getWatchZoneModels().values()),
+                                                        AlertNotificationJob.this).getZoneModelsLiveData().getValue()),
                                         watchZoneFences);
                                 preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
                                         System.currentTimeMillis()).commit();

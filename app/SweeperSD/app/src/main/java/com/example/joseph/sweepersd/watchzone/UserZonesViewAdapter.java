@@ -22,11 +22,10 @@ import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
+import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -44,24 +43,24 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     private final AppCompatActivity mActivity;
 
-    private List<WatchZoneModel> mCurrentList;
+    private List<ZoneModel> mCurrentList;
     private Map<Long, Integer> mUpdatingProgressMap;
 
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
 
-        WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, new WatchZoneModelsObserver(
+        WatchZoneModelRepository.getInstance(mActivity).getZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data,
+            public void onModelsChanged(Map<Long, ZoneModel> data,
                                         WatchZoneBaseObserver.ChangeSet changeSet) {
                 // This is only capable of detecting insertions or deletions.
                 // Changes must be detected directly.
                 List<Long> modelUids = new ArrayList<>(data.keySet());
                 Collections.sort(modelUids);
-                final List<WatchZoneModel> sortedModels = new ArrayList<>();
+                final List<ZoneModel> sortedModels = new ArrayList<>();
                 for (Long uid : modelUids) {
-                    WatchZoneModel model = data.get(uid);
+                    ZoneModel model = data.get(uid);
                     sortedModels.add(model);
                 }
                 DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
@@ -77,83 +76,28 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
                     @Override
                     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                        return mCurrentList.get(oldItemPosition).getWatchZoneUid() ==
-                                sortedModels.get(newItemPosition).getWatchZoneUid();
+                        return mCurrentList.get(oldItemPosition).watchZone.getUid() ==
+                                sortedModels.get(newItemPosition).watchZone.getUid();
                     }
 
                     @Override
                     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        // Save cycles because this update can only be an insertion or deletion.
-                        return true;
+                        return !mCurrentList.get(oldItemPosition).isChanged(sortedModels.get(newItemPosition));
                     }
                 }, false);
                 mCurrentList = sortedModels;
 
                 result.dispatchUpdatesTo(UserZonesViewAdapter.this);
-                // DiffUtil won't detect changes because each WatchZoneModel is a hard reference.
-                for (Long uid : changeSet.addedLimits) {
-                    final WatchZoneModelObserver modelObserver = new WatchZoneModelObserver(uid,
-                            new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
-                        @Override
-                        public void onWatchZoneModelChanged(WatchZoneModel model) {
-                            int index = mCurrentList.indexOf(model);
-                            if (index >=0) {
-                                notifyItemChanged(index);
-                            }
-                        }
-
-                        @Override
-                        public void onDataLoaded(WatchZoneModel data) {
-                            int index = mCurrentList.indexOf(data);
-                            if (index >=0) {
-                                notifyItemChanged(index);
-                            }
-                        }
-
-                        @Override
-                        public void onDataInvalid() {
-                            // TODO probably need a solution. After activity dies, these will be cleaned up automatically, but
-                            // performance might suffer if a lot of deletions happen.
-                        }
-                    });
-                    WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
-                }
             }
 
             @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+            public void onDataLoaded(Map<Long, ZoneModel> data) {
                 List<Long> modelUids = new ArrayList<>(data.keySet());
                 Collections.sort(modelUids);
-                List<WatchZoneModel> sortedModels = new ArrayList<>();
+                List<ZoneModel> sortedModels = new ArrayList<>();
                 for (Long uid : modelUids) {
-                    WatchZoneModel model = data.get(uid);
+                    ZoneModel model = data.get(uid);
                     sortedModels.add(model);
-
-                    final WatchZoneModelObserver modelObserver = new WatchZoneModelObserver(uid,
-                            new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
-                        @Override
-                        public void onWatchZoneModelChanged(WatchZoneModel model) {
-                            int index = mCurrentList.indexOf(model);
-                            if (index >=0) {
-                                notifyItemChanged(index);
-                            }
-                        }
-
-                        @Override
-                        public void onDataLoaded(WatchZoneModel data) {
-                            int index = mCurrentList.indexOf(data);
-                            if (index >=0) {
-                                notifyItemChanged(index);
-                            }
-                        }
-
-                        @Override
-                        public void onDataInvalid() {
-                            // TODO probably need a solution. After activity dies, these will be cleaned up automatically, but
-                            // performance might suffer if a lot of deletions happen.
-                        }
-                    });
-                    WatchZoneModelRepository.getInstance(mActivity).observe(mActivity, modelObserver);
                 }
 
                 mCurrentList = sortedModels;
@@ -184,8 +128,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             for (Long uid : watchZoneProgress.keySet()) {
                 removedWatchZones.remove(uid);
             }
-            for (WatchZoneModel model : mCurrentList) {
-                if (removedWatchZones.contains(model.getWatchZoneUid())) {
+            for (ZoneModel model : mCurrentList) {
+                if (removedWatchZones.contains(model.watchZone.getUid())) {
                     int index = mCurrentList.indexOf(model);
                     notifyItemChanged(index);
                 }
@@ -195,8 +139,8 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         if (mCurrentList == null) {
             return;
         }
-        for (WatchZoneModel model : mCurrentList) {
-            if (mUpdatingProgressMap.containsKey(model.getWatchZoneUid())) {
+        for (ZoneModel model : mCurrentList) {
+            if (mUpdatingProgressMap.containsKey(model.watchZone.getUid())) {
                 int index = mCurrentList.indexOf(model);
                 notifyItemChanged(index);
             }
@@ -217,94 +161,73 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mViewLayout.setBackground(
                 mActivity.getResources().getDrawable(R.drawable.apptheme_background));
-        final WatchZoneModel model = mCurrentList.get(position);
-        WatchZoneModel.Status modelStatus = WatchZoneModel.Status.LOADING;
-        String label = modelStatus.toString();
-        if (model != null) {
-            modelStatus = model.getStatus();
+        final ZoneModel model = mCurrentList.get(position);
+        final WatchZone watchZone = model.watchZone;
+        String label = watchZone.getLabel();
+
+        holder.mOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mActivity, WatchZoneDetailsActivity.class);
+                Bundle b = new Bundle();
+                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, watchZone.getUid());
+                intent.putExtras(b);
+                mActivity.startActivity(intent);
+            }
+        };
+        // Any status could be being updated by the WatchZoneModelUpdater...
+        Integer progress = null;
+        if (mUpdatingProgressMap != null) {
+            progress = mUpdatingProgressMap.get(watchZone.getUid());
         }
-        if (modelStatus == WatchZoneModel.Status.INVALID_NO_WATCH_ZONE) {
-            // TODO - This watch Zone doesn't exist and this should not happen!
-        } else if (model != null) {
-            WatchZone watchZone = model.getWatchZone();
-            if (watchZone != null) {
-                label = watchZone.getLabel();
 
-                holder.mOnClickListener = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(mActivity, WatchZoneDetailsActivity.class);
-                        Bundle b = new Bundle();
-                        b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, model.getWatchZoneUid());
-                        intent.putExtras(b);
-                        mActivity.startActivity(intent);
-                    }
-                };
+        if (progress != null) {
+            holder.mDetailsGroup.setVisibility(View.GONE);
+            holder.mLoadingGroup.setVisibility(View.VISIBLE);
+            holder.mUpdatingProgress.setVisibility(View.VISIBLE);
+            holder.mUpdatingProgress.setProgress(progress);
+        } else {
+            holder.mUpdatingProgress.setProgress(0);
+            holder.mLoadingGroup.setVisibility(View.GONE);
 
-                if (modelStatus == WatchZoneModel.Status.LOADING) {
-                    holder.mDetailsGroup.setVisibility(View.GONE);
-                    holder.mLoadingGroup.setVisibility(View.VISIBLE);
-                    holder.mUpdatingProgress.setVisibility(View.GONE);
+            holder.mDetailsGroup.setVisibility(View.VISIBLE);
+
+            // Get all LimitSchedules to determine sweeping dates
+            List<LimitSchedule> allLimitSchedules = new ArrayList<>();
+            for (Long uniqueLimitUid : model.getUniqueLimitModels().keySet()) {
+                allLimitSchedules.addAll(new ArrayList<>(
+                        model.getUniqueLimitModels().get(uniqueLimitUid).schedules));
+            }
+
+            long nextSweepingTime = WatchZoneUtils.getNextSweepingStartTime(allLimitSchedules);
+            String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
+            if (nextSweepingTime != 0) {
+                if (nextSweepingTime < System.currentTimeMillis()) {
+                    holder.mViewLayout.setBackground(
+                            mActivity.getResources().getDrawable(R.drawable.background_userzones_now));
+                    dateString = "Street sweeping is happening now.";
                 } else {
-                    // Any status could be being updated by the WatchZoneModelUpdater...
-                    Integer progress = null;
-                    if (mUpdatingProgressMap != null) {
-                        progress = mUpdatingProgressMap.get(model.getWatchZone().getUid());
-                    }
-
-                    if (progress != null) {
-                        holder.mDetailsGroup.setVisibility(View.GONE);
-                        holder.mLoadingGroup.setVisibility(View.VISIBLE);
-                        holder.mUpdatingProgress.setVisibility(View.VISIBLE);
-                        holder.mUpdatingProgress.setProgress(progress);
-                    } else {
-                        holder.mUpdatingProgress.setProgress(0);
-                        holder.mLoadingGroup.setVisibility(View.GONE);
-
-                        if (model.getStatus() == WatchZoneModel.Status.VALID) {
-                            holder.mDetailsGroup.setVisibility(View.VISIBLE);
-
-                            // Get all LimitSchedules to determine sweeping dates
-                            List<LimitSchedule> allLimitSchedules = new ArrayList<>();
-                            for (Long uniqueLimitUid : model.getWatchZoneLimitModelUids()) {
-                                allLimitSchedules.addAll(new ArrayList<>(
-                                        model.getWatchZoneLimitModel(uniqueLimitUid)
-                                                .getLimitSchedulesModel().getScheduleMap().values()));
-                            }
-
-                            long nextSweepingTime = WatchZoneUtils.getNextSweepingStartTime(allLimitSchedules);
-                            String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
-                            if (nextSweepingTime != 0) {
-                                if (nextSweepingTime < System.currentTimeMillis()) {
-                                    holder.mViewLayout.setBackground(
-                                            mActivity.getResources().getDrawable(R.drawable.background_userzones_now));
-                                    dateString = "Street sweeping is happening now.";
-                                } else {
-                                    long timeLeft = nextSweepingTime - System.currentTimeMillis();
-                                    if (timeLeft < 1000L * 60L * 60L * 24L) {
-                                        holder.mViewLayout.setBackground(
-                                                mActivity.getResources().getDrawable(R.drawable.background_userzones_upcoming));
-                                        Calendar sweeping = Calendar.getInstance();
-                                        sweeping.setTime(new Date(nextSweepingTime));
-                                        Calendar now = Calendar.getInstance();
-                                        if (sweeping.get(Calendar.DATE) != now.get(Calendar.DATE)) {
-                                            dateString = "Next sweeping will occur tomorrow at " +
-                                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                                        } else {
-                                            dateString = "Next sweeping will occur today at " +
-                                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                                        }
-                                    } else {
-                                        dateString = "Next sweeping will occur on " +
-                                                new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));
-                                    }
-                                }
-                            }
-                            holder.mAlarmNextSweeping.setText(dateString);
+                    long timeLeft = nextSweepingTime - System.currentTimeMillis();
+                    if (timeLeft < 1000L * 60L * 60L * 24L) {
+                        holder.mViewLayout.setBackground(
+                                mActivity.getResources().getDrawable(R.drawable.background_userzones_upcoming));
+                        Calendar sweeping = Calendar.getInstance();
+                        sweeping.setTime(new Date(nextSweepingTime));
+                        Calendar now = Calendar.getInstance();
+                        if (sweeping.get(Calendar.DATE) != now.get(Calendar.DATE)) {
+                            dateString = "Next sweeping will occur tomorrow at " +
+                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
+                        } else {
+                            dateString = "Next sweeping will occur today at " +
+                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
                         }
+                    } else {
+                        dateString = "Next sweeping will occur on " +
+                                new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));
                     }
                 }
             }
+            holder.mAlarmNextSweeping.setText(dateString);
         }
         holder.mWatchZoneLabel.setText(WordUtils.capitalize(label));
 

@@ -13,8 +13,8 @@ import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -82,10 +82,10 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
 
-        WatchZoneModelRepository.getInstance(this).observe(this, new WatchZoneObserver(mWatchZoneId,
-                new WatchZoneObserver.WatchZoneChangedCallback() {
+        WatchZoneModelRepository.getInstance(this).getZoneModelForUid(mWatchZoneId).observe(this, new WatchZoneModelObserver(mWatchZoneId,
+                new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
             @Override
-            public void onWatchZoneChanged(WatchZone watchZone) {
+            public void onWatchZoneModelChanged(WatchZone watchZone) {
                 invalidateUi(watchZone);
             }
 

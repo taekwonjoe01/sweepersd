@@ -1,82 +1,35 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.support.annotation.Nullable;
+import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.Log;
 
-import com.example.joseph.sweepersd.scheduling.ScheduleJob;
+import com.example.joseph.sweepersd.AppDatabase;
+import com.example.joseph.sweepersd.utils.LocationUtils;
+import com.example.joseph.sweepersd.watchzone.WatchZoneUpdateJob;
+import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository> {
+public class WatchZoneModelRepository {
     private static final String TAG = WatchZoneModelRepository.class.getSimpleName();
 
-    private static MutableLiveData<WatchZoneModelRepository> sInstance = new MutableLiveData<>();
+    private static WatchZoneModelRepository sInstance;
 
     private final Context mApplicationContext;
     private final Handler mHandler;
     private final HandlerThread mThread;
 
-    private final Map<Long, WatchZoneModel> mWatchZoneModelsMap;
-
-    private final Observer<List<WatchZone>> mWatchZoneObserver = new Observer<List<WatchZone>>() {
-        @Override
-        public void onChanged(@Nullable final List<WatchZone> watchZones) {
-            // In this observer, we are only detecting insertions or deletions. Changes to the
-            // models themselves are handled in the WatchZoneModels.
-            List<Long> existingWatchZones = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
-            Set<Long> deletedWatchZones = new HashSet<>(mWatchZoneModelsMap.keySet());
-            for (Long uid : existingWatchZones) {
-                if (!mWatchZoneModelsMap.containsKey(uid)) {
-                    mWatchZoneModelsMap.put(uid, null);
-                }
-                deletedWatchZones.remove(uid);
-            }
-            for (Long deletedUid : deletedWatchZones) {
-                WatchZoneModel deletedModel = mWatchZoneModelsMap.remove(deletedUid);
-                if (deletedModel != null) {
-                    deletedModel.removeObserver(mWatchZoneModelObserver);
-                }
-            }
-            if (watchZones != null) {
-                for (WatchZone watchZone : watchZones) {
-                    WatchZoneModel model = mWatchZoneModelsMap.get(watchZone.getUid());
-                    if (model == null) {
-                        model = new WatchZoneModel(mApplicationContext, mHandler, watchZone.getUid());
-                        model.observeForever(mWatchZoneModelObserver);
-                        mWatchZoneModelsMap.put(watchZone.getUid(), model);
-                    }
-                }
-            }
-
-            // This will spam call to start a scheduleJob. It should only run if 30 seconds pass
-            // since the last call to schedule the scheduleJob.
-            ScheduleJob.scheduleJob(mApplicationContext);
-
-            postValue(WatchZoneModelRepository.this);
-        }
-    };
-
-    private final Observer<WatchZoneModel> mWatchZoneModelObserver = new Observer<WatchZoneModel>() {
-        @Override
-        public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
-            // This will spam call to start a scheduleJob. It should only run if 30 seconds pass
-            // since the last call to schedule the scheduleJob.
-            ScheduleJob.scheduleJob(mApplicationContext);
-
-            // WatchZoneModel changes trigger this repository to issue a change.
-            postValue(WatchZoneModelRepository.this);
-        }
-    };
+    private final Map<Long, LiveData<ZoneModel>> mWatchZoneModelsMap;
+    private final LiveData<List<ZoneModel>> mCachedWatchZones;
 
     private WatchZoneModelRepository(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -85,87 +38,90 @@ public class WatchZoneModelRepository extends LiveData<WatchZoneModelRepository>
         mHandler = new Handler(/*mThread.getLooper()*/Looper.getMainLooper());
 
         mWatchZoneModelsMap = new HashMap<>();
+        mCachedWatchZones = loadWatchZonesLiveDataFromDb();
 
         List<Long> watchZoneUids = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
         for (Long uid : watchZoneUids) {
             mWatchZoneModelsMap.put(uid, null);
         }
-
-        WatchZoneRepository.getInstance(mApplicationContext).getWatchZonesLiveData()
-                .observeForever(mWatchZoneObserver);
-        setValue(this);
     }
 
     public static synchronized WatchZoneModelRepository getInstance(Context context) {
-        if (sInstance.getValue() == null) {
-            sInstance.setValue(new WatchZoneModelRepository(context));
+        if (sInstance == null) {
+            sInstance = new WatchZoneModelRepository(context);
         }
-        return sInstance.getValue();
+        return sInstance;
     }
 
     public synchronized long createWatchZone(String label, double centerLatitude,
                                              double centerLongitude, int radius) {
-        long newWatchZoneUid = WatchZoneRepository.getInstance(mApplicationContext).createWatchZone(label,
-                centerLatitude, centerLongitude, radius);
-        if (newWatchZoneUid >= 0L) {
-            mWatchZoneModelsMap.put(newWatchZoneUid, null);
-        }
-        return newWatchZoneUid;
-    }
+        long startTime = SystemClock.elapsedRealtime();
+        long result = -1;
+        if (!TextUtils.isEmpty(label)) {
+            WatchZone watchZone = new WatchZone();
+            watchZone.setLabel(label);
+            watchZone.setCenterLatitude(centerLatitude);
+            watchZone.setCenterLongitude(centerLongitude);
+            watchZone.setRadius(radius);
+            watchZone.setLastSweepingUpdated(0L);
+            watchZone.setRemindRange(WatchZone.REMIND_RANGE_DEFAULT);
+            watchZone.setRemindPolicy(WatchZone.REMIND_POLICY_DEFAULT);
 
-    public static LiveData<WatchZoneModelRepository> getInstanceLiveData() {
-        return sInstance;
-    }
+            WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+            result = watchZoneDao.insertWatchZone(watchZone);
 
-    public synchronized void delete() {
-        if (sInstance.getValue() != null) {
-            // TODO Remove observers
-            WatchZoneRepository.getInstance(mApplicationContext).getWatchZonesLiveData()
-                .removeObserver(mWatchZoneObserver);
-            for (Long watchZoneUid : mWatchZoneModelsMap.keySet()) {
-                WatchZoneModel model = mWatchZoneModelsMap.get(watchZoneUid);
-                if (model != null) {
-                    model.removeObserver(mWatchZoneModelObserver);
+            if (result > 0) {
+                List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(
+                        new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()),
+                        watchZone.getRadius());
+                List<WatchZonePoint> points = new ArrayList<>();
+                for (LatLng latLng : latLngs) {
+                    WatchZonePoint point = new WatchZonePoint();
+                    point.setLimitId(0L);
+                    point.setAddress(null);
+                    point.setWatchZoneUpdatedTimestampMs(0L);
+                    point.setWatchZoneId(result);
+                    point.setLatitude(latLng.latitude);
+                    point.setLongitude(latLng.longitude);
+                    points.add(point);
                 }
-            }
 
-            mThread.quit();
+                long[] uids = watchZoneDao.insertWatchZonePoints(points);
 
-            sInstance.setValue(null);
-        }
-    }
-
-    public synchronized Map<Long, WatchZoneModel> getWatchZoneModels() {
-        return mWatchZoneModelsMap;
-    }
-
-    public synchronized WatchZoneModel getWatchZoneModel(long watchZoneUid) {
-        return mWatchZoneModelsMap.get(watchZoneUid);
-    }
-
-    public synchronized boolean watchZoneExists(long watchZoneUid) {
-        boolean result = mWatchZoneModelsMap.containsKey(watchZoneUid);
-        if (!result) {
-            List<Long> watchZoneUids = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
-            for (Long uid : watchZoneUids) {
-                if (!mWatchZoneModelsMap.containsKey(uid)) {
-                    mWatchZoneModelsMap.put(uid, null);
-                }
+                scheduleUpdateJob();
             }
         }
-        result = mWatchZoneModelsMap.containsKey(watchZoneUid);
+        long endTime = SystemClock.elapsedRealtime();
+        Log.d(TAG, "create Watch Zone with radius " + radius + " took "
+                + (endTime - startTime) + "ms.");
         return result;
     }
 
-    @Override
-    protected void onActive() {
-        super.onActive();
-        // Do nothing, because we're a singleton and want to exist until delete is called.
+    public LiveData<List<ZoneModel>> getZoneModelsLiveData() {
+        return mCachedWatchZones;
     }
 
-    @Override
-    protected void onInactive() {
-        super.onInactive();
-        // Do nothing, because we're a singleton and want to exist until delete is called.
+    public LiveData<ZoneModel> getZoneModelForUid(long uid) {
+        if (!mWatchZoneModelsMap.containsKey(uid)) {
+            mWatchZoneModelsMap.put(uid, loadWatchZoneLiveDataFromDb(uid));
+        }
+
+        return mWatchZoneModelsMap.get(uid);
+    }
+
+    private LiveData<List<ZoneModel>> loadWatchZonesLiveDataFromDb() {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+
+        return watchZoneDao.getAllZonesLiveData();
+    }
+
+    private LiveData<ZoneModel> loadWatchZoneLiveDataFromDb(long uid) {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+
+        return watchZoneDao.getZoneLiveDataForUid(uid);
+    }
+
+    private void scheduleUpdateJob() {
+        WatchZoneUpdateJob.scheduleAppForegroundJob(mApplicationContext);
     }
 }
