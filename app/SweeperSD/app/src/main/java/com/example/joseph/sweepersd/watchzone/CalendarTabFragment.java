@@ -14,7 +14,7 @@ import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
@@ -99,7 +99,7 @@ public class CalendarTabFragment extends TabFragment {
                 new WatchZoneLimitsObserver.WatchZoneLimitsChangedCallback() {
             @Override
             public void onLimitsChanged(Map<Long, LimitModel> data,
-                                        WatchZoneBaseObserver.ChangeSet changeSet) {
+                                        BaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
                     LimitModel removedModel = null;
                     for (LimitModel model : presenter.sweepingDates.keySet()) {

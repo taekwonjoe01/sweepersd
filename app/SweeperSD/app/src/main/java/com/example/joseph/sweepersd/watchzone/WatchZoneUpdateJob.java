@@ -17,7 +17,7 @@ import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
@@ -94,9 +94,9 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                 }
             });
             WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this,
-                    new WatchZoneModelsObserver(new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+                    new WatchZoneModelsObserver(true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
                 @Override
-                public void onModelsChanged(Map<Long, ZoneModel> data, WatchZoneBaseObserver.ChangeSet changeSet) {
+                public void onModelsChanged(Map<Long, ZoneModel> data, BaseObserver.ChangeSet changeSet) {
                 }
 
                 @Override

@@ -14,7 +14,7 @@ import com.example.joseph.sweepersd.LimitViewAdapter;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.limit.LimitModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 
@@ -96,7 +96,7 @@ public class LimitsTabFragment extends TabFragment {
                 new WatchZoneLimitsObserver.WatchZoneLimitsChangedCallback() {
             @Override
             public void onLimitsChanged(Map<Long, LimitModel> data,
-                                        WatchZoneBaseObserver.ChangeSet changeSet) {
+                                        BaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
                     mAdapter.removeLimitModel(uid);
                 }

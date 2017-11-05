@@ -1,24 +1,25 @@
-package com.example.joseph.sweepersd.watchzone.model;
+package com.example.joseph.sweepersd.utils;
 
 import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class WatchZoneBaseObserver<T, U> implements Observer<U> {
-    private final WatchZoneBaseObserverCallback mCallback;
+public abstract class BaseObserver<T, U> implements Observer<U> {
+    private final BaseObserverCallback mCallback;
     private boolean mIsLoaded;
 
-    abstract boolean isValid(U data);
-    abstract void onPossibleChangeDetected(T data);
-    abstract T getData(U data);
+    public abstract boolean isValid(U data);
+    public abstract void onPossibleChangeDetected(T data);
+    public abstract T getData(U data);
 
-    public WatchZoneBaseObserver(WatchZoneBaseObserverCallback callback) {
+    public BaseObserver(BaseObserverCallback callback) {
         mCallback = callback;
         mIsLoaded = false;
     }
 
-    public interface WatchZoneBaseObserverCallback<T> {
+    public interface BaseObserverCallback<T> {
         void onDataLoaded(T data);
         void onDataInvalid();
     }
@@ -27,6 +28,12 @@ public abstract class WatchZoneBaseObserver<T, U> implements Observer<U> {
         public List<Long> addedLimits;
         public List<Long> changedLimits;
         public List<Long> removedLimits;
+
+        public ChangeSet() {
+            addedLimits = new ArrayList<>();
+            changedLimits = new ArrayList<>();
+            removedLimits = new ArrayList<>();
+        }
     }
 
     @Override

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.watchzone.model.PointModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneBaseObserver;
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
@@ -200,7 +200,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 new WatchZonePointsObserver.WatchZonePointsChangedCallback() {
             @Override
             public void onWatchZonePointsChanged(Map<Long, PointModel> watchZonePointMap,
-                                                 WatchZoneBaseObserver.ChangeSet changeSet) {
+                                                 BaseObserver.ChangeSet changeSet) {
                 for (Long uid : changeSet.removedLimits) {
                     Circle circle = presenter.pointsToCircleMap.remove(uid);
                     circle.remove();

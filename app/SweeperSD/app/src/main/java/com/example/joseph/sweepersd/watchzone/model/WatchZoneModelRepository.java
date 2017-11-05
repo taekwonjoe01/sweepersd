@@ -39,11 +39,6 @@ public class WatchZoneModelRepository {
 
         mWatchZoneModelsMap = new HashMap<>();
         mCachedWatchZones = loadWatchZonesLiveDataFromDb();
-
-        List<Long> watchZoneUids = WatchZoneRepository.getInstance(mApplicationContext).getWatchZoneUids();
-        for (Long uid : watchZoneUids) {
-            mWatchZoneModelsMap.put(uid, null);
-        }
     }
 
     public static synchronized WatchZoneModelRepository getInstance(Context context) {
@@ -103,7 +98,11 @@ public class WatchZoneModelRepository {
 
     public LiveData<ZoneModel> getZoneModelForUid(long uid) {
         if (!mWatchZoneModelsMap.containsKey(uid)) {
-            mWatchZoneModelsMap.put(uid, loadWatchZoneLiveDataFromDb(uid));
+            LiveData<ZoneModel> model = loadWatchZoneLiveDataFromDb(uid);
+            if (model == null) {
+                Log.e("Joey", "It's null???");
+            }
+            mWatchZoneModelsMap.put(uid, model);
         }
 
         return mWatchZoneModelsMap.get(uid);

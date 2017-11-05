@@ -1,16 +1,18 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
+import com.example.joseph.sweepersd.utils.BaseObserver;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, PointModel>, ZoneModel> {
+public class WatchZonePointsObserver extends BaseObserver<Map<Long, PointModel>, ZoneModel> {
     private final Long mWatchZoneUid;
     private final WatchZonePointsChangedCallback mCallback;
 
     protected Map<Long, PointModel> mWatchZonePoints;
 
-    public interface WatchZonePointsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, PointModel>> {
+    public interface WatchZonePointsChangedCallback extends BaseObserverCallback<Map<Long, PointModel>> {
         void onWatchZonePointsChanged(Map<Long, PointModel> watchZonePointMap, ChangeSet changeSet);
     }
 
@@ -21,12 +23,12 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, Poi
     }
 
     @Override
-    boolean isValid(ZoneModel zoneModel) {
+    public boolean isValid(ZoneModel zoneModel) {
         return zoneModel != null;
     }
 
     @Override
-    Map<Long, PointModel> getData(ZoneModel zoneModel) {
+    public Map<Long, PointModel> getData(ZoneModel zoneModel) {
         HashMap<Long, PointModel> results = new HashMap<>();
         for (PointModel model : zoneModel.points) {
             if (model.point.getAddress() != null) {
@@ -40,7 +42,7 @@ public class WatchZonePointsObserver extends WatchZoneBaseObserver<Map<Long, Poi
     }
 
     @Override
-    void onPossibleChangeDetected(Map<Long, PointModel> watchZonePoints) {
+    public void onPossibleChangeDetected(Map<Long, PointModel> watchZonePoints) {
         ChangeSet changeSet = new ChangeSet();
         changeSet.addedLimits = new ArrayList<>();
         changeSet.changedLimits = new ArrayList<>();

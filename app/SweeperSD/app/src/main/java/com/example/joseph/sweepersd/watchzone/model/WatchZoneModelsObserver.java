@@ -1,31 +1,35 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
+import com.example.joseph.sweepersd.utils.BaseObserver;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, ZoneModel>, List<ZoneModel>> {
+public class WatchZoneModelsObserver extends BaseObserver<Map<Long, ZoneModel>, List<ZoneModel>> {
     private final WatchZoneModelsChangedCallback mCallback;
+    private final boolean mDetectDeepChanges;
 
     protected Map<Long, ZoneModel> mWatchZoneModels;
 
-    public interface WatchZoneModelsChangedCallback extends WatchZoneBaseObserverCallback<Map<Long, ZoneModel>> {
+    public interface WatchZoneModelsChangedCallback extends BaseObserverCallback<Map<Long, ZoneModel>> {
         void onModelsChanged(Map<Long, ZoneModel> data, ChangeSet changeSet);
     }
 
-    public WatchZoneModelsObserver(WatchZoneModelsChangedCallback callback) {
+    public WatchZoneModelsObserver(boolean detectDeepChanges, WatchZoneModelsChangedCallback callback) {
         super(callback);
         mCallback = callback;
+        mDetectDeepChanges = detectDeepChanges;
     }
 
     @Override
-    boolean isValid(List<ZoneModel> data) {
+    public boolean isValid(List<ZoneModel> data) {
         return data != null;
     }
 
     @Override
-    void onPossibleChangeDetected(Map<Long, ZoneModel> watchZoneModels) {
+    public void onPossibleChangeDetected(Map<Long, ZoneModel> watchZoneModels) {
         ChangeSet changeSet = new ChangeSet();
         changeSet.addedLimits = new ArrayList<>();
         changeSet.changedLimits = new ArrayList<>();
@@ -37,9 +41,17 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Zon
             } else {
                 ZoneModel oldModel = mWatchZoneModels.get(uid);
                 ZoneModel newModel = watchZoneModels.get(uid);
-                Boolean isChanged = oldModel.isChanged(newModel);
-                if (isChanged) {
-                    changeSet.changedLimits.add(uid);
+                if (mDetectDeepChanges) {
+                    Boolean isChanged = oldModel.isChanged(newModel);
+                    if (isChanged) {
+                        changeSet.changedLimits.add(uid);
+                    }
+                } else {
+                    WatchZone oldZone = oldModel.watchZone;
+                    WatchZone newZone = newModel.watchZone;
+                    if (oldZone.isChanged(newZone)) {
+                        changeSet.changedLimits.add(uid);
+                    }
                 }
             }
         }
@@ -49,7 +61,7 @@ public class WatchZoneModelsObserver extends WatchZoneBaseObserver<Map<Long, Zon
     }
 
     @Override
-    Map<Long, ZoneModel> getData(List<ZoneModel> data) {
+    public Map<Long, ZoneModel> getData(List<ZoneModel> data) {
         HashMap<Long, ZoneModel> results = new HashMap<>();
         for (ZoneModel model : data) {
             results.put(model.watchZone.getUid(), model);

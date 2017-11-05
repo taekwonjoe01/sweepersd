@@ -246,8 +246,9 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         if (address == null) {
             address = LocationUtils.getAddressForLatLnt(
                     WatchZoneExplorerActivity.this, latLng);
-
-            if (address.contains(",")) {
+            if (address == null) {
+                address = "";
+            } else if (address.contains(",")) {
                 address = address.split(",")[0];
             }
         } else {

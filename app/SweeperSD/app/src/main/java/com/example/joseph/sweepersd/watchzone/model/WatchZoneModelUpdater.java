@@ -3,14 +3,15 @@ package com.example.joseph.sweepersd.watchzone.model;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.limit.Limit;
+import com.example.joseph.sweepersd.limit.LimitModel;
+import com.example.joseph.sweepersd.limit.LimitModelObserver;
+import com.example.joseph.sweepersd.limit.LimitRepository;
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
@@ -34,12 +35,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final HandlerThread mThread;
     private final Handler mHandler;
     private final WatchZoneModelsObserver mModelsObserver;
-    private final Observer<List<Limit>> mLimitObserver;
+    private final LimitModelObserver mLimitsObserver;
     private final LongPreferenceLiveData mExplorerUidLiveData;
     private final Observer<Long> mExplorerUidObserver;
     private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
-    private LiveData<List<Limit>> mLimits;
+    private List<LimitModel> mLimits;
+    private Map<Long, ZoneModel> mWatchZones;
 
     private WatchZoneModelUpdater(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -47,28 +49,52 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mUpdatingWatchZones = new HashMap<>();
-        mModelsObserver = new WatchZoneModelsObserver(new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+        mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> data, WatchZoneBaseObserver.ChangeSet changeSet) {
-
+            public void onModelsChanged(Map<Long, ZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                mWatchZones = data;
+                if (mLimits != null) {
+                    invalidate(data, changeSet);
+                }
             }
 
             @Override
             public void onDataLoaded(Map<Long, ZoneModel> data) {
-
+                mWatchZones = data;
+                if (mLimits != null) {
+                    invalidate(data, null);
+                }
             }
 
             @Override
             public void onDataInvalid() {
-
+                // This should never happen.
             }
         });
-        mLimitObserver = new Observer<List<Limit>>() {
+        mLimitsObserver = new LimitModelObserver(new LimitModelObserver.LimitModelCallback() {
             @Override
-            public void onChanged(@Nullable List<Limit> limits) {
-                //invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
+            public void onLimitModelsChanged(List<LimitModel> limitModels) {
+                if (mWatchZones != null) {
+                    // TODO refresh all
+                    BaseObserver.ChangeSet changeSet = new BaseObserver.ChangeSet();
+                    for (Long uid : mWatchZones.keySet()) {
+                        changeSet.changedLimits.add(uid);
+                    }
+                    invalidate(mWatchZones, changeSet);
+                }
+                mLimits = limitModels;
             }
-        };
+
+            @Override
+            public void onDataLoaded(List<LimitModel> data) {
+                mLimits = data;
+            }
+
+            @Override
+            public void onDataInvalid() {
+                mLimits = null;
+            }
+        });
         mExplorerUidLiveData = new LongPreferenceLiveData(mApplicationContext,
                 Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
         mExplorerUidObserver = new Observer<Long>() {
@@ -114,8 +140,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     @Override
     protected synchronized void onActive() {
-        //mLimits = LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData();
-        //mLimits.observeForever(mLimitObserver);
+        LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData().observeForever(mLimitsObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mModelsObserver);
         mExplorerUidLiveData.observeForever(mExplorerUidObserver);
     }
@@ -123,7 +148,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     @Override
     protected synchronized void onInactive() {
         mExplorerUidLiveData.removeObserver(mExplorerUidObserver);
-        mLimits.removeObserver(mLimitObserver);
+        LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData().removeObserver(mLimitsObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mModelsObserver);
         cancelAll();
     }
@@ -140,7 +165,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     }
 
     private class WatchZoneContainer {
-        WatchZoneModel watchZoneModel;
+        ZoneModel zoneModel;
         WatchZone updatingWatchZone;
         WatchZoneUpdater watchZoneUpdater;
         Integer progress;
@@ -152,8 +177,125 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 first.getRadius() != second.getRadius();
     }
 
-    private synchronized void invalidate(WatchZoneModelRepository repository) {
-        if (mLimits.getValue() == null) {
+    private synchronized void invalidate(Map<Long, ZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
+        List<Long> toCancel = new ArrayList<>();
+        List<Long> toAdd = new ArrayList<>();
+        if (changeSet != null) {
+            toCancel.addAll(changeSet.removedLimits);
+            toCancel.addAll(changeSet.changedLimits);
+            toAdd.addAll(changeSet.addedLimits);
+            toAdd.addAll(changeSet.changedLimits);
+        } else {
+            toAdd.addAll(new ArrayList<>(zoneModels.keySet()));
+        }
+
+        for (Long uid : toCancel) {
+            WatchZoneContainer container = mUpdatingWatchZones.get(uid);
+            if (container != null) {
+                cancelAndRemoveContainer(container);
+            }
+        }
+
+        if (!toAdd.isEmpty()) {
+            cancelAll();
+            toAdd.clear();
+            for (Long uid : zoneModels.keySet()) {
+                toAdd.add(uid);
+            }
+        }
+
+        Collections.sort(toAdd, new Comparator<Long>() {
+            @Override
+            public int compare(Long t1, Long t2) {
+                long diff = t2 - t1;
+                return diff < 0 ? -1 : diff > 0 ? 1 : 0;
+            }
+        });
+
+        for (Long uid : toAdd) {
+            final ZoneModel model = zoneModels.get(uid);
+
+            final WatchZoneContainer container = new WatchZoneContainer();
+            container.zoneModel = model;
+            container.updatingWatchZone = model.watchZone;
+            container.watchZoneUpdater = null;
+            container.progress = 0;
+
+            mUpdatingWatchZones.put(uid, container);
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (WatchZoneModelUpdater.this) {
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.zoneModel.watchZone.getUid());
+                        if (container != containerInMap) {
+                            return;
+                        }
+                    }
+                    int numThreads = Runtime.getRuntime().availableProcessors() * 32;
+                    List<HandlerThread> threads = new ArrayList<>();
+                    List<Handler> handlers = new ArrayList<>();
+                    Log.d(TAG, "Starting " + numThreads + " threads.");
+
+                    for (int i = 0; i < numThreads; i++) {
+                        HandlerThread thread = new HandlerThread("WatchZoneUpdater_" + (i + 1));
+                        thread.start();
+                        Handler handler = new Handler(thread.getLooper());
+
+                        threads.add(thread);
+                        handlers.add(handler);
+                    }
+
+                    container.watchZoneUpdater = new WatchZoneUpdater(container.zoneModel,
+                            new WatchZoneUpdater.ProgressListener() {
+                                @Override
+                                public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
+                                    if (WatchZoneUpdater.UpdateProgress.Status.UPDATING ==
+                                            progress.getStatus()) {
+                                        container.progress = progress.getProgress();
+                                        postUpdatedData();
+                                    }
+                                }
+                            }, handlers, WatchZoneModelUpdater.this,
+                            mLimits,
+                            WatchZoneModelUpdater.this);
+
+                    boolean cancel = false;
+                    synchronized (WatchZoneModelUpdater.this) {
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.zoneModel.watchZone.getUid());
+                        if (container != containerInMap) {
+                            cancel = true;
+                        }
+                    }
+                    if (!cancel) {
+                        // This will block!
+                        WatchZoneUpdater.UpdateProgress finalProgress = container.watchZoneUpdater.execute();
+
+                        if (WatchZoneUpdater.UpdateProgress.Status.CANCELLED == finalProgress.getStatus()) {
+                            // TODO is needed?
+                        }
+                    }
+
+                    for (HandlerThread thread : threads) {
+                        thread.quit();
+                    }
+
+                    synchronized (WatchZoneModelUpdater.this) {
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.zoneModel.watchZone.getUid());
+                        if (container == containerInMap) {
+                            mUpdatingWatchZones.remove(container.zoneModel.watchZone.getUid());
+                            postUpdatedData();
+                        }
+                    }
+                }
+            });
+        }
+
+        postUpdatedData();
+    }
+
+    /*private synchronized void invalidate(WatchZoneModelRepository repository) {
+        if (mLimits == null) {
             return;
         }
 
@@ -162,7 +304,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(/*repository.getWatchZoneModels().values()*/);
+        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(repository.getWatchZoneModels().values());
         Map<Long, WatchZoneModel> models = new HashMap<>();//mModelsObserver.getWatchZoneModels();
         for (Long uid : models.keySet()) {
             WatchZoneModel model = models.get(uid);
@@ -300,13 +442,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         }
 
         postUpdatedData();
-    }
+    }*/
 
     private synchronized void cancelAndRemoveContainer(WatchZoneContainer container) {
         if (container.watchZoneUpdater != null) {
             container.watchZoneUpdater.cancel();
         }
-        mUpdatingWatchZones.remove(container.watchZoneModel.getWatchZoneUid());
+        mUpdatingWatchZones.remove(container.zoneModel.watchZone.getUid());
     }
 
     private synchronized void postUpdatedData() {

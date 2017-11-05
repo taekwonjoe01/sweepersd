@@ -17,7 +17,7 @@ public interface WatchZoneDao {
     @Transaction @Query("SELECT * FROM watchzones")
     LiveData<List<ZoneModel>> getAllZonesLiveData();
 
-    @Transaction @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
+    @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
     LiveData<ZoneModel> getZoneLiveDataForUid(long uid);
 
     @Query("SELECT * FROM watchzones")
