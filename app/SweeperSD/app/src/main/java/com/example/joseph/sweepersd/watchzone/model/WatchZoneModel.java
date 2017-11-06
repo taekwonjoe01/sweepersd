@@ -21,7 +21,7 @@ public class WatchZoneModel {
 
         if (this.watchZone.getUid() == compareTo.watchZone.getUid()) {
             result = false;
-            if (this.watchZone.isChanged(compareTo.watchZone)) {
+            if (this.watchZone.isChanged(false, compareTo.watchZone)) {
                 result = true;
             } else if (this.points.size() != compareTo.points.size()) {
                 result = true;

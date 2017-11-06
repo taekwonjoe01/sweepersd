@@ -33,7 +33,7 @@ public class WatchZoneModelObserver extends BaseObserver<WatchZone, WatchZoneMod
 
     @Override
     public void onPossibleChangeDetected(WatchZone watchZone) {
-        boolean isChanged = mWatchZone.isChanged(watchZone);
+        boolean isChanged = mWatchZone.isChanged(false, watchZone);
         mWatchZone = watchZone;
         if (isChanged) {
             mCallback.onWatchZoneModelChanged(mWatchZone);

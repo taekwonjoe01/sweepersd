@@ -49,7 +49,7 @@ public class WatchZoneModelsObserver extends BaseObserver<Map<Long, WatchZoneMod
                 } else {
                     WatchZone oldZone = oldModel.watchZone;
                     WatchZone newZone = newModel.watchZone;
-                    if (oldZone.isChanged(newZone)) {
+                    if (oldZone.isChanged(true, newZone)) {
                         changeSet.changedLimits.add(uid);
                     }
                 }

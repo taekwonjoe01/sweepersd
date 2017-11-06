@@ -162,10 +162,14 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         Integer progress;
     }
 
-    private boolean needsRefresh(WatchZone first, WatchZone second) {
-        return first.getCenterLatitude() != second.getCenterLatitude() ||
-                first.getCenterLongitude() != second.getCenterLongitude() ||
-                first.getRadius() != second.getRadius();
+    private boolean needsUpdate(WatchZoneModel model) {
+        boolean result = false;
+        for (WatchZonePointModel pointModel : model.points) {
+            if (pointModel.point.getAddress() == null) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     private synchronized void invalidate(Map<Long, WatchZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
@@ -197,7 +201,10 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             cancelAll();
             toAdd.clear();
             for (Long uid : zoneModels.keySet()) {
-                toAdd.add(uid);
+                WatchZoneModel model = zoneModels.get(uid);
+                if (needsUpdate(model)) {
+                    toAdd.add(uid);
+                }
             }
         }
 

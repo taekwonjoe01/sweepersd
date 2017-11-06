@@ -104,7 +104,7 @@ public class WatchZone {
         this.remindPolicy = remindPolicy;
     }
 
-    public boolean isChanged(WatchZone compareTo) {
+    public boolean isChanged(boolean onlyCircle, WatchZone compareTo) {
         boolean result = false;
 
         if (this.uid == compareTo.getUid()) {
@@ -114,13 +114,13 @@ public class WatchZone {
                 result = true;
             } else if (this.centerLongitude != compareTo.getCenterLongitude()) {
                 result = true;
-            } else if (!TextUtils.equals(this.label, compareTo.getLabel())) {
+            } else if (!onlyCircle && !TextUtils.equals(this.label, compareTo.getLabel())) {
                 result = true;
-            } else if (this.lastSweepingUpdated != compareTo.getLastSweepingUpdated()) {
+            } else if (!onlyCircle && this.lastSweepingUpdated != compareTo.getLastSweepingUpdated()) {
                 result = true;
-            } else if (this.remindRange != compareTo.getRemindRange()) {
+            } else if (!onlyCircle && this.remindRange != compareTo.getRemindRange()) {
                 result = true;
-            } else if (this.remindPolicy != compareTo.getRemindPolicy()) {
+            } else if (!onlyCircle && this.remindPolicy != compareTo.getRemindPolicy()) {
                 result = true;
             }
         }
