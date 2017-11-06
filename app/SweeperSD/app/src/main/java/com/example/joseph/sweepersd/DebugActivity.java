@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.limit.AddressValidatorJob;
-import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.WatchZoneUpdateJob;
@@ -65,10 +64,10 @@ public class DebugActivity extends AppCompatActivity {
         mLimitCacheClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LimitRepository.getInstance(DebugActivity.this).delete();
+                //LimitRepository.getInstance(DebugActivity.this).delete();
             }
         });
-        LimitRepository.getInstanceLiveData().observe(this, new Observer<LimitRepository>() {
+        /*LimitRepository.getInstanceLiveData().observe(this, new Observer<LimitRepository>() {
             @Override
             public void onChanged(@Nullable LimitRepository limitRepository) {
                 if (limitRepository == null) {
@@ -77,7 +76,8 @@ public class DebugActivity extends AppCompatActivity {
                     mLimitCacheSize.setText("allocated");
                 }
             }
-        });
+        });*/
+        mLimitCacheSize.setText("TODO");
         mWZRCacheClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

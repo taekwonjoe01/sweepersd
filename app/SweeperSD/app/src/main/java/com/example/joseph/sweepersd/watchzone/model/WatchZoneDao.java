@@ -20,32 +20,14 @@ public interface WatchZoneDao {
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
     LiveData<WatchZoneModel> getZoneLiveDataForUid(long uid);
 
-    @Query("SELECT * FROM watchzones")
-    LiveData<List<WatchZone>> getAllWatchZonesLiveData();
-
-    @Query("SELECT * FROM watchzones")
-    List<WatchZone> getAllWatchZones();
-
-    @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
-    LiveData<List<WatchZonePoint>> getWatchZonePointsLiveData(long uid);
-
     @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
     List<WatchZonePoint> getWatchZonePoints(long uid);
-
-    @Query("SELECT * FROM watchzones WHERE uid LIKE :uid")
-    LiveData<WatchZone> getWatchZoneLiveData(long uid);
 
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
     WatchZone getWatchZone(long uid);
 
-    @Query("SELECT uid FROM watchzones")
-    List<Long> getWatchZoneUids();
-
     @Insert(onConflict = REPLACE)
     long insertWatchZone(WatchZone watchZone);
-
-    @Insert(onConflict = REPLACE)
-    long insertWatchZonePoint(WatchZonePoint point);
 
     @Insert(onConflict = REPLACE)
     long[] insertWatchZonePoints(List<WatchZonePoint> points);
