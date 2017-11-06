@@ -5,7 +5,6 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
-import android.arch.persistence.room.Transaction;
 import android.arch.persistence.room.Update;
 
 import java.util.List;
@@ -14,7 +13,7 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public interface LimitDao {
-    @Transaction @Query("SELECT * from limits WHERE isPosted IS 1 LIMIT 999")
+    @Query("SELECT * from limits WHERE isPosted IS 1 LIMIT 999")
     LiveData<List<LimitModel>> loadLimitModels();
 
     @Query("SELECT * FROM limits")

@@ -40,12 +40,13 @@ public abstract class BaseObserver<T, U> implements Observer<U> {
     public void onChanged(@Nullable U data) {
         if (!isValid(data)) {
             mCallback.onDataInvalid();
-        }
-        if (!mIsLoaded) {
-            mIsLoaded = true;
-            mCallback.onDataLoaded(getData(data));
-        } else if (mIsLoaded) {
-            onPossibleChangeDetected(getData(data));
+        } else {
+            if (!mIsLoaded) {
+                mIsLoaded = true;
+                mCallback.onDataLoaded(getData(data));
+            } else if (mIsLoaded) {
+                onPossibleChangeDetected(getData(data));
+            }
         }
     }
 

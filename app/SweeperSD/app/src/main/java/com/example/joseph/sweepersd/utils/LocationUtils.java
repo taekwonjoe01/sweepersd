@@ -5,7 +5,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.limit.Limit;
+import com.example.joseph.sweepersd.limit.LimitDao;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -13,7 +15,6 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class LocationUtils {
     private static final String TAG = LocationUtils.class.getSimpleName();
@@ -219,7 +220,7 @@ public class LocationUtils {
     }*/
 
     // TODO this will work in anywhere on earth... probably don't want to.
-    public static Limit findLimitForAddress(Map<String, List<Limit>> limitsHash, String address) {
+    public static Limit findLimitForAddress(Context context, String address) {
         Limit result = null;
         if (address != null) {
             String[] split = address.split(",");
@@ -240,8 +241,8 @@ public class LocationUtils {
                                 int minNum = Integer.parseInt(streetNumberParsings[0]);
                                 int maxNum = Integer.parseInt(streetNumberParsings[1]);
 
-                                Limit minLimit = checkAddress(limitsHash, minNum, streetName);
-                                Limit maxLimit = checkAddress(limitsHash, maxNum, streetName);
+                                Limit minLimit = checkAddress(context, minNum, streetName);
+                                Limit maxLimit = checkAddress(context, maxNum, streetName);
                                 result = (minLimit != null) ? minLimit :
                                         (maxLimit != null) ? maxLimit : null;
                             } catch (NumberFormatException e) {
@@ -253,7 +254,7 @@ public class LocationUtils {
                     } else {
                         try {
                             int num = Integer.parseInt(streetNumber);
-                            Limit l = checkAddress(limitsHash, num, streetName);
+                            Limit l = checkAddress(context, num, streetName);
                             result = (l != null) ? l : null;
                         } catch (NumberFormatException e) {
                             Log.e(TAG, "Malformed Street numbers: " + streetNumber);
@@ -271,11 +272,12 @@ public class LocationUtils {
         return result;
     }
 
-    private static Limit checkAddress(Map<String, List<Limit>> limitsHash, int houseNumber, String street) {
+    private static Limit checkAddress(Context context, int houseNumber, String street) {
         Limit result = null;
-        List<Limit> limitsForStreet = limitsHash.get(street);
+        LimitDao limitDao = AppDatabase.getInstance(context).limitDao();
+        List<Limit> limitsForStreet = limitDao.getAllByStreet(street);
         if (limitsForStreet != null) {
-            for (Limit l : limitsHash.get(street)) {
+            for (Limit l : limitsForStreet) {
                 if (street.contains(l.getStreet())) {
                     if (houseNumber >= l.getStartRange() && houseNumber <= l.getEndRange()) {
                         result = l;

@@ -92,6 +92,18 @@ public class WatchZoneModelRepository {
         return result;
     }
 
+    /**
+     * Intended for internal package use only.
+     * @param watchZonePoint
+     * @return
+     */
+    synchronized int updateWatchZonePoint(WatchZonePoint watchZonePoint) {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+        int result = watchZoneDao.updateWatchZonePoint(watchZonePoint);
+
+        return result;
+    }
+
     public LiveData<List<ZoneModel>> getZoneModelsLiveData() {
         return mCachedWatchZones;
     }

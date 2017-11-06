@@ -1,25 +1,21 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
+import android.content.Context;
 import android.os.Handler;
 
-import com.example.joseph.sweepersd.limit.Limit;
-import com.example.joseph.sweepersd.limit.LimitModel;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class WatchZoneUpdater {
+    private final Context mApplicationContext;
     private final List<Handler> mHandlers;
     private final ZoneModel mModel;
     private final WatchZonePointSaveDelegate mSaveDelegate;
     private final ProgressListener mProgressListener;
-    private final List<LimitModel> mLimits;
     private final AddressProvider mAddressProvider;
 
     private AtomicBoolean mIsCancelled;
@@ -45,15 +41,14 @@ class WatchZoneUpdater {
         void saveWatchZonePoint(WatchZonePoint p);
     }
 
-    public WatchZoneUpdater(ZoneModel watchZoneModel, ProgressListener listener,
+    public WatchZoneUpdater(Context applicationContext, ZoneModel watchZoneModel, ProgressListener listener,
                             List<Handler> threadedHandlers,
-                            WatchZonePointSaveDelegate saveDelegate,
-                            List<LimitModel> limits, AddressProvider addressProvider) {
+                            WatchZonePointSaveDelegate saveDelegate, AddressProvider addressProvider) {
+        mApplicationContext = applicationContext;
         mModel = watchZoneModel;
         mProgressListener = listener;
         mHandlers = threadedHandlers;
         mSaveDelegate = saveDelegate;
-        mLimits = limits;
         mAddressProvider = addressProvider;
 
         mIsCancelled = new AtomicBoolean(false);
@@ -73,16 +68,6 @@ class WatchZoneUpdater {
             publishProgress(mProgress);
             return mProgress;
         }
-        Map<String, List<Limit>> limitHash = new HashMap<>();
-        for (LimitModel l : mLimits) {
-            List<Limit> list = limitHash.get(l.limit.getStreet());
-            if (list == null) {
-                list = new ArrayList<>();
-            }
-            list.add(l.limit);
-            limitHash.put(l.limit.getStreet(), list);
-        }
-
 
         final List<PointModel> watchZonePoints = mModel.points;
         Collections.shuffle(watchZonePoints);
@@ -98,8 +83,8 @@ class WatchZoneUpdater {
         for (final PointModel p : watchZonePoints) {
             Handler handler = mHandlers.get(0);
 
-            final WatchZonePointUpdater updater = new WatchZonePointUpdater(p.point,
-                    mSaveDelegate, limitHash, mAddressProvider);
+            final WatchZonePointUpdater updater = new WatchZonePointUpdater(mApplicationContext, p.point,
+                    mSaveDelegate, mAddressProvider);
             handler.post(new Runnable() {
                 @Override
                 public void run() {

@@ -57,7 +57,10 @@ public class WatchZoneModelsObserver extends BaseObserver<Map<Long, ZoneModel>, 
         }
         mWatchZoneModels = watchZoneModels;
 
-        mCallback.onModelsChanged(mWatchZoneModels, changeSet);
+        if (!changeSet.changedLimits.isEmpty() || !changeSet.removedLimits.isEmpty()
+                || !changeSet.addedLimits.isEmpty()) {
+            mCallback.onModelsChanged(mWatchZoneModels, changeSet);
+        }
     }
 
     @Override

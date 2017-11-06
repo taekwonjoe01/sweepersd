@@ -1,0 +1,4 @@
+Location Priviledges:
+1. On fresh install, ensure WZE requests permission to get location. 
+	a. If denied, zooms into San Diego, otherwise zooms to current location. 
+2. If denied, when setting notification to "only nearby", verify request location. 

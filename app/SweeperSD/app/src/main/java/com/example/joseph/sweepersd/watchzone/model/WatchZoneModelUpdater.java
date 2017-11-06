@@ -8,10 +8,8 @@ import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.limit.LimitModel;
-import com.example.joseph.sweepersd.limit.LimitModelObserver;
-import com.example.joseph.sweepersd.limit.LimitRepository;
 import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.utils.BooleanPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
@@ -35,12 +33,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final HandlerThread mThread;
     private final Handler mHandler;
     private final WatchZoneModelsObserver mModelsObserver;
-    private final LimitModelObserver mLimitsObserver;
+    private final BooleanPreferenceLiveData mLimitsLoadedLiveData;
+    private final Observer<Boolean> mLimitsLoadedObserver;
     private final LongPreferenceLiveData mExplorerUidLiveData;
     private final Observer<Long> mExplorerUidObserver;
     private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
-    private List<LimitModel> mLimits;
+    private boolean mLimitsLoaded;
     private Map<Long, ZoneModel> mWatchZones;
 
     private WatchZoneModelUpdater(Context context) {
@@ -52,8 +51,9 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, ZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                Log.e("Joey", "onModelsChanged");
                 mWatchZones = data;
-                if (mLimits != null) {
+                if (mLimitsLoaded) {
                     invalidate(data, changeSet);
                 }
             }
@@ -61,7 +61,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             @Override
             public void onDataLoaded(Map<Long, ZoneModel> data) {
                 mWatchZones = data;
-                if (mLimits != null) {
+                if (mLimitsLoaded) {
                     invalidate(data, null);
                 }
             }
@@ -71,30 +71,20 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 // This should never happen.
             }
         });
-        mLimitsObserver = new LimitModelObserver(new LimitModelObserver.LimitModelCallback() {
+        mLimitsLoadedLiveData = new BooleanPreferenceLiveData(mApplicationContext, Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED);
+        mLimitsLoadedObserver = new Observer<Boolean>() {
             @Override
-            public void onLimitModelsChanged(List<LimitModel> limitModels) {
-                if (mWatchZones != null) {
-                    // TODO refresh all
+            public void onChanged(@Nullable Boolean limitsLoaded) {
+                if (limitsLoaded && !mLimitsLoaded && mWatchZones != null) {
                     BaseObserver.ChangeSet changeSet = new BaseObserver.ChangeSet();
                     for (Long uid : mWatchZones.keySet()) {
                         changeSet.changedLimits.add(uid);
                     }
                     invalidate(mWatchZones, changeSet);
                 }
-                mLimits = limitModels;
+                mLimitsLoaded = limitsLoaded;
             }
-
-            @Override
-            public void onDataLoaded(List<LimitModel> data) {
-                mLimits = data;
-            }
-
-            @Override
-            public void onDataInvalid() {
-                mLimits = null;
-            }
-        });
+        };
         mExplorerUidLiveData = new LongPreferenceLiveData(mApplicationContext,
                 Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
         mExplorerUidObserver = new Observer<Long>() {
@@ -103,6 +93,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 //invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
             }
         };
+        mLimitsLoaded = false;
     }
 
     public static synchronized WatchZoneModelUpdater getInstance(Context context) {
@@ -140,7 +131,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     @Override
     protected synchronized void onActive() {
-        LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData().observeForever(mLimitsObserver);
+        mLimitsLoadedLiveData.observeForever(mLimitsLoadedObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mModelsObserver);
         mExplorerUidLiveData.observeForever(mExplorerUidObserver);
     }
@@ -148,7 +139,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     @Override
     protected synchronized void onInactive() {
         mExplorerUidLiveData.removeObserver(mExplorerUidObserver);
-        LimitRepository.getInstance(mApplicationContext).getPostedLimitsLiveData().removeObserver(mLimitsObserver);
+        mLimitsLoadedLiveData.removeObserver(mLimitsLoadedObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mModelsObserver);
         cancelAll();
     }
@@ -178,6 +169,12 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     }
 
     private synchronized void invalidate(Map<Long, ZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
+        if (changeSet != null) {
+            Log.e("Joey", "invalidate toadd size " + changeSet.addedLimits.size() + " toremove size "
+                    + changeSet.removedLimits.size() + " changed size " + changeSet.changedLimits.size());
+        } else {
+            Log.e("Joey", "invalidate on loaded");
+        }
         List<Long> toCancel = new ArrayList<>();
         List<Long> toAdd = new ArrayList<>();
         if (changeSet != null) {
@@ -246,7 +243,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                         handlers.add(handler);
                     }
 
-                    container.watchZoneUpdater = new WatchZoneUpdater(container.zoneModel,
+                    container.watchZoneUpdater = new WatchZoneUpdater(mApplicationContext, container.zoneModel,
                             new WatchZoneUpdater.ProgressListener() {
                                 @Override
                                 public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
@@ -257,7 +254,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                                     }
                                 }
                             }, handlers, WatchZoneModelUpdater.this,
-                            mLimits,
                             WatchZoneModelUpdater.this);
 
                     boolean cancel = false;
@@ -468,7 +464,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     @Override
     public void saveWatchZonePoint(WatchZonePoint p) {
         if (mUpdatingWatchZones.containsKey(p.getWatchZoneId())) {
-            WatchZoneRepository.getInstance(mApplicationContext).updateWatchZonePoint(p);
+            WatchZoneModelRepository.getInstance(mApplicationContext).updateWatchZonePoint(p);
         }
     }
 }
