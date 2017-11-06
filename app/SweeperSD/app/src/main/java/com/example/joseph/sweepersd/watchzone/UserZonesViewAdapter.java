@@ -22,10 +22,10 @@ import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -43,7 +43,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
 
     private final AppCompatActivity mActivity;
 
-    private List<ZoneModel> mCurrentList;
+    private List<WatchZoneModel> mCurrentList;
     private Map<Long, Integer> mUpdatingProgressMap;
 
     public UserZonesViewAdapter(AppCompatActivity activity) {
@@ -52,15 +52,15 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         WatchZoneModelRepository.getInstance(mActivity).getZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> data,
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
                                         BaseObserver.ChangeSet changeSet) {
                 // This is only capable of detecting insertions or deletions.
                 // Changes must be detected directly.
                 List<Long> modelUids = new ArrayList<>(data.keySet());
                 Collections.sort(modelUids);
-                final List<ZoneModel> sortedModels = new ArrayList<>();
+                final List<WatchZoneModel> sortedModels = new ArrayList<>();
                 for (Long uid : modelUids) {
-                    ZoneModel model = data.get(uid);
+                    WatchZoneModel model = data.get(uid);
                     sortedModels.add(model);
                 }
                 DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
@@ -91,12 +91,12 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             }
 
             @Override
-            public void onDataLoaded(Map<Long, ZoneModel> data) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
                 List<Long> modelUids = new ArrayList<>(data.keySet());
                 Collections.sort(modelUids);
-                List<ZoneModel> sortedModels = new ArrayList<>();
+                List<WatchZoneModel> sortedModels = new ArrayList<>();
                 for (Long uid : modelUids) {
-                    ZoneModel model = data.get(uid);
+                    WatchZoneModel model = data.get(uid);
                     sortedModels.add(model);
                 }
 
@@ -128,7 +128,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
             for (Long uid : watchZoneProgress.keySet()) {
                 removedWatchZones.remove(uid);
             }
-            for (ZoneModel model : mCurrentList) {
+            for (WatchZoneModel model : mCurrentList) {
                 if (removedWatchZones.contains(model.watchZone.getUid())) {
                     int index = mCurrentList.indexOf(model);
                     notifyItemChanged(index);
@@ -139,7 +139,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
         if (mCurrentList == null) {
             return;
         }
-        for (ZoneModel model : mCurrentList) {
+        for (WatchZoneModel model : mCurrentList) {
             if (mUpdatingProgressMap.containsKey(model.watchZone.getUid())) {
                 int index = mCurrentList.indexOf(model);
                 notifyItemChanged(index);
@@ -161,7 +161,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mViewLayout.setBackground(
                 mActivity.getResources().getDrawable(R.drawable.apptheme_background));
-        final ZoneModel model = mCurrentList.get(position);
+        final WatchZoneModel model = mCurrentList.get(position);
         final WatchZone watchZone = model.watchZone;
         String label = watchZone.getLabel();
 

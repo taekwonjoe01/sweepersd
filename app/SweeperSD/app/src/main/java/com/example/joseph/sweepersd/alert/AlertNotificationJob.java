@@ -20,9 +20,9 @@ import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,13 +71,13 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
         WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> data,
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
                                         BaseObserver.ChangeSet changeSet) {
                 // Do nothing. Will be rescheduled if happens
             }
 
             @Override
-            public void onDataLoaded(Map<Long, ZoneModel> models) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
                 mWatchZoneModelsLoaded = true;
                 if (mWatchZoneFencesLoaded) {
                     AlertManager alertManager = new AlertManager(AlertNotificationJob.this);

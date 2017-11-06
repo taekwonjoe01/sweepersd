@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WatchZoneLimitsObserver extends BaseObserver<Map<Long, LimitModel>, ZoneModel> {
+public class WatchZoneLimitsObserver extends BaseObserver<Map<Long, LimitModel>, WatchZoneModel> {
     final Long mWatchZoneUid;
     private final WatchZoneLimitsChangedCallback mCallback;
 
@@ -25,14 +25,14 @@ public class WatchZoneLimitsObserver extends BaseObserver<Map<Long, LimitModel>,
     }
 
     @Override
-    public boolean isValid(ZoneModel zoneModel) {
-        return zoneModel != null;
+    public boolean isValid(WatchZoneModel watchZoneModel) {
+        return watchZoneModel != null;
     }
 
     @Override
-    public Map<Long, LimitModel> getData(ZoneModel zoneModel) {
+    public Map<Long, LimitModel> getData(WatchZoneModel watchZoneModel) {
         HashMap<Long, LimitModel> results = new HashMap<>();
-        for (PointModel point : zoneModel.points) {
+        for (WatchZonePointModel point : watchZoneModel.points) {
             List<LimitModel> models = point.limitModels;
             if (models != null && !models.isEmpty()) {
                 for (LimitModel model : models) {

@@ -12,7 +12,6 @@ import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 
 public class NotificationsTabFragment extends TabFragment {
 
@@ -64,7 +63,7 @@ public class NotificationsTabFragment extends TabFragment {
             @Override
             public void onClick(View view) {
                 WatchZone watchZone = mWatchZoneObserver.getWatchZone();
-                WatchZoneRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
+                WatchZoneModelRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
                         watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
                         watchZone.getRadius(), WatchZone.REMIND_RANGE_48_HOURS, watchZone.getRemindPolicy());
             }
@@ -73,7 +72,7 @@ public class NotificationsTabFragment extends TabFragment {
             @Override
             public void onClick(View view) {
                 WatchZone watchZone = mWatchZoneObserver.getWatchZone();
-                WatchZoneRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
+                WatchZoneModelRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
                         watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
                         watchZone.getRadius(), WatchZone.REMIND_RANGE_24_HOURS, watchZone.getRemindPolicy());
             }
@@ -82,7 +81,7 @@ public class NotificationsTabFragment extends TabFragment {
             @Override
             public void onClick(View view) {
                 WatchZone watchZone = mWatchZoneObserver.getWatchZone();
-                WatchZoneRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
+                WatchZoneModelRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
                         watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
                         watchZone.getRadius(), WatchZone.REMIND_RANGE_12_HOURS, watchZone.getRemindPolicy());
             }
@@ -91,7 +90,7 @@ public class NotificationsTabFragment extends TabFragment {
             @Override
             public void onClick(View view) {
                 WatchZone watchZone = mWatchZoneObserver.getWatchZone();
-                WatchZoneRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
+                WatchZoneModelRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
                         watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
                         watchZone.getRadius(), watchZone.getRemindRange(), WatchZone.REMIND_POLICY_ANYWHERE);
             }
@@ -100,7 +99,7 @@ public class NotificationsTabFragment extends TabFragment {
             @Override
             public void onClick(View view) {
                 WatchZone watchZone = mWatchZoneObserver.getWatchZone();
-                WatchZoneRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
+                WatchZoneModelRepository.getInstance(getActivity()).updateWatchZone(mWatchZoneUid, watchZone.getLabel(),
                         watchZone.getCenterLatitude(), watchZone.getCenterLongitude(),
                         watchZone.getRadius(), watchZone.getRemindRange(), WatchZone.REMIND_POLICY_NEARBY);
             }

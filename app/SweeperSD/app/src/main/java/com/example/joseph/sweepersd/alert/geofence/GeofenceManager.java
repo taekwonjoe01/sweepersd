@@ -10,7 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.PendingIntents;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
@@ -30,7 +30,7 @@ public class GeofenceManager {
         mApplicationContext = context.getApplicationContext();
     }
 
-    public void updateGeofences(List<ZoneModel> models) {
+    public void updateGeofences(List<WatchZoneModel> models) {
         WatchZoneFenceDao dao = AppDatabase.getInstance(mApplicationContext).watchZoneFenceDao();
         List<WatchZoneFence> watchZoneFences = dao.getAllGeofences();
 
@@ -40,8 +40,8 @@ public class GeofenceManager {
         }
 
         Set<Long> orphans = new HashSet<>(existingGeofences.keySet());
-        List<ZoneModel> newModels = new ArrayList<>();
-        for (ZoneModel model : models) {
+        List<WatchZoneModel> newModels = new ArrayList<>();
+        for (WatchZoneModel model : models) {
             orphans.remove(model.watchZone.getUid());
             if (!existingGeofences.containsKey(model.watchZone.getUid())
                     && model.watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_NEARBY) {
@@ -70,7 +70,7 @@ public class GeofenceManager {
                 dao.delete(watchZoneFence);
                 existingGeofences.remove(orphaned);
             }
-            for (ZoneModel model : newModels) {
+            for (WatchZoneModel model : newModels) {
                 WatchZoneFence newWatchZoneFence = new WatchZoneFence();
                 newWatchZoneFence.setWatchZoneId(model.watchZone.getUid());
                 newWatchZoneFence.setInRegion(false);

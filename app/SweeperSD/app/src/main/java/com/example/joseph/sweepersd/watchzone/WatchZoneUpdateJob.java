@@ -15,14 +15,13 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.Map;
 
@@ -85,53 +84,49 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
         mDispatcher.onServicePreSuperOnCreate();
         mDispatcher.onServicePreSuperOnStart();
 
-        if (!WatchZoneRepository.getInstance(this).getWatchZoneUids().isEmpty()) {
-            WatchZoneModelUpdater.getInstance(this).observe(this,
-                    new Observer<Map<Long, Integer>>() {
-                @Override
-                public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
-                    // Do nothing - just observing so this object comes to life.
-                }
-            });
-            WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this,
-                    new WatchZoneModelsObserver(true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-                @Override
-                public void onModelsChanged(Map<Long, ZoneModel> data, BaseObserver.ChangeSet changeSet) {
-                }
+        WatchZoneModelUpdater.getInstance(this).observe(this,
+                new Observer<Map<Long, Integer>>() {
+            @Override
+            public void onChanged(@Nullable Map<Long, Integer> longIntegerMap) {
+                // Do nothing - just observing so this object comes to life.
+            }
+        });
+        WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this,
+                new WatchZoneModelsObserver(true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+            }
 
-                @Override
-                public void onDataLoaded(Map<Long, ZoneModel> data) {
-                    boolean finished = false;
-                    if (data != null) {
-                        Map<Long, ZoneModel> models = data;
-                        if (models != null && !models.isEmpty()) {
-                            finished = true;
-                            /*for (Long uid : models.keySet()) {
-                                ZoneModel model = models.get(uid);
-                                if (model == null || model.getStatus() != WatchZoneModel.Status.VALID) {
-                                    finished = false;
-                                }
-                            }*/
-                        }
-                    }
-                    if (finished) {
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
-                                WatchZoneUpdateJob.this);
-                        preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
-                                System.currentTimeMillis()).commit();
-                        jobFinished(jobParameters, false);
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+                boolean finished = false;
+                if (data != null) {
+                    Map<Long, WatchZoneModel> models = data;
+                    if (models != null && !models.isEmpty()) {
+                        finished = true;
+                        /*for (Long uid : models.keySet()) {
+                            WatchZoneModel model = models.get(uid);
+                            if (model == null || model.getStatus() != WatchZoneModel.Status.VALID) {
+                                finished = false;
+                            }
+                        }*/
                     }
                 }
-
-                @Override
-                public void onDataInvalid() {
-
+                if (finished) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                            WatchZoneUpdateJob.this);
+                    preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
+                    jobFinished(jobParameters, false);
                 }
-            }));
-        } else {
-            Log.i(TAG, "No WatchZoneModels, finishing job.");
-            jobFinished(jobParameters, false);
-        }
+            }
+
+            @Override
+            public void onDataInvalid() {
+
+            }
+        }));
+
         // Signal that another thread is doing the work.
         return true;
     }

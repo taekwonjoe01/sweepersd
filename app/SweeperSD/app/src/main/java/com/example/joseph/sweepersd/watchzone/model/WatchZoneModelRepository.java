@@ -28,8 +28,8 @@ public class WatchZoneModelRepository {
     private final Handler mHandler;
     private final HandlerThread mThread;
 
-    private final Map<Long, LiveData<ZoneModel>> mWatchZoneModelsMap;
-    private final LiveData<List<ZoneModel>> mCachedWatchZones;
+    private final Map<Long, LiveData<WatchZoneModel>> mWatchZoneModelsMap;
+    private final LiveData<List<WatchZoneModel>> mCachedWatchZones;
 
     private WatchZoneModelRepository(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -104,13 +104,74 @@ public class WatchZoneModelRepository {
         return result;
     }
 
-    public LiveData<List<ZoneModel>> getZoneModelsLiveData() {
+    public synchronized int updateWatchZone(Long watchZoneUid, String label,
+                                            double centerLatitude, double centerLongitude,
+                                            int radius, int remindRange, int remindPolicy) {
+        int result = 0;
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+
+        boolean invalidateWatchZonePoints = false;
+        WatchZone watchZone = watchZoneDao.getWatchZone(watchZoneUid);
+        if (watchZone != null) {
+            if (centerLatitude != watchZone.getCenterLatitude()
+                    || centerLongitude != watchZone.getCenterLongitude()
+                    || radius != watchZone.getRadius()) {
+                invalidateWatchZonePoints = true;
+            }
+            watchZone.setLabel(label);
+            watchZone.setCenterLatitude(centerLatitude);
+            watchZone.setCenterLongitude(centerLongitude);
+            watchZone.setRadius(radius);
+            watchZone.setRemindRange(remindRange);
+            watchZone.setRemindPolicy(remindPolicy);
+            result = watchZoneDao.updateWatchZone(watchZone);
+            if (result > 0 && invalidateWatchZonePoints) {
+                List<WatchZonePoint> oldPoints = watchZoneDao.getWatchZonePoints(watchZone.getUid());
+                int numDeleted = watchZoneDao.deleteWatchZonePoints(oldPoints);
+
+                List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(
+                        new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()),
+                        watchZone.getRadius());
+                List<WatchZonePoint> points = new ArrayList<>();
+                for (LatLng latLng : latLngs) {
+                    WatchZonePoint point = new WatchZonePoint();
+                    point.setLimitId(0L);
+                    point.setAddress(null);
+                    point.setWatchZoneUpdatedTimestampMs(0L);
+                    point.setWatchZoneId(watchZone.getUid());
+                    point.setLatitude(latLng.latitude);
+                    point.setLongitude(latLng.longitude);
+                    points.add(point);
+                }
+
+                watchZoneDao.insertWatchZonePoints(points);
+
+                scheduleUpdateJob();
+            }
+        }
+
+        return result;
+    }
+
+    public synchronized int deleteWatchZone(Long uid) {
+        WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
+
+        WatchZone watchZone = watchZoneDao.getWatchZone(uid);
+        int result = 0;
+        if (watchZone != null) {
+            result = watchZoneDao.deleteWatchZone(watchZone);
+        }
+
+        return result;
+    }
+
+    public LiveData<List<WatchZoneModel>> getZoneModelsLiveData() {
         return mCachedWatchZones;
     }
 
-    public LiveData<ZoneModel> getZoneModelForUid(long uid) {
+    public LiveData<WatchZoneModel> getZoneModelForUid(long uid) {
         if (!mWatchZoneModelsMap.containsKey(uid)) {
-            LiveData<ZoneModel> model = loadWatchZoneLiveDataFromDb(uid);
+            LiveData<WatchZoneModel> model = loadWatchZoneLiveDataFromDb(uid);
             if (model == null) {
                 Log.e("Joey", "It's null???");
             }
@@ -120,13 +181,13 @@ public class WatchZoneModelRepository {
         return mWatchZoneModelsMap.get(uid);
     }
 
-    private LiveData<List<ZoneModel>> loadWatchZonesLiveDataFromDb() {
+    private LiveData<List<WatchZoneModel>> loadWatchZonesLiveDataFromDb() {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getAllZonesLiveData();
     }
 
-    private LiveData<ZoneModel> loadWatchZoneLiveDataFromDb(long uid) {
+    private LiveData<WatchZoneModel> loadWatchZoneLiveDataFromDb(long uid) {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getZoneLiveDataForUid(uid);

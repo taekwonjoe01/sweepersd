@@ -11,10 +11,10 @@ import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.scheduling.ScheduleManager;
 import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
         WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> models,
+            public void onModelsChanged(Map<Long, WatchZoneModel> models,
                                         BaseObserver.ChangeSet changeSet) {
                 AlertManager alertManager = new AlertManager(WatchZoneBaseActivity.this);
                 alertManager.updateAlertNotification(new ArrayList<>(models.values()),
@@ -44,7 +44,7 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
                 geofenceManager.updateGeofences(new ArrayList<>(models.values()));
             }
             @Override
-            public void onDataLoaded(Map<Long, ZoneModel> models) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
                 ScheduleManager scheduleManager = new ScheduleManager(WatchZoneBaseActivity.this);
                 scheduleManager.scheduleWatchZones(new ArrayList<>(models.values()));
                 GeofenceManager geofenceManager = new GeofenceManager(WatchZoneBaseActivity.this);

@@ -18,7 +18,7 @@ import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -61,13 +61,13 @@ public class ScheduleJob extends JobService implements LifecycleOwner {
         WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> data,
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
                                         BaseObserver.ChangeSet changeSet) {
                 // Do nothing.
             }
 
             @Override
-            public void onDataLoaded(Map<Long, ZoneModel> models) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
                 ScheduleManager scheduleManager = new ScheduleManager(ScheduleJob.this);
                 scheduleManager.scheduleWatchZones(new ArrayList<>(models.values()));
                 preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED,

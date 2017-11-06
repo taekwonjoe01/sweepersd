@@ -24,7 +24,6 @@ import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
@@ -164,7 +163,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                     return;
                 }
                 mCurrentRadius = getRadiusForProgress(seekBar.getProgress());
-                WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
+                WatchZoneModelRepository.getInstance(WatchZoneExplorerActivity.this)
                         .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
                                 mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
                                 WatchZone.REMIND_RANGE_DEFAULT,
@@ -232,7 +231,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         super.onDestroy();
 
         if (mCurrentWatchZoneUid != 0L && !mSaveOnDestroy) {
-            WatchZoneRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
+            WatchZoneModelRepository.getInstance(this).deleteWatchZone(mCurrentWatchZoneUid);
         }
     }
 
@@ -286,7 +285,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
             mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
         } else {
-            WatchZoneRepository.getInstance(WatchZoneExplorerActivity.this)
+            WatchZoneModelRepository.getInstance(WatchZoneExplorerActivity.this)
                     .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
                             mCurrentLatitude, mCurrentLongitude, mCurrentRadius,
                             WatchZone.REMIND_RANGE_DEFAULT,

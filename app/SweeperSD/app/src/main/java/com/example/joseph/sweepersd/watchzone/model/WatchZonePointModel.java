@@ -8,14 +8,14 @@ import com.example.joseph.sweepersd.limit.LimitModel;
 
 import java.util.List;
 
-public class PointModel {
+public class WatchZonePointModel {
     @Embedded
     public WatchZonePoint point;
 
     @Relation(parentColumn = "limitId", entityColumn = "uid", entity = Limit.class)
     public List<LimitModel> limitModels;
 
-    public boolean isChanged(PointModel compareTo) {
+    public boolean isChanged(WatchZonePointModel compareTo) {
         boolean result = false;
 
         if (this.point.getUid() != compareTo.point.getUid()) {

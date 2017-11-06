@@ -13,7 +13,7 @@ import com.example.joseph.sweepersd.watchzone.UserZonesActivity;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -30,10 +30,10 @@ public class AlertManager {
         mApplicationContext = context.getApplicationContext();
     }
 
-    public void updateAlertNotification(List<ZoneModel> models, List<WatchZoneFence> fences) {
+    public void updateAlertNotification(List<WatchZoneModel> models, List<WatchZoneFence> fences) {
         List<String> currentLabels = new ArrayList<>();
         List<String> upcomingLabels = new ArrayList<>();
-        for (ZoneModel model : models) {
+        for (WatchZoneModel model : models) {
             boolean isInBounds = false;
             if (model.watchZone.getRemindPolicy() == WatchZone.REMIND_POLICY_ANYWHERE) {
                 isInBounds = true;

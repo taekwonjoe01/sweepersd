@@ -2,7 +2,7 @@ package com.example.joseph.sweepersd.watchzone.model;
 
 import com.example.joseph.sweepersd.utils.BaseObserver;
 
-public class WatchZoneModelObserver extends BaseObserver<WatchZone, ZoneModel> {
+public class WatchZoneModelObserver extends BaseObserver<WatchZone, WatchZoneModel> {
     private final Long mWatchZoneUid;
     private final WatchZoneModelChangedCallback mCallback;
 
@@ -19,16 +19,16 @@ public class WatchZoneModelObserver extends BaseObserver<WatchZone, ZoneModel> {
     }
 
     @Override
-    public boolean isValid(ZoneModel zoneModel) {
-        return zoneModel != null;
+    public boolean isValid(WatchZoneModel watchZoneModel) {
+        return watchZoneModel != null;
     }
 
     @Override
-    public WatchZone getData(ZoneModel zoneModel) {
+    public WatchZone getData(WatchZoneModel watchZoneModel) {
         if (mWatchZone == null) {
-            mWatchZone = zoneModel.watchZone;
+            mWatchZone = watchZoneModel.watchZone;
         }
-        return zoneModel.watchZone;
+        return watchZoneModel.watchZone;
     }
 
     @Override

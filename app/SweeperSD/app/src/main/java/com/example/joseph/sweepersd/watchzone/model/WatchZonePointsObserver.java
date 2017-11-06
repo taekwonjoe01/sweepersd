@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WatchZonePointsObserver extends BaseObserver<Map<Long, PointModel>, ZoneModel> {
+public class WatchZonePointsObserver extends BaseObserver<Map<Long, WatchZonePointModel>, WatchZoneModel> {
     private final Long mWatchZoneUid;
     private final WatchZonePointsChangedCallback mCallback;
 
-    protected Map<Long, PointModel> mWatchZonePoints;
+    protected Map<Long, WatchZonePointModel> mWatchZonePoints;
 
-    public interface WatchZonePointsChangedCallback extends BaseObserverCallback<Map<Long, PointModel>> {
-        void onWatchZonePointsChanged(Map<Long, PointModel> watchZonePointMap, ChangeSet changeSet);
+    public interface WatchZonePointsChangedCallback extends BaseObserverCallback<Map<Long, WatchZonePointModel>> {
+        void onWatchZonePointsChanged(Map<Long, WatchZonePointModel> watchZonePointMap, ChangeSet changeSet);
     }
 
     public WatchZonePointsObserver(Long watchZoneUid, WatchZonePointsChangedCallback callback) {
@@ -23,14 +23,14 @@ public class WatchZonePointsObserver extends BaseObserver<Map<Long, PointModel>,
     }
 
     @Override
-    public boolean isValid(ZoneModel zoneModel) {
-        return zoneModel != null;
+    public boolean isValid(WatchZoneModel watchZoneModel) {
+        return watchZoneModel != null;
     }
 
     @Override
-    public Map<Long, PointModel> getData(ZoneModel zoneModel) {
-        HashMap<Long, PointModel> results = new HashMap<>();
-        for (PointModel model : zoneModel.points) {
+    public Map<Long, WatchZonePointModel> getData(WatchZoneModel watchZoneModel) {
+        HashMap<Long, WatchZonePointModel> results = new HashMap<>();
+        for (WatchZonePointModel model : watchZoneModel.points) {
             if (model.point.getAddress() != null) {
                 results.put(model.point.getUid(), model);
             }
@@ -42,7 +42,7 @@ public class WatchZonePointsObserver extends BaseObserver<Map<Long, PointModel>,
     }
 
     @Override
-    public void onPossibleChangeDetected(Map<Long, PointModel> watchZonePoints) {
+    public void onPossibleChangeDetected(Map<Long, WatchZonePointModel> watchZonePoints) {
         ChangeSet changeSet = new ChangeSet();
         changeSet.addedLimits = new ArrayList<>();
         changeSet.changedLimits = new ArrayList<>();
@@ -52,8 +52,8 @@ public class WatchZonePointsObserver extends BaseObserver<Map<Long, PointModel>,
             if (!mWatchZonePoints.containsKey(uid)) {
                 changeSet.addedLimits.add(uid);
             } else {
-                PointModel curPoint = mWatchZonePoints.get(uid);
-                PointModel newPoint = watchZonePoints.get(uid);
+                WatchZonePointModel curPoint = mWatchZonePoints.get(uid);
+                WatchZonePointModel newPoint = watchZonePoints.get(uid);
                 if (curPoint.isChanged(newPoint)) {
                     changeSet.changedLimits.add(uid);
                 }
@@ -64,7 +64,7 @@ public class WatchZonePointsObserver extends BaseObserver<Map<Long, PointModel>,
         mCallback.onWatchZonePointsChanged(mWatchZonePoints, changeSet);
     }
 
-    public Map<Long, PointModel> getWatchZonePoints() {
+    public Map<Long, WatchZonePointModel> getWatchZonePoints() {
         return mWatchZonePoints;
     }
 }

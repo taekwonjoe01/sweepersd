@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 class WatchZoneUpdater {
     private final Context mApplicationContext;
     private final List<Handler> mHandlers;
-    private final ZoneModel mModel;
+    private final WatchZoneModel mModel;
     private final WatchZonePointSaveDelegate mSaveDelegate;
     private final ProgressListener mProgressListener;
     private final AddressProvider mAddressProvider;
@@ -41,11 +41,11 @@ class WatchZoneUpdater {
         void saveWatchZonePoint(WatchZonePoint p);
     }
 
-    public WatchZoneUpdater(Context applicationContext, ZoneModel watchZoneModel, ProgressListener listener,
+    public WatchZoneUpdater(Context applicationContext, WatchZoneModel watchWatchZoneModel, ProgressListener listener,
                             List<Handler> threadedHandlers,
                             WatchZonePointSaveDelegate saveDelegate, AddressProvider addressProvider) {
         mApplicationContext = applicationContext;
-        mModel = watchZoneModel;
+        mModel = watchWatchZoneModel;
         mProgressListener = listener;
         mHandlers = threadedHandlers;
         mSaveDelegate = saveDelegate;
@@ -69,7 +69,7 @@ class WatchZoneUpdater {
             return mProgress;
         }
 
-        final List<PointModel> watchZonePoints = mModel.points;
+        final List<WatchZonePointModel> watchZonePoints = mModel.points;
         Collections.shuffle(watchZonePoints);
 
         mProgress = new UpdateProgress(0, UpdateProgress.Status.UPDATING);
@@ -80,7 +80,7 @@ class WatchZoneUpdater {
 
         int handlerIndex = 0;
         int numHandlers = mHandlers.size();
-        for (final PointModel p : watchZonePoints) {
+        for (final WatchZonePointModel p : watchZonePoints) {
             Handler handler = mHandlers.get(0);
 
             final WatchZonePointUpdater updater = new WatchZonePointUpdater(mApplicationContext, p.point,

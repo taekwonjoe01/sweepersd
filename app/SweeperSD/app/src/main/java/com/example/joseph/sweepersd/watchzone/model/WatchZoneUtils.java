@@ -281,7 +281,7 @@ public class WatchZoneUtils {
         }
     }
 
-    public static List<LimitScheduleDate> getStartTimeOrderedDatesForWatchZone(ZoneModel model) {
+    public static List<LimitScheduleDate> getStartTimeOrderedDatesForWatchZone(WatchZoneModel model) {
         List<LimitScheduleDate> results = null;
         Map<Long, LimitModel> limitModels = model.getUniqueLimitModels();
         if (!limitModels.isEmpty()) {
@@ -295,7 +295,7 @@ public class WatchZoneUtils {
         return results;
     }
 
-    public static long getNextEventTimestampForWatchZone(ZoneModel model) {
+    public static long getNextEventTimestampForWatchZone(WatchZoneModel model) {
         long result = -1L;
         Map<Long, LimitModel> limitModels = model.getUniqueLimitModels();
         if (!limitModels.isEmpty()) {

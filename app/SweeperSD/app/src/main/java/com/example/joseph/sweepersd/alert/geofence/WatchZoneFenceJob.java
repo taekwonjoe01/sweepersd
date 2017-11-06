@@ -16,9 +16,9 @@ import android.util.Log;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-import com.example.joseph.sweepersd.watchzone.model.ZoneModel;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -59,13 +59,13 @@ public class WatchZoneFenceJob extends JobService implements LifecycleOwner {
         WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> data,
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
                                         BaseObserver.ChangeSet changeSet) {
                 // Do nothing.
             }
 
             @Override
-            public void onDataLoaded(Map<Long, ZoneModel> models) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
                 GeofenceManager fenceManager = new GeofenceManager(WatchZoneFenceJob.this);
                 fenceManager.updateGeofences(new ArrayList<>(models.values()));
                 preferences.edit().putLong(Preferences.PREFERENCE_FENCE_JOB_LAST_FINISHED,

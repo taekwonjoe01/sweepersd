@@ -40,7 +40,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
     private boolean mLimitsLoaded;
-    private Map<Long, ZoneModel> mWatchZones;
+    private Map<Long, WatchZoneModel> mWatchZones;
 
     private WatchZoneModelUpdater(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -50,7 +50,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mUpdatingWatchZones = new HashMap<>();
         mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, ZoneModel> data, BaseObserver.ChangeSet changeSet) {
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
                 Log.e("Joey", "onModelsChanged");
                 mWatchZones = data;
                 if (mLimitsLoaded) {
@@ -59,7 +59,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             }
 
             @Override
-            public void onDataLoaded(Map<Long, ZoneModel> data) {
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
                 mWatchZones = data;
                 if (mLimitsLoaded) {
                     invalidate(data, null);
@@ -156,7 +156,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     }
 
     private class WatchZoneContainer {
-        ZoneModel zoneModel;
+        WatchZoneModel watchZoneModel;
         WatchZone updatingWatchZone;
         WatchZoneUpdater watchZoneUpdater;
         Integer progress;
@@ -168,7 +168,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 first.getRadius() != second.getRadius();
     }
 
-    private synchronized void invalidate(Map<Long, ZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
+    private synchronized void invalidate(Map<Long, WatchZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
         if (changeSet != null) {
             Log.e("Joey", "invalidate toadd size " + changeSet.addedLimits.size() + " toremove size "
                     + changeSet.removedLimits.size() + " changed size " + changeSet.changedLimits.size());
@@ -210,10 +210,10 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         });
 
         for (Long uid : toAdd) {
-            final ZoneModel model = zoneModels.get(uid);
+            final WatchZoneModel model = zoneModels.get(uid);
 
             final WatchZoneContainer container = new WatchZoneContainer();
-            container.zoneModel = model;
+            container.watchZoneModel = model;
             container.updatingWatchZone = model.watchZone;
             container.watchZoneUpdater = null;
             container.progress = 0;
@@ -224,7 +224,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 @Override
                 public void run() {
                     synchronized (WatchZoneModelUpdater.this) {
-                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.zoneModel.watchZone.getUid());
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.watchZone.getUid());
                         if (container != containerInMap) {
                             return;
                         }
@@ -243,7 +243,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                         handlers.add(handler);
                     }
 
-                    container.watchZoneUpdater = new WatchZoneUpdater(mApplicationContext, container.zoneModel,
+                    container.watchZoneUpdater = new WatchZoneUpdater(mApplicationContext, container.watchZoneModel,
                             new WatchZoneUpdater.ProgressListener() {
                                 @Override
                                 public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
@@ -258,7 +258,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
                     boolean cancel = false;
                     synchronized (WatchZoneModelUpdater.this) {
-                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.zoneModel.watchZone.getUid());
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.watchZone.getUid());
                         if (container != containerInMap) {
                             cancel = true;
                         }
@@ -277,9 +277,9 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                     }
 
                     synchronized (WatchZoneModelUpdater.this) {
-                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.zoneModel.watchZone.getUid());
+                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.watchZone.getUid());
                         if (container == containerInMap) {
-                            mUpdatingWatchZones.remove(container.zoneModel.watchZone.getUid());
+                            mUpdatingWatchZones.remove(container.watchZoneModel.watchZone.getUid());
                             postUpdatedData();
                         }
                     }
@@ -444,7 +444,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         if (container.watchZoneUpdater != null) {
             container.watchZoneUpdater.cancel();
         }
-        mUpdatingWatchZones.remove(container.zoneModel.watchZone.getUid());
+        mUpdatingWatchZones.remove(container.watchZoneModel.watchZone.getUid());
     }
 
     private synchronized void postUpdatedData() {

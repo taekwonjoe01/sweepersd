@@ -15,10 +15,10 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 @Dao
 public interface WatchZoneDao {
     @Transaction @Query("SELECT * FROM watchzones")
-    LiveData<List<ZoneModel>> getAllZonesLiveData();
+    LiveData<List<WatchZoneModel>> getAllZonesLiveData();
 
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
-    LiveData<ZoneModel> getZoneLiveDataForUid(long uid);
+    LiveData<WatchZoneModel> getZoneLiveDataForUid(long uid);
 
     @Query("SELECT * FROM watchzones")
     LiveData<List<WatchZone>> getAllWatchZonesLiveData();

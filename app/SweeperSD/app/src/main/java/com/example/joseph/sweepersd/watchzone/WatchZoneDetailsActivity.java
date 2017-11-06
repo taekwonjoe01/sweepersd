@@ -15,7 +15,6 @@ import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -121,7 +120,7 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                WatchZoneRepository.getInstance(this).deleteWatchZone(mWatchZoneId);
+                WatchZoneModelRepository.getInstance(this).deleteWatchZone(mWatchZoneId);
                 return true;
         }
         return false;
