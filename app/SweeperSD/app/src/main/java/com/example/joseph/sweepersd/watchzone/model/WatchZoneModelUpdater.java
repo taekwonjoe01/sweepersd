@@ -3,11 +3,13 @@ package com.example.joseph.sweepersd.watchzone.model;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.limit.OnDeviceLimitProviderService;
 import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.utils.BooleanPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.LocationUtils;
@@ -54,6 +56,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                 Log.e("Joey", "onModelsChanged");
                 mWatchZones = data;
                 if (mLimitsLoaded) {
+                    Log.e("Joey", "limitsLoaded");
                     invalidate(data, changeSet);
                 }
             }
@@ -75,12 +78,17 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mLimitsLoadedObserver = new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean limitsLoaded) {
+                Log.e("Joey", "limitsLoadedChanged " + limitsLoaded);
                 if (limitsLoaded && !mLimitsLoaded && mWatchZones != null) {
+                    Log.e("Joey", "invalidating ");
                     BaseObserver.ChangeSet changeSet = new BaseObserver.ChangeSet();
                     for (Long uid : mWatchZones.keySet()) {
                         changeSet.changedLimits.add(uid);
                     }
                     invalidate(mWatchZones, changeSet);
+                } else if (!limitsLoaded) {
+                    Intent msgIntent = new Intent(mApplicationContext, OnDeviceLimitProviderService.class);
+                    mApplicationContext.startService(msgIntent);
                 }
                 mLimitsLoaded = limitsLoaded;
             }
