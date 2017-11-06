@@ -95,6 +95,26 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                 new WatchZoneModelsObserver(true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                boolean finished = false;
+                if (data != null) {
+                    Map<Long, WatchZoneModel> models = data;
+                    if (models != null && !models.isEmpty()) {
+                        finished = true;
+                        /*for (Long uid : models.keySet()) {
+                            WatchZoneModel model = models.get(uid);
+                            if (model == null || model.getStatus() != WatchZoneModel.Status.VALID) {
+                                finished = false;
+                            }
+                        }*/
+                    }
+                }
+                if (finished) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                            WatchZoneUpdateJob.this);
+                    preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
+                    jobFinished(jobParameters, false);
+                }
             }
 
             @Override
