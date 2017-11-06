@@ -25,17 +25,12 @@ public class WatchZoneModelRepository {
     private static WatchZoneModelRepository sInstance;
 
     private final Context mApplicationContext;
-    private final Handler mHandler;
-    private final HandlerThread mThread;
 
     private final Map<Long, LiveData<WatchZoneModel>> mWatchZoneModelsMap;
     private final LiveData<List<WatchZoneModel>> mCachedWatchZones;
 
     private WatchZoneModelRepository(Context context) {
         mApplicationContext = context.getApplicationContext();
-        mThread = new HandlerThread("WatchZoneModelRepositoryUpdateThread");
-        mThread.start();
-        mHandler = new Handler(/*mThread.getLooper()*/Looper.getMainLooper());
 
         mWatchZoneModelsMap = new HashMap<>();
         mCachedWatchZones = loadWatchZonesLiveDataFromDb();
