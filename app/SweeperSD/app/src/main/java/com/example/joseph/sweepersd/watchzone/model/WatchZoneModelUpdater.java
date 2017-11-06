@@ -205,7 +205,12 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             }
         }
 
+        Map<Long, Integer> progressMap = new HashMap<>();
         if (!toAdd.isEmpty()) {
+            for (Long uid : mUpdatingWatchZones.keySet()) {
+                WatchZoneContainer container = mUpdatingWatchZones.get(uid);
+                progressMap.put(container.updatingWatchZone.getUid(), container.progress);
+            }
             cancelAll();
             toAdd.clear();
             for (Long uid : zoneModels.keySet()) {
@@ -231,7 +236,11 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             container.watchZoneModel = model;
             container.updatingWatchZone = model.watchZone;
             container.watchZoneUpdater = null;
-            container.progress = 0;
+            if (progressMap.containsKey(model.watchZone.getUid())) {
+                container.progress = progressMap.get(model.watchZone.getUid());
+            } else {
+                container.progress = 0;
+            }
 
             mUpdatingWatchZones.put(uid, container);
 
@@ -259,17 +268,17 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                     }
 
                     container.watchZoneUpdater = new WatchZoneUpdater(mApplicationContext, container.watchZoneModel,
-                            new WatchZoneUpdater.ProgressListener() {
-                                @Override
-                                public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
-                                    if (WatchZoneUpdater.UpdateProgress.Status.UPDATING ==
-                                            progress.getStatus()) {
-                                        container.progress = progress.getProgress();
-                                        postUpdatedData();
-                                    }
-                                }
-                            }, handlers, WatchZoneModelUpdater.this,
-                            WatchZoneModelUpdater.this);
+                            container.progress, new WatchZoneUpdater.ProgressListener() {
+                        @Override
+                        public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
+                            if (WatchZoneUpdater.UpdateProgress.Status.UPDATING ==
+                                    progress.getStatus()) {
+                                container.progress = progress.getProgress();
+                                postUpdatedData();
+                            }
+                        }
+                    }, handlers, WatchZoneModelUpdater.this,
+                    WatchZoneModelUpdater.this);
 
                     boolean cancel = false;
                     synchronized (WatchZoneModelUpdater.this) {

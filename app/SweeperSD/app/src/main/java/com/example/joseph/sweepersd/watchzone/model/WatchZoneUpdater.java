@@ -17,6 +17,7 @@ class WatchZoneUpdater {
     private final WatchZonePointSaveDelegate mSaveDelegate;
     private final ProgressListener mProgressListener;
     private final AddressProvider mAddressProvider;
+    private final Integer mStartingProgress;
 
     private AtomicBoolean mIsCancelled;
     private UpdateProgress mProgress;
@@ -41,11 +42,13 @@ class WatchZoneUpdater {
         void saveWatchZonePoint(WatchZonePoint p);
     }
 
-    public WatchZoneUpdater(Context applicationContext, WatchZoneModel watchWatchZoneModel, ProgressListener listener,
+    public WatchZoneUpdater(Context applicationContext, WatchZoneModel watchWatchZoneModel,
+                            Integer startingProgress, ProgressListener listener,
                             List<Handler> threadedHandlers,
                             WatchZonePointSaveDelegate saveDelegate, AddressProvider addressProvider) {
         mApplicationContext = applicationContext;
         mModel = watchWatchZoneModel;
+        mStartingProgress = startingProgress;
         mProgressListener = listener;
         mHandlers = threadedHandlers;
         mSaveDelegate = saveDelegate;
@@ -64,7 +67,7 @@ class WatchZoneUpdater {
 
     private UpdateProgress update() {
         if (mIsCancelled.get()) {
-            mProgress = new UpdateProgress(0, UpdateProgress.Status.CANCELLED);
+            mProgress = new UpdateProgress(mStartingProgress, UpdateProgress.Status.CANCELLED);
             publishProgress(mProgress);
             return mProgress;
         }
@@ -72,7 +75,7 @@ class WatchZoneUpdater {
         final List<WatchZonePointModel> watchZonePoints = mModel.points;
         Collections.shuffle(watchZonePoints);
 
-        mProgress = new UpdateProgress(0, UpdateProgress.Status.UPDATING);
+        mProgress = new UpdateProgress(mStartingProgress, UpdateProgress.Status.UPDATING);
         publishProgress(mProgress);
 
         final int size = watchZonePoints.size();
@@ -94,7 +97,7 @@ class WatchZoneUpdater {
                         if (!mIsCancelled.get()) {
                             synchronized (watchZonePoints) {
                                 int numDone = size - (int) latch.getCount();
-                                int progress = (int) (((double) numDone / (double) size) * 100);
+                                int progress = mStartingProgress + (int) ((((double) numDone / (double) size)) * (100.0 - (double) mStartingProgress));
                                 if (latch.getCount() > 0) {
                                     mProgress = new UpdateProgress(progress,
                                             UpdateProgress.Status.UPDATING);
