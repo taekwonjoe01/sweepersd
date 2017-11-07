@@ -15,9 +15,6 @@ import java.util.Map;
 public abstract class WatchZoneBaseActivity extends AppCompatActivity {
     public abstract void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap);
 
-    private boolean mWatchZonesLoaded;
-    private boolean mWatchZoneFencesLoaded;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
