@@ -206,11 +206,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onWatchZonePointsChanged(Map<Long, WatchZonePointModel> watchZonePointMap,
                                                  BaseObserver.ChangeSet changeSet) {
-                for (Long uid : changeSet.removedLimits) {
+                for (Long uid : changeSet.removedUids) {
                     Circle circle = presenter.pointsToCircleMap.remove(uid);
                     circle.remove();
                 }
-                for (Long uid : changeSet.changedLimits) {
+                for (Long uid : changeSet.changedUids) {
                     Circle circle = presenter.pointsToCircleMap.remove(uid);
                     circle.remove();
 
@@ -222,7 +222,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             .fillColor(getResources().getColor(R.color.map_radius_fill));
                     presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
                 }
-                for (Long uid : changeSet.addedLimits) {
+                for (Long uid : changeSet.addedUids) {
                     WatchZonePoint p = presenter.watchZonePointsObserver.getWatchZonePoints().get(uid).point;
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))

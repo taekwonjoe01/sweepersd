@@ -51,18 +51,18 @@ public class WatchZoneLimitsObserver extends BaseObserver<Map<Long, LimitModel>,
     @Override
     public void onPossibleChangeDetected(Map<Long, LimitModel> limitModels) {
         ChangeSet changeSet = new ChangeSet();
-        changeSet.addedLimits = new ArrayList<>();
-        changeSet.changedLimits = new ArrayList<>();
-        changeSet.removedLimits = new ArrayList<>(mLimitModels.keySet());
+        changeSet.addedUids = new ArrayList<>();
+        changeSet.changedUids = new ArrayList<>();
+        changeSet.removedUids = new ArrayList<>(mLimitModels.keySet());
         for (Long uid : limitModels.keySet()) {
-            changeSet.removedLimits.remove(uid);
+            changeSet.removedUids.remove(uid);
             if (!mLimitModels.containsKey(uid)) {
-                changeSet.addedLimits.add(uid);
+                changeSet.addedUids.add(uid);
             } else {
                 LimitModel curModel = mLimitModels.get(uid);
                 LimitModel newModel = limitModels.get(uid);
                 if (curModel.isChanged(newModel)) {
-                    changeSet.changedLimits.add(uid);
+                    changeSet.changedUids.add(uid);
                 }
             }
         }

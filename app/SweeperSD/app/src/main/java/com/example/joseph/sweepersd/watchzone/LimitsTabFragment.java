@@ -97,13 +97,13 @@ public class LimitsTabFragment extends TabFragment {
             @Override
             public void onLimitsChanged(Map<Long, LimitModel> data,
                                         BaseObserver.ChangeSet changeSet) {
-                for (Long uid : changeSet.removedLimits) {
+                for (Long uid : changeSet.removedUids) {
                     mAdapter.removeLimitModel(uid);
                 }
-                for (Long uid : changeSet.changedLimits) {
+                for (Long uid : changeSet.changedUids) {
                     mAdapter.updateLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
                 }
-                for (Long uid : changeSet.addedLimits) {
+                for (Long uid : changeSet.addedUids) {
                     mAdapter.addLimitModel(presenter.limitsObserver.getLimitModels().get(uid));
                 }
             }

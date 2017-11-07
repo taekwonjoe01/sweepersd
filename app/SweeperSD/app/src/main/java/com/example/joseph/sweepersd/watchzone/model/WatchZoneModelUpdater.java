@@ -53,7 +53,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
-                Log.e("Joey", "onModelsChanged");
+                Log.e("Joey", "onFencesChanges");
                 mWatchZones = data;
                 if (mLimitsLoaded) {
                     Log.e("Joey", "limitsLoaded");
@@ -83,7 +83,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
                     Log.e("Joey", "invalidating ");
                     BaseObserver.ChangeSet changeSet = new BaseObserver.ChangeSet();
                     for (Long uid : mWatchZones.keySet()) {
-                        changeSet.changedLimits.add(uid);
+                        changeSet.changedUids.add(uid);
                     }
                     invalidate(mWatchZones, changeSet);
                 } else if (!limitsLoaded) {
@@ -182,18 +182,18 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     private synchronized void invalidate(Map<Long, WatchZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
         if (changeSet != null) {
-            Log.e("Joey", "invalidate toadd size " + changeSet.addedLimits.size() + " toremove size "
-                    + changeSet.removedLimits.size() + " changed size " + changeSet.changedLimits.size());
+            Log.e("Joey", "invalidate toadd size " + changeSet.addedUids.size() + " toremove size "
+                    + changeSet.removedUids.size() + " changed size " + changeSet.changedUids.size());
         } else {
             Log.e("Joey", "invalidate on loaded");
         }
         List<Long> toCancel = new ArrayList<>();
         List<Long> toAdd = new ArrayList<>();
         if (changeSet != null) {
-            toCancel.addAll(changeSet.removedLimits);
-            toCancel.addAll(changeSet.changedLimits);
-            toAdd.addAll(changeSet.addedLimits);
-            toAdd.addAll(changeSet.changedLimits);
+            toCancel.addAll(changeSet.removedUids);
+            toCancel.addAll(changeSet.changedUids);
+            toAdd.addAll(changeSet.addedUids);
+            toAdd.addAll(changeSet.changedUids);
         } else {
             toAdd.addAll(new ArrayList<>(zoneModels.keySet()));
         }
@@ -324,8 +324,8 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             return;
         }
 
-        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(repository.getWatchZoneModels().values());
-        Map<Long, WatchZoneModel> models = new HashMap<>();//mModelsObserver.getWatchZoneModels();
+        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(repository.getWatchZoneFences().values());
+        Map<Long, WatchZoneModel> models = new HashMap<>();//mModelsObserver.getWatchZoneFences();
         for (Long uid : models.keySet()) {
             WatchZoneModel model = models.get(uid);
             if (model != null && model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {

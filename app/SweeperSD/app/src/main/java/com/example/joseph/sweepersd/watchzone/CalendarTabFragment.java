@@ -100,7 +100,7 @@ public class CalendarTabFragment extends TabFragment {
             @Override
             public void onLimitsChanged(Map<Long, LimitModel> data,
                                         BaseObserver.ChangeSet changeSet) {
-                for (Long uid : changeSet.removedLimits) {
+                for (Long uid : changeSet.removedUids) {
                     LimitModel removedModel = null;
                     for (LimitModel model : presenter.sweepingDates.keySet()) {
                         if (model.limit.getUid() == uid) {
@@ -117,7 +117,7 @@ public class CalendarTabFragment extends TabFragment {
                         }
                     }
                 }
-                for (Long uid : changeSet.changedLimits) {
+                for (Long uid : changeSet.changedUids) {
                     LimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
                             .get(uid);
                     List<Date> dates = presenter.sweepingDates.remove(model);
@@ -142,7 +142,7 @@ public class CalendarTabFragment extends TabFragment {
                     }
                     presenter.sweepingDates.put(model, calendarDates);
                 }
-                for (Long uid : changeSet.addedLimits) {
+                for (Long uid : changeSet.addedUids) {
                     LimitModel model = presenter.watchZoneLimitsObserver.getLimitModels()
                             .get(uid);
                     List<LimitSchedule> schedulesList = model.schedules;

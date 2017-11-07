@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.alert.geofence.AlertManager;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.utils.Jobs;
@@ -61,58 +62,21 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
         preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_STARTED,
                 System.currentTimeMillis()).commit();
 
-        final Long uid = jobParameters.getExtras().getLong(WATCH_ZONE_UID);
-
         mDispatcher = new ServiceLifecycleDispatcher(this);
 
         mDispatcher.onServicePreSuperOnCreate();
         mDispatcher.onServicePreSuperOnStart();
 
-        WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(true,
-                new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+        AlertManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data,
-                                        BaseObserver.ChangeSet changeSet) {
-                // Do nothing. Will be rescheduled if happens
-            }
-
-            @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
-                mWatchZoneModelsLoaded = true;
-                if (mWatchZoneFencesLoaded) {
-                    AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
-                    alertManager.updateAlertNotification(new ArrayList<>(models.values()),
-                            WatchZoneFenceRepository.getInstance(AlertNotificationJob.this).getFencesLiveData().getValue());
+            public void onChanged(@Nullable Boolean working) {
+                if (!working) {
                     preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
                             System.currentTimeMillis()).commit();
+                    jobFinished(jobParameters, false);
                 }
-                jobFinished(jobParameters, false);
             }
-            @Override
-            public void onDataInvalid() {
-                // Do nothing
-            }
-        }));
-        WatchZoneFenceRepository.getInstance(this).getFencesLiveData().observe(this,
-                new Observer<List<WatchZoneFence>>() {
-                    @Override
-                    public void onChanged(@Nullable List<WatchZoneFence> watchZoneFences) {
-                        if (watchZoneFences != null) {
-                            mWatchZoneFencesLoaded = true;
-                            if (mWatchZoneModelsLoaded) {
-                                AlertManager alertManager = new AlertManager(AlertNotificationJob.this);
-                                alertManager.updateAlertNotification(new ArrayList<>(
-                                                WatchZoneModelRepository.getInstance(
-                                                        AlertNotificationJob.this).getZoneModelsLiveData().getValue()),
-                                        watchZoneFences);
-                                preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_NOTIFICATION_LAST_FINISHED,
-                                        System.currentTimeMillis()).commit();
-                            }
-                        }
-                    }
-                });
-        mWatchZoneFencesLoaded = false;
-        mWatchZoneModelsLoaded = false;
+        });
 
         // Signal that another thread is doing the work.
         return true;

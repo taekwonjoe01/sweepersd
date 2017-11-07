@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class AlertManager {
+public class AlertUpdater {
     private final Context mApplicationContext;
 
-    public AlertManager(Context context) {
+    public AlertUpdater(Context context) {
         mApplicationContext = context.getApplicationContext();
     }
 

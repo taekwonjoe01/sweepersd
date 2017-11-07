@@ -44,18 +44,18 @@ public class WatchZonePointsObserver extends BaseObserver<Map<Long, WatchZonePoi
     @Override
     public void onPossibleChangeDetected(Map<Long, WatchZonePointModel> watchZonePoints) {
         ChangeSet changeSet = new ChangeSet();
-        changeSet.addedLimits = new ArrayList<>();
-        changeSet.changedLimits = new ArrayList<>();
-        changeSet.removedLimits = new ArrayList<>(mWatchZonePoints.keySet());
+        changeSet.addedUids = new ArrayList<>();
+        changeSet.changedUids = new ArrayList<>();
+        changeSet.removedUids = new ArrayList<>(mWatchZonePoints.keySet());
         for (Long uid : watchZonePoints.keySet()) {
-            changeSet.removedLimits.remove(uid);
+            changeSet.removedUids.remove(uid);
             if (!mWatchZonePoints.containsKey(uid)) {
-                changeSet.addedLimits.add(uid);
+                changeSet.addedUids.add(uid);
             } else {
                 WatchZonePointModel curPoint = mWatchZonePoints.get(uid);
                 WatchZonePointModel newPoint = watchZonePoints.get(uid);
                 if (curPoint.isChanged(newPoint)) {
-                    changeSet.changedLimits.add(uid);
+                    changeSet.changedUids.add(uid);
                 }
             }
         }

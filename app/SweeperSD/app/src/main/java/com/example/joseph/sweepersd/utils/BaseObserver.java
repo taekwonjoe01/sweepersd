@@ -25,14 +25,14 @@ public abstract class BaseObserver<T, U> implements Observer<U> {
     }
 
     public static class ChangeSet {
-        public List<Long> addedLimits;
-        public List<Long> changedLimits;
-        public List<Long> removedLimits;
+        public List<Long> addedUids;
+        public List<Long> changedUids;
+        public List<Long> removedUids;
 
         public ChangeSet() {
-            addedLimits = new ArrayList<>();
-            changedLimits = new ArrayList<>();
-            removedLimits = new ArrayList<>();
+            addedUids = new ArrayList<>();
+            changedUids = new ArrayList<>();
+            removedUids = new ArrayList<>();
         }
     }
 

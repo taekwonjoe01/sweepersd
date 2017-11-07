@@ -31,34 +31,34 @@ public class WatchZoneModelsObserver extends BaseObserver<Map<Long, WatchZoneMod
     @Override
     public void onPossibleChangeDetected(Map<Long, WatchZoneModel> watchZoneModels) {
         ChangeSet changeSet = new ChangeSet();
-        changeSet.addedLimits = new ArrayList<>();
-        changeSet.changedLimits = new ArrayList<>();
-        changeSet.removedLimits = new ArrayList<>(mWatchZoneModels.keySet());
+        changeSet.addedUids = new ArrayList<>();
+        changeSet.changedUids = new ArrayList<>();
+        changeSet.removedUids = new ArrayList<>(mWatchZoneModels.keySet());
         for (Long uid : watchZoneModels.keySet()) {
-            changeSet.removedLimits.remove(uid);
+            changeSet.removedUids.remove(uid);
             if (!mWatchZoneModels.containsKey(uid)) {
-                changeSet.addedLimits.add(uid);
+                changeSet.addedUids.add(uid);
             } else {
                 WatchZoneModel oldModel = mWatchZoneModels.get(uid);
                 WatchZoneModel newModel = watchZoneModels.get(uid);
                 if (mDetectDeepChanges) {
                     Boolean isChanged = oldModel.isChanged(newModel);
                     if (isChanged) {
-                        changeSet.changedLimits.add(uid);
+                        changeSet.changedUids.add(uid);
                     }
                 } else {
                     WatchZone oldZone = oldModel.watchZone;
                     WatchZone newZone = newModel.watchZone;
                     if (oldZone.isChanged(true, newZone)) {
-                        changeSet.changedLimits.add(uid);
+                        changeSet.changedUids.add(uid);
                     }
                 }
             }
         }
         mWatchZoneModels = watchZoneModels;
 
-        if (!changeSet.changedLimits.isEmpty() || !changeSet.removedLimits.isEmpty()
-                || !changeSet.addedLimits.isEmpty()) {
+        if (!changeSet.changedUids.isEmpty() || !changeSet.removedUids.isEmpty()
+                || !changeSet.addedUids.isEmpty()) {
             mCallback.onModelsChanged(mWatchZoneModels, changeSet);
         }
     }
