@@ -7,6 +7,7 @@ import android.os.HandlerThread;
 
 import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 
 import java.util.ArrayList;
@@ -62,12 +63,14 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
     @Override
     protected void onActive() {
         super.onActive();
+        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
         postValue(true);
     }
 
     @Override
     protected void onInactive() {
         super.onInactive();
+        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mWatchZoneModelsObserver);
     }
 
     private class UpdateGeofenceTask implements Runnable {
@@ -79,8 +82,8 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
 
         @Override
         public void run() {
-            GeofenceManager geofenceManager = new GeofenceManager(mApplicationContext);
-            geofenceManager.updateGeofences(new ArrayList<>(mModels.values()));
+            WatchZoneFenceUpdater watchZoneFenceUpdater = new WatchZoneFenceUpdater(mApplicationContext);
+            watchZoneFenceUpdater.updateGeofences(new ArrayList<>(mModels.values()));
 
             int numTasksRemaining = mTaskCount.decrementAndGet();
             if (numTasksRemaining == 0) {
