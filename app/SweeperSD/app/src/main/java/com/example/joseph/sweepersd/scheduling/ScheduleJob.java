@@ -6,11 +6,13 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ServiceLifecycleDispatcher;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.Jobs;
@@ -58,27 +60,16 @@ public class ScheduleJob extends JobService implements LifecycleOwner {
         mDispatcher.onServicePreSuperOnCreate();
         mDispatcher.onServicePreSuperOnStart();
 
-        WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this, new WatchZoneModelsObserver(true,
-                new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+        ScheduleManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data,
-                                        BaseObserver.ChangeSet changeSet) {
-                // Do nothing.
+            public void onChanged(@Nullable Boolean working) {
+                if (!working) {
+                    preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
+                    jobFinished(jobParameters, false);
+                }
             }
-
-            @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> models) {
-                ScheduleManager scheduleManager = new ScheduleManager(ScheduleJob.this);
-                scheduleManager.scheduleWatchZones(new ArrayList<>(models.values()));
-                preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED,
-                        System.currentTimeMillis()).commit();
-                jobFinished(jobParameters, false);
-            }
-            @Override
-            public void onDataInvalid() {
-                // Do nothing
-            }
-        }));
+        });
         // Signal that another thread is doing the work.
         return true;
     }

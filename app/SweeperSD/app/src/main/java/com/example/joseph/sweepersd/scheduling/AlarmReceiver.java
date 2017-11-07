@@ -10,6 +10,7 @@ import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceJob;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        LastAlarm.getInstance().postAlarm();
         // Wake up the app!
         ScheduleJob.scheduleJob(context);
         AlertNotificationJob.scheduleJob(context);

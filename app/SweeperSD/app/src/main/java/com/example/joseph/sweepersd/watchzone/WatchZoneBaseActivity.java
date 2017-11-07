@@ -10,6 +10,7 @@ import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceManager;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.scheduling.ScheduleManager;
+import com.example.joseph.sweepersd.scheduling.ScheduleUpdater;
 import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -38,14 +39,9 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
                 AlertManager alertManager = new AlertManager(WatchZoneBaseActivity.this);
                 alertManager.updateAlertNotification(new ArrayList<>(models.values()),
                         WatchZoneFenceRepository.getInstance(WatchZoneBaseActivity.this).getFencesLiveData().getValue());
-                ScheduleManager scheduleManager = new ScheduleManager(WatchZoneBaseActivity.this);
-                scheduleManager.scheduleWatchZones(new ArrayList<>(models.values()));
             }
             @Override
             public void onDataLoaded(Map<Long, WatchZoneModel> models) {
-                ScheduleManager scheduleManager = new ScheduleManager(WatchZoneBaseActivity.this);
-                scheduleManager.scheduleWatchZones(new ArrayList<>(models.values()));
-
                 mWatchZonesLoaded = true;
                 if (mWatchZoneFencesLoaded) {
                     AlertManager alertManager = new AlertManager(WatchZoneBaseActivity.this);
@@ -66,9 +62,15 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
                 }
             }
         });
+        ScheduleManager.getInstance(this).observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean working) {
+                // Do nothing.
+            }
+        });
         WatchZoneFenceManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
-            public void onChanged(@Nullable Boolean aBoolean) {
+            public void onChanged(@Nullable Boolean working) {
                 // Do nothing.
             }
         });

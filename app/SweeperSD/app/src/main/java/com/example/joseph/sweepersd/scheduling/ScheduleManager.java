@@ -1,53 +1,109 @@
 package com.example.joseph.sweepersd.scheduling;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.support.annotation.Nullable;
 
-import com.example.joseph.sweepersd.utils.PendingIntents;
+import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 
-import java.util.Date;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class ScheduleManager {
-    private static final String TAG = ScheduleManager.class.getSimpleName();
+public class ScheduleManager extends LiveData<Boolean> {
+    private static ScheduleManager sInstance;
 
     private final Context mApplicationContext;
+    private final HandlerThread mThread;
+    private final Handler mHandler;
+    private final AtomicInteger mTaskCount;
 
-    public ScheduleManager(Context context) {
-        mApplicationContext = context.getApplicationContext();
-    }
+    private final WatchZoneModelsObserver mWatchZoneModelsObserver = new WatchZoneModelsObserver(
+            true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+        @Override
+        public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+            mTaskCount.incrementAndGet();
+            postValue(true);
+            mHandler.post(new UpdateScheduleTask(data));
+        }
 
-    public long scheduleWatchZones(List<WatchZoneModel> watchWatchZoneModels) {
-        long nextEventTimestamp = -1L;
-        for (WatchZoneModel model : watchWatchZoneModels) {
-            long nextTimestamp = WatchZoneUtils.getNextEventTimestampForWatchZone(model);
-            if (nextTimestamp != -1L) {
-                if (nextEventTimestamp == -1L || nextTimestamp < nextEventTimestamp) {
-                    nextEventTimestamp = nextTimestamp;
-                }
+        @Override
+        public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+            mTaskCount.incrementAndGet();
+            postValue(true);
+            mHandler.post(new UpdateScheduleTask(data));
+        }
+
+        @Override
+        public void onDataInvalid() {
+            // This should never happen!
+        }
+    });
+
+    private final Observer<Long> mLastAlarmObserver = new Observer<Long>() {
+        @Override
+        public void onChanged(@Nullable Long aLong) {
+            if (mWatchZoneModelsObserver.isLoaded()) {
+                mTaskCount.incrementAndGet();
+                postValue(true);
+                mHandler.post(new UpdateScheduleTask(mWatchZoneModelsObserver.getWatchZoneModels()));
             }
         }
-        if (nextEventTimestamp != -1L) {
-            scheduleAlarm(nextEventTimestamp);
-        }
-        return nextEventTimestamp;
+    };
+
+    private ScheduleManager(Context context) {
+        mApplicationContext = context.getApplicationContext();
+        mThread = new HandlerThread("ScheduleManager-thread");
+        mThread.start();
+        mHandler = new Handler(mThread.getLooper());
+        mTaskCount = new AtomicInteger(0);
+        postValue(false);
     }
 
-    private void scheduleAlarm(long timestamp) {
-        AlarmManager alarmMgr;
-        PendingIntent alarmIntent;
+    public static ScheduleManager getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new ScheduleManager(context);
+        }
+        return sInstance;
+    }
 
-        alarmMgr = (AlarmManager) mApplicationContext.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(mApplicationContext, AlarmReceiver.class);
-        alarmIntent = PendingIntent.getBroadcast(mApplicationContext, PendingIntents.REQUEST_CODE_ALARM, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+    @Override
+    protected void onActive() {
+        super.onActive();
+        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
+        LastAlarm.getInstance().observeForever(mLastAlarmObserver);
+        postValue(true);
+    }
 
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, timestamp, alarmIntent);
-        Log.i(TAG, "Alarm scheduled for " + new Date(timestamp).toString());
+    @Override
+    protected void onInactive() {
+        super.onInactive();
+        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mWatchZoneModelsObserver);
+        LastAlarm.getInstance().removeObserver(mLastAlarmObserver);
+    }
+
+    private class UpdateScheduleTask implements Runnable {
+        private final Map<Long, WatchZoneModel> mModels;
+
+        UpdateScheduleTask(Map<Long, WatchZoneModel> models) {
+            mModels = models;
+        }
+
+        @Override
+        public void run() {
+            ScheduleUpdater scheduleUpdater = new ScheduleUpdater(mApplicationContext);
+            scheduleUpdater.scheduleWatchZones(new ArrayList<>(mModels.values()));
+
+            int numTasksRemaining = mTaskCount.decrementAndGet();
+            if (numTasksRemaining == 0) {
+                postValue(false);
+            }
+        }
     }
 }
