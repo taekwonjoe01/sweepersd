@@ -15,19 +15,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.alert.geofence.AlertManager;
-import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
-import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.utils.BaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class AlertNotificationJob extends JobService implements LifecycleOwner {
     private static final String TAG = AlertNotificationJob.class.getSimpleName();

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.joseph.sweepersd.alert.geofence.AlertManager;
+import com.example.joseph.sweepersd.alert.AlertManager;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceManager;
 import com.example.joseph.sweepersd.scheduling.ScheduleManager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;

@@ -4,6 +4,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.arch.lifecycle.Observer;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
@@ -31,7 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddressValidatorJob extends JobService {
     private static final String TAG = AddressValidatorJob.class.getSimpleName();
-    private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     private static final long ONE_HOUR = 1000L * 60L * 60L;
     private static final long TEN_SECONDS = 1000L * 10L;
 
@@ -81,69 +82,18 @@ public class AddressValidatorJob extends JobService {
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.d(TAG, "Starting " + TAG);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_STARTED, System.currentTimeMillis()).commit();
 
-        mFinishedLatch = new CountDownLatch(1);
-
-        mMainHandler = new Handler(Looper.getMainLooper());
-
-        mBackgroundThread = new HandlerThread("AddressValidatorThread");
-        mBackgroundThread.start();
-        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-        mIsCancelled = new AtomicBoolean(false);
-        mJobParameters = jobParameters;
-
-        mBackgroundHandler.post(new Runnable() {
+        AddressValidatorManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
-            public void run() {
-                LimitDao limitDao = AppDatabase.getInstance(AddressValidatorJob.this).limitDao();
-
-                Map<String, String> foundAddresses = new HashMap<>();
-
-                List<Limit> limits = limitDao.getAllLimits();
-                List<Limit> updatedLimits = new ArrayList<>();
-                for (Limit limit : limits) {
-                    if (mIsCancelled.get()) {
-                        break;
-                    }
-                    long timePassed = System.currentTimeMillis() - limit.getAddressValidatedTimestamp();
-                    if (timePassed > ONE_MONTH) {
-                        String streetBeingValidated = limit.getStreet();
-                        String validatedAddress = null;
-                        if (foundAddresses.containsKey(streetBeingValidated)) {
-                            validatedAddress = foundAddresses.get(streetBeingValidated);
-                        } else {
-                            validatedAddress = LocationUtils.validateStreet(
-                                    AddressValidatorJob.this, streetBeingValidated);
-                        }
-
-                        if (validatedAddress != null) {
-                            String[] parsings = validatedAddress.split(",");
-                            if (parsings.length > 0) {
-                                String validatedStreet = parsings[0].trim();
-                                limit.setStreet(validatedStreet);
-
-                                updatedLimits.add(limit);
-                                foundAddresses.put(streetBeingValidated, validatedStreet);
-                            }
-
-                            Log.d(TAG, "Validated address " + validatedAddress);
-                        }
-                    }
+            public void onChanged(@Nullable Boolean working) {
+                if (!working) {
+                    preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();
+                    preferences.edit().putBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_VALIDATED,
+                            true).commit();
                 }
-
-                long timestamp = System.currentTimeMillis();
-                for (Limit updatedLimit : updatedLimits) {
-                    updatedLimit.setAddressValidatedTimestamp(timestamp);
-                }
-                limitDao.updateLimits(updatedLimits);
-                Log.d(TAG, "Updated limit database with " + updatedLimits.size() + " limits.");
-
-                if (!mIsCancelled.get()) {
-                    postFinished();
-                }
-                mFinishedLatch.countDown();
             }
         });
 
@@ -161,26 +111,5 @@ public class AddressValidatorJob extends JobService {
         }
         mBackgroundThread.quit();
         return true;
-    }
-
-    private void postFinished() {
-        mMainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (!mIsCancelled.get()) {
-                    Log.d(TAG, "Finishing " + TAG);
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
-                            AddressValidatorJob.this);
-                    preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED,
-                            System.currentTimeMillis()).commit();
-                    preferences.edit().putBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_VALIDATED,
-                            true).commit();
-
-                    jobFinished(mJobParameters, false);
-
-                    mBackgroundThread.quit();
-                }
-            }
-        });
     }
 }

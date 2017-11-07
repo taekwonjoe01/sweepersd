@@ -1,4 +1,4 @@
-package com.example.joseph.sweepersd.alert.geofence;
+package com.example.joseph.sweepersd.alert;
 
 
 import android.arch.lifecycle.LiveData;
@@ -6,7 +6,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import com.example.joseph.sweepersd.alert.AlertUpdater;
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceObserver;
+import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
 import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -97,7 +99,7 @@ public class AlertManager extends LiveData<Boolean> {
         super.onActive();
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
         WatchZoneFenceRepository.getInstance(mApplicationContext).getFencesLiveData().observeForever(mFenceObserver);
-        postValue(true);
+        setValue(true);
     }
 
     @Override
@@ -105,6 +107,7 @@ public class AlertManager extends LiveData<Boolean> {
         super.onInactive();
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mWatchZoneModelsObserver);
         WatchZoneFenceRepository.getInstance(mApplicationContext).getFencesLiveData().removeObserver(mFenceObserver);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private class UpdateAlertsTask implements Runnable {

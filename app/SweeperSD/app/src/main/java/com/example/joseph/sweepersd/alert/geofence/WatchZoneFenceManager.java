@@ -64,13 +64,14 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
     protected void onActive() {
         super.onActive();
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
-        postValue(true);
+        setValue(true);
     }
 
     @Override
     protected void onInactive() {
         super.onInactive();
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mWatchZoneModelsObserver);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private class UpdateGeofenceTask implements Runnable {
