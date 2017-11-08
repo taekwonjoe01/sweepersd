@@ -8,10 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.limit.AddressValidatorJob;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.watchzone.WatchZoneUpdateJob;
 
 import java.util.Date;
 
@@ -116,8 +114,8 @@ public class DebugActivity extends AppCompatActivity {
         mScheduleAddressValidator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AddressValidatorJob.scheduleJob(DebugActivity.this);
-                AddressValidatorJob.scheduleMonthlyJob(DebugActivity.this);
+                /*AddressValidatorJob.scheduleJob(DebugActivity.this);
+                AddressValidatorJob.scheduleMonthlyJob(DebugActivity.this);*/
             }
         });
 
@@ -152,7 +150,7 @@ public class DebugActivity extends AppCompatActivity {
         mScheduleUpdater.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                WatchZoneUpdateJob.scheduleAppForegroundJob(DebugActivity.this);
+                //WatchZoneUpdateJob.scheduleAppForegroundJob(DebugActivity.this);
             }
         });
         LongPreferenceLiveData updaterStart = new LongPreferenceLiveData(this,

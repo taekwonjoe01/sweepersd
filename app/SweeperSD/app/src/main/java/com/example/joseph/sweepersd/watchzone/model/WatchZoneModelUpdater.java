@@ -34,13 +34,13 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     private final Context mApplicationContext;
     private final HandlerThread mThread;
     private final Handler mHandler;
-    private final WatchZoneModelsObserver mModelsObserver;
     private final BooleanPreferenceLiveData mLimitsLoadedLiveData;
-    private final Observer<Boolean> mLimitsLoadedObserver;
     private final LongPreferenceLiveData mExplorerUidLiveData;
-    private final Observer<Long> mExplorerUidObserver;
     private final Map<Long, WatchZoneContainer> mUpdatingWatchZones;
 
+    private WatchZoneModelsObserver mModelsObserver;
+    private Observer<Boolean> mLimitsLoadedObserver;
+    private Observer<Long> mExplorerUidObserver;
     private boolean mLimitsLoaded;
     private Map<Long, WatchZoneModel> mWatchZones;
 
@@ -50,57 +50,11 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mUpdatingWatchZones = new HashMap<>();
-        mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-            @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
-                Log.e("Joey", "onFencesChanges");
-                mWatchZones = data;
-                if (mLimitsLoaded) {
-                    Log.e("Joey", "limitsLoaded");
-                    invalidate(data, changeSet);
-                }
-            }
 
-            @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
-                mWatchZones = data;
-                if (mLimitsLoaded) {
-                    invalidate(data, null);
-                }
-            }
-
-            @Override
-            public void onDataInvalid() {
-                // This should never happen.
-            }
-        });
         mLimitsLoadedLiveData = new BooleanPreferenceLiveData(mApplicationContext, Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED);
-        mLimitsLoadedObserver = new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean limitsLoaded) {
-                Log.e("Joey", "limitsLoadedChanged " + limitsLoaded);
-                if (limitsLoaded && !mLimitsLoaded && mWatchZones != null) {
-                    Log.e("Joey", "invalidating ");
-                    BaseObserver.ChangeSet changeSet = new BaseObserver.ChangeSet();
-                    for (Long uid : mWatchZones.keySet()) {
-                        changeSet.changedUids.add(uid);
-                    }
-                    invalidate(mWatchZones, changeSet);
-                } else if (!limitsLoaded) {
-                    Intent msgIntent = new Intent(mApplicationContext, OnDeviceLimitProviderService.class);
-                    mApplicationContext.startService(msgIntent);
-                }
-                mLimitsLoaded = limitsLoaded;
-            }
-        };
+
         mExplorerUidLiveData = new LongPreferenceLiveData(mApplicationContext,
                 Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
-        mExplorerUidObserver = new Observer<Long>() {
-            @Override
-            public void onChanged(@Nullable Long aLong) {
-                //invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
-            }
-        };
         mLimitsLoaded = false;
     }
 
@@ -139,6 +93,50 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     @Override
     protected synchronized void onActive() {
+        mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                mWatchZones = data;
+                if (mLimitsLoaded) {
+                    invalidate(data, changeSet);
+                }
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+                mWatchZones = data;
+                if (mLimitsLoaded) {
+                    invalidate(data, null);
+                }
+            }
+
+            @Override
+            public void onDataInvalid() {
+                // This should never happen.
+            }
+        });
+        mLimitsLoadedObserver = new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean limitsLoaded) {
+                if (limitsLoaded && !mLimitsLoaded && mWatchZones != null) {
+                    BaseObserver.ChangeSet changeSet = new BaseObserver.ChangeSet();
+                    for (Long uid : mWatchZones.keySet()) {
+                        changeSet.changedUids.add(uid);
+                    }
+                    invalidate(mWatchZones, changeSet);
+                } else if (!limitsLoaded) {
+                    Intent msgIntent = new Intent(mApplicationContext, OnDeviceLimitProviderService.class);
+                    mApplicationContext.startService(msgIntent);
+                }
+                mLimitsLoaded = limitsLoaded;
+            }
+        };
+        mExplorerUidObserver = new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long aLong) {
+                //invalidate(WatchZoneModelRepository.getInstance(mApplicationContext));
+            }
+        };
         mLimitsLoadedLiveData.observeForever(mLimitsLoadedObserver);
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mModelsObserver);
         mExplorerUidLiveData.observeForever(mExplorerUidObserver);
@@ -181,12 +179,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     }
 
     private synchronized void invalidate(Map<Long, WatchZoneModel> zoneModels, BaseObserver.ChangeSet changeSet) {
-        if (changeSet != null) {
-            Log.e("Joey", "invalidate toadd size " + changeSet.addedUids.size() + " toremove size "
-                    + changeSet.removedUids.size() + " changed size " + changeSet.changedUids.size());
-        } else {
-            Log.e("Joey", "invalidate on loaded");
-        }
         List<Long> toCancel = new ArrayList<>();
         List<Long> toAdd = new ArrayList<>();
         if (changeSet != null) {
@@ -313,156 +305,6 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
         postUpdatedData();
     }
-
-    /*private synchronized void invalidate(WatchZoneModelRepository repository) {
-        if (mLimits == null) {
-            return;
-        }
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
-        if (!preferences.getBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_LOADED, false)) {
-            return;
-        }
-
-        List<WatchZoneModel> modelsToSchedule = new ArrayList<>(repository.getWatchZoneFences().values());
-        Map<Long, WatchZoneModel> models = new HashMap<>();//mModelsObserver.getWatchZoneFences();
-        for (Long uid : models.keySet()) {
-            WatchZoneModel model = models.get(uid);
-            if (model != null && model.getWatchZoneUid() == mExplorerUidLiveData.getValue()) {
-                modelsToSchedule.remove(model);
-            }
-        }
-
-        List<WatchZoneModel> modelsThatNeedUpdate = new ArrayList<>();
-        for (Long uid : models.keySet()) {
-            WatchZoneModel model = models.get(uid);
-            if (model != null && model.getStatus() != WatchZoneModel.Status.VALID &&
-                    model.getStatus() != WatchZoneModel.Status.LOADING) {
-                modelsThatNeedUpdate.add(model);
-            }
-        }
-
-        List<WatchZoneModel> newModelsToUpdate = new ArrayList<>();
-        List<Long> uidsThatNoLongerExist = new ArrayList<>(mUpdatingWatchZones.keySet());
-        for (WatchZoneModel model : modelsThatNeedUpdate) {
-            Long uid = model.getWatchZone().getUid();
-            if (!mUpdatingWatchZones.containsKey(uid)) {
-                newModelsToUpdate.add(model);
-                uidsThatNoLongerExist.remove(uid);
-            } else {
-                WatchZoneContainer container = mUpdatingWatchZones.get(uid);
-                if (needsRefresh(container.updatingWatchZone, model.getWatchZone())) {
-                    // Keep it on the cancel and remove list...
-                    // Then add it back to the to-update list.
-                    newModelsToUpdate.add(model);
-                } else {
-                    uidsThatNoLongerExist.remove(uid);
-                }
-            }
-        }
-
-        for (Long uid : uidsThatNoLongerExist) {
-            WatchZoneContainer container = mUpdatingWatchZones.get(uid);
-            cancelAndRemoveContainer(container);
-        }
-
-        if (!newModelsToUpdate.isEmpty()) {
-            cancelAll();
-            newModelsToUpdate.clear();
-            for (WatchZoneModel model : modelsThatNeedUpdate) {
-                newModelsToUpdate.add(model);
-            }
-        }
-
-        Collections.sort(newModelsToUpdate, new Comparator<WatchZoneModel>() {
-            @Override
-            public int compare(WatchZoneModel t1, WatchZoneModel t2) {
-                long diff = t2.getWatchZoneUid() - t1.getWatchZoneUid();
-                return diff < 0 ? -1 : diff > 0 ? 1 : 0;
-            }
-        });
-
-        for (final WatchZoneModel model : newModelsToUpdate) {
-            final Long uid = model.getWatchZone().getUid();
-
-            final WatchZoneContainer container = new WatchZoneContainer();
-            container.watchZoneModel = model;
-            container.updatingWatchZone = model.getWatchZone();
-            container.watchZoneUpdater = null;
-            container.progress = 0;
-
-            mUpdatingWatchZones.put(uid, container);
-
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (WatchZoneModelUpdater.this) {
-                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.getWatchZoneUid());
-                        if (container != containerInMap) {
-                            return;
-                        }
-                    }
-                    int numThreads = Runtime.getRuntime().availableProcessors() * 32;
-                    List<HandlerThread> threads = new ArrayList<>();
-                    List<Handler> handlers = new ArrayList<>();
-                    Log.d(TAG, "Starting " + numThreads + " threads.");
-
-                    for (int i = 0; i < numThreads; i++) {
-                        HandlerThread thread = new HandlerThread("WatchZoneUpdater_" + (i + 1));
-                        thread.start();
-                        Handler handler = new Handler(thread.getLooper());
-
-                        threads.add(thread);
-                        handlers.add(handler);
-                    }
-
-                    container.watchZoneUpdater = new WatchZoneUpdater(container.watchZoneModel,
-                            new WatchZoneUpdater.ProgressListener() {
-                                @Override
-                                public void onProgress(WatchZoneUpdater.UpdateProgress progress) {
-                                    if (WatchZoneUpdater.UpdateProgress.Status.UPDATING ==
-                                            progress.getStatus()) {
-                                        container.progress = progress.getProgress();
-                                        postUpdatedData();
-                                    }
-                                }
-                            }, handlers, WatchZoneModelUpdater.this,
-                            mLimits.getValue(),
-                            WatchZoneModelUpdater.this);
-
-                    boolean cancel = false;
-                    synchronized (WatchZoneModelUpdater.this) {
-                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.getWatchZoneUid());
-                        if (container != containerInMap) {
-                            cancel = true;
-                        }
-                    }
-                    if (!cancel) {
-                        // This will block!
-                        WatchZoneUpdater.UpdateProgress finalProgress = container.watchZoneUpdater.execute();
-
-                        if (WatchZoneUpdater.UpdateProgress.Status.CANCELLED == finalProgress.getStatus()) {
-                            // TODO is needed?
-                        }
-                    }
-
-                    for (HandlerThread thread : threads) {
-                        thread.quit();
-                    }
-
-                    synchronized (WatchZoneModelUpdater.this) {
-                        WatchZoneContainer containerInMap = mUpdatingWatchZones.get(container.watchZoneModel.getWatchZoneUid());
-                        if (container == containerInMap) {
-                            mUpdatingWatchZones.remove(container.watchZoneModel.getWatchZoneUid());
-                            postUpdatedData();
-                        }
-                    }
-                }
-            });
-        }
-
-        postUpdatedData();
-    }*/
 
     private synchronized void cancelAndRemoveContainer(WatchZoneContainer container) {
         if (container.watchZoneUpdater != null) {

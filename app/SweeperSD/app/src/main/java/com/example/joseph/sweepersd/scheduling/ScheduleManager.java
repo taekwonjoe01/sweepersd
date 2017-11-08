@@ -24,38 +24,8 @@ public class ScheduleManager extends LiveData<Boolean> {
     private final Handler mHandler;
     private final AtomicInteger mTaskCount;
 
-    private final WatchZoneModelsObserver mWatchZoneModelsObserver = new WatchZoneModelsObserver(
-            true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-        @Override
-        public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
-            mTaskCount.incrementAndGet();
-            postValue(true);
-            mHandler.post(new UpdateScheduleTask(data));
-        }
-
-        @Override
-        public void onDataLoaded(Map<Long, WatchZoneModel> data) {
-            mTaskCount.incrementAndGet();
-            postValue(true);
-            mHandler.post(new UpdateScheduleTask(data));
-        }
-
-        @Override
-        public void onDataInvalid() {
-            // This should never happen!
-        }
-    });
-
-    private final Observer<Long> mLastAlarmObserver = new Observer<Long>() {
-        @Override
-        public void onChanged(@Nullable Long aLong) {
-            if (mWatchZoneModelsObserver.isLoaded()) {
-                mTaskCount.incrementAndGet();
-                postValue(true);
-                mHandler.post(new UpdateScheduleTask(mWatchZoneModelsObserver.getWatchZoneModels()));
-            }
-        }
-    };
+    private WatchZoneModelsObserver mWatchZoneModelsObserver;
+    private Observer<Long> mLastAlarmObserver;
 
     private ScheduleManager(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -63,7 +33,6 @@ public class ScheduleManager extends LiveData<Boolean> {
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mTaskCount = new AtomicInteger(0);
-        postValue(false);
     }
 
     public static ScheduleManager getInstance(Context context) {
@@ -76,6 +45,37 @@ public class ScheduleManager extends LiveData<Boolean> {
     @Override
     protected void onActive() {
         super.onActive();
+        mWatchZoneModelsObserver = new WatchZoneModelsObserver(
+                true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                mTaskCount.incrementAndGet();
+                postValue(true);
+                mHandler.post(new UpdateScheduleTask(data));
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+                mTaskCount.incrementAndGet();
+                postValue(true);
+                mHandler.post(new UpdateScheduleTask(data));
+            }
+
+            @Override
+            public void onDataInvalid() {
+                // This should never happen!
+            }
+        });
+        mLastAlarmObserver = new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long aLong) {
+                if (mWatchZoneModelsObserver.isLoaded()) {
+                    mTaskCount.incrementAndGet();
+                    postValue(true);
+                    mHandler.post(new UpdateScheduleTask(mWatchZoneModelsObserver.getWatchZoneModels()));
+                }
+            }
+        };
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
         LastAlarm.getInstance().observeForever(mLastAlarmObserver);
         setValue(true);

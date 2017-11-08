@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.PendingIntents;
@@ -95,9 +96,9 @@ public class WatchZoneFenceUpdater {
                 existingGeofences.put(model.watchZone.getUid(), newWatchZoneFence);
             }
 
-            List<com.google.android.gms.location.Geofence> gmsFences = new ArrayList<>();
+            List<Geofence> gmsFences = new ArrayList<>();
             for (WatchZoneFence fence : existingGeofences.values()) {
-                gmsFences.add(new com.google.android.gms.location.Geofence.Builder()
+                gmsFences.add(new Geofence.Builder()
                         // Set the request ID of the geofence. This is a string to identify this
                         // geofence.
                         .setRequestId(Long.toString(fence.getUid()))
@@ -107,8 +108,8 @@ public class WatchZoneFenceUpdater {
                                 fence.getCenterLongitude(),
                                 (float)fence.getRadius() + GEOFENCE_RADIUS_PADDING
                         )
-                        .setTransitionTypes(com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER |
-                                com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                                Geofence.GEOFENCE_TRANSITION_EXIT)
                         .build());
             }
             if (!gmsFences.isEmpty()) {

@@ -34,7 +34,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
 
     private ServiceLifecycleDispatcher mDispatcher;
 
-    public static void scheduleAppForegroundJob(Context context) {
+    /*public static void scheduleAppForegroundJob(Context context) {
         scheduleAppBackgroundJob(context);
 
         JobScheduler jobScheduler =
@@ -69,7 +69,7 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
         builder.setBackoffCriteria(ONE_HOUR, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         jobScheduler.schedule(builder.build());
-    }
+    }*/
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {

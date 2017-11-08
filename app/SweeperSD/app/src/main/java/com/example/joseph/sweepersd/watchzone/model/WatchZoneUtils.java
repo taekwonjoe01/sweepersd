@@ -75,7 +75,7 @@ public class WatchZoneUtils {
                     }
                 }
 
-                calendar.add(Calendar.DATE, 1);
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
             }
         }
 
@@ -316,7 +316,12 @@ public class WatchZoneUtils {
                 schedules, true);
         List<Long> timeOrderedTimestamps = new ArrayList<>();
         for (LimitScheduleDate date : allDates) {
-            timeOrderedTimestamps.add(date.getStartCalendar().getTime().getTime() - startOffset);
+            long startTimeWithOffset = date.getStartCalendar().getTime().getTime() - startOffset;
+            GregorianCalendar today = new GregorianCalendar(
+                    TimeZone.getTimeZone("America/Los_Angeles"), Locale.US);
+            if (startTimeWithOffset > today.getTime().getTime()) {
+                timeOrderedTimestamps.add(startTimeWithOffset);
+            }
             timeOrderedTimestamps.add(date.getEndCalendar().getTime().getTime());
         }
         Collections.sort(timeOrderedTimestamps);

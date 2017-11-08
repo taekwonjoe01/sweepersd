@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddressValidatorJob extends JobService {
     private static final String TAG = AddressValidatorJob.class.getSimpleName();
+    private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     private static final long ONE_HOUR = 1000L * 60L * 60L;
     private static final long TEN_SECONDS = 1000L * 10L;
 
@@ -44,7 +45,7 @@ public class AddressValidatorJob extends JobService {
     private AtomicBoolean mIsCancelled;
     private CountDownLatch mFinishedLatch;
 
-    public static void scheduleJob(Context context) {
+    /*public static void scheduleJob(Context context) {
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
@@ -77,7 +78,7 @@ public class AddressValidatorJob extends JobService {
         builder.setBackoffCriteria(ONE_HOUR, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         jobScheduler.schedule(builder.build());
-    }
+    }*/
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
@@ -85,7 +86,7 @@ public class AddressValidatorJob extends JobService {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_STARTED, System.currentTimeMillis()).commit();
 
-        AddressValidatorManager.getInstance(this).observe(this, new Observer<Boolean>() {
+        /*AddressValidatorManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean working) {
                 if (!working) {
@@ -95,7 +96,7 @@ public class AddressValidatorJob extends JobService {
                             true).commit();
                 }
             }
-        });
+        });*/
 
         return true;
     }

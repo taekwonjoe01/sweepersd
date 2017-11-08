@@ -28,7 +28,7 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
     private boolean mWatchZoneModelsLoaded;
     private boolean mWatchZoneFencesLoaded;
 
-    public static void scheduleJob(Context context) {
+    /*public static void scheduleJob(Context context) {
         Log.i(TAG, "Scheduling " + TAG);
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -42,7 +42,7 @@ public class AlertNotificationJob extends JobService implements LifecycleOwner {
                 new ComponentName(context, AlertNotificationJob.class));
         builder.setMinimumLatency(30000L);
         jobScheduler.schedule(builder.build());
-    }
+    }*/
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {

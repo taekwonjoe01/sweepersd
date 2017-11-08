@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddressValidatorManager extends LiveData<Boolean> {
     private static final String TAG = AddressValidatorManager.class.getSimpleName();
@@ -26,7 +26,8 @@ public class AddressValidatorManager extends LiveData<Boolean> {
     private final Context mApplicationContext;
     private final HandlerThread mThread;
     private final Handler mHandler;
-    private final AtomicInteger mTaskCount;
+    private final AtomicBoolean mIsActive;
+
 
     private Map<String, String> mValidatedAddressCache;
     private List<Limit> mUpdatedLimits;
@@ -36,8 +37,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
         mThread = new HandlerThread("AddressValidatorManager-thread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        mTaskCount = new AtomicInteger(0);
-        postValue(false);
+        mIsActive = new AtomicBoolean(false);
     }
 
     public static AddressValidatorManager getInstance(Context context) {
@@ -50,6 +50,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
     @Override
     protected void onActive() {
         super.onActive();
+        mIsActive.set(true);
         scheduleWork();
         setValue(true);
     }
@@ -57,19 +58,27 @@ public class AddressValidatorManager extends LiveData<Boolean> {
     @Override
     protected void onInactive() {
         super.onInactive();
+        mIsActive.set(false);
         cancelWork();
     }
 
     private void scheduleWork() {
+        mHandler.removeCallbacksAndMessages(null);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 LimitDao limitDao = AppDatabase.getInstance(mApplicationContext).limitDao();
+                if (!mIsActive.get()) {
+                    return;
+                }
 
                 mValidatedAddressCache = new HashMap<>();
                 mUpdatedLimits = new ArrayList<>();
 
                 List<Limit> limits = limitDao.getAllLimits();
+                if (limits.isEmpty()) {
+                    Log.e("Joey", "Limits are gone!");
+                }
                 int index = 0;
                 for (Limit limit : limits) {
                     long timePassed = System.currentTimeMillis() - limit.getAddressValidatedTimestamp();
@@ -91,8 +100,14 @@ public class AddressValidatorManager extends LiveData<Boolean> {
 
     private void cancelWork() {
         mHandler.removeCallbacksAndMessages(null);
-        mHandler.post(new SaveAddressesTask());
-        mHandler.post(new SetNotBusyTask());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mHandler.removeCallbacksAndMessages(null);
+                mHandler.post(new SaveAddressesTask());
+                mHandler.post(new SetNotBusyTask());
+            }
+        });
     }
 
     private class UpdateAddressTask implements Runnable {
@@ -154,7 +169,9 @@ public class AddressValidatorManager extends LiveData<Boolean> {
 
         @Override
         public void run() {
-            postValue(false);
+            if (!mIsActive.get()) {
+                postValue(false);
+            }
         }
     }
 }

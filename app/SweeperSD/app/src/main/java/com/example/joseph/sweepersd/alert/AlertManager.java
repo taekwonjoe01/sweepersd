@@ -26,57 +26,9 @@ public class AlertManager extends LiveData<Boolean> {
     private final Handler mHandler;
     private final AtomicInteger mTaskCount;
 
-    private final WatchZoneModelsObserver mWatchZoneModelsObserver = new WatchZoneModelsObserver(
-            true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-        @Override
-        public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
-            if (mFenceObserver.isLoaded()) {
-                mTaskCount.incrementAndGet();
-                postValue(true);
-                mHandler.post(new UpdateAlertsTask(data, mFenceObserver.getWatchZoneFences()));
-            }
-        }
+    private WatchZoneModelsObserver mWatchZoneModelsObserver;
 
-        @Override
-        public void onDataLoaded(Map<Long, WatchZoneModel> data) {
-            if (mFenceObserver.isLoaded()) {
-                mTaskCount.incrementAndGet();
-                postValue(true);
-                mHandler.post(new UpdateAlertsTask(data, mFenceObserver.getWatchZoneFences()));
-            }
-        }
-
-        @Override
-        public void onDataInvalid() {
-            // This should never happen!
-        }
-    });
-
-    private final WatchZoneFenceObserver mFenceObserver = new WatchZoneFenceObserver(
-            new WatchZoneFenceObserver.WatchZoneFencesChangedCallback() {
-        @Override
-        public void onFencesChanges(Map<Long, WatchZoneFence> data, BaseObserver.ChangeSet changeSet) {
-            if (mWatchZoneModelsObserver.isLoaded()) {
-                mTaskCount.incrementAndGet();
-                postValue(true);
-                mHandler.post(new UpdateAlertsTask(mWatchZoneModelsObserver.getWatchZoneModels(), data));
-            }
-        }
-
-        @Override
-        public void onDataLoaded(Map<Long, WatchZoneFence> data) {
-            if (mWatchZoneModelsObserver.isLoaded()) {
-                mTaskCount.incrementAndGet();
-                postValue(true);
-                mHandler.post(new UpdateAlertsTask(mWatchZoneModelsObserver.getWatchZoneModels(), data));
-            }
-        }
-
-        @Override
-        public void onDataInvalid() {
-            // This should never happen!
-        }
-    });
+    private WatchZoneFenceObserver mFenceObserver;
 
     private AlertManager(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -84,7 +36,6 @@ public class AlertManager extends LiveData<Boolean> {
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mTaskCount = new AtomicInteger(0);
-        postValue(false);
     }
 
     public static AlertManager getInstance(Context context) {
@@ -97,6 +48,55 @@ public class AlertManager extends LiveData<Boolean> {
     @Override
     protected void onActive() {
         super.onActive();
+        mWatchZoneModelsObserver = new WatchZoneModelsObserver(
+                true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                if (mFenceObserver.isLoaded()) {
+                    mTaskCount.incrementAndGet();
+                    postValue(true);
+                    mHandler.post(new UpdateAlertsTask(data, mFenceObserver.getWatchZoneFences()));
+                }
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+                if (mFenceObserver.isLoaded()) {
+                    mTaskCount.incrementAndGet();
+                    postValue(true);
+                    mHandler.post(new UpdateAlertsTask(data, mFenceObserver.getWatchZoneFences()));
+                }
+            }
+
+            @Override
+            public void onDataInvalid() {
+                // This should never happen!
+            }
+        });
+        mFenceObserver = new WatchZoneFenceObserver(new WatchZoneFenceObserver.WatchZoneFencesChangedCallback() {
+            @Override
+            public void onFencesChanges(Map<Long, WatchZoneFence> data, BaseObserver.ChangeSet changeSet) {
+                if (mWatchZoneModelsObserver.isLoaded()) {
+                    mTaskCount.incrementAndGet();
+                    postValue(true);
+                    mHandler.post(new UpdateAlertsTask(mWatchZoneModelsObserver.getWatchZoneModels(), data));
+                }
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneFence> data) {
+                if (mWatchZoneModelsObserver.isLoaded()) {
+                    mTaskCount.incrementAndGet();
+                    postValue(true);
+                    mHandler.post(new UpdateAlertsTask(mWatchZoneModelsObserver.getWatchZoneModels(), data));
+                }
+            }
+
+            @Override
+            public void onDataInvalid() {
+                // This should never happen!
+            }
+        });
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
         WatchZoneFenceRepository.getInstance(mApplicationContext).getFencesLiveData().observeForever(mFenceObserver);
         setValue(true);

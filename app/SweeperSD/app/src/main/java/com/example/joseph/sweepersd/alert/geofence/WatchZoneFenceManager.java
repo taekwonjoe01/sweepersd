@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
@@ -22,27 +23,7 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
     private final Handler mHandler;
     private final AtomicInteger mTaskCount;
 
-    private final WatchZoneModelsObserver mWatchZoneModelsObserver = new WatchZoneModelsObserver(
-            false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-        @Override
-        public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
-            mTaskCount.incrementAndGet();
-            postValue(true);
-            mHandler.post(new UpdateGeofenceTask(data));
-        }
-
-        @Override
-        public void onDataLoaded(Map<Long, WatchZoneModel> data) {
-            mTaskCount.incrementAndGet();
-            postValue(true);
-            mHandler.post(new UpdateGeofenceTask(data));
-        }
-
-        @Override
-        public void onDataInvalid() {
-            // This should never happen!
-        }
-    });
+    private WatchZoneModelsObserver mWatchZoneModelsObserver;
 
     private WatchZoneFenceManager(Context context) {
         mApplicationContext = context.getApplicationContext();
@@ -50,7 +31,6 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mTaskCount = new AtomicInteger(0);
-        postValue(false);
     }
 
     public static WatchZoneFenceManager getInstance(Context context) {
@@ -63,6 +43,27 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
     @Override
     protected void onActive() {
         super.onActive();
+        mWatchZoneModelsObserver = new WatchZoneModelsObserver(
+                true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+                mTaskCount.incrementAndGet();
+                postValue(true);
+                mHandler.post(new UpdateGeofenceTask(data));
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+                mTaskCount.incrementAndGet();
+                postValue(true);
+                mHandler.post(new UpdateGeofenceTask(data));
+            }
+
+            @Override
+            public void onDataInvalid() {
+                // This should never happen!
+            }
+        });
         WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
         setValue(true);
     }

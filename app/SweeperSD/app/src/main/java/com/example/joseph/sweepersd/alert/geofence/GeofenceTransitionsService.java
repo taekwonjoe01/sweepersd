@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
+import com.example.joseph.sweepersd.AppUpdateJob;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
@@ -33,7 +34,7 @@ public class GeofenceTransitionsService extends IntentService {
         List<WatchZoneFence> fences = new ArrayList<>();
         for (Geofence geofence : triggeringFences) {
             long uid = Long.parseLong(geofence.getRequestId());
-            WatchZoneFence fence = dao.getFenceForWatchZoneId(uid);
+            WatchZoneFence fence = dao.getFenceByUid(uid);
             if (fence != null) {
                 if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                     fence.setInRegion(true);
@@ -45,6 +46,9 @@ public class GeofenceTransitionsService extends IntentService {
         }
 
         dao.updateGeofences(fences);
+
+        Log.e("Joey", "scheduling AppUpdateJob from geofence service");
+        AppUpdateJob.scheduleJob(this);
     }
 }
 

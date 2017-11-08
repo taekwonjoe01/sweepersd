@@ -2,16 +2,12 @@ package com.example.joseph.sweepersd.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.LocationUtils;
-import com.example.joseph.sweepersd.watchzone.WatchZoneUpdateJob;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -77,8 +73,6 @@ public class WatchZoneModelRepository {
                 }
 
                 long[] uids = watchZoneDao.insertWatchZonePoints(points);
-
-                scheduleUpdateJob();
             }
         }
         long endTime = SystemClock.elapsedRealtime();
@@ -140,8 +134,6 @@ public class WatchZoneModelRepository {
                 }
 
                 watchZoneDao.insertWatchZonePoints(points);
-
-                scheduleUpdateJob();
             }
         }
 
@@ -167,9 +159,6 @@ public class WatchZoneModelRepository {
     public LiveData<WatchZoneModel> getZoneModelForUid(long uid) {
         if (!mWatchZoneModelsMap.containsKey(uid)) {
             LiveData<WatchZoneModel> model = loadWatchZoneLiveDataFromDb(uid);
-            if (model == null) {
-                Log.e("Joey", "It's null???");
-            }
             mWatchZoneModelsMap.put(uid, model);
         }
 
@@ -186,9 +175,5 @@ public class WatchZoneModelRepository {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
 
         return watchZoneDao.getZoneLiveDataForUid(uid);
-    }
-
-    private void scheduleUpdateJob() {
-        WatchZoneUpdateJob.scheduleAppForegroundJob(mApplicationContext);
     }
 }

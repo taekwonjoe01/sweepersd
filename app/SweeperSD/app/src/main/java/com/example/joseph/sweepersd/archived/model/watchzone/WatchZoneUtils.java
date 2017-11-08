@@ -205,7 +205,7 @@ public class WatchZoneUtils {
     }
 
     public static void scheduleWatchZoneAlarm(Context context, WatchZone watchZone) {
-        long nextSweepingTime = getNextSweepingTimeFromAddresses(
+        /*long nextSweepingTime = getNextSweepingTimeFromAddresses(
                 watchZone.getSweepingAddresses());
         if (nextSweepingTime > 0) {
             long alarmTime = getAlarmTimeForSweepingTime(nextSweepingTime);
@@ -220,6 +220,6 @@ public class WatchZoneUtils {
 
             alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
             Log.i(TAG, "Alarm scheduled for " + new Date(alarmTime).toString());
-        }
+        }*/
     }
 }

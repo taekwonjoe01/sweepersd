@@ -30,7 +30,7 @@ public class WatchZoneFenceJob extends JobService implements LifecycleOwner {
 
     private ServiceLifecycleDispatcher mDispatcher;
 
-    public static void scheduleJob(Context context) {
+    /*public static void scheduleJob(Context context) {
         Log.i(TAG, "Scheduling " + TAG);
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -44,7 +44,7 @@ public class WatchZoneFenceJob extends JobService implements LifecycleOwner {
                 new ComponentName(context, WatchZoneFenceJob.class));
         builder.setMinimumLatency(15000L);
         jobScheduler.schedule(builder.build());
-    }
+    }*/
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
