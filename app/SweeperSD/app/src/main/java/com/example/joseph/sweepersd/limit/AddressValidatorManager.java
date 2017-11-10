@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
@@ -78,6 +79,13 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                 List<Limit> limits = limitDao.getAllLimits();
                 if (limits.isEmpty()) {
                     Log.e("Joey", "Limits are gone!");
+                } else {
+                    Log.e("Joey", "Limits size " + limits.size());
+                    for (Limit l : limits) {
+                        if (l.getStreet() == null || l.getStreet().equals("")) {
+                            Log.e("Joey", "Limit has bad streetname");
+                        }
+                    }
                 }
                 int index = 0;
                 for (Limit limit : limits) {
@@ -128,7 +136,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                         mApplicationContext, streetBeingValidated);
             }
 
-            if (validatedAddress != null) {
+            if (!TextUtils.isEmpty(validatedAddress)) {
                 String[] parsings = validatedAddress.split(",");
                 if (parsings.length > 0) {
                     String validatedStreet = parsings[0].trim();

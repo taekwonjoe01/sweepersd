@@ -167,7 +167,7 @@ public class LocationUtils {
         if (addresses != null && !addresses.isEmpty()) {
             Address first = addresses.get(0);
             result = "";
-            for (int i = 0; i < first.getMaxAddressLineIndex(); i++) {
+            for (int i = 0; i <= first.getMaxAddressLineIndex(); i++) {
                 result += first.getAddressLine(i) + ",";
             }
             result = result.toLowerCase();
