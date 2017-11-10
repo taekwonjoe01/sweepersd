@@ -120,7 +120,7 @@ public class WatchZoneFenceUpdater {
         }
     }
 
-    private GeofencingRequest getGeofencingRequest(List<com.google.android.gms.location.Geofence> geofences) {
+    private GeofencingRequest getGeofencingRequest(List<Geofence> geofences) {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofences(geofences);
