@@ -88,7 +88,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                     }
                 }
                 int index = 0;
-                for (Limit limit : limits) {
+                /*for (Limit limit : limits) {
                     long timePassed = System.currentTimeMillis() - limit.getAddressValidatedTimestamp();
                     if (timePassed > ONE_MONTH) {
                         mHandler.post(new UpdateAddressTask(limit));
@@ -99,7 +99,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                             index++;
                         }
                     }
-                }
+                }*/
                 mHandler.post(new SaveAddressesTask());
                 mHandler.post(new SetNotBusyTask());
             }

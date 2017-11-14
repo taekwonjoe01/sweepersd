@@ -7,12 +7,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 
-import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,6 +25,7 @@ public class ScheduleManager extends LiveData<Boolean> {
     private final Handler mHandler;
     private final AtomicInteger mTaskCount;
 
+    private LiveData<List<WatchZoneModel>> mModelLiveData;
     private WatchZoneModelsObserver mWatchZoneModelsObserver;
     private Observer<Long> mLastAlarmObserver;
 
@@ -48,7 +50,7 @@ public class ScheduleManager extends LiveData<Boolean> {
         mWatchZoneModelsObserver = new WatchZoneModelsObserver(
                 true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet) {
                 mTaskCount.incrementAndGet();
                 postValue(true);
                 mHandler.post(new UpdateScheduleTask(data));
@@ -76,7 +78,8 @@ public class ScheduleManager extends LiveData<Boolean> {
                 }
             }
         };
-        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
+        mModelLiveData = WatchZoneModelRepository.getInstance(mApplicationContext).getWatchZoneModelsLiveData();
+        mModelLiveData.observeForever(mWatchZoneModelsObserver);
         LastAlarm.getInstance().observeForever(mLastAlarmObserver);
         setValue(true);
     }
@@ -84,7 +87,7 @@ public class ScheduleManager extends LiveData<Boolean> {
     @Override
     protected void onInactive() {
         super.onInactive();
-        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mWatchZoneModelsObserver);
+        mModelLiveData.removeObserver(mWatchZoneModelsObserver);
         LastAlarm.getInstance().removeObserver(mLastAlarmObserver);
         mHandler.removeCallbacksAndMessages(null);
     }

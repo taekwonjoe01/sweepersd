@@ -1,6 +1,7 @@
 package com.example.joseph.sweepersd.alert.geofence;
 
 import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.utils.ChangeSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;

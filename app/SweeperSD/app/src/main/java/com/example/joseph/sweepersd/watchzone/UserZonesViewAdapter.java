@@ -18,10 +18,10 @@ import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
+import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.utils.BaseObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
@@ -49,11 +49,11 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
 
-        WatchZoneModelRepository.getInstance(mActivity).getZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(true,
+        WatchZoneModelRepository.getInstance(mActivity).getCachedWatchZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data,
-                                        BaseObserver.ChangeSet changeSet) {
+                                        ChangeSet changeSet) {
                 // This is only capable of detecting insertions or deletions.
                 // Changes must be detected directly.
                 List<Long> modelUids = new ArrayList<>(data.keySet());

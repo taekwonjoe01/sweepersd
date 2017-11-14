@@ -1,22 +1,17 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import android.app.job.JobInfo;
 import android.app.job.JobParameters;
-import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ServiceLifecycleDispatcher;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.utils.BaseObserver;
-import com.example.joseph.sweepersd.utils.Jobs;
+import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -91,10 +86,10 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                 // Do nothing - just observing so this object comes to life.
             }
         });
-        WatchZoneModelRepository.getInstance(this).getZoneModelsLiveData().observe(this,
+        WatchZoneModelRepository.getInstance(this).getCachedWatchZoneModelsLiveData().observe(this,
                 new WatchZoneModelsObserver(true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet) {
                 boolean finished = false;
                 if (data != null) {
                     Map<Long, WatchZoneModel> models = data;

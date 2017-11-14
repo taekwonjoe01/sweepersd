@@ -9,12 +9,13 @@ import android.os.HandlerThread;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceObserver;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceRepository;
-import com.example.joseph.sweepersd.utils.BaseObserver;
+import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +27,7 @@ public class AlertManager extends LiveData<Boolean> {
     private final Handler mHandler;
     private final AtomicInteger mTaskCount;
 
+    private LiveData<List<WatchZoneModel>> mModelLiveData;
     private WatchZoneModelsObserver mWatchZoneModelsObserver;
 
     private WatchZoneFenceObserver mFenceObserver;
@@ -51,7 +53,7 @@ public class AlertManager extends LiveData<Boolean> {
         mWatchZoneModelsObserver = new WatchZoneModelsObserver(
                 true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data, BaseObserver.ChangeSet changeSet) {
+            public void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet) {
                 if (mFenceObserver.isLoaded()) {
                     mTaskCount.incrementAndGet();
                     postValue(true);
@@ -75,7 +77,7 @@ public class AlertManager extends LiveData<Boolean> {
         });
         mFenceObserver = new WatchZoneFenceObserver(new WatchZoneFenceObserver.WatchZoneFencesChangedCallback() {
             @Override
-            public void onFencesChanges(Map<Long, WatchZoneFence> data, BaseObserver.ChangeSet changeSet) {
+            public void onFencesChanges(Map<Long, WatchZoneFence> data, ChangeSet changeSet) {
                 if (mWatchZoneModelsObserver.isLoaded()) {
                     mTaskCount.incrementAndGet();
                     postValue(true);
@@ -97,7 +99,8 @@ public class AlertManager extends LiveData<Boolean> {
                 // This should never happen!
             }
         });
-        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().observeForever(mWatchZoneModelsObserver);
+        mModelLiveData = WatchZoneModelRepository.getInstance(mApplicationContext).getWatchZoneModelsLiveData();
+        mModelLiveData.observeForever(mWatchZoneModelsObserver);
         WatchZoneFenceRepository.getInstance(mApplicationContext).getFencesLiveData().observeForever(mFenceObserver);
         setValue(true);
     }
@@ -105,7 +108,7 @@ public class AlertManager extends LiveData<Boolean> {
     @Override
     protected void onInactive() {
         super.onInactive();
-        WatchZoneModelRepository.getInstance(mApplicationContext).getZoneModelsLiveData().removeObserver(mWatchZoneModelsObserver);
+        mModelLiveData.removeObserver(mWatchZoneModelsObserver);
         WatchZoneFenceRepository.getInstance(mApplicationContext).getFencesLiveData().removeObserver(mFenceObserver);
         mHandler.removeCallbacksAndMessages(null);
     }

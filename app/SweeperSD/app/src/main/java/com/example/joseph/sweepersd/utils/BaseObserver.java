@@ -11,6 +11,7 @@ public abstract class BaseObserver<T, U> implements Observer<U> {
     private boolean mIsLoaded;
 
     public abstract boolean isValid(U data);
+    //public abstract boolean isDataLoaded(U data);
     public abstract void onPossibleChangeDetected(T data);
     public abstract T getData(U data);
 
@@ -24,26 +25,16 @@ public abstract class BaseObserver<T, U> implements Observer<U> {
         void onDataInvalid();
     }
 
-    public static class ChangeSet {
-        public List<Long> addedUids;
-        public List<Long> changedUids;
-        public List<Long> removedUids;
-
-        public ChangeSet() {
-            addedUids = new ArrayList<>();
-            changedUids = new ArrayList<>();
-            removedUids = new ArrayList<>();
-        }
-    }
-
     @Override
     public void onChanged(@Nullable U data) {
         if (!isValid(data)) {
             mCallback.onDataInvalid();
         } else {
             if (!mIsLoaded) {
-                mIsLoaded = true;
-                mCallback.onDataLoaded(getData(data));
+                mIsLoaded = true;//isDataLoaded(data);
+                if (mIsLoaded) {
+                    mCallback.onDataLoaded(getData(data));
+                }
             } else if (mIsLoaded) {
                 onPossibleChangeDetected(getData(data));
             }

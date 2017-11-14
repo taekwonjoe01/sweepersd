@@ -8,22 +8,12 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ServiceLifecycleDispatcher;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.utils.Jobs;
 import com.example.joseph.sweepersd.utils.Preferences;
-import com.example.joseph.sweepersd.utils.BaseObserver;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
-
-import java.util.ArrayList;
-import java.util.Map;
 
 public class WatchZoneFenceJob extends JobService implements LifecycleOwner {
     private static final String TAG = WatchZoneFenceJob.class.getSimpleName();

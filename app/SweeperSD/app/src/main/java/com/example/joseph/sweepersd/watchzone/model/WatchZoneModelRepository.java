@@ -152,9 +152,15 @@ public class WatchZoneModelRepository {
         return result;
     }
 
-    public LiveData<List<WatchZoneModel>> getZoneModelsLiveData() {
+    public LiveData<List<WatchZoneModel>> getCachedWatchZoneModelsLiveData() {
         return mCachedWatchZones;
     }
+
+    // This is intended for the singleton observed models that do work.
+    public LiveData<List<WatchZoneModel>> getWatchZoneModelsLiveData() {
+        return loadWatchZonesLiveDataFromDb();
+    }
+
 
     public LiveData<WatchZoneModel> getZoneModelForUid(long uid) {
         if (!mWatchZoneModelsMap.containsKey(uid)) {
