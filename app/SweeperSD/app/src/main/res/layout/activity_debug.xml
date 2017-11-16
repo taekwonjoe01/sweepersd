@@ -46,6 +46,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
+
+            <Button
+                android:id="@+id/button_create_zone_and_active_limit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create Watch Zone and Active Limit"/>
+            <Button
+                android:id="@+id/button_create_zone_and_soon_limit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create Watch Zone and Soon-To-Be-Active Limit"/>
         </LinearLayout>
     </ScrollView>
 

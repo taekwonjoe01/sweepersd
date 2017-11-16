@@ -23,6 +23,11 @@ public interface LimitDao {
     @Insert(onConflict = REPLACE)
     void insertLimitSchedules(List<LimitSchedule> schedules);
 
+    @Insert(onConflict = REPLACE)
+    long insertLimit(Limit limit);
+    @Insert(onConflict = REPLACE)
+    void insertLimitSchedule(LimitSchedule schedule);
+
     @Update(onConflict = REPLACE)
     void updateLimit(Limit limit);
 
