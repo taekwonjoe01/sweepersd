@@ -41,9 +41,9 @@ public class ScheduleJob extends JobService implements LifecycleOwner {
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.i(TAG, "Starting " + TAG);
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        /*final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_STARTED,
-                System.currentTimeMillis()).commit();
+                System.currentTimeMillis()).commit();*/
 
         mDispatcher = new ServiceLifecycleDispatcher(this);
 
@@ -54,8 +54,8 @@ public class ScheduleJob extends JobService implements LifecycleOwner {
             @Override
             public void onChanged(@Nullable Boolean working) {
                 if (!working) {
-                    preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED,
-                            System.currentTimeMillis()).commit();
+                    /*preferences.edit().putLong(Preferences.PREFERENCE_SCHEDULE_JOB_LAST_FINISHED,
+                            System.currentTimeMillis()).commit();*/
                     jobFinished(jobParameters, false);
                 }
             }

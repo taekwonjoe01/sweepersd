@@ -72,6 +72,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                 if (!mIsActive.get()) {
                     return;
                 }
+                postValue(true);
 
                 mValidatedAddressCache = new HashMap<>();
                 mUpdatedLimits = new ArrayList<>();
@@ -177,9 +178,7 @@ public class AddressValidatorManager extends LiveData<Boolean> {
 
         @Override
         public void run() {
-            if (!mIsActive.get()) {
-                postValue(false);
-            }
+            postValue(false);
         }
     }
 }

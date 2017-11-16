@@ -20,37 +20,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <Button
-                    android:id="@+id/button_schedule_validator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="start"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Address Validator Last Started: "/>
-                <TextView
-                    android:id="@+id/textview_address_validator_started"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Address Validator Last Finished: " />
-                <TextView
-                    android:id="@+id/textview_address_validator_finished"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <Button
                     android:id="@+id/button_schedule_updater"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -58,9 +27,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="WatchZone Updater Last Started: " />
+                    android:text="App Updater Last Started: "/>
                 <TextView
-                    android:id="@+id/textview_wzu_started"
+                    android:id="@+id/textview_updater_started"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -71,115 +40,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="WatchZoneUpdater Last Finished: " />
+                    android:text="AppUpdater Last Finished: " />
                 <TextView
-                    android:id="@+id/textview_wzu_finished"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WZ Notif Last Started: " />
-                <TextView
-                    android:id="@+id/textview_wzn_started"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WZ Notif Last Finished: " />
-                <TextView
-                    android:id="@+id/textview_wzn_finished"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ScheduleJob last started: " />
-                <TextView
-                    android:id="@+id/textview_schedulejob_started"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ScheduleJob last Finished: " />
-                <TextView
-                    android:id="@+id/textview_schedulejob_finished"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_limit_clear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="clear"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="LimitRepo: " />
-                <TextView
-                    android:id="@+id/textview_limit_repo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_wz_clear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="clear"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WatchZone Repo: " />
-                <TextView
-                    android:id="@+id/textview_wz_repo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_wzm_clear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="clear"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WZM Repo: " />
-                <TextView
-                    android:id="@+id/textview_wzm_repo"
+                    android:id="@+id/textview_updater_finished"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>

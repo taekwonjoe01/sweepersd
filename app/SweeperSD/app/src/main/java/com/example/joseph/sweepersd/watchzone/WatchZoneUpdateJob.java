@@ -70,9 +70,9 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.i(TAG, "Starting update job.");
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_STARTED,
-                System.currentTimeMillis()).commit();
+                System.currentTimeMillis()).commit();*/
 
         mDispatcher = new ServiceLifecycleDispatcher(this);
 
@@ -104,10 +104,10 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                     }
                 }
                 if (finished) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                    /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
                             WatchZoneUpdateJob.this);
                     preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
-                            System.currentTimeMillis()).commit();
+                            System.currentTimeMillis()).commit();*/
                     jobFinished(jobParameters, false);
                 }
             }
@@ -128,10 +128,10 @@ public class WatchZoneUpdateJob extends JobService implements LifecycleOwner {
                     }
                 }
                 if (finished) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                    /*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
                             WatchZoneUpdateJob.this);
                     preferences.edit().putLong(Preferences.PREFERENCE_WATCH_ZONE_UPDATE_LAST_FINISHED,
-                            System.currentTimeMillis()).commit();
+                            System.currentTimeMillis()).commit();*/
                     jobFinished(jobParameters, false);
                 }
             }

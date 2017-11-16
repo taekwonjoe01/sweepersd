@@ -1,29 +1,15 @@
 package com.example.joseph.sweepersd.limit;
 
-import android.app.job.JobInfo;
 import android.app.job.JobParameters;
-import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.arch.lifecycle.Observer;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.joseph.sweepersd.AppDatabase;
-import com.example.joseph.sweepersd.utils.Jobs;
-import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.Preferences;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -84,13 +70,13 @@ public class AddressValidatorJob extends JobService {
     public boolean onStartJob(JobParameters jobParameters) {
         Log.d(TAG, "Starting " + TAG);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_STARTED, System.currentTimeMillis()).commit();
+        preferences.edit().putLong(Preferences.PREFERENCE_APP_UPDATER_LAST_STARTED, System.currentTimeMillis()).commit();
 
         /*AddressValidatorManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean working) {
                 if (!working) {
-                    preferences.edit().putLong(Preferences.PREFERENCE_ADDRESS_VALIDATOR_LAST_FINISHED,
+                    preferences.edit().putLong(Preferences.PREFERENCE_APP_UPDATER_LAST_FINISHED,
                             System.currentTimeMillis()).commit();
                     preferences.edit().putBoolean(Preferences.PREFERENCE_ON_DEVICE_LIMITS_VALIDATED,
                             true).commit();
