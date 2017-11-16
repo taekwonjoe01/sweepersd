@@ -71,16 +71,8 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
                 new Observer<Map<Long, Integer>>() {
             @Override
             public void onChanged(@Nullable Map<Long, Integer> progressMap) {
-                if (progressMap.isEmpty()) {
-                    Boolean addressValidatorBusy = AddressValidatorManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean alertBusy = AlertManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean scheduleBusy = ScheduleManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean fencesBusy = WatchZoneFenceManager.getInstance(AppUpdateJob.this).getValue();
-                    boolean busy = addressValidatorBusy == null ? true : addressValidatorBusy ||
-                            alertBusy == null ? true : alertBusy ||
-                            scheduleBusy == null ? true : scheduleBusy ||
-                            fencesBusy == null ? true : fencesBusy;
-                    if (!busy) {
+                if (progressMap != null && progressMap.isEmpty()) {
+                    if (!isBusy()) {
                         Log.d(TAG, "Finishing from WZMU " + TAG);
                         finish(jobParameters);
                     }
@@ -90,17 +82,8 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
         AddressValidatorManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean working) {
-                if (!working) {
-                    Boolean alertBusy = AlertManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean scheduleBusy = ScheduleManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean fencesBusy = WatchZoneFenceManager.getInstance(AppUpdateJob.this).getValue();
-                    boolean updaterBusy = WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue() == null ? true :
-                            !WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue().isEmpty();
-                    boolean busy = updaterBusy ||
-                            alertBusy == null ? true : alertBusy ||
-                            scheduleBusy == null ? true : scheduleBusy ||
-                            fencesBusy == null ? true : fencesBusy;
-                    if (!busy) {
+                if (working != null && !working) {
+                    if (!isBusy()) {
                         Log.d(TAG, "Finishing from AVM " + TAG);
                         finish(jobParameters);
                     }
@@ -110,17 +93,8 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
         AlertManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean working) {
-                if (!working) {
-                    Boolean addressValidatorBusy = AddressValidatorManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean scheduleBusy = ScheduleManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean fencesBusy = WatchZoneFenceManager.getInstance(AppUpdateJob.this).getValue();
-                    boolean updaterBusy = WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue() == null ? true :
-                            !WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue().isEmpty();
-                    boolean busy = addressValidatorBusy == null ? true : addressValidatorBusy ||
-                            updaterBusy ||
-                            scheduleBusy == null ? true : scheduleBusy ||
-                            fencesBusy == null ? true : fencesBusy;
-                    if (!busy) {
+                if (working != null && !working) {
+                    if (!isBusy()) {
                         Log.d(TAG, "Finishing from AM " + TAG);
                         finish(jobParameters);
                     }
@@ -130,17 +104,8 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
         ScheduleManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean working) {
-                if (!working) {
-                    Boolean addressValidatorBusy = AddressValidatorManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean alertBusy = AlertManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean fencesBusy = WatchZoneFenceManager.getInstance(AppUpdateJob.this).getValue();
-                    boolean updaterBusy = WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue() == null ? true :
-                            !WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue().isEmpty();
-                    boolean busy = addressValidatorBusy == null ? true : addressValidatorBusy ||
-                            alertBusy == null ? true : alertBusy ||
-                            updaterBusy ||
-                            fencesBusy == null ? true : fencesBusy;
-                    if (!busy) {
+                if (working != null && !working) {
+                    if (!isBusy()) {
                         Log.d(TAG, "Finishing from SM " + TAG);
                         finish(jobParameters);
                     }
@@ -150,17 +115,8 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
         WatchZoneFenceManager.getInstance(this).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean working) {
-                if (!working) {
-                    Boolean addressValidatorBusy = AddressValidatorManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean alertBusy = AlertManager.getInstance(AppUpdateJob.this).getValue();
-                    Boolean scheduleBusy = ScheduleManager.getInstance(AppUpdateJob.this).getValue();
-                    boolean updaterBusy = WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue() == null ? true :
-                            !WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue().isEmpty();
-                    boolean busy = addressValidatorBusy == null ? true : addressValidatorBusy ||
-                            alertBusy == null ? true : alertBusy ||
-                            scheduleBusy == null ? true : scheduleBusy ||
-                            updaterBusy;
-                    if (!busy) {
+                if (working != null && !working) {
+                    if (!isBusy()) {
                         Log.d(TAG, "Finishing from WZFM " + TAG);
                         finish(jobParameters);
                     }
@@ -170,6 +126,21 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
 
         // Signal that another thread is doing the work.
         return true;
+    }
+
+    private boolean isBusy() {
+        Boolean addressValidatorBusy = AddressValidatorManager.getInstance(AppUpdateJob.this).getValue();
+        Boolean alertBusy = AlertManager.getInstance(AppUpdateJob.this).getValue();
+        Boolean scheduleBusy = ScheduleManager.getInstance(AppUpdateJob.this).getValue();
+        Map<Long, Integer> progress = WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue();
+        Boolean fencesBusy = WatchZoneFenceManager.getInstance(AppUpdateJob.this).getValue();
+
+        if (addressValidatorBusy == null || alertBusy == null || scheduleBusy == null
+                || fencesBusy == null || progress == null) {
+            return true;
+        } else {
+            return addressValidatorBusy || alertBusy || scheduleBusy || fencesBusy || !progress.isEmpty();
+        }
     }
 
     @Override
