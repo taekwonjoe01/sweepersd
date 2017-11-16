@@ -4,9 +4,12 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.PendingIntents;
+import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
@@ -49,5 +52,9 @@ public class ScheduleUpdater {
 
         alarmMgr.set(AlarmManager.RTC_WAKEUP, timestamp, alarmIntent);
         Log.i(TAG, "Alarm scheduled for " + new Date(timestamp).toString());
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
+        preferences.edit().putLong(Preferences.PREFERENCE_ALARM_SCHEDULED_FOR,
+                timestamp).apply();
     }
 }

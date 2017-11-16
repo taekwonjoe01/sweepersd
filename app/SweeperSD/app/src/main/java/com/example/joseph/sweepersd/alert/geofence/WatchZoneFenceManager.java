@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WatchZoneFenceManager extends LiveData<Boolean> {
+    private static final String TAG = WatchZoneFenceManager.class.getSimpleName();
     private static WatchZoneFenceManager sInstance;
 
     private final Context mApplicationContext;
@@ -43,6 +45,7 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
 
     @Override
     protected void onActive() {
+        Log.d(TAG, "AppUpdateJob onActive");
         super.onActive();
         mWatchZoneModelsObserver = new WatchZoneModelsObserver(
                 true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
@@ -72,6 +75,7 @@ public class WatchZoneFenceManager extends LiveData<Boolean> {
 
     @Override
     protected void onInactive() {
+        Log.d(TAG, "AppUpdateJob onInactive");
         super.onInactive();
         mModelLiveData.removeObserver(mWatchZoneModelsObserver);
         mHandler.removeCallbacksAndMessages(null);

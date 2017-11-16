@@ -76,6 +76,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".scheduling.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+        </receiver>
 
         <!-- EXPERIMENTAL
         <activity

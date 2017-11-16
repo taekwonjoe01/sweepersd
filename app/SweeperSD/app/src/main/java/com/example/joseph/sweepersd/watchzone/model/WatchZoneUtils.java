@@ -324,6 +324,9 @@ public class WatchZoneUtils {
             if (startTimeWithOffset > today.getTime().getTime()) {
                 timeOrderedTimestamps.add(startTimeWithOffset);
             }
+            if (date.getStartCalendar().getTime().getTime() > today.getTime().getTime()) {
+                timeOrderedTimestamps.add(date.getStartCalendar().getTime().getTime());
+            }
             timeOrderedTimestamps.add(date.getEndCalendar().getTime().getTime());
         }
         Collections.sort(timeOrderedTimestamps);

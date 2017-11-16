@@ -39,6 +39,8 @@ public class DebugActivity extends AppCompatActivity {
     private Button mCreateActive;
     private Button mCreateSoon;
 
+    private TextView mAlarmScheduledFor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,7 @@ public class DebugActivity extends AppCompatActivity {
         mUpdaterLastFinished = findViewById(R.id.textview_updater_finished);
         mCreateActive = findViewById(R.id.button_create_zone_and_active_limit);
         mCreateSoon = findViewById(R.id.button_create_zone_and_soon_limit);
+        mAlarmScheduledFor = findViewById(R.id.textview_alarm_scheduled_for);
 
         LongPreferenceLiveData updaterStart = new LongPreferenceLiveData(this,
                 Preferences.PREFERENCE_APP_UPDATER_LAST_STARTED);
@@ -129,6 +132,20 @@ public class DebugActivity extends AppCompatActivity {
                             }
                         }
                     });
+                }
+            }
+        });
+        LongPreferenceLiveData alarmScheduledFor = new LongPreferenceLiveData(this,
+                Preferences.PREFERENCE_ALARM_SCHEDULED_FOR);
+        alarmScheduledFor.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long timestamp) {
+                if (timestamp != null) {
+                    if (timestamp == 0L) {
+                        mAlarmScheduledFor.setText("never");
+                    } else {
+                        mAlarmScheduledFor.setText(new Date(timestamp).toString());
+                    }
                 }
             }
         });

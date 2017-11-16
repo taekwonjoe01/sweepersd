@@ -6,5 +6,7 @@ public class Preferences {
     public static final String PREFERENCE_APP_UPDATER_LAST_STARTED = "app_updater_last_started";
     public static final String PREFERENCE_APP_UPDATER_LAST_FINISHED = "app_updater_last_finished";
 
+    public static final String PREFERENCE_ALARM_SCHEDULED_FOR = "alarm_scheduled_for";
+
     public static final String PREFERENCE_WATCH_ZONE_EXPLORER_UID = "watch_zone_explorer_uid";
 }

@@ -40,6 +40,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     private LiveData<List<WatchZoneModel>> mModelLiveData;
     private WatchZoneModelsObserver mModelsObserver;
+    private Observer<List<WatchZoneModel>> mTempObserver;
     private Observer<Boolean> mLimitsLoadedObserver;
     private Observer<Long> mExplorerUidObserver;
     private boolean mLimitsLoaded;
@@ -94,6 +95,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
 
     @Override
     protected synchronized void onActive() {
+        Log.d(TAG, "AppUpdateJob onActive");
         mModelsObserver = new WatchZoneModelsObserver(false, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data, ChangeSet changeSet) {
@@ -141,14 +143,34 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
         mLimitsLoadedLiveData.observeForever(mLimitsLoadedObserver);
         mModelLiveData = WatchZoneModelRepository.getInstance(mApplicationContext).getWatchZoneModelsLiveData();
         mModelLiveData.observeForever(mModelsObserver);
+        mTempObserver = new Observer<List<WatchZoneModel>>() {
+            @Override
+            public void onChanged(@Nullable List<WatchZoneModel> watchZoneModels) {
+                if (watchZoneModels == null) {
+                    Log.e(TAG, "AppUpdateJob onChanged null");
+                }
+                if (watchZoneModels.isEmpty()) {
+                    Log.e(TAG, "AppUpdateJob onChanged empty");
+                }
+                if (!watchZoneModels.isEmpty()) {
+                    Log.e(TAG, "AppUpdateJob onChanged size " + watchZoneModels.size());
+                }
+            }
+        };
+        mModelLiveData.observeForever(mTempObserver);
         mExplorerUidLiveData.observeForever(mExplorerUidObserver);
+
+        // This is done to signal that this is busy, don't think it's done yet!
+        setValue(null);
     }
 
     @Override
     protected synchronized void onInactive() {
+        Log.d(TAG, "AppUpdateJob onInactive");
         mExplorerUidLiveData.removeObserver(mExplorerUidObserver);
         mLimitsLoadedLiveData.removeObserver(mLimitsLoadedObserver);
         mModelLiveData.removeObserver(mModelsObserver);
+        mModelLiveData.removeObserver(mTempObserver);
         cancelAll();
     }
 
@@ -321,6 +343,7 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
             WatchZoneContainer container = mUpdatingWatchZones.get(uid);
             data.put(uid, container.progress);
         }
+        Log.e(TAG, "posting Value AppUpdateJob");
         postValue(data);
     }
 
