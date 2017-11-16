@@ -21,6 +21,12 @@ public class LimitSchedule {
     @ColumnInfo(name = "endHour")
     private int endHour;
 
+    @ColumnInfo(name = "startMinute")
+    private int startMinute;
+
+    @ColumnInfo(name = "endMinute")
+    private int endMinute;
+
     @ColumnInfo(name = "dayNumber")
     private int dayNumber;
 
@@ -46,6 +52,14 @@ public class LimitSchedule {
         return endHour;
     }
 
+    public int getStartMinute() {
+        return startMinute;
+    }
+
+    public int getEndMinute() {
+        return endMinute;
+    }
+
     public int getDayNumber() {
         return dayNumber;
     }
@@ -64,6 +78,14 @@ public class LimitSchedule {
 
     public void setEndHour(int endHour) {
         this.endHour = endHour;
+    }
+
+    public void setStartMinute(int startMinute) {
+        this.startMinute = startMinute;
+    }
+
+    public void setEndMinute(int endMinute) {
+        this.endMinute = endMinute;
     }
 
     public void setDayNumber(int dayNumber) {
@@ -91,6 +113,10 @@ public class LimitSchedule {
             } else if (this.weekNumber != compareTo.getWeekNumber()) {
                 result = true;
             } else if (this.limitId != compareTo.getLimitId()) {
+                result = true;
+            } else if (this.startMinute != compareTo.getStartMinute()) {
+                result = true;
+            } else if (this.endMinute != compareTo.getEndMinute()) {
                 result = true;
             }
         }

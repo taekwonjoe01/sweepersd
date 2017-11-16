@@ -102,7 +102,7 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         for (Long uid : schedules.keySet()) {
             LimitSchedule s = schedules.get(uid);
             LimitTuple tuple = new LimitTuple(s.getDayNumber(),
-                    s.getStartHour(), s.getEndHour());
+                    s.getStartHour(), s.getEndHour(), s.getStartMinute(), s.getEndMinute());
             List<LimitSchedule> schedulesForDay = sortedSchedules.get(tuple);
             if (schedulesForDay == null) {
                 schedulesForDay = new ArrayList<>();
@@ -172,22 +172,27 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         final int day;
         final int startHour;
         final int endHour;
+        final int startMinute;
+        final int endMinute;
 
-        LimitTuple(int day, int start, int end) {
+        LimitTuple(int day, int startHour, int endHour, int startMinute, int endMinute) {
             this.day = day;
-            this.startHour = start;
-            this.endHour = end;
+            this.startHour = startHour;
+            this.endHour = endHour;
+            this.startMinute = startMinute;
+            this.endMinute = endMinute;
         }
 
         @Override
         public boolean equals(Object obj) {
             LimitTuple other = (LimitTuple) obj;
-            return this.day == other.day && this.startHour == other.startHour && this.endHour == other.endHour;
+            return this.day == other.day && this.startHour == other.startHour && this.endHour == other.endHour
+                    && this.startMinute == other.startMinute && this.endMinute == other.endMinute;
         }
 
         @Override
         public int hashCode() {
-            return day * startHour * endHour;
+            return day * startHour * endHour * (1 + startMinute) * (1 + endMinute);
         }
     }
 

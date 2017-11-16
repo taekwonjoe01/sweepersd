@@ -123,7 +123,9 @@ public class LimitParser {
                         for (int j = 1; j < 5; j++) {
                             LimitSchedule sched = new LimitSchedule();
                             sched.setStartHour(startTime);
+                            sched.setStartMinute(0);
                             sched.setEndHour(endTime);
+                            sched.setEndMinute(0);
                             sched.setWeekNumber(j);
                             sched.setDayNumber(weekdayNumber);
                             schedulesForDay.add(sched);

@@ -47,20 +47,21 @@ public class WatchZoneUtils {
                                 calendar.get(Calendar.MONTH),
                                 calendar.get(Calendar.DAY_OF_MONTH),
                                 schedule.getStartHour(),
-                                0,
+                                schedule.getStartMinute(),
                                 0);
-                        int sweepingLength = schedule.getEndHour() - schedule.getStartHour();
-                        if (sweepingLength < 0) {
-                            sweepingLength += 24;
+                        int sweepingLengthMinutes = ((schedule.getEndHour() * 60) + schedule.getEndMinute()) -
+                                ((schedule.getStartHour() * 60) + schedule.getStartMinute());
+                        if (sweepingLengthMinutes < 0) {
+                            sweepingLengthMinutes += 24 * 60;
                         }
                         GregorianCalendar potentialEndTime = new GregorianCalendar(
                                 calendar.get(Calendar.YEAR),
                                 calendar.get(Calendar.MONTH),
                                 calendar.get(Calendar.DAY_OF_MONTH),
                                 schedule.getStartHour(),
-                                0,
+                                schedule.getStartMinute(),
                                 0);
-                        potentialEndTime.add(Calendar.HOUR, sweepingLength);
+                        potentialEndTime.add(Calendar.MINUTE, sweepingLengthMinutes);
 
                         if (potentialStartTime.getTime().getTime() > today.getTime().getTime()) {
                             result = new LimitScheduleDate(
@@ -181,7 +182,7 @@ public class WatchZoneUtils {
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH),
                         schedule.getStartHour(),
-                        0,
+                        schedule.getStartMinute(),
                         0);
                 int sweepingLength = schedule.getEndHour() - schedule.getStartHour();
                 if (sweepingLength < 0) {
@@ -192,30 +193,31 @@ public class WatchZoneUtils {
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH),
                         schedule.getStartHour(),
-                        0,
+                        schedule.getStartMinute(),
                         0);
                 potentialEndTime.add(Calendar.HOUR, sweepingLength);
 
                 result = new LimitScheduleDate(schedule, potentialStartTime, potentialEndTime);
             } else if (dow == (schedule.getDayNumber() % 7) + 1) {
-                int sweepingLength = schedule.getEndHour() - schedule.getStartHour();
-                if (sweepingLength < 0) {
+                int sweepingLengthMinutes = ((schedule.getEndHour() * 60) + schedule.getEndMinute()) -
+                        ((schedule.getStartHour() * 60) + schedule.getStartMinute());
+                if (sweepingLengthMinutes < 0) {
                     GregorianCalendar potentialStartTime = new GregorianCalendar(
                             calendar.get(Calendar.YEAR),
                             calendar.get(Calendar.MONTH),
                             calendar.get(Calendar.DAY_OF_MONTH),
                             schedule.getStartHour(),
-                            0,
+                            schedule.getStartMinute(),
                             0);
-                    sweepingLength += 24;
+                    sweepingLengthMinutes += 24 * 60;
                     GregorianCalendar potentialEndTime = new GregorianCalendar(
                             calendar.get(Calendar.YEAR),
                             calendar.get(Calendar.MONTH),
                             calendar.get(Calendar.DAY_OF_MONTH),
                             schedule.getStartHour(),
-                            0,
+                            schedule.getStartMinute(),
                             0);
-                    potentialEndTime.add(Calendar.HOUR, sweepingLength);
+                    potentialEndTime.add(Calendar.MINUTE, sweepingLengthMinutes);
 
                     result = new LimitScheduleDate(schedule, potentialStartTime, potentialEndTime);
                 }
