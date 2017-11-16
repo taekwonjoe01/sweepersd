@@ -121,9 +121,23 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
             newSign.startTime = tuple.startHour < 13 ? Integer.toString(tuple.startHour) :
                     Integer.toString(tuple.startHour - 12);
             newSign.startAMPM = tuple.startHour < 13 ? "AM" : "PM";
+            if (tuple.startMinute != 0) {
+                if (tuple.startMinute < 10) {
+                    newSign.startTime += ":0" + tuple.startMinute;
+                } else {
+                    newSign.startTime += ":" + tuple.startMinute;
+                }
+            }
             newSign.endTime = tuple.endHour < 13 ? Integer.toString(tuple.endHour) :
                     Integer.toString(tuple.endHour - 12);
             newSign.endAMPM = tuple.startHour < 13 ? "AM" : "PM";
+            if (tuple.endMinute != 0) {
+                if (tuple.endMinute < 10) {
+                    newSign.endTime += ":0" + tuple.endMinute;
+                } else {
+                    newSign.endTime += ":" + tuple.endMinute;
+                }
+            }
 
             List<LimitSchedule> uniques = sortedSchedules.get(tuple);
             List<Integer> weekNumbers = new ArrayList<>();
