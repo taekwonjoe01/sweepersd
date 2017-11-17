@@ -12,8 +12,8 @@ public class WatchZonePointModel {
     @Embedded
     public WatchZonePoint point;
 
-    @Relation(parentColumn = "limitId", entityColumn = "uid", entity = Limit.class)
-    public List<LimitModel> limitModels;
+    @Relation(parentColumn = "uid", entityColumn = "watchZonePointId", entity = WatchZonePointLimit.class)
+    public List<WatchZonePointLimitModel> pointLimitModels;
 
     public boolean isChanged(WatchZonePointModel compareTo) {
         boolean result = false;
@@ -22,13 +22,13 @@ public class WatchZonePointModel {
             result = true;
         } else if (point.isChanged(compareTo.point)) {
             result = true;
-        } else if (this.limitModels.size() != compareTo.limitModels.size()) {
+        } else if (this.pointLimitModels.size() != compareTo.pointLimitModels.size()) {
             result = true;
         } else {
-            for (int i = 0; i < limitModels.size(); i++) {
-                LimitModel myModel = limitModels.get(i);
-                LimitModel otherModel = compareTo.limitModels.get(i);
-                if (myModel.isChanged(otherModel)) {
+            for (int i = 0; i < pointLimitModels.size(); i++) {
+                WatchZonePointLimitModel myModel = pointLimitModels.get(i);
+                WatchZonePointLimitModel otherModel = compareTo.pointLimitModels.get(i);
+                if (myModel.pointLimit.getUid() != otherModel.pointLimit.getUid()) {
                     result = true;
                     break;
                 }

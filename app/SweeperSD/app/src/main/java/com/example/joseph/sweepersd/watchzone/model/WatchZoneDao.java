@@ -23,6 +23,9 @@ public interface WatchZoneDao {
     @Query("SELECT * FROM watchzonepoints WHERE watchZoneId LIKE :uid")
     List<WatchZonePoint> getWatchZonePoints(long uid);
 
+    @Query("SELECT * FROM watchzonepointlimits WHERE watchZonePointId LIKE :pointUid")
+    List<WatchZonePointLimit> getWatchZonePointLimits(long pointUid);
+
     @Query("SELECT * FROM watchzones WHERE uid LIKE :uid LIMIT 1")
     WatchZone getWatchZone(long uid);
 
@@ -31,6 +34,9 @@ public interface WatchZoneDao {
 
     @Insert(onConflict = REPLACE)
     long[] insertWatchZonePoints(List<WatchZonePoint> points);
+
+    @Insert(onConflict = REPLACE)
+    long[] insertWatchZonePointLimits(List<WatchZonePointLimit> pointLimits);
 
     @Update(onConflict = REPLACE)
     int updateWatchZone(WatchZone watchZone);
@@ -43,4 +49,7 @@ public interface WatchZoneDao {
 
     @Delete
     int deleteWatchZonePoints(List<WatchZonePoint> watchZonePoints);
+
+    @Delete
+    int deleteWatchZonePointLimits(List<WatchZonePointLimit> watchZonePointLimits);
 }

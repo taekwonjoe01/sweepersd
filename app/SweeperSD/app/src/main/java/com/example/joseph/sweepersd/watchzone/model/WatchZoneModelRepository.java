@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
+import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -63,7 +64,6 @@ public class WatchZoneModelRepository {
                 List<WatchZonePoint> points = new ArrayList<>();
                 for (LatLng latLng : latLngs) {
                     WatchZonePoint point = new WatchZonePoint();
-                    point.setLimitId(0L);
                     point.setAddress(null);
                     point.setWatchZoneUpdatedTimestampMs(0L);
                     point.setWatchZoneId(result);
@@ -86,9 +86,23 @@ public class WatchZoneModelRepository {
      * @param watchZonePoint
      * @return
      */
-    synchronized int updateWatchZonePoint(WatchZonePoint watchZonePoint) {
+    synchronized int updateWatchZonePoint(WatchZonePoint watchZonePoint, List<Limit> limits) {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
         int result = watchZoneDao.updateWatchZonePoint(watchZonePoint);
+
+        List<WatchZonePointLimit> pointLimits = watchZoneDao.getWatchZonePointLimits(watchZonePoint.getUid());
+        watchZoneDao.deleteWatchZonePointLimits(pointLimits);
+
+        if (limits != null) {
+            List<WatchZonePointLimit> newPointLimits = new ArrayList<>();
+            for (Limit l : limits) {
+                WatchZonePointLimit pointLimit = new WatchZonePointLimit();
+                pointLimit.setLimitId(l.getUid());
+                pointLimit.setWatchZonePointId(watchZonePoint.getUid());
+                newPointLimits.add(pointLimit);
+            }
+            watchZoneDao.insertWatchZonePointLimits(newPointLimits);
+        }
 
         return result;
     }
@@ -124,7 +138,6 @@ public class WatchZoneModelRepository {
                 List<WatchZonePoint> points = new ArrayList<>();
                 for (LatLng latLng : latLngs) {
                     WatchZonePoint point = new WatchZonePoint();
-                    point.setLimitId(0L);
                     point.setAddress(null);
                     point.setWatchZoneUpdatedTimestampMs(0L);
                     point.setWatchZoneId(watchZone.getUid());

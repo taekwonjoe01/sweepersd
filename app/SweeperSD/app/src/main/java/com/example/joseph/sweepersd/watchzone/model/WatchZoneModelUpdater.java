@@ -9,6 +9,7 @@ import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.OnDeviceLimitProviderService;
 import com.example.joseph.sweepersd.utils.BooleanPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.ChangeSet;
@@ -353,9 +354,9 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     }
 
     @Override
-    public void saveWatchZonePoint(WatchZonePoint p) {
+    public void saveWatchZonePoint(WatchZonePoint p, List<Limit> limits) {
         if (mUpdatingWatchZones.containsKey(p.getWatchZoneId())) {
-            WatchZoneModelRepository.getInstance(mApplicationContext).updateWatchZonePoint(p);
+            WatchZoneModelRepository.getInstance(mApplicationContext).updateWatchZonePoint(p, limits);
         }
     }
 }

@@ -24,9 +24,6 @@ public class WatchZonePoint {
     @ColumnInfo(name = "address")
     private String address;
 
-    @ColumnInfo(name = "limitId")
-    private long limitId;
-
     @ColumnInfo(name = "watchZoneId", index = true)
     private long watchZoneId;
 
@@ -47,10 +44,6 @@ public class WatchZonePoint {
 
     public String getAddress() {
         return address;
-    }
-
-    public long getLimitId() {
-        return limitId;
     }
 
     public long getWatchZoneId() {
@@ -77,10 +70,6 @@ public class WatchZonePoint {
         this.address = address;
     }
 
-    public void setLimitId(long limitId) {
-        this.limitId = limitId;
-    }
-
     public void setWatchZoneId(long watchZoneId) {
         this.watchZoneId = watchZoneId;
     }
@@ -98,8 +87,6 @@ public class WatchZonePoint {
             } else if (this.latitude != compareTo.getLatitude()) {
                 result = true;
             } else if (!TextUtils.equals(this.address, compareTo.getAddress())) {
-                result = true;
-            } else if (this.limitId != compareTo.getLimitId()) {
                 result = true;
             } else if (this.watchZoneId != compareTo.getWatchZoneId()) {
                 result = true;

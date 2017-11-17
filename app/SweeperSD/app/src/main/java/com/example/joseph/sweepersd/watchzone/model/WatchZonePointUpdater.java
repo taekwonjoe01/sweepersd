@@ -7,6 +7,8 @@ import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.List;
+
 public class WatchZonePointUpdater implements Runnable {
     public static final long WATCH_ZONE_UP_TO_DATE_TIME_MS = 1000L * 60L * 60L * 24L * 30L;
     private final Context mApplicationContext;
@@ -34,15 +36,15 @@ public class WatchZonePointUpdater implements Runnable {
 
             if (address != null) {
                 mWatchZonePoint.setAddress(address);
+                List<Limit> limits = null;
                 if (!TextUtils.isEmpty(address)) {
-                    Limit limit = LocationUtils.findLimitForAddress(mApplicationContext,
+                    limits = LocationUtils.findLimitsForAddress(mApplicationContext,
                             address);
-                    mWatchZonePoint.setLimitId(limit != null ? limit.getUid() : 0L);
                 }
                 mWatchZonePoint.setWatchZoneUpdatedTimestampMs(System.currentTimeMillis());
-            }
 
-            mSaveDelegate.saveWatchZonePoint(mWatchZonePoint);
+                mSaveDelegate.saveWatchZonePoint(mWatchZonePoint, limits);
+            }
         }
     }
 }

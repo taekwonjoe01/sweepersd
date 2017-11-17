@@ -214,9 +214,9 @@ public class LocationUtils {
                 a += address.getAddressLine(i) + ",";
             }
             a = a.toLowerCase();
-            Log.d(TAG, "findLimitForAddress: " + a);
+            Log.d(TAG, "findLimitsForAddress: " + a);
             // TODO: This should check more dynamically the city.
-            findLimitForAddress(a);
+            findLimitsForAddress(a);
         }
         return result;
     }*/

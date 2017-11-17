@@ -43,10 +43,14 @@ public class WatchZoneModel {
     public Map<Long, LimitModel> getUniqueLimitModels() {
         Map<Long, LimitModel> results = new HashMap<>();
         for (WatchZonePointModel p : points) {
-            if (p.limitModels != null) {
-                for (LimitModel limitModel : p.limitModels) {
-                    if (!results.containsKey(limitModel.limit.getUid())) {
-                        results.put(limitModel.limit.getUid(), limitModel);
+            if (p.pointLimitModels != null) {
+                for (WatchZonePointLimitModel pointLimitModel : p.pointLimitModels) {
+                    if (pointLimitModel.limitModels != null) {
+                        for (LimitModel limitModel : pointLimitModel.limitModels) {
+                            if (!results.containsKey(limitModel.limit.getUid())) {
+                                results.put(limitModel.limit.getUid(), limitModel);
+                            }
+                        }
                     }
                 }
             }

@@ -226,23 +226,6 @@ public class WatchZoneUtils {
         return result;
     }
 
-    /**
-     * Many sweeping addresses have the same limit. We don't want to show duplicated limits on UI.
-     * @param points
-     * @return
-     */
-    public static List<Long> getUniqueLimitIds(List<WatchZonePoint> points) {
-        List<Long> results = new ArrayList<>();
-        for (WatchZonePoint p : points) {
-            if (p.getLimitId() != -1) {
-                if (!results.contains(p.getLimitId())) {
-                    results.add(p.getLimitId());
-                }
-            }
-        }
-        return results;
-    }
-
     public static List<LimitScheduleDate> getStartTimeOrderedDatesForLimitSchedules(
             List<LimitSchedule> schedules, boolean includeEndTime) {
         List<LimitScheduleDate> limitScheduleDates = new ArrayList<>();

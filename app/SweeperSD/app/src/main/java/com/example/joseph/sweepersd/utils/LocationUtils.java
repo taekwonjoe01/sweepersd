@@ -212,16 +212,15 @@ public class LocationUtils {
                 a += address.getAddressLine(i) + ",";
             }
             a = a.toLowerCase();
-            Log.d(TAG, "findLimitForAddress: " + a);
+            Log.d(TAG, "findLimitsForAddress: " + a);
             // TODO: This should check more dynamically the city.
-            findLimitForAddress(a);
+            findLimitsForAddress(a);
         }
         return result;
     }*/
 
-    // TODO this will work in anywhere on earth... probably don't want to.
-    public static Limit findLimitForAddress(Context context, String address) {
-        Limit result = null;
+    public static List<Limit> findLimitsForAddress(Context context, String address) {
+        List<Limit> results = new ArrayList<>();
         if (address != null) {
             String[] split = address.split(",");
             if (split.length > 1) {
@@ -241,10 +240,10 @@ public class LocationUtils {
                                 int minNum = Integer.parseInt(streetNumberParsings[0]);
                                 int maxNum = Integer.parseInt(streetNumberParsings[1]);
 
-                                Limit minLimit = checkAddress(context, minNum, streetName);
-                                Limit maxLimit = checkAddress(context, maxNum, streetName);
-                                result = (minLimit != null) ? minLimit :
-                                        (maxLimit != null) ? maxLimit : null;
+                                List<Limit> minLimits = getLimitsForAddress(context, minNum, streetName);
+                                List<Limit> maxLimits = getLimitsForAddress(context, maxNum, streetName);
+                                results = (minLimits != null && !minLimits.isEmpty()) ? minLimits :
+                                        (maxLimits != null && !maxLimits.isEmpty()) ? maxLimits : null;
                             } catch (NumberFormatException e) {
                                 Log.e(TAG, "Malformed Street numbers: " + streetNumber);
                             }
@@ -254,8 +253,8 @@ public class LocationUtils {
                     } else {
                         try {
                             int num = Integer.parseInt(streetNumber);
-                            Limit l = checkAddress(context, num, streetName);
-                            result = (l != null) ? l : null;
+                            List<Limit> limits = getLimitsForAddress(context, num, streetName);
+                            results = (limits != null && !limits.isEmpty()) ? limits : null;
                         } catch (NumberFormatException e) {
                             Log.e(TAG, "Malformed Street numbers: " + streetNumber);
                         }
@@ -269,22 +268,22 @@ public class LocationUtils {
         } else {
             Log.w(TAG, "City is not San Diego. Address is  " + address);
         }
-        return result;
+        return results;
     }
 
-    private static Limit checkAddress(Context context, int houseNumber, String street) {
-        Limit result = null;
+    private static List<Limit> getLimitsForAddress(Context context, int houseNumber, String street) {
+        List<Limit> results = new ArrayList<>();
         LimitDao limitDao = AppDatabase.getInstance(context).limitDao();
         List<Limit> limitsForStreet = limitDao.getAllByStreet(street);
         if (limitsForStreet != null) {
             for (Limit l : limitsForStreet) {
                 if (street.contains(l.getStreet())) {
                     if (houseNumber >= l.getStartRange() && houseNumber <= l.getEndRange()) {
-                        result = l;
+                        results.add(l);
                     }
                 }
             }
         }
-        return result;
+        return results;
     }
 }

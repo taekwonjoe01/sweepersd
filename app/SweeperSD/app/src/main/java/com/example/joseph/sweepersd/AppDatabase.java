@@ -15,9 +15,10 @@ import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneDao;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
+import com.example.joseph.sweepersd.watchzone.model.WatchZonePointLimit;
 
 @Database(entities = {Limit.class, LimitSchedule.class, WatchZone.class, WatchZonePoint.class,
-        ActivityReport.class, WatchZoneFence.class},
+        ActivityReport.class, WatchZoneFence.class, WatchZonePointLimit.class },
         version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase sInstance;

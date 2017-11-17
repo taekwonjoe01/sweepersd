@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.watchzone.model;
 import android.content.Context;
 import android.os.Handler;
 
+import com.example.joseph.sweepersd.limit.Limit;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Collections;
@@ -39,7 +40,7 @@ class WatchZoneUpdater {
     }
 
     interface WatchZonePointSaveDelegate {
-        void saveWatchZonePoint(WatchZonePoint p);
+        void saveWatchZonePoint(WatchZonePoint p, List<Limit> limits);
     }
 
     public WatchZoneUpdater(Context applicationContext, WatchZoneModel watchWatchZoneModel,

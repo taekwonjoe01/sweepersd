@@ -34,11 +34,16 @@ public class WatchZoneLimitsObserver extends BaseObserver<Map<Long, LimitModel>,
     public Map<Long, LimitModel> getData(WatchZoneModel watchZoneModel) {
         HashMap<Long, LimitModel> results = new HashMap<>();
         for (WatchZonePointModel point : watchZoneModel.points) {
-            List<LimitModel> models = point.limitModels;
-            if (models != null && !models.isEmpty()) {
-                for (LimitModel model : models) {
-                    if (!results.containsKey(model.limit.getUid())) {
-                        results.put(model.limit.getUid(), model);
+            List<WatchZonePointLimitModel> wzpModels = point.pointLimitModels;
+            if (wzpModels != null && !wzpModels.isEmpty()) {
+                for (WatchZonePointLimitModel wzpModel : wzpModels) {
+                    List<LimitModel> models = wzpModel.limitModels;
+                    if (models != null && !models.isEmpty()) {
+                        for (LimitModel model : models) {
+                            if (!results.containsKey(model.limit.getUid())) {
+                                results.put(model.limit.getUid(), model);
+                            }
+                        }
                     }
                 }
             }
