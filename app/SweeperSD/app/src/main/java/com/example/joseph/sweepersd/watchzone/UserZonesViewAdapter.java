@@ -21,6 +21,7 @@ import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
+import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
@@ -34,8 +35,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 
 public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdapter.ViewHolder> {
@@ -199,28 +203,66 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                         model.getUniqueLimitModels().get(uniqueLimitUid).schedules));
             }
 
-            long nextSweepingTime = WatchZoneUtils.getNextSweepingStartTime(allLimitSchedules);
             String dateString = mActivity.getResources().getString(R.string.watch_zone_no_sweeping);
-            if (nextSweepingTime != 0) {
-                if (nextSweepingTime < System.currentTimeMillis()) {
+            List<LimitScheduleDate> sweepingDates =
+                    WatchZoneUtils.getStartTimeOrderedDatesForWatchZone(model);
+            if (sweepingDates != null) {
+                List<LimitScheduleDate> currentSweeping = new ArrayList<>();
+                List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
+                long now = new GregorianCalendar(
+                        TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
+                long startOffset = WatchZoneUtils.getStartHourOffset(model.watchZone);
+                for (LimitScheduleDate date : sweepingDates) {
+                    long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
+                    long startTime = date.getStartCalendar().getTime().getTime();
+                    long endTime = date.getEndCalendar().getTime().getTime();
+                    if (startTime <= now && endTime >= now) {
+                        currentSweeping.add(date);
+                    } else if (warningTime <= now && endTime >= now) {
+                        upcomingSweeping.add(date);
+                    }
+                }
+
+                if (!currentSweeping.isEmpty()) {
                     holder.mViewLayout.setBackground(
                             mActivity.getResources().getDrawable(R.drawable.background_userzones_now));
                     dateString = "Street sweeping is happening now.";
-                } else {
-                    long timeLeft = nextSweepingTime - System.currentTimeMillis();
-                    if (timeLeft < 1000L * 60L * 60L * 24L) {
-                        holder.mViewLayout.setBackground(
-                                mActivity.getResources().getDrawable(R.drawable.background_userzones_upcoming));
-                        Calendar sweeping = Calendar.getInstance();
-                        sweeping.setTime(new Date(nextSweepingTime));
-                        Calendar now = Calendar.getInstance();
-                        if (sweeping.get(Calendar.DATE) != now.get(Calendar.DATE)) {
-                            dateString = "Next sweeping will occur tomorrow at " +
-                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                        } else {
-                            dateString = "Next sweeping will occur today at " +
-                                    new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                        }
+                } else if (!upcomingSweeping.isEmpty()) {
+                    long nextSweepingTime = upcomingSweeping.get(0).getStartCalendar().getTime().getTime();
+
+                    holder.mViewLayout.setBackground(
+                            mActivity.getResources().getDrawable(R.drawable.background_userzones_upcoming));
+                    Calendar sweeping = Calendar.getInstance();
+                    sweeping.setTime(new Date(nextSweepingTime));
+                    Calendar today = Calendar.getInstance();
+                    Calendar tomorrow = Calendar.getInstance();
+                    tomorrow.add(Calendar.DATE, 1);
+                    if (sweeping.get(Calendar.DATE) == today.get(Calendar.DATE)) {
+                        dateString = "Next sweeping will occur today at " +
+                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
+                    } else if (sweeping.get(Calendar.DATE) == tomorrow.get(Calendar.DATE)) {
+                        dateString = "Next sweeping will occur tomorrow at " +
+                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
+                    } else {
+                        dateString = "Next sweeping will occur on " +
+                                new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));
+                    }
+                } else if (!sweepingDates.isEmpty()) {
+                    long nextSweepingTime = sweepingDates.get(0).getStartCalendar().getTime().getTime();
+
+                    holder.mViewLayout.setBackground(
+                            mActivity.getResources().getDrawable(R.drawable.apptheme_background));
+                    Calendar sweeping = Calendar.getInstance();
+                    sweeping.setTime(new Date(nextSweepingTime));
+                    Calendar today = Calendar.getInstance();
+                    Calendar tomorrow = Calendar.getInstance();
+                    tomorrow.add(Calendar.DATE, 1);
+                    if (sweeping.get(Calendar.DATE) == today.get(Calendar.DATE)) {
+                        dateString = "Next sweeping will occur today at " +
+                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
+                    } else if (sweeping.get(Calendar.DATE) == tomorrow.get(Calendar.DATE)) {
+                        dateString = "Next sweeping will occur tomorrow at " +
+                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
                     } else {
                         dateString = "Next sweeping will occur on " +
                                 new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));

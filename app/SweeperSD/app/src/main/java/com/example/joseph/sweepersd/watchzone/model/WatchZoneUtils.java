@@ -70,7 +70,7 @@ public class WatchZoneUtils {
                         } else if (includeEndTime &&
                                 potentialEndTime.getTime().getTime() > today.getTime().getTime()) {
                             result = new LimitScheduleDate(
-                                    schedule, potentialEndTime, potentialEndTime);
+                                    schedule, potentialStartTime, potentialEndTime);
                             break;
                         }
                     }
