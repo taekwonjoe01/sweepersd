@@ -5,7 +5,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.example.joseph.sweepersd"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -49,13 +49,10 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-rc1"
     implementation 'android.arch.persistence.room:runtime:1.0.0-rc1'
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0-rc1"
-
     // Required for Sliding drawer from bottom of screen
     compile 'com.sothree.slidinguppanel:library:3.4.0'
-
     // For vertical seekbar
     compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
-
     // For Calendar
     compile 'com.roomorama:caldroid:3.0.1'
 }
