@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
@@ -12,8 +13,8 @@ import com.example.joseph.sweepersd.utils.Notifications;
 import com.example.joseph.sweepersd.watchzone.UserZonesActivity;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
 

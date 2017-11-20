@@ -1,7 +1,6 @@
 package com.example.joseph.sweepersd.archived.presentation.manualalarms;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -69,10 +68,6 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         if (animator instanceof SimpleItemAnimator) {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
-
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
     }
 
     @Override

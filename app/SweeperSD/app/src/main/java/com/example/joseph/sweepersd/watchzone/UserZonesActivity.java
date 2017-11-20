@@ -1,7 +1,5 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,8 +15,6 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
-import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateWatchZoneActivity;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Map;
 
@@ -71,10 +67,6 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
         if (animator instanceof SimpleItemAnimator) {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
-
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
     }
 
     @Override
