@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
@@ -356,7 +357,11 @@ public class WatchZoneModelUpdater extends LiveData<Map<Long, Integer>> implemen
     @Override
     public void saveWatchZonePoint(WatchZonePoint p, List<Limit> limits) {
         if (mUpdatingWatchZones.containsKey(p.getWatchZoneId())) {
-            WatchZoneModelRepository.getInstance(mApplicationContext).updateWatchZonePoint(p, limits);
+            try {
+                WatchZoneModelRepository.getInstance(mApplicationContext).updateWatchZonePoint(p, limits);
+            } catch (SQLiteConstraintException e) {
+                Log.w(TAG, "Attempting to update a non-existant WatchZonePoint.");
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.joseph.sweepersd.watchzone.model;
 
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
@@ -86,7 +87,7 @@ public class WatchZoneModelRepository {
      * @param watchZonePoint
      * @return
      */
-    synchronized int updateWatchZonePoint(WatchZonePoint watchZonePoint, List<Limit> limits) {
+    synchronized int updateWatchZonePoint(WatchZonePoint watchZonePoint, List<Limit> limits) throws SQLiteConstraintException {
         WatchZoneDao watchZoneDao = AppDatabase.getInstance(mApplicationContext).watchZoneDao();
         int result = watchZoneDao.updateWatchZonePoint(watchZonePoint);
 
@@ -101,6 +102,7 @@ public class WatchZoneModelRepository {
                 pointLimit.setWatchZonePointId(watchZonePoint.getUid());
                 newPointLimits.add(pointLimit);
             }
+
             watchZoneDao.insertWatchZonePointLimits(newPointLimits);
         }
 
