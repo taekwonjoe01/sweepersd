@@ -18,6 +18,12 @@ public interface LimitDao {
     @Query("SELECT * FROM limits WHERE street LIKE (:streetName)")
     List<Limit> getAllByStreet(String streetName);
 
+    @Query("SELECT * FROM limitschedules WHERE limitId LIKE (:limitId)")
+    List<LimitSchedule> getAllSchedulesByLimitId(long limitId);
+
+    @Query("SELECT * FROM limitschedules")
+    List<LimitSchedule> getAllSchedules();
+
     @Insert(onConflict = REPLACE)
     long[] insertLimits(List<Limit> limits);
     @Insert(onConflict = REPLACE)
