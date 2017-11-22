@@ -131,7 +131,7 @@ public class WatchZoneModelRepository {
             watchZone.setRemindPolicy(remindPolicy);
             result = watchZoneDao.updateWatchZone(watchZone);
             if (result > 0 && invalidateWatchZonePoints) {
-                List<WatchZonePoint> oldPoints = watchZoneDao.getWatchZonePoints(watchZone.getUid());
+                List<WatchZonePoint> oldPoints = watchZoneDao.getWatchZonePointsForWatchZoneId(watchZone.getUid());
                 int numDeleted = watchZoneDao.deleteWatchZonePoints(oldPoints);
 
                 List<LatLng> latLngs = LocationUtils.getLatLngsInRadius(
