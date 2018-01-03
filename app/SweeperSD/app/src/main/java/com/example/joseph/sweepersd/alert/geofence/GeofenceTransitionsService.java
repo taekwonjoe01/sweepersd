@@ -35,7 +35,7 @@ public class GeofenceTransitionsService extends IntentService {
         List<WatchZoneFence> fences = new ArrayList<>();
         for (Geofence geofence : triggeringFences) {
             long uid = Long.parseLong(geofence.getRequestId());
-            WatchZoneFence fence = dao.getFenceByUid(uid);
+            WatchZoneFence fence = dao.getFenceByWatchZoneUid(uid);
             if (fence != null) {
                 if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                     fence.setInRegion(true);

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.AppDatabase;
 import com.example.joseph.sweepersd.utils.PendingIntents;
@@ -91,8 +90,8 @@ public class WatchZoneFenceUpdater {
                 newWatchZoneFence.setCenterLatitude(model.watchZone.getCenterLatitude());
                 newWatchZoneFence.setCenterLongitude(model.watchZone.getCenterLongitude());
                 newWatchZoneFence.setRadius(model.watchZone.getRadius());
-                long uid = dao.insertGeofence(newWatchZoneFence);
-                newWatchZoneFence.setUid(uid);
+                // This should fail if there's already a geofence with the same watchZoneUid
+                dao.insertGeofence(newWatchZoneFence);
                 existingGeofences.put(model.watchZone.getUid(), newWatchZoneFence);
             }
 
@@ -101,7 +100,7 @@ public class WatchZoneFenceUpdater {
                 gmsFences.add(new Geofence.Builder()
                         // Set the request ID of the geofence. This is a string to identify this
                         // geofence.
-                        .setRequestId(Long.toString(fence.getUid()))
+                        .setRequestId(Long.toString(fence.getWatchZoneId()))
                         .setExpirationDuration(Geofence.NEVER_EXPIRE)
                         .setCircularRegion(
                                 fence.getCenterLatitude(),

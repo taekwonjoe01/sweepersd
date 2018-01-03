@@ -3,15 +3,10 @@ package com.example.joseph.sweepersd.alert.geofence;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.text.TextUtils;
-
-import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 
 @Entity(tableName = "watchzonefences")
 public class WatchZoneFence {
-    @PrimaryKey(autoGenerate = true)
-    private long uid;
-
+    @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "watchZoneId")
     private long watchZoneId;
 
@@ -43,14 +38,6 @@ public class WatchZoneFence {
         this.inRegion = inRegion;
     }
 
-    void setUid(long uid) {
-        this.uid = uid;
-    }
-
-    public long getUid() {
-        return uid;
-    }
-
     public double getCenterLatitude() {
         return centerLatitude;
     }
@@ -75,10 +62,11 @@ public class WatchZoneFence {
         this.radius = radius;
     }
 
-    public boolean isChanged(WatchZoneFence compareTo) {
-        boolean result = false;
+    public Boolean isChanged(WatchZoneFence compareTo) {
+        Boolean result = null;
 
         if (this.watchZoneId == compareTo.getWatchZoneId()) {
+            result = false;
             if (this.radius != compareTo.getRadius()) {
                 result = true;
             } else if (this.centerLatitude != compareTo.getCenterLatitude()) {

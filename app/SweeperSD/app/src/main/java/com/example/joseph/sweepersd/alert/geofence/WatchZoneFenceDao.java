@@ -19,8 +19,8 @@ public interface WatchZoneFenceDao {
     @Query("SELECT * FROM watchzonefences")
     List<WatchZoneFence> getAllGeofences();
 
-    @Query("SELECT * FROM watchzonefences WHERE uid LIKE (:uid) LIMIT 1")
-    WatchZoneFence getFenceByUid(long uid);
+    @Query("SELECT * FROM watchzonefences WHERE watchZoneId LIKE (:watchZoneId) LIMIT 1")
+    WatchZoneFence getFenceByWatchZoneUid(long watchZoneId);
 
     @Insert(onConflict = REPLACE)
     long[] insertGeofences(List<WatchZoneFence> watchZoneFences);
