@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -49,6 +50,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             SphericalUtil.computeOffset(SAN_DIEGO_CENTER,
             SAN_DIEGO_RADIUS_METERS * Math.sqrt(2), 45));
 
+    private static final int REQUEST_CODE_LOCATION_PERMISSION = 0;
+
     private PlaceAutocompleteFragment mPlaceFragment;
     private MapFragment mMapFragment;
     private FloatingActionButton mSaveButton;
@@ -75,6 +78,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private ProgressBar mProgressBar;
 
     private boolean mSaveOnDestroy;
+
+    private boolean mPermissionRequested;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -180,6 +185,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             }
         });
         mSaveOnDestroy = false;
+        mPermissionRequested = false;
         mCurrentWatchZoneUid = 0L;
     }
 
@@ -196,13 +202,13 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED ) {
+        int permission = ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (permission != PackageManager.PERMISSION_GRANTED && !mPermissionRequested) {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                    0);
-        } else if (mCurrentWatchZoneUid == 0L) {
+                    REQUEST_CODE_LOCATION_PERMISSION);
+        } else if (permission == PackageManager.PERMISSION_GRANTED && mCurrentWatchZoneUid == 0L) {
             LocationServices.getFusedLocationProviderClient(this).getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
@@ -216,6 +222,23 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             });
         } else if (mCurrentWatchZoneUid == 0L) {
             mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(SAN_DIEGO_BOUNDS, 0));
+            Toast.makeText(this, "Long press anywhere on the map to set a watch zone.", Toast.LENGTH_LONG).show();
+        } else {
+            LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
+            LatLng southWest = SphericalUtil.computeOffset(center,
+                    mCurrentRadius * Math.sqrt(2), 225);
+            LatLng northEast = SphericalUtil.computeOffset(center,
+                    mCurrentRadius * Math.sqrt(2), 45);
+            LatLngBounds bounds = new LatLngBounds(southWest, northEast);
+            mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 10));
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_LOCATION_PERMISSION) {
+            mPermissionRequested = true;
         }
     }
 
