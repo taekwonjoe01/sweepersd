@@ -104,10 +104,11 @@ public class WatchZone {
         this.remindPolicy = remindPolicy;
     }
 
-    public boolean isChanged(boolean onlyCircle, WatchZone compareTo) {
-        boolean result = false;
+    public Boolean isChanged(boolean onlyCircle, WatchZone compareTo) {
+        Boolean result = null;
 
         if (this.uid == compareTo.getUid()) {
+            result = false;
             if (this.radius != compareTo.getRadius()) {
                 result = true;
             } else if (this.centerLatitude != compareTo.getCenterLatitude()) {

@@ -3,7 +3,6 @@ package com.example.joseph.sweepersd.limit;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
-import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
@@ -100,10 +99,11 @@ public class LimitSchedule {
         this.limitId = limitId;
     }
 
-    public boolean isChanged(LimitSchedule compareTo) {
-        boolean result = false;
+    public Boolean isChanged(LimitSchedule compareTo) {
+        Boolean result = null;
 
         if (this.uid == compareTo.getUid()) {
+            result = false;
             if (this.startHour != compareTo.getStartHour()) {
                 result = true;
             } else if (this.endHour != compareTo.getEndHour()) {

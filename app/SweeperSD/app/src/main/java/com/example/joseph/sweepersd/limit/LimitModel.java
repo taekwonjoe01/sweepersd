@@ -11,20 +11,20 @@ public class LimitModel {
     @Relation(parentColumn = "uid", entityColumn = "limitId")
     public List<LimitSchedule> schedules;
 
-    public boolean isChanged(LimitModel compareTo) {
-        boolean result = false;
+    public Boolean isChanged(LimitModel compareTo) {
+        Boolean result = limit.isChanged(compareTo.limit);
 
-        if (this.limit.isChanged(compareTo.limit)) {
-            result = true;
-        } else if (this.schedules.size() != compareTo.schedules.size()) {
-            result = true;
-        } else {
-            for (int i = 0; i < schedules.size(); i++) {
-                LimitSchedule mySchedule = this.schedules.get(i);
-                LimitSchedule otherSchedule = compareTo.schedules.get(i);
-                if (mySchedule.isChanged(otherSchedule)) {
-                    result = true;
-                    break;
+        if (result != null && !result) {
+            if (this.schedules.size() != compareTo.schedules.size()) {
+                result = true;
+            } else {
+                for (int i = 0; i < schedules.size(); i++) {
+                    LimitSchedule mySchedule = this.schedules.get(i);
+                    LimitSchedule otherSchedule = compareTo.schedules.get(i);
+                    if (mySchedule.isChanged(otherSchedule)) {
+                        result = true;
+                        break;
+                    }
                 }
             }
         }

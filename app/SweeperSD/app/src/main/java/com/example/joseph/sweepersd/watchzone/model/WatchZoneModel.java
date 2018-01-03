@@ -17,13 +17,10 @@ public class WatchZoneModel {
     public List<WatchZonePointModel> points;
 
     public Boolean isChanged(WatchZoneModel compareTo) {
-        Boolean result = null;
+        Boolean result = watchZone.isChanged(false, compareTo.watchZone);
 
-        if (this.watchZone.getUid() == compareTo.watchZone.getUid()) {
-            result = false;
-            if (this.watchZone.isChanged(false, compareTo.watchZone)) {
-                result = true;
-            } else if (this.points.size() != compareTo.points.size()) {
+        if (result != null && !result) {
+            if (this.points.size() != compareTo.points.size()) {
                 result = true;
             } else {
                 for (int i = 0; i < this.points.size(); i++) {

@@ -78,10 +78,11 @@ public class WatchZonePoint {
         watchZoneUpdatedTimestampMs = timestamp;
     }
 
-    public boolean isChanged(WatchZonePoint compareTo) {
-        boolean result = false;
+    public Boolean isChanged(WatchZonePoint compareTo) {
+        Boolean result = null;
 
         if (this.uid == compareTo.getUid()) {
+            result = false;
             if (this.longitude != compareTo.getLongitude()) {
                 result = true;
             } else if (this.latitude != compareTo.getLatitude()) {

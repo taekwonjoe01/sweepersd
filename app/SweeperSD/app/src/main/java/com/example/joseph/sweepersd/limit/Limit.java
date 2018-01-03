@@ -84,21 +84,21 @@ public class Limit {
         return isPosted;
     }
 
-    public boolean isChanged(Limit compareTo) {
-        boolean result = false;
+    public Boolean isChanged(Limit compareTo) {
+        Boolean result = null;
 
-        if (this.uid != compareTo.getUid()) {
-            result = true;
-        } else if (this.startRange != compareTo.getStartRange()) {
-            result = true;
-        } else if (this.endRange != compareTo.getEndRange()) {
-            result = true;
-        } else if (!TextUtils.equals(this.street, compareTo.getStreet())) {
-            result = true;
-        } else if (!TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
-            result = true;
+        if (this.uid == compareTo.getUid()) {
+            result = false;
+            if (this.startRange != compareTo.getStartRange()) {
+                result = true;
+            } else if (this.endRange != compareTo.getEndRange()) {
+                result = true;
+            } else if (!TextUtils.equals(this.street, compareTo.getStreet())) {
+                result = true;
+            } else if (!TextUtils.equals(this.rawLimitString, compareTo.getRawLimitString())) {
+                result = true;
+            }
         }
-
         return result;
     }
 }
