@@ -4,7 +4,6 @@ import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.AppUpdateJob;
 import com.example.joseph.sweepersd.alert.AlertManager;
@@ -67,7 +66,6 @@ public abstract class WatchZoneBaseActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        Log.e("Joey", "scheduling AppUpdateJob from base activity");
         AppUpdateJob.scheduleJob(this);
     }
 }

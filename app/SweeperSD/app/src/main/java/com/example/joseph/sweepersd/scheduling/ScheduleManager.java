@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
@@ -48,7 +47,6 @@ public class ScheduleManager extends LiveData<Boolean> {
 
     @Override
     protected void onActive() {
-        Log.d(TAG, "AppUpdateJob onActive");
         super.onActive();
         mWatchZoneModelsObserver = new WatchZoneModelsObserver(
                 true, new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
@@ -89,7 +87,6 @@ public class ScheduleManager extends LiveData<Boolean> {
 
     @Override
     protected void onInactive() {
-        Log.d(TAG, "AppUpdateJob onInactive");
         super.onInactive();
         mModelLiveData.removeObserver(mWatchZoneModelsObserver);
         LastAlarm.getInstance().removeObserver(mLastAlarmObserver);

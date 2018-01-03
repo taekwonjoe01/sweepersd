@@ -48,7 +48,6 @@ public class GeofenceTransitionsService extends IntentService {
 
         dao.updateGeofences(fences);
 
-        Log.e("Joey", "scheduling AppUpdateJob from geofence service");
         AppUpdateJob.scheduleJob(this);
     }
 }

@@ -50,7 +50,6 @@ public class AddressValidatorManager extends LiveData<Boolean> {
 
     @Override
     protected void onActive() {
-        Log.d(TAG, "AppUpdateJob onActive");
         super.onActive();
         mIsActive.set(true);
         scheduleWork();
@@ -59,7 +58,6 @@ public class AddressValidatorManager extends LiveData<Boolean> {
 
     @Override
     protected void onInactive() {
-        Log.d(TAG, "AppUpdateJob onInactive");
         super.onInactive();
         mIsActive.set(false);
         cancelWork();
@@ -80,16 +78,6 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                 mUpdatedLimits = new ArrayList<>();
 
                 List<Limit> limits = limitDao.getAllLimits();
-                if (limits.isEmpty()) {
-                    Log.e("Joey", "Limits are gone!");
-                } else {
-                    Log.e("Joey", "Limits size " + limits.size());
-                    for (Limit l : limits) {
-                        if (l.getStreet() == null || l.getStreet().equals("")) {
-                            Log.e("Joey", "Limit has bad streetname");
-                        }
-                    }
-                }
                 int index = 0;
                 for (Limit limit : limits) {
                     long timePassed = System.currentTimeMillis() - limit.getAddressValidatedTimestamp();

@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.example.joseph.sweepersd.alert.AlertManager;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFenceManager;
@@ -42,14 +41,8 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
     }
 
     public static void scheduleJob(Context context) {
-        Log.i(TAG, "Scheduling " + TAG);
         JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-
-        /*if (jobScheduler.getPendingJob(Jobs.APP_UPDATE_JOB) != null) {
-            return;
-        }*/
-        Log.i(TAG, "Building " + TAG);
 
         JobInfo.Builder builder = new JobInfo.Builder(Jobs.APP_UPDATE_JOB,
                 new ComponentName(context, AppUpdateJob.class));
@@ -63,7 +56,6 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
 
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        Log.i(TAG, "Starting " + TAG);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putLong(Preferences.PREFERENCE_APP_UPDATER_LAST_STARTED,
                 System.currentTimeMillis()).apply();
@@ -79,10 +71,7 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
             public void onChanged(@Nullable Map<Long, Integer> progressMap) {
                 if (progressMap != null && progressMap.isEmpty()) {
                     if (!isBusy()) {
-                        Log.d(TAG, "Finishing from WZMU " + TAG);
                         finish(preferences, jobParameters);
-                    } else {
-                        Log.d(TAG, "Still busy from WZMU " + TAG);
                     }
                 }
             }
@@ -92,10 +81,7 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
             public void onChanged(@Nullable Boolean working) {
                 if (working != null && !working) {
                     if (!isBusy()) {
-                        Log.d(TAG, "Finishing from AVM " + TAG);
                         finish(preferences, jobParameters);
-                    } else {
-                        Log.d(TAG, "Still busy from AVM " + TAG);
                     }
                 }
             }
@@ -105,10 +91,7 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
             public void onChanged(@Nullable Boolean working) {
                 if (working != null && !working) {
                     if (!isBusy()) {
-                        Log.d(TAG, "Finishing from AM " + TAG);
                         finish(preferences, jobParameters);
-                    } else {
-                        Log.d(TAG, "Still busy from AM " + TAG);
                     }
                 }
             }
@@ -118,10 +101,7 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
             public void onChanged(@Nullable Boolean working) {
                 if (working != null && !working) {
                     if (!isBusy()) {
-                        Log.d(TAG, "Finishing from SM " + TAG);
                         finish(preferences, jobParameters);
-                    } else {
-                        Log.d(TAG, "Still busy from SM " + TAG);
                     }
                 }
             }
@@ -131,10 +111,7 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
             public void onChanged(@Nullable Boolean working) {
                 if (working != null && !working) {
                     if (!isBusy()) {
-                        Log.d(TAG, "Finishing from WZFM " + TAG);
                         finish(preferences, jobParameters);
-                    } else {
-                        Log.d(TAG, "Still busy from WZFM " + TAG);
                     }
                 }
             }
@@ -151,7 +128,7 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
         Map<Long, Integer> progress = WatchZoneModelUpdater.getInstance(AppUpdateJob.this).getValue();
         Boolean fencesBusy = WatchZoneFenceManager.getInstance(AppUpdateJob.this).getValue();
 
-        String log = "Following are still busy: ";
+        /*String log = "Following are still busy: ";
         if (addressValidatorBusy == null || addressValidatorBusy) {
             log += "AV ";
         }
@@ -166,23 +143,22 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
         }
         if (progress == null || !progress.isEmpty()) {
             log += "WZMU ";
-        }
+        }*/
 
         if (addressValidatorBusy == null || alertBusy == null || scheduleBusy == null
                 || fencesBusy == null || progress == null) {
-            Log.d(TAG, log);
+            //Log.d(TAG, log);
             return true;
         } else {
-            if (addressValidatorBusy || alertBusy || scheduleBusy || fencesBusy || !progress.isEmpty()) {
+            /*if (addressValidatorBusy || alertBusy || scheduleBusy || fencesBusy || !progress.isEmpty()) {
                 Log.d(TAG, log);
-            }
+            }*/
             return addressValidatorBusy || alertBusy || scheduleBusy || fencesBusy || !progress.isEmpty();
         }
     }
 
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        Log.i(TAG, "Interrupting " + TAG);
         mDispatcher.onServicePreSuperOnDestroy();
 
         // Please reschedule
@@ -195,7 +171,6 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
     }
 
     private void finish(SharedPreferences preferences, JobParameters jobParameters) {
-        Log.d(TAG, "Finishing " + TAG);
         preferences.edit().putLong(Preferences.PREFERENCE_APP_UPDATER_LAST_FINISHED,
                 System.currentTimeMillis()).apply();
         mDispatcher.onServicePreSuperOnDestroy();
