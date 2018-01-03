@@ -91,18 +91,17 @@ public class AddressValidatorManager extends LiveData<Boolean> {
                     }
                 }
                 int index = 0;
-                /*for (Limit limit : limits) {
+                for (Limit limit : limits) {
                     long timePassed = System.currentTimeMillis() - limit.getAddressValidatedTimestamp();
                     if (timePassed > ONE_MONTH) {
                         mHandler.post(new UpdateAddressTask(limit));
+                        index++;
                         if (index >= AUTOSAVE_THRESHOLD) {
                             mHandler.post(new SaveAddressesTask());
                             index = 0;
-                        } else {
-                            index++;
                         }
                     }
-                }*/
+                }
                 mHandler.post(new SaveAddressesTask());
                 mHandler.post(new SetNotBusyTask());
             }
