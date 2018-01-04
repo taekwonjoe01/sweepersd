@@ -18,14 +18,11 @@ import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
-import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
 import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -33,7 +30,6 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -53,7 +49,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
 
-        WatchZoneModelRepository.getInstance(mActivity).getCachedWatchZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(true,
+        /*WatchZoneModelRepository.getInstance(mActivity).getCachedWatchZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(true,
                 new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
             @Override
             public void onModelsChanged(Map<Long, WatchZoneModel> data,
@@ -113,7 +109,7 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                 mCurrentList.clear();
                 notifyDataSetChanged();
             }
-        }));
+        }));*/
 
         LongPreferenceLiveData explorerPreference = new LongPreferenceLiveData(mActivity, Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
         explorerPreference.observe(mActivity, new Observer<Long>() {
@@ -148,6 +144,42 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
                 int index = mCurrentList.indexOf(model);
                 notifyItemChanged(index);
             }
+        }
+    }
+
+    public void setWatchZoneModels(final List<WatchZoneModel> sortedModels) {
+        if (sortedModels == null ) {
+            mCurrentList = null;
+            notifyDataSetChanged();
+        } else if (mCurrentList == null) {
+            mCurrentList = sortedModels;
+            notifyDataSetChanged();
+        } else {
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return mCurrentList.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return sortedModels.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return mCurrentList.get(oldItemPosition).watchZone.getUid() ==
+                            sortedModels.get(newItemPosition).watchZone.getUid();
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    return !mCurrentList.get(oldItemPosition).isChanged(sortedModels.get(newItemPosition));
+                }
+            }, false);
+            mCurrentList = sortedModels;
+
+            result.dispatchUpdatesTo(UserZonesViewAdapter.this);
         }
     }
 

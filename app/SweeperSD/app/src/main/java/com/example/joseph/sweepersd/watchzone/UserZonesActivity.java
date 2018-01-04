@@ -1,5 +1,6 @@
 package com.example.joseph.sweepersd.watchzone;
 
+import android.arch.lifecycle.LiveData;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,7 +16,14 @@ import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
+import com.example.joseph.sweepersd.utils.ChangeSet;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class UserZonesActivity extends WatchZoneBaseActivity implements
@@ -27,6 +35,8 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
     private UserZonesViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private WatchZoneViewItemDecoration mWatchZoneViewItemDecoration;
+
+    private LiveData<List<WatchZoneModel>> mWatchZoneModels;
 
     private Menu mOptionsMenu;
 
@@ -88,11 +98,49 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
 
         AddressValidatorManager.getInstance(this).addListener(this);
         setProgress(AddressValidatorManager.getInstance(this).getValidationProgress());
+
+        mWatchZoneModels = WatchZoneModelRepository.getInstance(this).getWatchZoneModelsLiveData();
+        mWatchZoneModels.observe(this, new WatchZoneModelsObserver(true,
+                new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
+            @Override
+            public void onModelsChanged(Map<Long, WatchZoneModel> data,
+                                        ChangeSet changeSet) {
+                // This is only capable of detecting insertions or deletions.
+                // Changes must be detected directly.
+                List<Long> modelUids = new ArrayList<>(data.keySet());
+                Collections.sort(modelUids);
+                final List<WatchZoneModel> sortedModels = new ArrayList<>();
+                for (Long uid : modelUids) {
+                    WatchZoneModel model = data.get(uid);
+                    sortedModels.add(model);
+                }
+                mAdapter.setWatchZoneModels(sortedModels);
+            }
+
+            @Override
+            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
+                List<Long> modelUids = new ArrayList<>(data.keySet());
+                Collections.sort(modelUids);
+                List<WatchZoneModel> sortedModels = new ArrayList<>();
+                for (Long uid : modelUids) {
+                    WatchZoneModel model = data.get(uid);
+                    sortedModels.add(model);
+                }
+
+                mAdapter.setWatchZoneModels(sortedModels);
+            }
+
+            @Override
+            public void onDataInvalid() {
+                mAdapter.setWatchZoneModels(null);
+            }
+        }));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        mWatchZoneModels.removeObservers(this);
 
         AddressValidatorManager.getInstance(this).removeListener(this);
     }
