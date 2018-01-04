@@ -49,68 +49,6 @@ public class UserZonesViewAdapter extends RecyclerView.Adapter<UserZonesViewAdap
     public UserZonesViewAdapter(AppCompatActivity activity) {
         mActivity = activity;
 
-        /*WatchZoneModelRepository.getInstance(mActivity).getCachedWatchZoneModelsLiveData().observe(mActivity, new WatchZoneModelsObserver(true,
-                new WatchZoneModelsObserver.WatchZoneModelsChangedCallback() {
-            @Override
-            public void onModelsChanged(Map<Long, WatchZoneModel> data,
-                                        ChangeSet changeSet) {
-                // This is only capable of detecting insertions or deletions.
-                // Changes must be detected directly.
-                List<Long> modelUids = new ArrayList<>(data.keySet());
-                Collections.sort(modelUids);
-                final List<WatchZoneModel> sortedModels = new ArrayList<>();
-                for (Long uid : modelUids) {
-                    WatchZoneModel model = data.get(uid);
-                    sortedModels.add(model);
-                }
-                DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                    @Override
-                    public int getOldListSize() {
-                        return mCurrentList.size();
-                    }
-
-                    @Override
-                    public int getNewListSize() {
-                        return sortedModels.size();
-                    }
-
-                    @Override
-                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                        return mCurrentList.get(oldItemPosition).watchZone.getUid() ==
-                                sortedModels.get(newItemPosition).watchZone.getUid();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        return !mCurrentList.get(oldItemPosition).isChanged(sortedModels.get(newItemPosition));
-                    }
-                }, false);
-                mCurrentList = sortedModels;
-
-                result.dispatchUpdatesTo(UserZonesViewAdapter.this);
-            }
-
-            @Override
-            public void onDataLoaded(Map<Long, WatchZoneModel> data) {
-                List<Long> modelUids = new ArrayList<>(data.keySet());
-                Collections.sort(modelUids);
-                List<WatchZoneModel> sortedModels = new ArrayList<>();
-                for (Long uid : modelUids) {
-                    WatchZoneModel model = data.get(uid);
-                    sortedModels.add(model);
-                }
-
-                mCurrentList = sortedModels;
-                notifyDataSetChanged();
-            }
-
-            @Override
-            public void onDataInvalid() {
-                mCurrentList.clear();
-                notifyDataSetChanged();
-            }
-        }));*/
-
         LongPreferenceLiveData explorerPreference = new LongPreferenceLiveData(mActivity, Preferences.PREFERENCE_WATCH_ZONE_EXPLORER_UID);
         explorerPreference.observe(mActivity, new Observer<Long>() {
             @Override
