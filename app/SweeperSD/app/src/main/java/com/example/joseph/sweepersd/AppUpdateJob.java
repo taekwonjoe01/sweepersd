@@ -48,6 +48,9 @@ public class AppUpdateJob extends JobService implements LifecycleOwner {
                 new ComponentName(context, AppUpdateJob.class));
         builder.setMinimumLatency(0L);
         builder.setOverrideDeadline(0L);
+        // Apparently this only works for killed applications and does not work across a manual device
+        // reboot. Implementing a manual BroadcastReceiver that listens to onBootCompleted and launches
+        // this Job.
         builder.setPersisted(true);
         builder.setBackoffCriteria(ONE_MINUTE, JobInfo.BACKOFF_POLICY_LINEAR);
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);

@@ -81,6 +81,14 @@
             android:enabled="true"
             android:exported="false">
         </receiver>
+        <receiver
+            android:name=".BootupReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <!-- EXPERIMENTAL
         <activity
@@ -88,14 +96,6 @@
             android:screenOrientation="portrait" />
 
 
-        <receiver
-            android:name=".experimental.BootupReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
 
         <service
             android:name=".BootupSchedulerService"
