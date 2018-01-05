@@ -130,7 +130,7 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
             }
             newSign.endTime = tuple.endHour < 13 ? Integer.toString(tuple.endHour) :
                     Integer.toString(tuple.endHour - 12);
-            newSign.endAMPM = tuple.startHour < 13 ? "AM" : "PM";
+            newSign.endAMPM = tuple.endHour < 13 ? "AM" : "PM";
             if (tuple.endMinute != 0) {
                 if (tuple.endMinute < 10) {
                     newSign.endTime += ":0" + tuple.endMinute;
