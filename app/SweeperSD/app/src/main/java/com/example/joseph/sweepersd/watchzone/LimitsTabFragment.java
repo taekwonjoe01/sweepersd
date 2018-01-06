@@ -54,7 +54,7 @@ public class LimitsTabFragment extends TabFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.content_posted_limits_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_posted_limits, container, false);
 
         mRecyclerView = view.findViewById(R.id.posted_limits_recycler_view);
         //mRecyclerView.setHasFixedSize(true);

@@ -60,7 +60,7 @@ public class CalendarTabFragment extends TabFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.content_posted_limits_calendar, container, false);
+        View v = inflater.inflate(R.layout.fragment_calendar, container, false);
 
         mCaldroidFragment = new CaldroidFragment();
         Bundle args = new Bundle();

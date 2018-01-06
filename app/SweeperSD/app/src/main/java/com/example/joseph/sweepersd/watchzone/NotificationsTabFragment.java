@@ -49,7 +49,7 @@ public class NotificationsTabFragment extends TabFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.content_tab_watchzone_notification_settings,
+        View view = inflater.inflate(R.layout.fragment_watchzone_notif_settings,
                 container, false);
 
         mRemind48Hour = view.findViewById(R.id.radiobutton_remind_range_48);
