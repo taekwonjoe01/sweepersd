@@ -23,4 +23,16 @@
 
     <color name="background_userzones_now">#8e0000</color>
     <color name="background_userzones_now_activated">#ff5f52</color>
+
+    <color name="primaryColor">#546e7a</color>
+    <color name="primaryLightColor">#819ca9</color>
+    <color name="primaryDarkColor">#29434e</color>
+    <color name="secondaryColor">#00e5ff</color>
+    <color name="secondaryLightColor">#6effff</color>
+    <color name="secondaryDarkColor">#00b2cc</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="secondaryTextColor">#000000</color>
+
+    <color name="neutralBackground">#e0e0e0</color>
+    <color name="neutralBackgroundDark">#aeaeae</color>
 </resources>

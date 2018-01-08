@@ -151,8 +151,11 @@
     <string name="alarm_maps_done">Done</string>
 
     <!-- Strings for Watch Zone List Activity -->
-    <string name="title_user_zone_activity">Saved Zones</string>
+    <string name="title_user_zone_activity">Saved Watch Zones</string>
     <string name="watch_zone_no_sweeping">There is no street sweeping in this zone.</string>
+
+    <string name="watch_zone_list_overlay_loading">Loading Watch Zones...</string>
+    <string name="watch_zone_list_overlay_empty">You have not setup any places to be monitored for street sweeping yet. Use the \'+\' (add) button to get started.</string>
 
     <!-- Strings for Watch Zone Details Activity -->
     <string name="details_delete_watch_zone">Delete</string>

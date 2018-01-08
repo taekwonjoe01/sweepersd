@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.utils.Notifications;
-import com.example.joseph.sweepersd.watchzone.UserZonesActivity;
+import com.example.joseph.sweepersd.watchzone.WatchZoneListActivity;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
@@ -108,7 +108,7 @@ public class AlertUpdater {
     }
 
     private void sendNotification(String message) {
-        Intent notificationIntent = new Intent(mApplicationContext, UserZonesActivity.class);
+        Intent notificationIntent = new Intent(mApplicationContext, WatchZoneListActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 

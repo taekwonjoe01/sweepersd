@@ -3,6 +3,7 @@ package com.example.joseph.sweepersd.watchzone;
 import android.arch.lifecycle.LiveData;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
@@ -11,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
@@ -26,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class UserZonesActivity extends WatchZoneBaseActivity implements
+public class WatchZoneListActivity extends WatchZoneBaseActivity implements
         AddressValidatorManager.ValidatorProgressListener{
     public static final String ALARM_LOCATION_EXTRA = "ALARM_LOCATION_EXTRA";
     private static final int CREATE_ALARM_CODE = 1;
@@ -40,6 +43,9 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
 
     private Menu mOptionsMenu;
 
+    private FrameLayout mOverlay;
+    private TextView mOverlayText;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,16 +54,19 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ImageButton fab = (ImageButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(UserZonesActivity.this, "Add", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WatchZoneListActivity.this, "Add", Toast.LENGTH_SHORT).show();
                 startActivityForResult(
-                        new Intent(UserZonesActivity.this, WatchZoneExplorerActivity.class),
+                        new Intent(WatchZoneListActivity.this, WatchZoneExplorerActivity.class),
                         CREATE_ALARM_CODE);
             }
         });
+
+        mOverlay = (FrameLayout) findViewById(R.id.layout_overlay);
+        mOverlayText = findViewById(R.id.textview_overlay);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.alarm_recycler_view);
         //mRecyclerView.setHasFixedSize(true);
@@ -115,6 +124,13 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
                     sortedModels.add(model);
                 }
                 mAdapter.setWatchZoneModels(sortedModels);
+
+                if (sortedModels.isEmpty()) {
+                    mOverlay.setVisibility(mRecyclerView.VISIBLE);
+                    mOverlayText.setText(R.string.watch_zone_list_overlay_empty);
+                } else {
+                    mOverlay.setVisibility(mRecyclerView.GONE);
+                }
             }
 
             @Override
@@ -128,6 +144,13 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
                 }
 
                 mAdapter.setWatchZoneModels(sortedModels);
+
+                if (sortedModels.isEmpty()) {
+                    mOverlay.setVisibility(mRecyclerView.VISIBLE);
+                    mOverlayText.setText(R.string.watch_zone_list_overlay_empty);
+                } else {
+                    mOverlay.setVisibility(mRecyclerView.GONE);
+                }
             }
 
             @Override
@@ -135,6 +158,9 @@ public class UserZonesActivity extends WatchZoneBaseActivity implements
                 mAdapter.setWatchZoneModels(null);
             }
         }));
+
+        mOverlay.setVisibility(mRecyclerView.VISIBLE);
+        mOverlayText.setText(R.string.watch_zone_list_overlay_loading);
     }
 
     @Override

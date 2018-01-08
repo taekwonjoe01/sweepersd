@@ -11,7 +11,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/app_background">
+        android:background="@color/neutralBackground">
 
 
         <android.support.v7.widget.RecyclerView
@@ -24,18 +24,29 @@
             android:clipToPadding="false"
             android:paddingLeft="@dimen/alarm_view_item_space" />
 
-        <ImageButton
+        <FrameLayout
+            android:id="@+id/layout_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/neutralBackgroundDark">
+
+            <TextView
+                android:id="@+id/textview_overlay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/secondaryTextColor"
+                android:gravity="center_horizontal"
+                android:text="@string/watch_zone_list_overlay_loading" />
+        </FrameLayout>
+
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:layout_gravity="bottom|center"
-            android:layout_margin="@dimen/fab_margin"
-            android:padding="5dp"
-            android:src="@drawable/ic_add_white"
-            android:elevation="20dp"
-            android:background="@drawable/apptheme_action_button" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="20dp"
+            android:src="@drawable/ic_add_black_24dp" />
     </FrameLayout>
 
 </RelativeLayout>

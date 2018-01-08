@@ -23,7 +23,7 @@
             android:name=".alert.geofence.GeofenceTransitionsService"
             android:exported="false" />
         <activity
-            android:name=".watchzone.UserZonesActivity"
+            android:name=".watchzone.WatchZoneListActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
