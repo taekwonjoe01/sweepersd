@@ -35,4 +35,8 @@
 
     <color name="neutralBackground">#e0e0e0</color>
     <color name="neutralBackgroundDark">#aeaeae</color>
+
+    <color name="statusRed">#cc3232</color>
+    <color name="statusYellow">#e7b416</color>
+    <color name="statusGreen">#2dc937</color>
 </resources>

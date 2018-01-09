@@ -166,4 +166,9 @@
     <string name="explorer_tab_title_calendar">Calendar</string>
     <string name="explorer_tab_title_notifications">Notifications</string>
 
+    <string name="summary_action_customize">Customize</string>
+    <string name="summary_action_save">Save</string>
+
+    <string name="bullet">\u2022</string>
+
 </resources>
