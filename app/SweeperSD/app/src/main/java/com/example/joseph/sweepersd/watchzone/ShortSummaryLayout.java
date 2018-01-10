@@ -1,13 +1,13 @@
 package com.example.joseph.sweepersd.watchzone;
 
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
+import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,7 +20,6 @@ import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class ShortSummaryFragment extends Fragment {
+public class ShortSummaryLayout extends RelativeLayout {
 
     private WatchZoneModel mWatchZoneModel = null;
     private SummaryAction mSummaryAction = SummaryAction.None;
@@ -58,47 +57,55 @@ public class ShortSummaryFragment extends Fragment {
 
     private Observer<WatchZoneModel> mObserver;
 
-    public void setWatchZone(WatchZoneModel watchZoneModel) {
+    public ShortSummaryLayout(Context context) {
+        super(context);
+        init();
+    }
+
+    public ShortSummaryLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public ShortSummaryLayout(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        init();
+    }
+
+    private void init() {
+        inflate(getContext(), R.layout.layout_watchzone_summary_short, this);
+
+        mLabel = findViewById(R.id.text_watch_zone_label);
+        mProgressBar = findViewById(R.id.progressbar_updating_watchzone);
+        mStatusIcon = findViewById(R.id.imageview_status_icon);
+        mStatusText = findViewById(R.id.textview_status);
+        mSummaryDetails = findViewById(R.id.layout_summary_details);
+        mSummaryPostedLimits = findViewById(R.id.textview_number_posted_limits);
+        mSummaryStreets = findViewById(R.id.textview_number_streets);
+        mLayoutMoreInfo = findViewById(R.id.layout_more_info_group);
+        mActionButton = findViewById(R.id.button_summary_action);
+    }
+
+    public void setWatchZoneModel(WatchZoneModel watchZoneModel) {
         mWatchZoneModel = watchZoneModel;
-        if (mLabel != null) {
-            setPresentation();
-        }
+        setPresentation();
     }
 
     public void setSummaryAction(SummaryAction summaryAction) {
         mSummaryAction = summaryAction;
-        if (mLabel != null) {
-            setPresentation();
-        }
+        setPresentation();
     }
 
     public void setUpdatingProgress(int progress) {
         mUpdatingProgress = progress;
-        if (mLabel != null) {
-            setPresentation();
-        }
+        setPresentation();
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_watchzone_summary_short, container, false);
-
-        mLabel = v.findViewById(R.id.text_watch_zone_label);
-        mProgressBar = v.findViewById(R.id.progressbar_updating_watchzone);
-        mStatusIcon = v.findViewById(R.id.imageview_status_icon);
-        mStatusText = v.findViewById(R.id.textview_status);
-        mSummaryDetails = v.findViewById(R.id.layout_summary_details);
-        mSummaryPostedLimits = v.findViewById(R.id.textview_number_posted_limits);
-        mSummaryStreets = v.findViewById(R.id.textview_number_streets);
-        mLayoutMoreInfo = v.findViewById(R.id.layout_more_info_group);
-        mActionButton = v.findViewById(R.id.button_summary_action);
-
-        if (mWatchZoneModel != null) {
-            setPresentation();
-        }
-
-        return v;
+    public void set(WatchZoneModel watchZoneModel, SummaryAction summaryAction, int progress) {
+        mWatchZoneModel = watchZoneModel;
+        mSummaryAction = summaryAction;
+        mUpdatingProgress = progress;
+        setPresentation();
     }
 
     private void setPresentation() {
@@ -110,11 +117,11 @@ public class ShortSummaryFragment extends Fragment {
         mLayoutMoreInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), WatchZoneDetailsActivity.class);
+                Intent intent = new Intent(getContext(), WatchZoneDetailsActivity.class);
                 Bundle b = new Bundle();
                 b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, watchZone.getUid());
                 intent.putExtras(b);
-                getActivity().startActivity(intent);
+                getContext().startActivity(intent);
             }
         });
         // Any status could be being updated by the WatchZoneModelUpdater...
@@ -138,7 +145,7 @@ public class ShortSummaryFragment extends Fragment {
                         mWatchZoneModel.getUniqueLimitModels().get(uniqueLimitUid).schedules));
             }
 
-            String dateString = getActivity().getResources().getString(R.string.watch_zone_no_sweeping);
+            String dateString = getResources().getString(R.string.watch_zone_no_sweeping);
             List<LimitScheduleDate> sweepingDates =
                     WatchZoneUtils.getStartTimeOrderedDatesForWatchZone(mWatchZoneModel);
             if (sweepingDates != null) {
@@ -160,13 +167,13 @@ public class ShortSummaryFragment extends Fragment {
 
                 if (!currentSweeping.isEmpty()) {
                     mStatusIcon.setBackground(
-                            getActivity().getResources().getDrawable(R.drawable.ic_local_parking_red_24dp));
+                            getResources().getDrawable(R.drawable.ic_local_parking_red_24dp));
                     dateString = "Street sweeping is happening now.";
                 } else if (!upcomingSweeping.isEmpty()) {
                     long nextSweepingTime = upcomingSweeping.get(0).getStartCalendar().getTime().getTime();
 
                     mStatusIcon.setBackground(
-                            getActivity().getResources().getDrawable(R.drawable.ic_local_parking_yellow_24dp));
+                            getResources().getDrawable(R.drawable.ic_local_parking_yellow_24dp));
                     Calendar sweeping = Calendar.getInstance();
                     sweeping.setTime(new Date(nextSweepingTime));
                     Calendar today = Calendar.getInstance();
@@ -186,7 +193,7 @@ public class ShortSummaryFragment extends Fragment {
                     long nextSweepingTime = sweepingDates.get(0).getStartCalendar().getTime().getTime();
 
                     mStatusIcon.setBackground(
-                            getActivity().getResources().getDrawable(R.drawable.ic_local_parking_green_24dp));
+                            getResources().getDrawable(R.drawable.ic_local_parking_green_24dp));
                     Calendar sweeping = Calendar.getInstance();
                     sweeping.setTime(new Date(nextSweepingTime));
                     Calendar today = Calendar.getInstance();
@@ -204,21 +211,23 @@ public class ShortSummaryFragment extends Fragment {
                     }
                 } else {
                     mStatusIcon.setBackground(
-                            getActivity().getResources().getDrawable(R.drawable.ic_local_parking_black_24dp));
+                            getResources().getDrawable(R.drawable.ic_local_parking_black_24dp));
                 }
             }
             mStatusText.setText(dateString);
         }
 
         if (mSummaryAction == SummaryAction.None) {
-            mActionButton.setVisibility(View.GONE);
+            mActionButton.setVisibility(View.INVISIBLE);
         } else if (mSummaryAction == SummaryAction.Customize) {
-            mActionButton.setCompoundDrawables(getActivity().getResources().getDrawable(R.drawable.ic_customize_black_24dp),
+            mActionButton.setCompoundDrawablesWithIntrinsicBounds(
+                    getResources().getDrawable(R.drawable.ic_customize_black_18dp),
                     null, null, null);
             mActionButton.setText(R.string.summary_action_customize);
             mActionButton.setVisibility(View.VISIBLE);
         } else if (mSummaryAction == SummaryAction.Save) {
-            mActionButton.setCompoundDrawables(getActivity().getResources().getDrawable(R.drawable.ic_favorite_black_24dp),
+            mActionButton.setCompoundDrawablesWithIntrinsicBounds(
+                    getResources().getDrawable(R.drawable.ic_favorite_black_18dp),
                     null, null, null);
             mActionButton.setText(R.string.summary_action_save);
             mActionButton.setVisibility(View.VISIBLE);

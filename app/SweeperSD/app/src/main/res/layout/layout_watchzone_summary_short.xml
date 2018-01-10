@@ -2,50 +2,60 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:background="@color/backgroundWhite">
 
     <TextView
         android:id="@+id/text_watch_zone_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@android:style/TextAppearance.Large"
-        android:padding="2dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="2dp"
         android:text="1066 Beryl St"/>
 
-    <FrameLayout
-        android:id="@+id/layout_icon"
+    <LinearLayout
+        android:id="@+id/layout_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="2dp"
-        android:layout_below="@+id/text_watch_zone_label">
-
-        <ProgressBar
-            android:id="@+id/progressbar_updating_watchzone"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:indeterminateDrawable="@drawable/apptheme_circular_progress_bar"
-            android:layout_gravity="center"/>
-
-        <ImageView
-            android:id="@+id/imageview_status_icon"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_local_parking_green_24dp"
-            android:layout_gravity="center"/>
-
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/textview_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        style="@android:style/TextAppearance.Small"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:layout_below="@+id/text_watch_zone_label"
-        android:layout_toRightOf="@id/layout_icon"
-        android:layout_marginStart="2dp"
-        android:padding="2dp"
-        android:text=" Updating Watch Zone (1%)..."/>
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="2dp">
+
+            <ProgressBar
+                android:id="@+id/progressbar_updating_watchzone"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:indeterminateDrawable="@drawable/apptheme_circular_progress_bar"
+                android:layout_gravity="center"/>
+
+            <ImageView
+                android:id="@+id/imageview_status_icon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_local_parking_green_24dp"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textview_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            style="@android:style/TextAppearance.Small"
+            android:layout_marginStart="2dp"
+            android:padding="2dp"
+            android:text=" Updating Watch Zone (1%)..."/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_summary_details"
@@ -53,7 +63,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="2dp"
-        android:layout_below="@+id/textview_status">
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_below="@+id/layout_status">
 
         <TextView
             android:id="@+id/textview_number_posted_limits"
@@ -91,21 +103,26 @@
         android:id="@+id/layout_more_info_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="2dp"
         android:layout_below="@id/separator">
 
         <ImageView
             android:id="@+id/icon_more_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
+            android:layout_width="18dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginBottom="12dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_info_outline_black_24dp" />
 
         <TextView
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@android:style/TextAppearance.Medium"
+            style="@android:style/TextAppearance.Small"
             android:layout_marginStart="16dp"
             android:layout_toRightOf="@+id/icon_more_info"
             android:layout_centerVertical="true"
@@ -115,17 +132,21 @@
             android:id="@+id/button_summary_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minHeight="36dp"
             android:layout_alignParentEnd="true"
+            android:minHeight="30dp"
             style="@android:style/TextAppearance.Small"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:drawablePadding="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:drawablePadding="12dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginRight="12dp"
+            android:layout_centerVertical="true"
             android:background="@color/secondaryColor"
-            android:drawableStart="@drawable/ic_favorite_black_24dp"
+            android:drawableStart="@drawable/ic_favorite_black_18dp"
             android:includeFontPadding="false"
             android:textColor="@color/secondaryTextColor"
-            android:text="@string/summary_action_save"/>
+            android:text="@string/summary_action_customize"/>
     </RelativeLayout>
 
 

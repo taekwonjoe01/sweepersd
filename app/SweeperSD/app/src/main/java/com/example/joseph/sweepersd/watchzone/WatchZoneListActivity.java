@@ -13,7 +13,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +34,7 @@ public class WatchZoneListActivity extends WatchZoneBaseActivity implements
     private static final int CREATE_ALARM_CODE = 1;
 
     private RecyclerView mRecyclerView;
-    private UserZonesViewAdapter mAdapter;
+    private WatchZoneListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private WatchZoneViewItemDecoration mWatchZoneViewItemDecoration;
 
@@ -69,7 +68,7 @@ public class WatchZoneListActivity extends WatchZoneBaseActivity implements
         mOverlayText = findViewById(R.id.textview_overlay);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.alarm_recycler_view);
-        //mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -78,7 +77,7 @@ public class WatchZoneListActivity extends WatchZoneBaseActivity implements
 
         mRecyclerView.addItemDecoration(mWatchZoneViewItemDecoration);
 
-        mAdapter = new UserZonesViewAdapter(this);
+        mAdapter = new WatchZoneListAdapter(this);
 
         setTitle(getResources().getString(R.string.title_user_zone_activity));
 

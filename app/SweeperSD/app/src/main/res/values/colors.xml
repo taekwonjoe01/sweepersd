@@ -33,6 +33,8 @@
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#000000</color>
 
+    <color name="backgroundWhite">#ffffffff</color>
+    <color name="neutralBackgroundLight">#ffeeeeee</color>
     <color name="neutralBackground">#e0e0e0</color>
     <color name="neutralBackgroundDark">#aeaeae</color>
 
