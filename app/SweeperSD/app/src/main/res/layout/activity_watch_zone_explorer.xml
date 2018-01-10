@@ -76,36 +76,10 @@
             android:background="@android:color/transparent"
             android:orientation="vertical">
 
-            <FrameLayout
+            <com.example.joseph.sweepersd.watchzone.ShortSummaryLayout
+                android:id="@+id/short_summary_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/button_save_zone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_favorite_24dp"
-                    android:layout_gravity="right"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"/>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="4dp"
-                    android:layout_gravity="bottom">
-
-                    <ProgressBar
-                        android:id="@+id/progress_updating"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="4dp"
-                        android:progressTint="@color/app_primary"
-                        android:secondaryProgressTint="@color/app_primary"
-                        android:progress="0"
-                        android:visibility="invisible" />
-                </FrameLayout>
-
-            </FrameLayout>
+                android:layout_height="wrap_content"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"

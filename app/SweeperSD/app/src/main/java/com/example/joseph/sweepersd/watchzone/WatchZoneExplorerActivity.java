@@ -54,7 +54,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
     private PlaceAutocompleteFragment mPlaceFragment;
     private MapFragment mMapFragment;
-    private FloatingActionButton mSaveButton;
 
     private SlidingUpPanelLayout mSlidingPanelLayout;
 
@@ -63,6 +62,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private TabLayout mTabLayout;
     private WrapContentTabViewPager mTabViewPager;
     private LinearLayout mDragLayout;
+    private ShortSummaryLayout mShortSummaryLayout;
 
     private LimitsTabFragment mLimitsTabFragment;
     private CalendarTabFragment mCalendarTabFragment;
@@ -74,8 +74,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private int mCurrentRadius;
 
     private LatLng mLatLng;
-
-    private ProgressBar mProgressBar;
 
     private boolean mSaveOnDestroy;
 
@@ -90,13 +88,12 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                 .findFragmentById(R.id.watch_zone_map_fragment);
         mPlaceFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-        mSaveButton = findViewById(R.id.button_save_zone);
         mSlidingPanelLayout = findViewById(R.id.sliding_layout);
         mTabLayout = findViewById(R.id.tab_layout);
         mTabViewPager = findViewById(R.id.tab_viewpager);
         mRadiusSeekbar = findViewById(R.id.seekbar_radius);
         mDragLayout = findViewById(R.id.drag_view);
-        mProgressBar = findViewById(R.id.progress_updating);
+        mShortSummaryLayout = findViewById(R.id.short_summary_layout);
 
         mMapFragment.setMapPadding(0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_top),
                 0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_bottom));
@@ -121,13 +118,14 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         });
         ((EditText)findViewById(R.id.place_autocomplete_search_input)).setTextColor(
                 getResources().getColor(android.R.color.white));
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
+        // TODO
+        /*mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mSaveOnDestroy = true;
                 finish();
             }
-        });
+        });*/
         mSlidingPanelLayout.setAnchorPoint(0.4f);
         mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -178,24 +176,24 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                ViewGroup.MarginLayoutParams saveButtonLayoutParams =
-                        (ViewGroup.MarginLayoutParams) mSaveButton.getLayoutParams();
-                mSlidingPanelLayout.setPanelHeight(mSaveButton.getHeight()
-                        + saveButtonLayoutParams.bottomMargin);
+                mSlidingPanelLayout.setPanelHeight(mShortSummaryLayout.getHeight());
             }
         });
         mSaveOnDestroy = false;
         mPermissionRequested = false;
         mCurrentWatchZoneUid = 0L;
+
+        mSlidingPanelLayout.setVisibility(View.GONE);
     }
 
     @Override
     public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
         if (progressMap.containsKey(mCurrentWatchZoneUid)) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mProgressBar.setProgress(progressMap.get(mCurrentWatchZoneUid));
+            // TODO
+            //mProgressBar.setVisibility(View.VISIBLE);
+            //mProgressBar.setProgress(progressMap.get(mCurrentWatchZoneUid));
         } else {
-            mProgressBar.setVisibility(View.INVISIBLE);
+            //mProgressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -298,7 +296,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                     mCurrentRadius * Math.sqrt(2), 45);
             LatLngBounds bounds = new LatLngBounds(southWest, northEast);
             mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 10));
-            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            //mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
 
         if (mCurrentWatchZoneUid == 0L) {
@@ -314,6 +312,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                             WatchZone.REMIND_RANGE_DEFAULT,
                             WatchZone.REMIND_POLICY_DEFAULT);
         }
+
+        mSlidingPanelLayout.setVisibility(View.VISIBLE);
     }
 
     private void dismissCreateLabelDialog() {
