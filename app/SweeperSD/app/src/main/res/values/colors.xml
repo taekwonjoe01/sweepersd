@@ -25,6 +25,7 @@
     <color name="background_userzones_now_activated">#ff5f52</color>
 
     <color name="primaryColor">#546e7a</color>
+    <color name="primaryColorTranslucent">#44546e7a</color>
     <color name="primaryLightColor">#819ca9</color>
     <color name="primaryDarkColor">#29434e</color>
     <color name="secondaryColor">#00e5ff</color>

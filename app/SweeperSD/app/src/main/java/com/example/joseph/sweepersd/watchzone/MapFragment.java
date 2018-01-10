@@ -167,8 +167,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
                             .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
                             .radius(watchZone.getRadius())
-                            .strokeColor(getResources().getColor(R.color.app_primary))
-                            .fillColor(getResources().getColor(R.color.map_radius_fill)));
+                            .strokeColor(getResources().getColor(R.color.secondaryColor))
+                            .fillColor(getResources().getColor(R.color.primaryColorTranslucent)));
                     presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
                             .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
                 }
@@ -179,8 +179,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
                         .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
                         .radius(watchZone.getRadius())
-                        .strokeColor(getResources().getColor(R.color.app_primary))
-                        .fillColor(getResources().getColor(R.color.map_radius_fill)));
+                        .strokeColor(getResources().getColor(R.color.secondaryColor))
+                        .fillColor(getResources().getColor(R.color.primaryColorTranslucent)));
                 presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
                         .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
             }
@@ -218,8 +218,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
-                            .strokeColor(getResources().getColor(R.color.app_primary))
-                            .fillColor(getResources().getColor(R.color.map_radius_fill));
+                            .strokeColor(getResources().getColor(R.color.primaryColor))
+                            .fillColor(getResources().getColor(R.color.primaryColor));
                     presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
                 }
                 for (Long uid : changeSet.addedUids) {
@@ -227,8 +227,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
-                            .strokeColor(getResources().getColor(R.color.app_primary))
-                            .fillColor(getResources().getColor(R.color.map_radius_fill));
+                            .strokeColor(getResources().getColor(R.color.primaryColor))
+                            .fillColor(getResources().getColor(R.color.primaryColor));
                     presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
                 }
             }
@@ -241,8 +241,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(p.getLatitude(), p.getLongitude()))
                             .radius(1.0)
-                            .strokeColor(getResources().getColor(R.color.app_primary))
-                            .fillColor(getResources().getColor(R.color.map_radius_fill));
+                            .strokeColor(getResources().getColor(R.color.primaryColor))
+                            .fillColor(getResources().getColor(R.color.primaryColor));
                     presenter.pointsToCircleMap.put(uid, mGoogleMap.addCircle(circleOptions));
                 }
             }

@@ -3,8 +3,6 @@ package com.example.joseph.sweepersd.watchzone;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
@@ -45,6 +43,12 @@ public class ShortSummaryLayout extends RelativeLayout {
         Customize
     }
 
+    public interface SummaryLayoutCallback {
+        void onSummaryActionClicked();
+        void onLayoutClicked();
+        void onMoreInfoClicked();
+    }
+
     private TextView mLabel;
     private ProgressBar mProgressBar;
     private ImageView mStatusIcon;
@@ -54,6 +58,8 @@ public class ShortSummaryLayout extends RelativeLayout {
     private TextView mSummaryStreets;
     private RelativeLayout mLayoutMoreInfo;
     private Button mActionButton;
+
+    private SummaryLayoutCallback mCallback;
 
     private Observer<WatchZoneModel> mObserver;
 
@@ -108,6 +114,10 @@ public class ShortSummaryLayout extends RelativeLayout {
         setPresentation();
     }
 
+    public void setCallback(SummaryLayoutCallback callback) {
+        mCallback = callback;
+    }
+
     private void setPresentation() {
         final WatchZone watchZone = mWatchZoneModel.watchZone;
         String label = watchZone.getLabel();
@@ -117,11 +127,25 @@ public class ShortSummaryLayout extends RelativeLayout {
         mLayoutMoreInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), WatchZoneDetailsActivity.class);
-                Bundle b = new Bundle();
-                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, watchZone.getUid());
-                intent.putExtras(b);
-                getContext().startActivity(intent);
+                if (mCallback != null) {
+                    mCallback.onMoreInfoClicked();
+                }
+            }
+        });
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCallback != null) {
+                    mCallback.onLayoutClicked();
+                }
+            }
+        });
+        mActionButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCallback != null) {
+                    mCallback.onSummaryActionClicked();
+                }
             }
         });
         // Any status could be being updated by the WatchZoneModelUpdater...

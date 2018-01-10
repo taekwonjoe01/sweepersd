@@ -20,7 +20,7 @@
         android:id="@+id/button_ok"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/apptheme_action_button"
+        android:background="@drawable/apptheme_widget_background"
         android:text="OK"
         android:textColor="@android:color/white"
         style="@android:style/TextAppearance.Medium"

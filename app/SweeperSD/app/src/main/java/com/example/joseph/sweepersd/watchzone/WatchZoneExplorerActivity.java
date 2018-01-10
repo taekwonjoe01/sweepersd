@@ -1,21 +1,20 @@
 package com.example.joseph.sweepersd.watchzone;
 
 import android.app.DialogFragment;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
@@ -24,6 +23,7 @@ import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAla
 import com.example.joseph.sweepersd.utils.LocationUtils;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
@@ -57,7 +57,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
     private SlidingUpPanelLayout mSlidingPanelLayout;
 
-    private SeekBar mRadiusSeekbar;
+    //private SeekBar mRadiusSeekbar;
 
     private TabLayout mTabLayout;
     private WrapContentTabViewPager mTabViewPager;
@@ -79,6 +79,25 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
     private boolean mPermissionRequested;
 
+    private Observer<WatchZoneModel> mModelObserver = new Observer<WatchZoneModel>() {
+        @Override
+        public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
+            int progress = -1;
+            if (mUpdatingProgressMap != null) {
+                Integer p = mUpdatingProgressMap.get(watchZoneModel.watchZone.getUid());
+                if (p != null) {
+                    progress = p.intValue();
+                }
+            }
+            mShortSummaryLayout.set(watchZoneModel, ShortSummaryLayout.SummaryAction.Save, progress);
+
+            mSlidingPanelLayout.setVisibility(View.VISIBLE);
+        }
+    };
+
+    private LiveData<WatchZoneModel> mModelLiveData;
+    private Map<Long, Integer> mUpdatingProgressMap;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +110,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mSlidingPanelLayout = findViewById(R.id.sliding_layout);
         mTabLayout = findViewById(R.id.tab_layout);
         mTabViewPager = findViewById(R.id.tab_viewpager);
-        mRadiusSeekbar = findViewById(R.id.seekbar_radius);
+        //mRadiusSeekbar = findViewById(R.id.seekbar_radius);
         mDragLayout = findViewById(R.id.drag_view);
         mShortSummaryLayout = findViewById(R.id.short_summary_layout);
 
@@ -118,14 +137,29 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         });
         ((EditText)findViewById(R.id.place_autocomplete_search_input)).setTextColor(
                 getResources().getColor(android.R.color.white));
-        // TODO
-        /*mSaveButton.setOnClickListener(new View.OnClickListener() {
+        mShortSummaryLayout.setCallback(new ShortSummaryLayout.SummaryLayoutCallback() {
             @Override
-            public void onClick(View view) {
+            public void onSummaryActionClicked() {
+                // This summary is a Save button.
                 mSaveOnDestroy = true;
                 finish();
             }
-        });*/
+
+            @Override
+            public void onLayoutClicked() {
+                mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            }
+
+            @Override
+            public void onMoreInfoClicked() {
+                // TODO
+                /*Intent intent = new Intent(getContext(), WatchZoneDetailsActivity.class);
+                Bundle b = new Bundle();
+                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, watchZone.getUid());
+                intent.putExtras(b);
+                startActivity(intent);*/
+            }
+        });
         mSlidingPanelLayout.setAnchorPoint(0.4f);
         mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -150,7 +184,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
 
-        mRadiusSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        /*mRadiusSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             }
@@ -172,7 +206,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                                 WatchZone.REMIND_RANGE_DEFAULT,
                                 WatchZone.REMIND_POLICY_DEFAULT);
             }
-        });
+        });*/
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
@@ -188,13 +222,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
     @Override
     public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
-        if (progressMap.containsKey(mCurrentWatchZoneUid)) {
-            // TODO
-            //mProgressBar.setVisibility(View.VISIBLE);
-            //mProgressBar.setProgress(progressMap.get(mCurrentWatchZoneUid));
-        } else {
-            //mProgressBar.setVisibility(View.INVISIBLE);
-        }
+        mUpdatingProgressMap = progressMap;
     }
 
     @Override
@@ -257,6 +285,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     }
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
+        mSlidingPanelLayout.setVisibility(View.GONE);
+
         if (!SAN_DIEGO_BOUNDS.contains(latLng)) {
             Toast.makeText(this, "You can only set zones near San Diego!", Toast.LENGTH_SHORT).show();
             return;
@@ -286,7 +316,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mCurrentLabel = address;
         mCurrentLatitude = mLatLng.latitude;
         mCurrentLongitude = mLatLng.longitude;
-        mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
+        mCurrentRadius = getRadiusForProgress(30);
 
         if (animateCamera) {
             LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
@@ -296,7 +326,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                     mCurrentRadius * Math.sqrt(2), 45);
             LatLngBounds bounds = new LatLngBounds(southWest, northEast);
             mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 10));
-            //mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
 
         if (mCurrentWatchZoneUid == 0L) {
@@ -313,7 +342,12 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                             WatchZone.REMIND_POLICY_DEFAULT);
         }
 
-        mSlidingPanelLayout.setVisibility(View.VISIBLE);
+        if (mModelObserver != null && mModelLiveData != null) {
+            mModelLiveData.removeObserver(mModelObserver);
+        }
+
+        mModelLiveData = WatchZoneModelRepository.getInstance(this).getZoneModelForUid(mCurrentWatchZoneUid);
+        mModelLiveData.observe(this, mModelObserver);
     }
 
     private void dismissCreateLabelDialog() {

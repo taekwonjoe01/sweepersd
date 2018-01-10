@@ -2,6 +2,8 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
@@ -110,7 +112,7 @@ public class WatchZoneListAdapter extends RecyclerView.Adapter<WatchZoneListAdap
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        WatchZoneModel model = mCurrentList.get(position);
+        final WatchZoneModel model = mCurrentList.get(position);
         int progress = -1;
         if (mUpdatingProgressMap != null) {
             Integer p = mUpdatingProgressMap.get(model.watchZone.getUid());
@@ -120,6 +122,30 @@ public class WatchZoneListAdapter extends RecyclerView.Adapter<WatchZoneListAdap
         }
 
         holder.mShortSummaryLayout.set(model, ShortSummaryLayout.SummaryAction.None, progress);
+        holder.mShortSummaryLayout.setCallback(new ShortSummaryLayout.SummaryLayoutCallback() {
+            @Override
+            public void onSummaryActionClicked() {
+
+            }
+
+            @Override
+            public void onLayoutClicked() {
+                Intent intent = new Intent(mActivity, WatchZoneDetailsActivity.class);
+                Bundle b = new Bundle();
+                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, model.watchZone.getUid());
+                intent.putExtras(b);
+                mActivity.startActivity(intent);
+            }
+
+            @Override
+            public void onMoreInfoClicked() {
+                Intent intent = new Intent(mActivity, WatchZoneDetailsActivity.class);
+                Bundle b = new Bundle();
+                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, model.watchZone.getUid());
+                intent.putExtras(b);
+                mActivity.startActivity(intent);
+            }
+        });
     }
 
     @Override
