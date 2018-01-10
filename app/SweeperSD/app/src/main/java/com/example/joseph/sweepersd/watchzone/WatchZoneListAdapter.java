@@ -119,7 +119,7 @@ public class WatchZoneListAdapter extends RecyclerView.Adapter<WatchZoneListAdap
             }
         }
 
-        holder.mShortSummaryLayout.set(model, ShortSummaryLayout.SummaryAction.Save, progress);
+        holder.mShortSummaryLayout.set(model, ShortSummaryLayout.SummaryAction.None, progress);
     }
 
     @Override
