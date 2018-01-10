@@ -10,7 +10,7 @@
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/sliding_layout"
         android:gravity="bottom"
         app:umanoOverlay="true"
@@ -74,7 +74,7 @@
         <LinearLayout
             android:id="@+id/drag_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@android:color/transparent"
             android:orientation="vertical">
 
@@ -84,25 +84,26 @@
                 android:layout_height="wrap_content"/>
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/app_background"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/neutralBackground"
                 android:orientation="vertical">
 
                 <com.example.joseph.sweepersd.utils.WrapContentTabViewPager
                     android:id="@+id/tab_viewpager"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior">
                     <android.support.design.widget.TabLayout
                         android:id="@+id/tab_layout"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:tabMode="fixed"
-                        app:tabTextColor="@color/app_secondary"
-                        app:tabSelectedTextColor="@color/app_secondary"
-                        app:tabIndicatorColor="@color/app_background_activated"
-                        app:tabBackground="@drawable/apptheme_background"
+                        app:tabTextColor="@color/primaryTextColor"
+                        app:tabSelectedTextColor="@color/primaryTextColor"
+                        app:tabIndicatorColor="@color/secondaryColor"
+                        app:tabBackground="@color/primaryLightColor"
                         app:tabGravity="fill"/>
                 </com.example.joseph.sweepersd.utils.WrapContentTabViewPager>
             </LinearLayout>

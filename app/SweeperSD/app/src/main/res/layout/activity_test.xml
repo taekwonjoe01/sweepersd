@@ -6,4 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".utils.TestActivity">
 
+    <LinearLayout
+        android:id="@+id/drag_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
+
+        <com.example.joseph.sweepersd.watchzone.ShortSummaryLayout
+            android:id="@+id/short_summary_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/neutralBackground"
+            android:orientation="vertical">
+
+            <com.example.joseph.sweepersd.utils.WrapContentTabViewPager
+                android:id="@+id/tab_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:tabMode="fixed"
+                    app:tabTextColor="@color/primaryTextColor"
+                    app:tabSelectedTextColor="@color/primaryTextColor"
+                    app:tabIndicatorColor="@color/secondaryColor"
+                    app:tabBackground="@color/primaryLightColor"
+                    app:tabGravity="fill"/>
+            </com.example.joseph.sweepersd.utils.WrapContentTabViewPager>
+        </LinearLayout>
+    </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

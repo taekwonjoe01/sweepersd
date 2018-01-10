@@ -1,6 +1,5 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -74,7 +73,7 @@ public class CalendarTabFragment extends TabFragment {
         t.replace(R.id.caldroid_fragment_layout, mCaldroidFragment);
         t.commit();
 
-        mCaldroidFragment.setTextColorForDate(R.color.app_primary, new Date());
+        mCaldroidFragment.setTextColorForDate(R.color.secondaryColor, new Date());
         mCaldroidFragment.refreshView();
 
         for (Long watchZoneUid : mWatchZones.keySet()) {
@@ -132,7 +131,7 @@ public class CalendarTabFragment extends TabFragment {
                             schedulesList, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
                     for (LimitScheduleDate date : scheduleDates) {
-                        ColorDrawable red = new ColorDrawable(Color.RED);
+                        ColorDrawable red = new ColorDrawable(getResources().getColor(R.color.statusRed));
                         Date startDate = new Date(date.getStartCalendar().getTimeInMillis());
                         Date endDate = new Date(date.getEndCalendar().getTimeInMillis());
                         mCaldroidFragment.setBackgroundDrawableForDate(red, startDate);
@@ -150,7 +149,7 @@ public class CalendarTabFragment extends TabFragment {
                             schedulesList, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
                     for (LimitScheduleDate date : dates) {
-                        ColorDrawable red = new ColorDrawable(Color.RED);
+                        ColorDrawable red = new ColorDrawable(getResources().getColor(R.color.statusRed));
                         Date startDate = new Date(date.getStartCalendar().getTimeInMillis());
                         Date endDate = new Date(date.getEndCalendar().getTimeInMillis());
                         mCaldroidFragment.setBackgroundDrawableForDate(red, startDate);
@@ -172,7 +171,7 @@ public class CalendarTabFragment extends TabFragment {
                             schedulesList, 31, 93);
                     List<Date> calendarDates = new ArrayList<>();
                     for (LimitScheduleDate date : dates) {
-                        ColorDrawable red = new ColorDrawable(Color.RED);
+                        ColorDrawable red = new ColorDrawable(getResources().getColor(R.color.statusRed));
                         Date startDate = new Date(date.getStartCalendar().getTimeInMillis());
                         Date endDate = new Date(date.getEndCalendar().getTimeInMillis());
                         mCaldroidFragment.setBackgroundDrawableForDate(red, startDate);

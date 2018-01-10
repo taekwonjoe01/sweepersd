@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 
 public class WrapContentTabViewPager extends ViewPager {
     public WrapContentTabViewPager(Context context) {
@@ -17,7 +16,7 @@ public class WrapContentTabViewPager extends ViewPager {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int height = 0;
+        /*int height = 0;
         if (getChildCount() > 0) {
             for (int i = 1; i < getChildCount(); i++) {
                 View child = getChildAt(i);
@@ -28,7 +27,7 @@ public class WrapContentTabViewPager extends ViewPager {
 
             heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
                     + getChildAt(0).getMeasuredHeight();
-        }
+        }*/
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }

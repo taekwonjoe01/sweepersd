@@ -147,17 +147,12 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
             @Override
             public void onLayoutClicked() {
-                mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
 
             @Override
             public void onMoreInfoClicked() {
-                // TODO
-                /*Intent intent = new Intent(getContext(), WatchZoneDetailsActivity.class);
-                Bundle b = new Bundle();
-                b.putLong(WatchZoneDetailsActivity.KEY_WATCHZONE_ID, watchZone.getUid());
-                intent.putExtras(b);
-                startActivity(intent);*/
+                mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
         });
         mSlidingPanelLayout.setAnchorPoint(0.4f);
