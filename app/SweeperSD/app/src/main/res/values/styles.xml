@@ -10,13 +10,13 @@
         <item name="windowNoTitle">true</item>
 
         <!-- To change the popup menu and app text color  -->
-        <item name="android:textColor">@color/app_secondary</item>
+        <item name="android:textColor">@color/secondaryTextColor</item>
 
         <!-- To change the background of options menu-->
-        <item name="android:itemBackground">@color/app_background</item>
+        <item name="android:itemBackground">@color/primaryColor</item>
 
         <!-- Radio Button styling -->
-        <item name="android:buttonTint">@color/app_secondary</item>
+        <item name="android:buttonTint">@color/secondaryColor</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

@@ -1,24 +1,26 @@
 package com.example.joseph.sweepersd.watchzone;
 
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
+import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -32,13 +34,17 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
 
     private TabLayout mTabLayout;
     private WrapContentTabViewPager mTabViewPager;
+    private ShortSummaryLayout mShortSummaryLayout;
+    private SlidingUpPanelLayout mSlidingPanelLayout;
+    private LinearLayout mDragLayout;
+
     private LimitsTabFragment mLimitsTabFragment;
     private CalendarTabFragment mCalendarTabFragment;
     private NotificationsTabFragment mNotificationsTabFragment;
 
     private MapFragment mMapFragment;
 
-    private ProgressBar mProgressBar;
+    private Map<Long, Integer> mUpdatingProgressMap;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,11 +61,11 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
             finish();
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
         mTabLayout = findViewById(R.id.tab_layout);
         mTabViewPager = findViewById(R.id.tab_viewpager);
-        mProgressBar = findViewById(R.id.progress_updating);
-        setSupportActionBar(toolbar);
+        mShortSummaryLayout = findViewById(R.id.short_summary_layout);
+        mSlidingPanelLayout = findViewById(R.id.sliding_layout);
+        mDragLayout = findViewById(R.id.drag_view);
 
         mMapFragment= (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.watch_zone_map_fragment);
@@ -81,33 +87,75 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
 
-        WatchZoneModelRepository.getInstance(this).getZoneModelForUid(mWatchZoneId).observe(this, new WatchZoneModelObserver(mWatchZoneId,
-                new WatchZoneModelObserver.WatchZoneModelChangedCallback() {
+        WatchZoneModelRepository.getInstance(this).getZoneModelForUid(mWatchZoneId).observe(this, new Observer<WatchZoneModel>() {
             @Override
-            public void onWatchZoneModelChanged(WatchZone watchZone) {
-                invalidateUi(watchZone);
+            public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
+                int progress = -1;
+                if (mUpdatingProgressMap != null) {
+                    Integer p = mUpdatingProgressMap.get(watchZoneModel.watchZone.getUid());
+                    if (p != null) {
+                        progress = p.intValue();
+                    }
+                }
+
+                ShortSummaryLayout.SummaryAction action =
+                        mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                                ShortSummaryLayout.SummaryAction.None :
+                                ShortSummaryLayout.SummaryAction.Customize;
+                mShortSummaryLayout.set(watchZoneModel, action, progress);
+
+                mSlidingPanelLayout.setVisibility(View.VISIBLE);
+
+                setMap(watchZoneModel.watchZone);
+            }
+        });
+
+        mShortSummaryLayout.setCallback(new ShortSummaryLayout.SummaryLayoutCallback() {
+            @Override
+            public void onSummaryActionClicked() {
+                //TODO
             }
 
             @Override
-            public void onDataLoaded(WatchZone watchZone) {
-                invalidateUi(watchZone);
+            public void onLayoutClicked() {
+                mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
 
             @Override
-            public void onDataInvalid() {
-                finish();
+            public void onMoreInfoClicked() {
+                mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
-        }));
+        });
+        mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel,
+                                            SlidingUpPanelLayout.PanelState previousState,
+                                            SlidingUpPanelLayout.PanelState newState) {
+                ShortSummaryLayout.SummaryAction action =
+                        newState == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                                ShortSummaryLayout.SummaryAction.None :
+                                ShortSummaryLayout.SummaryAction.Customize;
+                mShortSummaryLayout.setSummaryAction(action);
+            }
+        });
+        mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                mSlidingPanelLayout.setPanelHeight(mShortSummaryLayout.getHeight());
+            }
+        });
+
+        mSlidingPanelLayout.setVisibility(View.GONE);
     }
 
     @Override
     public void onWatchZoneUpdateProgress(Map<Long, Integer> progressMap) {
-        if (progressMap.containsKey(mWatchZoneId)) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mProgressBar.setProgress(progressMap.get(mWatchZoneId));
-        } else {
-            mProgressBar.setVisibility(View.INVISIBLE);
-        }
+        mUpdatingProgressMap = progressMap;
     }
 
     @Override
@@ -126,7 +174,7 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         return false;
     }
 
-    private void invalidateUi(WatchZone watchZone) {
+    private void setMap(WatchZone watchZone) {
         setTitle(WordUtils.capitalize(watchZone.getLabel()));
         LatLng latLng = new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude());
 
@@ -136,5 +184,15 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
                 ((double)watchZone.getRadius()) * Math.sqrt(2), 45);
         LatLngBounds bounds = new LatLngBounds(southWest, northEast);
         mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(bounds, 0));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
+                mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED) {
+            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

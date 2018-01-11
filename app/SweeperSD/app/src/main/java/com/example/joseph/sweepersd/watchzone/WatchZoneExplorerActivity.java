@@ -155,7 +155,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                 mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
         });
-        mSlidingPanelLayout.setAnchorPoint(0.4f);
         mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
@@ -343,6 +342,16 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
         mModelLiveData = WatchZoneModelRepository.getInstance(this).getZoneModelForUid(mCurrentWatchZoneUid);
         mModelLiveData.observe(this, mModelObserver);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
+                mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED) {
+            mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void dismissCreateLabelDialog() {

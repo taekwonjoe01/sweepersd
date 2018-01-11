@@ -7,20 +7,66 @@
     android:fitsSystemWindows="true"
     tools:context=".archived.presentation.manualalarms.WatchZoneDetailsActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        android:id="@+id/sliding_layout"
+        android:gravity="bottom"
+        app:umanoOverlay="true"
+        app:umanoDragView="@id/drag_view"
+        app:umanoFadeColor="@android:color/transparent"
+        app:umanoShadowHeight="0dp">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/app_primary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent">
 
-    </android.support.design.widget.AppBarLayout>
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/watch_zone_map_fragment"
+                android:name="com.example.joseph.sweepersd.watchzone.MapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-    <include layout="@layout/content_watch_zone_details" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/drag_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:orientation="vertical">
+
+            <com.example.joseph.sweepersd.watchzone.ShortSummaryLayout
+                android:id="@+id/short_summary_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/neutralBackground"
+                android:orientation="vertical">
+
+                <com.example.joseph.sweepersd.utils.WrapContentTabViewPager
+                    android:id="@+id/tab_viewpager"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+                    <android.support.design.widget.TabLayout
+                        android:id="@+id/tab_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:tabMode="fixed"
+                        app:tabTextColor="@color/primaryTextColor"
+                        app:tabSelectedTextColor="@color/primaryTextColor"
+                        app:tabIndicatorColor="@color/secondaryColor"
+                        app:tabBackground="@color/primaryLightColor"
+                        app:tabGravity="fill"/>
+                </com.example.joseph.sweepersd.utils.WrapContentTabViewPager>
+            </LinearLayout>
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 </android.support.design.widget.CoordinatorLayout>

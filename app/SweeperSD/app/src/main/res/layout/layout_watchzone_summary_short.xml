@@ -65,6 +65,7 @@
         android:padding="2dp"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
+        android:visibility="gone"
         android:layout_below="@+id/layout_status">
 
         <TextView
@@ -72,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@android:style/TextAppearance.Small"
-            android:text="43 posted limits"/>
+            android:text="a cool statistic here"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -87,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@android:style/TextAppearance.Small"
-            android:text="12 swept streets"/>
+            android:text="and another cool statistic"/>
 
     </LinearLayout>
 
