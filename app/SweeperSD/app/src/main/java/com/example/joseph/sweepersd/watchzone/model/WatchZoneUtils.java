@@ -107,7 +107,7 @@ public class WatchZoneUtils {
             public int compare(LimitScheduleDate date1, LimitScheduleDate date2) {
                 long val = date1.getStartCalendar().getTime().getTime() -
                         date2.getStartCalendar().getTime().getTime();
-                return (int)val;
+                return val < 0L ? -1 : val > 0L ? 1 : 0;
             }
         });
     }

@@ -41,7 +41,7 @@
                 android:id="@+id/imageview_status_icon"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:src="@drawable/ic_local_parking_green_24dp"
+                android:background="@drawable/ic_local_parking_green_24dp"
                 android:layout_gravity="center"/>
 
         </FrameLayout>

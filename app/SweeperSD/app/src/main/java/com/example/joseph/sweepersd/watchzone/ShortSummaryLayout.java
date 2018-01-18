@@ -2,8 +2,6 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -14,22 +12,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.limit.LimitSchedule;
-import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
+import com.example.joseph.sweepersd.utils.SummaryHelper;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
-import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
 
 import org.apache.commons.lang3.text.WordUtils;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class ShortSummaryLayout extends RelativeLayout {
 
@@ -162,83 +149,30 @@ public class ShortSummaryLayout extends RelativeLayout {
             mStatusIcon.setVisibility(View.VISIBLE);
             mProgressBar.setVisibility(View.GONE);
 
-            // Get all LimitSchedules to determine sweeping dates
-            List<LimitSchedule> allLimitSchedules = new ArrayList<>();
-            for (Long uniqueLimitUid : mWatchZoneModel.getUniqueLimitModels().keySet()) {
-                allLimitSchedules.addAll(new ArrayList<>(
-                        mWatchZoneModel.getUniqueLimitModels().get(uniqueLimitUid).schedules));
-            }
+            SummaryHelper.WatchZoneModelSummary summary = SummaryHelper.getStatusFromModel(mWatchZoneModel);
 
-            String dateString = getResources().getString(R.string.watch_zone_no_sweeping);
-            List<LimitScheduleDate> sweepingDates =
-                    WatchZoneUtils.getStartTimeOrderedDatesForWatchZone(mWatchZoneModel);
-            if (sweepingDates != null) {
-                List<LimitScheduleDate> currentSweeping = new ArrayList<>();
-                List<LimitScheduleDate> upcomingSweeping = new ArrayList<>();
-                long now = new GregorianCalendar(
-                        TimeZone.getTimeZone("America/Los_Angeles"), Locale.US).getTime().getTime();
-                long startOffset = WatchZoneUtils.getStartHourOffset(watchZone);
-                for (LimitScheduleDate date : sweepingDates) {
-                    long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
-                    long startTime = date.getStartCalendar().getTime().getTime();
-                    long endTime = date.getEndCalendar().getTime().getTime();
-                    if (startTime <= now && endTime >= now) {
-                        currentSweeping.add(date);
-                    } else if (warningTime <= now && endTime >= now) {
-                        upcomingSweeping.add(date);
-                    }
-                }
-
-                if (!currentSweeping.isEmpty()) {
+            switch (summary.summaryStatus) {
+                case NOW:
                     mStatusIcon.setBackground(
                             getResources().getDrawable(R.drawable.ic_local_parking_red_24dp));
-                    dateString = "Street sweeping is happening now.";
-                } else if (!upcomingSweeping.isEmpty()) {
-                    long nextSweepingTime = upcomingSweeping.get(0).getStartCalendar().getTime().getTime();
-
+                    mStatusText.setText("Happening now!");
+                    break;
+                case SOON:
                     mStatusIcon.setBackground(
-                            getResources().getDrawable(R.drawable.ic_local_parking_yellow_24dp));
-                    Calendar sweeping = Calendar.getInstance();
-                    sweeping.setTime(new Date(nextSweepingTime));
-                    Calendar today = Calendar.getInstance();
-                    Calendar tomorrow = Calendar.getInstance();
-                    tomorrow.add(Calendar.DATE, 1);
-                    if (sweeping.get(Calendar.DATE) == today.get(Calendar.DATE)) {
-                        dateString = "Next sweeping will occur today at " +
-                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                    } else if (sweeping.get(Calendar.DATE) == tomorrow.get(Calendar.DATE)) {
-                        dateString = "Next sweeping will occur tomorrow at " +
-                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                    } else {
-                        dateString = "Next sweeping will occur on " +
-                                new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));
-                    }
-                } else if (!sweepingDates.isEmpty()) {
-                    long nextSweepingTime = sweepingDates.get(0).getStartCalendar().getTime().getTime();
-
+                        getResources().getDrawable(R.drawable.ic_local_parking_yellow_24dp));
+                    mStatusText.setText(SummaryHelper.getNextSweepingString(summary.dateForStatus));
+                    break;
+                case LATER:
                     mStatusIcon.setBackground(
                             getResources().getDrawable(R.drawable.ic_local_parking_green_24dp));
-                    Calendar sweeping = Calendar.getInstance();
-                    sweeping.setTime(new Date(nextSweepingTime));
-                    Calendar today = Calendar.getInstance();
-                    Calendar tomorrow = Calendar.getInstance();
-                    tomorrow.add(Calendar.DATE, 1);
-                    if (sweeping.get(Calendar.DATE) == today.get(Calendar.DATE)) {
-                        dateString = "Next sweeping will occur today at " +
-                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                    } else if (sweeping.get(Calendar.DATE) == tomorrow.get(Calendar.DATE)) {
-                        dateString = "Next sweeping will occur tomorrow at " +
-                                new SimpleDateFormat("K:mma").format(new Date(nextSweepingTime));
-                    } else {
-                        dateString = "Next sweeping will occur on " +
-                                new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(nextSweepingTime));
-                    }
-                } else {
+                    mStatusText.setText(SummaryHelper.getNextSweepingString(summary.dateForStatus));
+                    break;
+                case NEVER:
                     mStatusIcon.setBackground(
                             getResources().getDrawable(R.drawable.ic_local_parking_black_24dp));
-                }
+                    mStatusText.setText("No sweeping in this zone.");
+                    break;
             }
-            mStatusText.setText(dateString);
         }
 
         if (mSummaryAction == SummaryAction.None) {
