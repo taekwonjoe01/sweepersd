@@ -145,17 +145,13 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
                                             SlidingUpPanelLayout.PanelState previousState,
                                             SlidingUpPanelLayout.PanelState newState) {
                 Log.e("Joey", "panel state " + newState.toString());
-                /*ShortSummaryLayout.SummaryDisplayMode displayMode =
-                        mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
-                                ShortSummaryLayout.SummaryDisplayMode.DETAILS_TITLE :
-                                ShortSummaryLayout.SummaryDisplayMode.DETAILS;
-                mShortSummaryLayout.setDisplayMode(displayMode);*/
             }
         });
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                 mSlidingPanelLayout.setPanelHeight(mShortSummaryLayout.getHeight());
+                mDragLayout.removeOnLayoutChangeListener(this);
             }
         });
 

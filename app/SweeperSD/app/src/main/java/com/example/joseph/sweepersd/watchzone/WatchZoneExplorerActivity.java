@@ -215,6 +215,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                 mSlidingPanelLayout.setPanelHeight(mShortSummaryLayout.getHeight());
+                mDragLayout.removeOnLayoutChangeListener(this);
             }
         });
         mSaveOnDestroy = false;
