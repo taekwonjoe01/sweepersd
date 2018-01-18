@@ -461,7 +461,7 @@ public class ShortSummaryLayout extends RelativeLayout implements PopupMenu.OnMe
             case NOW:
                 mStatusIcon.setBackground(
                         getResources().getDrawable(R.drawable.ic_local_parking_red_24dp));
-                mStatusText.setText("Happening now!");
+                mStatusText.setText("Street sweeping happening now!");
                 break;
             case SOON:
                 mStatusIcon.setBackground(

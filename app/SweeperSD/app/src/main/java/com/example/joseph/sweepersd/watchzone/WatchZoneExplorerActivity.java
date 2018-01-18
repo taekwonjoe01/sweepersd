@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -130,6 +131,10 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                 setCurrentZone(null, latLng, true);
             }
         });
+        ImageButton searchButton = findViewById(R.id.place_autocomplete_search_button);
+        searchButton.setImageResource(R.drawable.ic_search_secondary_24dp);
+        ImageButton clearButton = findViewById(R.id.place_autocomplete_clear_button);
+        clearButton.setImageResource(R.drawable.ic_clear_secondary_24dp);
         mPlaceFragment.setBoundsBias(SAN_DIEGO_BOUNDS);
         mPlaceFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
