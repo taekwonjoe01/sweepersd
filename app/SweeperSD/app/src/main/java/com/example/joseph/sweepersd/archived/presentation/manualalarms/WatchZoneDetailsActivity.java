@@ -98,7 +98,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_activity_watch_zone_details, menu);
+        getMenuInflater().inflate(R.menu.menu_activity_details, menu);
         return true;
     }
 

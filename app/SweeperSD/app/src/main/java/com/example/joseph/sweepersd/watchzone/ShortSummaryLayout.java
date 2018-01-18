@@ -117,12 +117,21 @@ public class ShortSummaryLayout extends RelativeLayout implements PopupMenu.OnMe
         mCallback = callback;
     }
 
+    /**
+     * TODO - This should be generalized similar to the action button. Perhaps the parent should provide
+     * the menu and listener interface for menu item clicks.
+     */
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
                 WatchZoneModelRepository.getInstance(getContext()).deleteWatchZone(mWatchZoneModel.watchZone.getUid());
                 return true;
+            case R.id.action_save:
+                if (mCallback != null) {
+                    mCallback.onSummaryActionClicked();
+                }
+                break;
         }
         return false;
     }
@@ -309,7 +318,7 @@ public class ShortSummaryLayout extends RelativeLayout implements PopupMenu.OnMe
         setBackgroundColor(getResources().getColor(R.color.primaryColor));
 
         final PopupMenu popup = new PopupMenu(getContext(), mMenu);
-        popup.getMenuInflater().inflate(R.menu.menu_activity_watch_zone_details, popup.getMenu());
+        popup.getMenuInflater().inflate(R.menu.menu_activity_explorer, popup.getMenu());
         popup.setOnMenuItemClickListener(this);
         mMenu.setVisibility(View.VISIBLE);
         mMenu.setOnClickListener(new OnClickListener() {
@@ -411,7 +420,7 @@ public class ShortSummaryLayout extends RelativeLayout implements PopupMenu.OnMe
         setBackgroundColor(getResources().getColor(R.color.primaryColor));
 
         final PopupMenu popup = new PopupMenu(getContext(), mMenu);
-        popup.getMenuInflater().inflate(R.menu.menu_activity_watch_zone_details, popup.getMenu());
+        popup.getMenuInflater().inflate(R.menu.menu_activity_details, popup.getMenu());
         popup.setOnMenuItemClickListener(this);
         mMenu.setVisibility(View.VISIBLE);
         mMenu.setOnClickListener(new OnClickListener() {
