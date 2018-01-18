@@ -121,7 +121,7 @@ public class WatchZoneListAdapter extends RecyclerView.Adapter<WatchZoneListAdap
             }
         }
 
-        holder.mShortSummaryLayout.set(model, ShortSummaryLayout.SummaryAction.None, progress);
+        holder.mShortSummaryLayout.set(model, ShortSummaryLayout.SummaryDisplayMode.LIST, progress);
         holder.mShortSummaryLayout.setCallback(new ShortSummaryLayout.SummaryLayoutCallback() {
             @Override
             public void onSummaryActionClicked() {

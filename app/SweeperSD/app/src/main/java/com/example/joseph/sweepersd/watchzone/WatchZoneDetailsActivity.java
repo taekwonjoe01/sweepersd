@@ -90,6 +90,10 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         WatchZoneModelRepository.getInstance(this).getZoneModelForUid(mWatchZoneId).observe(this, new Observer<WatchZoneModel>() {
             @Override
             public void onChanged(@Nullable WatchZoneModel watchZoneModel) {
+                if (watchZoneModel == null) {
+                    finish();
+                    return;
+                }
                 int progress = -1;
                 if (mUpdatingProgressMap != null) {
                     Integer p = mUpdatingProgressMap.get(watchZoneModel.watchZone.getUid());
@@ -98,11 +102,11 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
                     }
                 }
 
-                ShortSummaryLayout.SummaryAction action =
+                ShortSummaryLayout.SummaryDisplayMode displayMode =
                         mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
-                                ShortSummaryLayout.SummaryAction.None :
-                                ShortSummaryLayout.SummaryAction.Customize;
-                mShortSummaryLayout.set(watchZoneModel, action, progress);
+                                ShortSummaryLayout.SummaryDisplayMode.DETAILS_TITLE :
+                                ShortSummaryLayout.SummaryDisplayMode.DETAILS;
+                mShortSummaryLayout.set(watchZoneModel, displayMode, progress);
 
                 mSlidingPanelLayout.setVisibility(View.VISIBLE);
 
@@ -129,18 +133,23 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-
+                if (slideOffset > 0.2f) {
+                    mShortSummaryLayout.setDisplayMode(ShortSummaryLayout.SummaryDisplayMode.DETAILS_TITLE);
+                } else {
+                    mShortSummaryLayout.setDisplayMode(ShortSummaryLayout.SummaryDisplayMode.DETAILS);
+                }
             }
 
             @Override
             public void onPanelStateChanged(View panel,
                                             SlidingUpPanelLayout.PanelState previousState,
                                             SlidingUpPanelLayout.PanelState newState) {
-                ShortSummaryLayout.SummaryAction action =
-                        newState == SlidingUpPanelLayout.PanelState.EXPANDED ?
-                                ShortSummaryLayout.SummaryAction.None :
-                                ShortSummaryLayout.SummaryAction.Customize;
-                mShortSummaryLayout.setSummaryAction(action);
+                Log.e("Joey", "panel state " + newState.toString());
+                /*ShortSummaryLayout.SummaryDisplayMode displayMode =
+                        mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                                ShortSummaryLayout.SummaryDisplayMode.DETAILS_TITLE :
+                                ShortSummaryLayout.SummaryDisplayMode.DETAILS;
+                mShortSummaryLayout.setDisplayMode(displayMode);*/
             }
         });
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {

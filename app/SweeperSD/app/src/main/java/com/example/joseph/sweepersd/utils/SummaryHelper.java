@@ -1,7 +1,5 @@
 package com.example.joseph.sweepersd.utils;
 
-import android.util.Log;
-
 import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
@@ -45,27 +43,16 @@ public class SummaryHelper {
             LimitScheduleDate date = sweepingDates.get(0);
 
             long warningTime = date.getStartCalendar().getTime().getTime() - startOffset;
-            Log.e("Joey", "warning time: " + new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(warningTime)));
             long startTime = date.getStartCalendar().getTime().getTime();
-            Log.e("Joey", "start time: " + new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(startTime)));
             long endTime = date.getEndCalendar().getTime().getTime();
-            Log.e("Joey", "end time: " + new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(endTime)));
             if (startTime <= now && endTime >= now) {
                 result.summaryStatus = SummaryStatus.NOW;
-                Log.e("Joey", "returning now");
             } else if (warningTime <= now && endTime >= now) {
                 result.summaryStatus = SummaryStatus.SOON;
-                Log.e("Joey", "returning soon");
             } else {
                 result.summaryStatus = SummaryStatus.LATER;
-                Log.e("Joey", "returning later");
             }
             result.dateForStatus = date;
-            /*Log.e("Joey", "For this model:");
-
-            for (LimitScheduleDate d : sweepingDates) {
-                Log.e("Joey", new SimpleDateFormat("EEE, MMM dd 'at' K:mma").format(new Date(d.getStartCalendar().getTime().getTime())));
-            }*/
         }
         return result;
     }

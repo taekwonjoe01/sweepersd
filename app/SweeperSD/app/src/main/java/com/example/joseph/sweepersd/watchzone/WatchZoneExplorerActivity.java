@@ -89,7 +89,11 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                     progress = p.intValue();
                 }
             }
-            mShortSummaryLayout.set(watchZoneModel, ShortSummaryLayout.SummaryAction.Save, progress);
+            ShortSummaryLayout.SummaryDisplayMode displayMode =
+                    mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                            ShortSummaryLayout.SummaryDisplayMode.EXPLORER_TITLE :
+                            ShortSummaryLayout.SummaryDisplayMode.EXPLORER;
+            mShortSummaryLayout.set(watchZoneModel, displayMode, progress);
 
             mSlidingPanelLayout.setVisibility(View.VISIBLE);
         }
@@ -158,14 +162,20 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mSlidingPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-
+                if (slideOffset > 0.2f) {
+                    mShortSummaryLayout.setDisplayMode(ShortSummaryLayout.SummaryDisplayMode.EXPLORER_TITLE);
+                }
             }
 
             @Override
             public void onPanelStateChanged(View panel,
                                             SlidingUpPanelLayout.PanelState previousState,
                                             SlidingUpPanelLayout.PanelState newState) {
-
+                ShortSummaryLayout.SummaryDisplayMode displayMode =
+                        mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                                ShortSummaryLayout.SummaryDisplayMode.EXPLORER_TITLE :
+                                ShortSummaryLayout.SummaryDisplayMode.EXPLORER;
+                mShortSummaryLayout.setDisplayMode(displayMode);
             }
         });
         TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
