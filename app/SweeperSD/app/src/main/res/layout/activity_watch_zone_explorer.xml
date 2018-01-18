@@ -18,7 +18,7 @@
         app:umanoFadeColor="@android:color/transparent"
         app:umanoShadowHeight="0dp">
 
-        <FrameLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -29,24 +29,48 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <LinearLayout
+            <FrameLayout
+                android:id="@+id/place_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-                <FrameLayout
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/apptheme_widget_background">
+
+                <fragment
+                    android:id="@+id/place_autocomplete_fragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/apptheme_widget_background">
+                    android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"/>
+            </FrameLayout>
 
-                    <fragment
-                        android:id="@+id/place_autocomplete_fragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"/>
-                </FrameLayout>
-            </LinearLayout>
-        </FrameLayout>
+            <FrameLayout
+                android:id="@+id/buffer_layout"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_alignParentBottom="true"/>
+
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/place_layout"
+                android:layout_above="@id/buffer_layout"
+                android:layout_margin="10dp">
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/seekbar_radius"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:splitTrack="false"
+                    app:seekBarRotation="CW270"
+                    android:progressTint="@color/secondaryColor"
+                    android:thumbTint="@color/secondaryColor"
+                    android:secondaryProgressTint="@color/secondaryLightColor"
+                    android:padding="10dp"
+                    android:progress="30"/>
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/drag_view"

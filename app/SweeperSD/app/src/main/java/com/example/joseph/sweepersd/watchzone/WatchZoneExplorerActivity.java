@@ -14,7 +14,9 @@ import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
@@ -57,12 +59,13 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
     private SlidingUpPanelLayout mSlidingPanelLayout;
 
-    //private SeekBar mRadiusSeekbar;
+    private SeekBar mRadiusSeekbar;
 
     private TabLayout mTabLayout;
     private WrapContentTabViewPager mTabViewPager;
     private LinearLayout mDragLayout;
     private ShortSummaryLayout mShortSummaryLayout;
+    private FrameLayout mBufferLayout;
 
     private LimitsTabFragment mLimitsTabFragment;
     private CalendarTabFragment mCalendarTabFragment;
@@ -114,9 +117,10 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mSlidingPanelLayout = findViewById(R.id.sliding_layout);
         mTabLayout = findViewById(R.id.tab_layout);
         mTabViewPager = findViewById(R.id.tab_viewpager);
-        //mRadiusSeekbar = findViewById(R.id.seekbar_radius);
+        mRadiusSeekbar = findViewById(R.id.seekbar_radius);
         mDragLayout = findViewById(R.id.drag_view);
         mShortSummaryLayout = findViewById(R.id.short_summary_layout);
+        mBufferLayout = findViewById(R.id.buffer_layout);
 
         mMapFragment.setMapPadding(0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_top),
                 0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_bottom));
@@ -188,21 +192,21 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
 
-        /*mRadiusSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mRadiusSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int radius = getRadiusForProgress(progress);
+                mMapFragment.setDraggingRadius(mCurrentWatchZoneUid, radius);
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (mCurrentWatchZoneUid == 0L) {
                     return;
                 }
+                mMapFragment.setDraggingRadius(mCurrentWatchZoneUid, -1);
                 mCurrentRadius = getRadiusForProgress(seekBar.getProgress());
                 WatchZoneModelRepository.getInstance(WatchZoneExplorerActivity.this)
                         .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,
@@ -210,11 +214,13 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                                 WatchZone.REMIND_RANGE_DEFAULT,
                                 WatchZone.REMIND_POLICY_DEFAULT);
             }
-        });*/
+        });
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                 mSlidingPanelLayout.setPanelHeight(mShortSummaryLayout.getHeight());
+                mBufferLayout.getLayoutParams().height = mShortSummaryLayout.getHeight();
+                mBufferLayout.requestLayout();
                 mDragLayout.removeOnLayoutChangeListener(this);
             }
         });
@@ -321,7 +327,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mCurrentLabel = address;
         mCurrentLatitude = mLatLng.latitude;
         mCurrentLongitude = mLatLng.longitude;
-        mCurrentRadius = getRadiusForProgress(30);
+        mCurrentRadius = getRadiusForProgress(mRadiusSeekbar.getProgress());
 
         if (animateCamera) {
             LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);

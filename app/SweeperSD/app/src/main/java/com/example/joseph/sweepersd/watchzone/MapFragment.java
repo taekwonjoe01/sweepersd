@@ -41,10 +41,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap.OnMapLongClickListener mLongClickListener;
     private CameraUpdate mCameraUpdate;
 
+    private int mDraggingRadius = -1;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.content_watchzone_map_fragment, container, false);
+        View v = inflater.inflate(R.layout.content_map_fragment, container, false);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
@@ -138,6 +140,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    public void setDraggingRadius(Long watchZoneUid, int radius) {
+        mDraggingRadius = radius;
+
+        if (mDraggingRadius > -1) {
+            WatchZonePresenter presenter = mWatchZones.get(watchZoneUid);
+            WatchZone watchZone = presenter.oldWatchZone;
+            if (presenter != null) {
+                presenter.watchZoneRadius.setRadius(mDraggingRadius);
+                presenter.watchZoneRadius.setStrokeColor(getResources().getColor(R.color.secondaryColor));
+                /*presenter.watchZoneCenter.remove();
+                presenter.watchZoneRadius.remove();
+
+                if (presenter.watchZonePointsObserver != null) {
+                    for (Long uid : presenter.pointsToCircleMap.keySet()) {
+                        Circle point = presenter.pointsToCircleMap.get(uid);
+                        point.remove();
+                    }
+                }
+                WatchZoneModelRepository.getInstance(getContext()).getZoneModelForUid(watchZoneUid).removeObserver(
+                        presenter.watchZonePointsObserver);
+                createWatchZonePointsObserver(watchZoneUid, presenter);
+
+                presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
+                        .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
+                        .radius(mDraggingRadius)
+                        .strokeColor(getResources().getColor(R.color.secondaryColor))
+                        .fillColor(getResources().getColor(R.color.primaryColorTranslucent)));
+                presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
+                mGoogleMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+                    @Override
+                    public void onCircleClick(Circle circle) {
+
+                    }
+                });*/
+            }
+        }
+    }
+
     private void createPresenter(final Long watchZoneUid) {
         final WatchZonePresenter presenter = new WatchZonePresenter();
         presenter.watchZoneObserver = new WatchZoneModelObserver(watchZoneUid,
@@ -166,11 +207,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                     presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
                             .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
-                            .radius(watchZone.getRadius())
-                            .strokeColor(getResources().getColor(R.color.secondaryColor))
+                            .radius(mDraggingRadius > -1 ? mDraggingRadius : watchZone.getRadius())
+                            .strokeColor(mDraggingRadius > -1 ? getResources().getColor(R.color.secondaryColor)
+                                    : getResources().getColor(R.color.primaryColor))
                             .fillColor(getResources().getColor(R.color.primaryColorTranslucent)));
                     presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
                             .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
+                    mGoogleMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+                        @Override
+                        public void onCircleClick(Circle circle) {
+
+                        }
+                    });
                 }
             }
             @Override
@@ -178,8 +226,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 presenter.oldWatchZone = watchZone;
                 presenter.watchZoneRadius = mGoogleMap.addCircle(new CircleOptions()
                         .center(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude()))
-                        .radius(watchZone.getRadius())
-                        .strokeColor(getResources().getColor(R.color.secondaryColor))
+                        .radius(mDraggingRadius > -1 ? mDraggingRadius : watchZone.getRadius())
+                        .strokeColor(getResources().getColor(R.color.primaryColor))
                         .fillColor(getResources().getColor(R.color.primaryColorTranslucent)));
                 presenter.watchZoneCenter = mGoogleMap.addMarker(new MarkerOptions()
                         .position(new LatLng(watchZone.getCenterLatitude(), watchZone.getCenterLongitude())));
