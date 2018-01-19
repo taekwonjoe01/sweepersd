@@ -70,6 +70,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
 
     private LimitsTabFragment mLimitsTabFragment;
     private CalendarTabFragment mCalendarTabFragment;
+    private NotificationsTabFragment mNotificationsTabFragment;
 
     private Long mCurrentWatchZoneUid;
     private String mCurrentLabel;
@@ -173,6 +174,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             public void onPanelSlide(View panel, float slideOffset) {
                 if (slideOffset > 0.2f) {
                     mShortSummaryLayout.setDisplayMode(ShortSummaryLayout.SummaryDisplayMode.EXPLORER_TITLE);
+                } else {
+                    mShortSummaryLayout.setDisplayMode(ShortSummaryLayout.SummaryDisplayMode.EXPLORER);
                 }
             }
 
@@ -192,8 +195,11 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mLimitsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_limits));
         mCalendarTabFragment = new CalendarTabFragment();
         mCalendarTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_calendar));
-        tabAdapter.addFragment(mLimitsTabFragment);
+        mNotificationsTabFragment = new NotificationsTabFragment();
+        mNotificationsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_notifications));
+        //tabAdapter.addFragment(mLimitsTabFragment);
         tabAdapter.addFragment(mCalendarTabFragment);
+        tabAdapter.addFragment(mNotificationsTabFragment);
         mTabViewPager.setAdapter(tabAdapter);
         mTabLayout.setupWithViewPager(mTabViewPager);
 
@@ -350,6 +356,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             mMapFragment.addWatchZone(mCurrentWatchZoneUid);
             mLimitsTabFragment.addWatchZone(mCurrentWatchZoneUid);
             mCalendarTabFragment.addWatchZone(mCurrentWatchZoneUid);
+            mNotificationsTabFragment.setWatchZoneUid(mCurrentWatchZoneUid);
         } else {
             WatchZoneModelRepository.getInstance(WatchZoneExplorerActivity.this)
                     .updateWatchZone(mCurrentWatchZoneUid, mCurrentLabel,

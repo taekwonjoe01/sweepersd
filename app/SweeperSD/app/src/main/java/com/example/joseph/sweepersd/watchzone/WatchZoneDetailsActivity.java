@@ -70,6 +70,8 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         mMapFragment= (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.watch_zone_map_fragment);
         mMapFragment.addWatchZone(mWatchZoneId);
+        mMapFragment.setMapPadding(0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_top),
+                0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_bottom));
 
         TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
         mLimitsTabFragment = new LimitsTabFragment();
@@ -81,7 +83,7 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
         mNotificationsTabFragment = new NotificationsTabFragment();
         mNotificationsTabFragment.setTabTitle(getResources().getString(R.string.explorer_tab_title_notifications));
         mNotificationsTabFragment.setWatchZoneUid(mWatchZoneId);
-        tabAdapter.addFragment(mLimitsTabFragment);
+        //tabAdapter.addFragment(mLimitsTabFragment);
         tabAdapter.addFragment(mCalendarTabFragment);
         tabAdapter.addFragment(mNotificationsTabFragment);
         mTabViewPager.setAdapter(tabAdapter);

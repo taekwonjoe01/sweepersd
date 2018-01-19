@@ -24,6 +24,7 @@
                     android:layout_height="wrap_content"
                     android:text="48 hours or less"
                     android:layout_margin="5dp"
+                    android:textColor="@color/secondaryTextColor"
                     style="@style/AppTheme" />
                 <RadioButton
                     android:id="@+id/radiobutton_remind_range_24"
@@ -31,6 +32,7 @@
                     android:layout_height="wrap_content"
                     android:text="24 hours or less"
                     android:layout_margin="5dp"
+                    android:textColor="@color/secondaryTextColor"
                     style="@style/AppTheme" />
                 <RadioButton
                     android:id="@+id/radiobutton_remind_range_12"
@@ -38,6 +40,7 @@
                     android:layout_height="wrap_content"
                     android:text="12 hours or less"
                     android:layout_margin="5dp"
+                    android:textColor="@color/secondaryTextColor"
                     style="@style/AppTheme" />
             </RadioGroup>
 
@@ -51,6 +54,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondaryTextColor"
                     android:text="Keep me notified when sweeping is within "
                     android:layout_gravity="center"
                     android:gravity="center"/>
@@ -78,6 +82,7 @@
                     android:layout_height="wrap_content"
                     android:text="always"
                     android:layout_margin="5dp"
+                    android:textColor="@color/secondaryTextColor"
                     style="@style/AppTheme" />
                 <RadioButton
                     android:id="@+id/radiobutton_remind_policy_nearby"
@@ -85,6 +90,7 @@
                     android:layout_height="wrap_content"
                     android:text="only when I am nearby"
                     android:layout_margin="5dp"
+                    android:textColor="@color/secondaryTextColor"
                     style="@style/AppTheme" />
             </RadioGroup>
 
@@ -99,6 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Notify me "
+                    android:textColor="@color/secondaryTextColor"
                     android:layout_gravity="center"
                     android:gravity="center"/>
             </FrameLayout>

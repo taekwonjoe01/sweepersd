@@ -6,7 +6,7 @@
     <FrameLayout
         android:id="@+id/caldroid_fragment_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="@dimen/alarm_view_item_space"/>
 
