@@ -3,9 +3,11 @@ package com.example.joseph.sweepersd.watchzone;
 import android.app.DialogFragment;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -13,17 +15,22 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAlarmLabelDialogFragment;
 import com.example.joseph.sweepersd.utils.LocationUtils;
+import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
+import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
@@ -53,6 +60,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             SphericalUtil.computeOffset(SAN_DIEGO_CENTER,
             SAN_DIEGO_RADIUS_METERS * Math.sqrt(2), 45));
 
+    private static final long SHOW_TUTORIAL_AFTER_MS = 1000L * 60L * 60L * 48L;
+
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 0;
 
     private PlaceAutocompleteFragment mPlaceFragment;
@@ -68,6 +77,10 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private ShortSummaryLayout mShortSummaryLayout;
     private FrameLayout mBufferLayout;
 
+    private RelativeLayout mOverlay;
+    private TextView mOverlayText;
+    private Button mOverlayButton;
+
     private LimitsTabFragment mLimitsTabFragment;
     private CalendarTabFragment mCalendarTabFragment;
     private NotificationsTabFragment mNotificationsTabFragment;
@@ -77,6 +90,8 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private double mCurrentLatitude;
     private double mCurrentLongitude;
     private int mCurrentRadius;
+
+    private LongPreferenceLiveData mLastTutorialLiveData;
 
     private LatLng mLatLng;
 
@@ -124,11 +139,15 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mShortSummaryLayout = findViewById(R.id.short_summary_layout);
         mBufferLayout = findViewById(R.id.buffer_layout);
 
+        mOverlay = findViewById(R.id.layout_overlay);
+        mOverlayText = findViewById(R.id.textview_overlay);
+        mOverlayButton = findViewById(R.id.overlay_button);
+
         mMapFragment.setMapPadding(0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_top),
                 0, getResources().getDimensionPixelOffset(R.dimen.explorer_map_padding_bottom));
-        mMapFragment.setOnLongClickListener(new GoogleMap.OnMapLongClickListener() {
+        mMapFragment.setMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
-            public void onMapLongClick(LatLng latLng) {
+            public void onMapClick(LatLng latLng) {
                 setCurrentZone(null, latLng, true);
             }
         });
@@ -240,6 +259,30 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mCurrentWatchZoneUid = 0L;
 
         mSlidingPanelLayout.setVisibility(View.GONE);
+
+        mLastTutorialLiveData = new LongPreferenceLiveData(this, Preferences.PREFERENCE_LAST_EXPLORER_TUTORIAL_TIMESTAMP);
+        mLastTutorialLiveData.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long aLong) {
+                long now = System.currentTimeMillis();
+                long elapsedTime = now - aLong;
+                if (elapsedTime > SHOW_TUTORIAL_AFTER_MS) {
+                    mOverlay.setVisibility(View.VISIBLE);
+                    mOverlayButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mOverlay.setVisibility(View.GONE);
+                            SharedPreferences preferences =
+                                    PreferenceManager.getDefaultSharedPreferences(WatchZoneExplorerActivity.this);
+                            preferences.edit().putLong(Preferences.PREFERENCE_LAST_EXPLORER_TUTORIAL_TIMESTAMP,
+                                    System.currentTimeMillis()).apply();
+                        }
+                    });
+                } else {
+                    mOverlay.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override

@@ -9,4 +9,6 @@ public class Preferences {
     public static final String PREFERENCE_ALARM_SCHEDULED_FOR = "alarm_scheduled_for";
 
     public static final String PREFERENCE_WATCH_ZONE_EXPLORER_UID = "watch_zone_explorer_uid";
+
+    public static final String PREFERENCE_LAST_EXPLORER_TUTORIAL_TIMESTAMP = "explorer_last_tutorial";
 }

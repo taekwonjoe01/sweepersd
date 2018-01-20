@@ -38,7 +38,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private int mPaddingRight;
     private int mPaddingBottom;
 
-    private GoogleMap.OnMapLongClickListener mLongClickListener;
+    private GoogleMap.OnMapClickListener mMapClickListener;
     private CameraUpdate mCameraUpdate;
 
     private int mDraggingRadius = -1;
@@ -66,8 +66,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             createPresenter(uid);
         }
         mGoogleMap.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
-        if (mLongClickListener != null) {
-            mGoogleMap.setOnMapLongClickListener(mLongClickListener);
+        if (mMapClickListener != null) {
+            mGoogleMap.setOnMapClickListener(mMapClickListener);
         }
         if (mCameraUpdate != null) {
             mGoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
@@ -121,10 +121,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    public void setOnLongClickListener (GoogleMap.OnMapLongClickListener listener) {
-        mLongClickListener = listener;
+    public void setMapClickListener(GoogleMap.OnMapClickListener listener) {
+        mMapClickListener = listener;
         if (mGoogleMap != null) {
-            mGoogleMap.setOnMapLongClickListener(mLongClickListener);
+            mGoogleMap.setOnMapClickListener(mMapClickListener);
         }
     }
 

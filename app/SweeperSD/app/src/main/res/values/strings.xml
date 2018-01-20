@@ -155,7 +155,7 @@
     <string name="watch_zone_no_sweeping">There is no street sweeping in this zone.</string>
 
     <string name="watch_zone_list_overlay_loading">Loading Watch Zones...</string>
-    <string name="watch_zone_list_overlay_empty">You have not setup any places to be monitored for street sweeping yet. Use the \'+\' (add) button to get started.</string>
+    <string name="watch_zone_list_overlay_empty">You have not saved any locations yet. Use the \'+\' (add) button to get started.</string>
 
     <!-- Strings for Watch Zone Details Activity -->
     <string name="details_delete_watch_zone">Delete</string>
@@ -170,5 +170,7 @@
     <string name="summary_action_save">Save</string>
 
     <string name="bullet">\u2022</string>
+
+    <string name="tutorial_explorer_text">1. Set the location you want to monitor:\n\ta. Tap anywhere on the map.\n\t\tOR\n\tb. Use the search bar to enter an address.\n2. Use the slider to adjust the radius.\n3. Save the location.\n4. We\'ll notify you when you need to care!</string>
 
 </resources>
