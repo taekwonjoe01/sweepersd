@@ -410,7 +410,8 @@ public class ShortSummaryLayout extends RelativeLayout implements PopupMenu.OnMe
                 getResources().getDrawable(R.drawable.ic_customize_black_18dp),
                 null, null, null);
         mActionButton.setText(R.string.summary_action_customize);
-        mActionButton.setVisibility(View.VISIBLE);
+        // TODO - Set to visible when customization is available.
+        mActionButton.setVisibility(View.INVISIBLE);
     }
 
     private void setDetailsTitle() {
