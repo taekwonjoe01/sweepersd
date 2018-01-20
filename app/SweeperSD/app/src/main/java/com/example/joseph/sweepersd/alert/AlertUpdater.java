@@ -81,13 +81,14 @@ public class AlertUpdater {
             if (upcomingLabels.isEmpty()) {
                 if (currentLabels.size() == 1) {
                     String message = "Current Sweeping at " + currentLabels.get(0);
-                    sendNotification(message);
+                    sendNotification(message, true);
                 } else {
                     String message = "Current Sweeping at " + currentLabels.size() + " zones.";
-                    sendNotification(message);
+                    sendNotification(message, true);
                 }
             } else {
                 String message = "";
+                boolean isCurrent = true;
                 if (currentLabels.size() == 1) {
                     message += "Current Sweeping at " + currentLabels.get(0);
                 } else if (!currentLabels.isEmpty()) {
@@ -96,18 +97,20 @@ public class AlertUpdater {
                 if (currentLabels.isEmpty()) {
                     if (upcomingLabels.size() == 1) {
                         message += "Upcoming Sweeping at " + upcomingLabels.get(0);
+                        isCurrent = false;
                     } else if (!upcomingLabels.isEmpty()) {
                         message += "Upcoming sweeping at " + upcomingLabels.size() + " zones.";
+                        isCurrent = false;
                     }
                 }
-                sendNotification(message);
+                sendNotification(message, isCurrent);
             }
         } else {
             cancelNotification();
         }
     }
 
-    private void sendNotification(String message) {
+    private void sendNotification(String message, boolean isCurrent) {
         Intent notificationIntent = new Intent(mApplicationContext, WatchZoneListActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -116,7 +119,7 @@ public class AlertUpdater {
                 notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mApplicationContext)
-                .setSmallIcon(R.drawable.ic_lrg_no_parking_red)
+                .setSmallIcon(isCurrent ? R.drawable.ic_local_parking_red_24dp : R.drawable.ic_local_parking_yellow_24dp)
                 .setContentText(message)
                 .setOngoing(true)
                 .setContentIntent(intent);
