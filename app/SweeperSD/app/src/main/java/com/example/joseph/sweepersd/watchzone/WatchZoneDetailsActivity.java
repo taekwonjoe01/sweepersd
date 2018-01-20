@@ -146,7 +146,6 @@ public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
             public void onPanelStateChanged(View panel,
                                             SlidingUpPanelLayout.PanelState previousState,
                                             SlidingUpPanelLayout.PanelState newState) {
-                Log.e("Joey", "panel state " + newState.toString());
             }
         });
         mDragLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {

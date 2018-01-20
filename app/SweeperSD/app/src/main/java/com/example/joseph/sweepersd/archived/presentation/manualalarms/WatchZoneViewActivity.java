@@ -13,7 +13,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
@@ -44,7 +43,6 @@ public class WatchZoneViewActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(WatchZoneViewActivity.this, "Add WatchZone", Toast.LENGTH_SHORT).show();
                 startActivityForResult(
                         new Intent(WatchZoneViewActivity.this, CreateWatchZoneActivity.class), CREATE_ALARM_CODE);
             }

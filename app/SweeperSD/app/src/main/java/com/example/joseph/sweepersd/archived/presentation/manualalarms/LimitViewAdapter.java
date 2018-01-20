@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.limits.Limit;
@@ -85,7 +84,6 @@ public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.View
         holder.mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Show watchZone details", Toast.LENGTH_SHORT).show();
             }
         };
         holder.mLongClickListener = new View.OnLongClickListener() {

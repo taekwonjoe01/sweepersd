@@ -313,7 +313,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
             });
         } else if (mCurrentWatchZoneUid == 0L) {
             mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(SAN_DIEGO_BOUNDS, 0));
-            Toast.makeText(this, "Long press anywhere on the map to set a watch zone.", Toast.LENGTH_LONG).show();
         } else {
             LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
             LatLng southWest = SphericalUtil.computeOffset(center,
