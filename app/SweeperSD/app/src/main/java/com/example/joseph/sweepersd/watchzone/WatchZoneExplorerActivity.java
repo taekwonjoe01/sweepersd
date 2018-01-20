@@ -109,11 +109,16 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                     progress = p.intValue();
                 }
             }
-            ShortSummaryLayout.SummaryDisplayMode displayMode =
-                    mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
-                            ShortSummaryLayout.SummaryDisplayMode.EXPLORER_TITLE :
-                            ShortSummaryLayout.SummaryDisplayMode.EXPLORER;
-            mShortSummaryLayout.set(watchZoneModel, displayMode, progress);
+            if (mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.DRAGGING) {
+                mShortSummaryLayout.setWatchZoneModel(watchZoneModel);
+                mShortSummaryLayout.setUpdatingProgress(progress);
+            } else {
+                ShortSummaryLayout.SummaryDisplayMode displayMode =
+                        mSlidingPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                                ShortSummaryLayout.SummaryDisplayMode.EXPLORER_TITLE :
+                                ShortSummaryLayout.SummaryDisplayMode.EXPLORER;
+                mShortSummaryLayout.set(watchZoneModel, displayMode, progress);
+            }
 
             mSlidingPanelLayout.setVisibility(View.VISIBLE);
         }
