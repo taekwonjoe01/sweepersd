@@ -28,10 +28,14 @@ public class WatchZoneModelRepository {
     private final LiveData<List<WatchZoneModel>> mCachedWatchZones;
 
     private WatchZoneModelRepository(Context context) {
+        long startTime = SystemClock.elapsedRealtime();
         mApplicationContext = context.getApplicationContext();
 
         mWatchZoneModelsMap = new HashMap<>();
         mCachedWatchZones = loadWatchZonesLiveDataFromDb();
+        long endTime = SystemClock.elapsedRealtime();
+        Log.d(TAG, "Initialize took "
+                + (endTime - startTime) + "ms.");
     }
 
     public static synchronized WatchZoneModelRepository getInstance(Context context) {

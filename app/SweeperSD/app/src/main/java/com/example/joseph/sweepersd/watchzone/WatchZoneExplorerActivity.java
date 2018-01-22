@@ -14,6 +14,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -120,7 +121,9 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                 mShortSummaryLayout.set(watchZoneModel, displayMode, progress);
             }
 
-            mSlidingPanelLayout.setVisibility(View.VISIBLE);
+            mRadiusSeekbar.setVisibility(View.VISIBLE);
+            mShortSummaryLayout.setVisibility(View.VISIBLE);
+            mSlidingPanelLayout.setTouchEnabled(true);
         }
     };
 
@@ -263,8 +266,6 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
         mPermissionRequested = false;
         mCurrentWatchZoneUid = 0L;
 
-        mSlidingPanelLayout.setVisibility(View.GONE);
-
         mLastTutorialLiveData = new LongPreferenceLiveData(this, Preferences.PREFERENCE_LAST_EXPLORER_TUTORIAL_TIMESTAMP);
         mLastTutorialLiveData.observe(this, new Observer<Long>() {
             @Override
@@ -288,6 +289,11 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                 }
             }
         });
+
+        mShortSummaryLayout.setVisibility(View.INVISIBLE);
+        mRadiusSeekbar.setVisibility(View.GONE);
+        mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        mSlidingPanelLayout.setTouchEnabled(false);
     }
 
     @Override
@@ -317,6 +323,7 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
                 }
             });
         } else if (mCurrentWatchZoneUid == 0L) {
+            Log.e("Joey", "animating bounds");
             mMapFragment.animateCameraBounds(CameraUpdateFactory.newLatLngBounds(SAN_DIEGO_BOUNDS, 0));
         } else {
             LatLng center = new LatLng(mCurrentLatitude, mCurrentLongitude);
@@ -354,7 +361,10 @@ public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     }
 
     private void setCurrentZone(String address, LatLng latLng, boolean animateCamera) {
-        mSlidingPanelLayout.setVisibility(View.GONE);
+        mShortSummaryLayout.setVisibility(View.INVISIBLE);
+        mRadiusSeekbar.setVisibility(View.GONE);
+        mSlidingPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        mSlidingPanelLayout.setTouchEnabled(false);
 
         if (!SAN_DIEGO_BOUNDS.contains(latLng)) {
             Toast.makeText(this, "You can only set zones near San Diego!", Toast.LENGTH_SHORT).show();
