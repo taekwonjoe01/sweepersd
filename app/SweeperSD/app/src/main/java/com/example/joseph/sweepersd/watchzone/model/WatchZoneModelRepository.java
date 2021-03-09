@@ -1,6 +1,6 @@
 package com.example.joseph.sweepersd.watchzone.model;
 
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
 import android.os.SystemClock;

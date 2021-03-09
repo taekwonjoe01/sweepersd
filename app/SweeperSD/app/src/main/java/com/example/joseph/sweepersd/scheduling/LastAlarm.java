@@ -1,6 +1,6 @@
 package com.example.joseph.sweepersd.scheduling;
 
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 
 public class LastAlarm extends LiveData<Long> {
     private static LastAlarm sInstance;

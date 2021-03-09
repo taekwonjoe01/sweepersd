@@ -1,10 +1,7 @@
 package com.example.joseph.sweepersd.utils;
 
-import android.arch.lifecycle.Observer;
-import android.support.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.lifecycle.Observer;
+import androidx.annotation.Nullable;
 
 public abstract class BaseObserver<T, U> implements Observer<U> {
     private final BaseObserverCallback mCallback;

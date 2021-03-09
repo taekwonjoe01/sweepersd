@@ -2,7 +2,7 @@ package com.example.joseph.sweepersd.archived;
 
 import android.Manifest;
 import android.app.Service;
-import android.arch.persistence.room.Ignore;
+import androidx.room.Ignore;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,7 +12,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.archived.model.limits.Limit;

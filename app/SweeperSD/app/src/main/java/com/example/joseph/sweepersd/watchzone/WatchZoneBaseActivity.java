@@ -1,9 +1,9 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import android.arch.lifecycle.Observer;
+import androidx.lifecycle.Observer;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.joseph.sweepersd.AppUpdateJob;
 import com.example.joseph.sweepersd.alert.AlertManager;

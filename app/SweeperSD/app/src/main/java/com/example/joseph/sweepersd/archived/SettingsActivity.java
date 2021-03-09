@@ -16,14 +16,13 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
-import android.support.v7.app.ActionBar;
+import androidx.appcompat.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.watchzone.SweepingAddress;
-import com.example.joseph.sweepersd.experimental.parkdetection.ParkDetectionManager;
 
 import java.util.List;
 

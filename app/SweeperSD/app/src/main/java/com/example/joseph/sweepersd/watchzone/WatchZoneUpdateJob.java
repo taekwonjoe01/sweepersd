@@ -2,17 +2,14 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ServiceLifecycleDispatcher;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ServiceLifecycleDispatcher;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.utils.ChangeSet;
-import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelUpdater;

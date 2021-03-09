@@ -1,7 +1,7 @@
 package com.example.joseph.sweepersd.alert;
 
 
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
