@@ -11,67 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_schedule_updater"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="start"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="App Updater Last Started: "/>
-                <TextView
-                    android:id="@+id/textview_updater_started"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="AppUpdater Last Finished: " />
-                <TextView
-                    android:id="@+id/textview_updater_finished"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-
-            <Button
-                android:id="@+id/button_create_zone_and_active_limit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Create Watch Zone and Active Limit"/>
-            <Button
-                android:id="@+id/button_create_zone_and_soon_limit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Create Watch Zone and Soon-To-Be-Active Limit"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Alarm Scheduled For: " />
-                <TextView
-                    android:id="@+id/textview_alarm_scheduled_for"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-        </LinearLayout>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

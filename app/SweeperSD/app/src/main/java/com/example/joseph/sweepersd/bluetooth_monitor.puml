@@ -1,0 +1,22 @@
+@startuml
+
+participant DebugActivity
+participant BluetoothDeviceScanner
+
+box ForegroundService
+    participant LocationService
+end box
+
+box BroadcastReceiver
+    participant BluetoothDeviceListener
+end box
+
+participant OS
+
+== Enable and Setup ==
+
+DebugActivity -> OS : requestPermissions
+
+
+
+@enduml
