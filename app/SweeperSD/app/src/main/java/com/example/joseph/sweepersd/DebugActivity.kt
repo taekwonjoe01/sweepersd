@@ -1,20 +1,18 @@
 package com.example.joseph.sweepersd
 
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-class DebugActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_debug)
+import com.hutchins.navcore.NavigationActivity
+import com.hutchins.navui.core.NavViewActivity
+import com.hutchins.navui.core.NavViewDelegate
+import com.hutchins.navui.jetpack.JetpackSideNavDelegate
 
-        val bondedDevices = BluetoothAdapter.getDefaultAdapter().bondedDevices
-        Log.e("Joey", "${BluetoothAdapter.getDefaultAdapter().bondedDevices.size}")
+class DebugActivity : NavViewActivity() {
 
-        for (bondedDevice in bondedDevices) {
-            Log.e("Joey", "${bondedDevice.address} ${bondedDevice.name} ${bondedDevice.bondState}")
-        }
-    }
+    override val navViewDelegate: NavViewDelegate = JetpackSideNavDelegate(this, R.menu.menu_debug)
+    override val navigationGraphResourceId: Int = R.navigation.navigation_debug
+
+
 }

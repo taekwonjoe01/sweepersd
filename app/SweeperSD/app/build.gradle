@@ -13,6 +13,11 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
+
+    dataBinding {
+        enabled = true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -31,9 +36,16 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.13'
+    implementation 'com.github.taekwonjoe01.BetterJetpackNav:navcore:2.0.0-rc2'
+    implementation 'com.github.taekwonjoe01.BetterJetpackNav:navui:2.0.0-rc2'
+
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.0.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.0.0'
+
+    // old stuff below:
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+
     implementation 'com.google.android.gms:play-services-location:18.0.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.maps.android:android-maps-utils:0.4'
@@ -54,7 +66,7 @@ dependencies {
     androidTestImplementation 'androidx.annotation:annotation:1.1.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test:rules:1.3.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime:2.3.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //noinspection LifecycleAnnotationProcessorWithJava8
     annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.3.0'
@@ -66,10 +78,9 @@ dependencies {
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
     // For Calendar
     implementation 'com.roomorama:caldroid:3.0.1'
-    implementation "androidx.core:core-ktx:+"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
-repositories {
-    mavenCentral()
+//    implementation "androidx.core:core-ktx:+"
+//    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    testImplementation 'junit:junit:4.13'
 }
