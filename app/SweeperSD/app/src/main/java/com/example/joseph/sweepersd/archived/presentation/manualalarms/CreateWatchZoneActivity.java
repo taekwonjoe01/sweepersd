@@ -81,7 +81,7 @@ public class CreateWatchZoneActivity extends AppCompatActivity implements OnMapR
         //mRadiusDisplay = (TextView) findViewById(R.id.radius_display);
         //mRadiusSeekbar = (SeekBar) findViewById(R.id.seekbar_radius);
         //mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
-        mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
+        mLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         int itemMargin = getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);

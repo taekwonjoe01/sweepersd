@@ -16,41 +16,41 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service
-            android:name=".limit.OnDeviceLimitProviderService"
-            android:exported="false" />
-        <service
-            android:name=".alert.geofence.GeofenceTransitionsService"
-            android:exported="false" />
-        <activity
-            android:name=".watchzone.WatchZoneListActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+<!--        <service-->
+<!--            android:name=".limit.OnDeviceLimitProviderService"-->
+<!--            android:exported="false" />-->
+<!--        <service-->
+<!--            android:name=".alert.geofence.GeofenceTransitionsService"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".watchzone.WatchZoneListActivity"-->
+<!--            android:label="@string/app_name"-->
+<!--            android:screenOrientation="portrait"-->
+<!--            android:theme="@style/AppTheme.NoActionBar">-->
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".utils.TestActivity"
-            android:label="@string/title_activity_test">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+<!--        <activity-->
+<!--            android:name=".utils.TestActivity"-->
+<!--            android:label="@string/title_activity_test">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".watchzone.WatchZoneExplorerActivity"
-            android:label="@string/title_watch_zone_explorer_activity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".watchzone.WatchZoneDetailsActivity"
-            android:label="@string/title_watch_zone_details_activity"
-            android:screenOrientation="portrait" />
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+<!--        <activity-->
+<!--            android:name=".watchzone.WatchZoneExplorerActivity"-->
+<!--            android:label="@string/title_watch_zone_explorer_activity"-->
+<!--            android:screenOrientation="portrait" />-->
+<!--        <activity-->
+<!--            android:name=".watchzone.WatchZoneDetailsActivity"-->
+<!--            android:label="@string/title_watch_zone_details_activity"-->
+<!--            android:screenOrientation="portrait" />-->
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -60,13 +60,13 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-        <service
-            android:name=".AppUpdateJob"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false" />
+<!--        <meta-data-->
+<!--            android:name="com.google.android.geo.API_KEY"-->
+<!--            android:value="@string/google_maps_key" />-->
+<!--        <service-->
+<!--            android:name=".AppUpdateJob"-->
+<!--            android:permission="android.permission.BIND_JOB_SERVICE"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".DebugActivity"
             android:label="@string/title_activity_debug">
@@ -76,19 +76,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver
-            android:name=".scheduling.AlarmReceiver"
-            android:enabled="true"
-            android:exported="false">
-        </receiver>
-        <receiver
-            android:name=".BootupReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver-->
+<!--            android:name=".scheduling.AlarmReceiver"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false">-->
+<!--        </receiver>-->
+<!--        <receiver-->
+<!--            android:name=".BootupReceiver"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <!-- EXPERIMENTAL
         <activity

@@ -2,11 +2,6 @@ package com.example.joseph.sweepersd.archived.presentation.manualalarms;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SimpleItemAnimator;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +19,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 
 import org.apache.commons.lang3.text.WordUtils;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 public class WatchZoneDetailsActivity extends AppCompatActivity implements
         OnMapReadyCallback {
@@ -71,7 +72,7 @@ public class WatchZoneDetailsActivity extends AppCompatActivity implements
 
         //mRecyclerView = (RecyclerView) findViewById(R.id.limit_recycler_view);
         //mLoadingGroup = (LinearLayout) findViewById(R.id.limit_loading_group);
-        mLayoutManager = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
+        mLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         int itemMargin = getResources().getDimensionPixelSize(R.dimen.limit_view_item_space);

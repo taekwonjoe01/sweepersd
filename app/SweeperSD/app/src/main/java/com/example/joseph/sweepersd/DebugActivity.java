@@ -1,15 +1,8 @@
 package com.example.joseph.sweepersd;
 
-import androidx.lifecycle.Observer;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,17 +11,14 @@ import com.example.joseph.sweepersd.limit.Limit;
 import com.example.joseph.sweepersd.limit.LimitDao;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
 import com.example.joseph.sweepersd.utils.LocationUtils;
-import com.example.joseph.sweepersd.utils.LongPreferenceLiveData;
-import com.example.joseph.sweepersd.utils.Preferences;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneDao;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class DebugActivity extends AppCompatActivity {
     private TextView mUpdaterLastStarted;
@@ -52,102 +42,102 @@ public class DebugActivity extends AppCompatActivity {
         mCreateSoon = findViewById(R.id.button_create_zone_and_soon_limit);
         mAlarmScheduledFor = findViewById(R.id.textview_alarm_scheduled_for);
 
-        LongPreferenceLiveData updaterStart = new LongPreferenceLiveData(this,
-                Preferences.PREFERENCE_APP_UPDATER_LAST_STARTED);
-        updaterStart.observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(@Nullable Long timestamp) {
-                if (timestamp != null) {
-                    if (timestamp == 0L) {
-                        mUpdaterLastStarted.setText("never");
-                    } else {
-                        mUpdaterLastStarted.setText(new Date(timestamp).toString());
-                    }
-                }
-            }
-        });
-        LongPreferenceLiveData updaterFinish = new LongPreferenceLiveData(this,
-                Preferences.PREFERENCE_APP_UPDATER_LAST_FINISHED);
-        updaterFinish.observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(@Nullable Long timestamp) {
-                if (timestamp != null) {
-                    if (timestamp == 0L) {
-                        mUpdaterLastFinished.setText("never");
-                    } else {
-                        mUpdaterLastFinished.setText(new Date(timestamp).toString());
-                    }
-                }
-            }
-        });
-        mScheduleUpdater.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AppUpdateJob.scheduleJob(DebugActivity.this);
-            }
-        });
-        mCreateActive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(DebugActivity.this,
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED ) {
-                    ActivityCompat.requestPermissions(DebugActivity.this,
-                            new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                            0);
-                } else {
-                    LocationServices.getFusedLocationProviderClient(DebugActivity.this).getLastLocation()
-                            .addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                if (createLimit(location, true)) {
-                                    createWatchZone(location);
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        });
-        mCreateSoon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(DebugActivity.this,
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED ) {
-                    ActivityCompat.requestPermissions(DebugActivity.this,
-                            new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                            0);
-                } else {
-                    LocationServices.getFusedLocationProviderClient(DebugActivity.this).getLastLocation()
-                            .addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                if (createLimit(location, false)) {
-                                    createWatchZone(location);
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        });
-        LongPreferenceLiveData alarmScheduledFor = new LongPreferenceLiveData(this,
-                Preferences.PREFERENCE_ALARM_SCHEDULED_FOR);
-        alarmScheduledFor.observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(@Nullable Long timestamp) {
-                if (timestamp != null) {
-                    if (timestamp == 0L) {
-                        mAlarmScheduledFor.setText("never");
-                    } else {
-                        mAlarmScheduledFor.setText(new Date(timestamp).toString());
-                    }
-                }
-            }
-        });
+//        LongPreferenceLiveData updaterStart = new LongPreferenceLiveData(this,
+//                Preferences.PREFERENCE_APP_UPDATER_LAST_STARTED);
+//        updaterStart.observe(this, new Observer<Long>() {
+//            @Override
+//            public void onChanged(@Nullable Long timestamp) {
+//                if (timestamp != null) {
+//                    if (timestamp == 0L) {
+//                        mUpdaterLastStarted.setText("never");
+//                    } else {
+//                        mUpdaterLastStarted.setText(new Date(timestamp).toString());
+//                    }
+//                }
+//            }
+//        });
+//        LongPreferenceLiveData updaterFinish = new LongPreferenceLiveData(this,
+//                Preferences.PREFERENCE_APP_UPDATER_LAST_FINISHED);
+//        updaterFinish.observe(this, new Observer<Long>() {
+//            @Override
+//            public void onChanged(@Nullable Long timestamp) {
+//                if (timestamp != null) {
+//                    if (timestamp == 0L) {
+//                        mUpdaterLastFinished.setText("never");
+//                    } else {
+//                        mUpdaterLastFinished.setText(new Date(timestamp).toString());
+//                    }
+//                }
+//            }
+//        });
+//        mScheduleUpdater.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                AppUpdateJob.scheduleJob(DebugActivity.this);
+//            }
+//        });
+//        mCreateActive.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (ContextCompat.checkSelfPermission(DebugActivity.this,
+//                        android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+//                        PackageManager.PERMISSION_GRANTED ) {
+//                    ActivityCompat.requestPermissions(DebugActivity.this,
+//                            new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+//                            0);
+//                } else {
+//                    LocationServices.getFusedLocationProviderClient(DebugActivity.this).getLastLocation()
+//                            .addOnSuccessListener(new OnSuccessListener<Location>() {
+//                        @Override
+//                        public void onSuccess(Location location) {
+//                            if (location != null) {
+//                                if (createLimit(location, true)) {
+//                                    createWatchZone(location);
+//                                }
+//                            }
+//                        }
+//                    });
+//                }
+//            }
+//        });
+//        mCreateSoon.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (ContextCompat.checkSelfPermission(DebugActivity.this,
+//                        android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+//                        PackageManager.PERMISSION_GRANTED ) {
+//                    ActivityCompat.requestPermissions(DebugActivity.this,
+//                            new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+//                            0);
+//                } else {
+//                    LocationServices.getFusedLocationProviderClient(DebugActivity.this).getLastLocation()
+//                            .addOnSuccessListener(new OnSuccessListener<Location>() {
+//                        @Override
+//                        public void onSuccess(Location location) {
+//                            if (location != null) {
+//                                if (createLimit(location, false)) {
+//                                    createWatchZone(location);
+//                                }
+//                            }
+//                        }
+//                    });
+//                }
+//            }
+//        });
+//        LongPreferenceLiveData alarmScheduledFor = new LongPreferenceLiveData(this,
+//                Preferences.PREFERENCE_ALARM_SCHEDULED_FOR);
+//        alarmScheduledFor.observe(this, new Observer<Long>() {
+//            @Override
+//            public void onChanged(@Nullable Long timestamp) {
+//                if (timestamp != null) {
+//                    if (timestamp == 0L) {
+//                        mAlarmScheduledFor.setText("never");
+//                    } else {
+//                        mAlarmScheduledFor.setText(new Date(timestamp).toString());
+//                    }
+//                }
+//            }
+//        });
     }
 
     private void createWatchZone(Location location) {
