@@ -1,10 +1,7 @@
 package com.example.joseph.sweepersd.archived;
 
-import android.Manifest;
 import android.app.Service;
-import androidx.room.Ignore;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -12,12 +9,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
 
 import com.example.joseph.sweepersd.archived.model.limits.Limit;
 import com.example.joseph.sweepersd.archived.model.watchzone.SweepingAddress;
-import com.example.joseph.sweepersd.SweeperSDApplication;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -288,16 +283,16 @@ public class SweeperService extends Service implements GoogleApiClient.Connectio
     private boolean checkLocationPermissions() {
         boolean coarsePermission = false;
         boolean finePermission = false;
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-            SweeperSDApplication.needsCoarsePermission = true;
-        } else {
-            SweeperSDApplication.needsCoarsePermission = false;
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-            SweeperSDApplication.needsFinePermission = true;
-        } else {
-            SweeperSDApplication.needsFinePermission = false;
-        }
+//        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+//            SweeperSDApplication.needsCoarsePermission = true;
+//        } else {
+//            SweeperSDApplication.needsCoarsePermission = false;
+//        }
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+//            SweeperSDApplication.needsFinePermission = true;
+//        } else {
+//            SweeperSDApplication.needsFinePermission = false;
+//        }
         return (coarsePermission && finePermission);
     }
 
