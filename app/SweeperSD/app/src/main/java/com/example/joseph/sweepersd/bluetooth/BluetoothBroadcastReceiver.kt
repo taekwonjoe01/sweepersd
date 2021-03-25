@@ -34,14 +34,14 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
             }
             BluetoothDevice.ACTION_ACL_CONNECTED -> {
                 val bluetoothDevice: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
-                val record = BluetoothDeviceRecord(System.currentTimeMillis(), bluetoothDevice.address, bluetoothDevice.name, BluetoothDeviceEvent.CONNECTED)
+                val record = BluetoothDeviceEventRecord(PairedBluetoothDevice(bluetoothDevice.name, bluetoothDevice.address), System.currentTimeMillis(), BluetoothDeviceEvent.CONNECTED)
                 runBlocking(Dispatchers.IO) {
                     BluetoothRecordRepo.addBluetoothDeviceRecord(record)
                 }
             }
             BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                 val bluetoothDevice: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
-                val record = BluetoothDeviceRecord(System.currentTimeMillis(), bluetoothDevice.address, bluetoothDevice.name, BluetoothDeviceEvent.DISCONNECTED)
+                val record = BluetoothDeviceEventRecord(PairedBluetoothDevice(bluetoothDevice.name, bluetoothDevice.address), System.currentTimeMillis(), BluetoothDeviceEvent.DISCONNECTED)
                 runBlocking(Dispatchers.IO) {
                     BluetoothRecordRepo.addBluetoothDeviceRecord(record)
                 }

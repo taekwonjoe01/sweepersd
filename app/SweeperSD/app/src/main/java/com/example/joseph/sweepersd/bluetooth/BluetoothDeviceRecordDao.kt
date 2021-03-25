@@ -10,9 +10,9 @@ import androidx.room.Query
  */
 @Dao
 interface BluetoothDeviceRecordDao {
-    @get:Query("SELECT * FROM bluetoothDeviceRecords")
-    val bluetoothDeviceRecords: List<BluetoothDeviceRecord>
+    @get:Query("SELECT * FROM bluetoothDeviceEventRecords")
+    val bluetoothDeviceRecords: List<BluetoothDeviceEventRecord>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertBluetoothDeviceRecord(bluetoothAdapterRecord: BluetoothDeviceRecord): Long
+    fun insertBluetoothDeviceRecord(bluetoothAdapterRecord: BluetoothDeviceEventRecord): Long
 }
