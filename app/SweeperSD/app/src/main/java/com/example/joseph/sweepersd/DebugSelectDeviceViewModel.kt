@@ -2,6 +2,7 @@ package com.example.joseph.sweepersd
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -41,6 +42,9 @@ class DebugSelectDeviceViewModel : ViewModel() {
         availableDevicesLiveData.value = pairedBluetoothDevices
     }
 
+    /**
+     * return true to stop service, false to keep service alive.
+     */
     suspend fun onDeviceSelected(pairedBluetoothDevice: PairedBluetoothDevice) {
         BluetoothRecordRepo.setSelectedPairedBluetoothDevice(pairedBluetoothDevice)
     }

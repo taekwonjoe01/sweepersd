@@ -8,7 +8,7 @@ android {
     buildToolsVersion '26.0.3'
     defaultConfig {
         applicationId "com.example.joseph.sweepersd"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
         versionName "0.1.0"

@@ -1,5 +1,6 @@
 package com.example.joseph.sweepersd
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -28,6 +29,11 @@ class DebugSelectDeviceScreen : JetpackScreenFragment() {
     private val adapter = BluetoothDeviceAdapter(object : OnPairedBluetoothDeviceSelectedListener {
         override fun onPairedBluetoothDeviceSelected(pairedBluetoothDevice: PairedBluetoothDevice) {
             runBlocking(Dispatchers.IO) { viewModel.onDeviceSelected(pairedBluetoothDevice) }
+
+            // TODO: Only stop the service if we know the newly selected device is not bonded.
+            //  Can't know this on application startup.
+            Log.e("Joey", "calling startService to actually stop the service.")
+            requireContext().startForegroundService(Intent(context, DrivingService::class.java).apply { setAction("Stop Service") })
             findNavController().popBackStack()
         }
     })

@@ -1,12 +1,19 @@
 package com.example.joseph.sweepersd.bluetooth
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.example.joseph.sweepersd.DebugMainScreen
+import com.example.joseph.sweepersd.DrivingService
+import com.example.joseph.sweepersd.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -38,6 +45,14 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
                 runBlocking(Dispatchers.IO) {
                     BluetoothRecordRepo.addBluetoothDeviceRecord(record)
                 }
+                runBlocking(Dispatchers.IO) {
+                    BluetoothRecordRepo.getSelectedPairedBluetoothDevice()?.let {
+                        if (it.name == bluetoothDevice.name) {
+                            Log.e("Joey", "calling startForegroundService.")
+                            context.startForegroundService(Intent(context, DrivingService::class.java))
+                        }
+                    }
+                }
             }
             BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                 val bluetoothDevice: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
@@ -45,6 +60,25 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
                 runBlocking(Dispatchers.IO) {
                     BluetoothRecordRepo.addBluetoothDeviceRecord(record)
                 }
+                runBlocking(Dispatchers.IO) {
+                    val shouldStopService = BluetoothRecordRepo.getSelectedPairedBluetoothDevice()?.name == bluetoothDevice.name ?: true
+                    if (shouldStopService) {
+                        // send message to service to stop itself.
+                        Log.e("Joey", "calling startService to actually stop the service.")
+                        context.startForegroundService(Intent(context, DrivingService::class.java).apply { setAction("Stop Service") })
+                    }
+                }
+            }
+            BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED -> {
+                Log.e("Joey", "ACTION_CONNECTION_STATE_CHANGED ${intent.extras}")
+                val connectionState = when (val state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1)) {
+                    BluetoothAdapter.STATE_CONNECTED -> "Connected"
+                    BluetoothAdapter.STATE_CONNECTING -> "Connecting"
+                    BluetoothAdapter.STATE_DISCONNECTED -> "Disconnected"
+                    BluetoothAdapter.STATE_DISCONNECTING -> "Disconnecting"
+                    else -> throw IllegalStateException("Unexpected bluetooth adapter connection state: ${state}.")
+                }
+                Log.e(TAG, "Connection State Changed ${connectionState}")
             }
             else -> {
                 // TODO: Analytics logging.
