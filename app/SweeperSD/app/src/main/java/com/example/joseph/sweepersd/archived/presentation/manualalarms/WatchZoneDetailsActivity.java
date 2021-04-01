@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZoneManager;
 import com.example.joseph.sweepersd.watchzone.WatchZoneViewItemDecoration;
@@ -17,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.hutchins.tbd.R;
 
 import org.apache.commons.lang3.text.WordUtils;
 

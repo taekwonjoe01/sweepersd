@@ -9,20 +9,21 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.R;
-import com.example.joseph.sweepersd.experimental.ActivityDetectionService;
 import com.example.joseph.sweepersd.archived.model.watchzone.SweepingAddress;
+import com.example.joseph.sweepersd.experimental.ActivityDetectionService;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.hutchins.tbd.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class DebugActivity extends AppCompatActivity
         implements SweeperService.SweeperServiceListener  {

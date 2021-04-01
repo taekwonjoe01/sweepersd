@@ -1,18 +1,11 @@
 package com.example.joseph.sweepersd.watchzone;
 
 import android.app.DialogFragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.tabs.TabLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +19,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.CreateAlarmLabelDialogFragment;
 import com.example.joseph.sweepersd.utils.LocationUtils;
@@ -46,10 +38,19 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.tabs.TabLayout;
 import com.google.maps.android.SphericalUtil;
+import com.hutchins.tbd.R;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 public class WatchZoneExplorerActivity extends WatchZoneBaseActivity {
     private static final String TAG = WatchZoneExplorerActivity.class.getSimpleName();

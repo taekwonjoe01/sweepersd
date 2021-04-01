@@ -1,19 +1,16 @@
 package com.example.joseph.sweepersd.watchzone;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.utils.ChangeSet;
-import com.example.joseph.sweepersd.watchzone.model.WatchZonePointModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePoint;
+import com.example.joseph.sweepersd.watchzone.model.WatchZonePointModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZonePointsObserver;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,9 +21,13 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.hutchins.tbd.R;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mGoogleMap;

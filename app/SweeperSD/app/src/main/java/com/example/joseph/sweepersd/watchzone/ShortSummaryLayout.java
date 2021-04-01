@@ -1,8 +1,6 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import androidx.lifecycle.Observer;
 import android.content.Context;
-import androidx.appcompat.widget.PopupMenu;
 import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,13 +11,16 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.utils.SummaryHelper;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
+import com.hutchins.tbd.R;
 
 import org.apache.commons.lang3.text.WordUtils;
+
+import androidx.appcompat.widget.PopupMenu;
+import androidx.lifecycle.Observer;
 
 public class ShortSummaryLayout extends RelativeLayout implements PopupMenu.OnMenuItemClickListener {
 

@@ -16,15 +16,16 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
-import androidx.appcompat.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.watchzone.SweepingAddress;
+import com.hutchins.tbd.R;
 
 import java.util.List;
+
+import androidx.appcompat.app.ActionBar;
 
 public class SettingsActivity extends AppCompatPreferenceActivity
         implements SweeperService.SweeperServiceListener {

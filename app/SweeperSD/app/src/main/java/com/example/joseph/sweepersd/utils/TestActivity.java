@@ -1,9 +1,10 @@
 package com.example.joseph.sweepersd.utils;
 
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.joseph.sweepersd.R;
+import com.hutchins.tbd.R;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class TestActivity extends AppCompatActivity {
 

@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/SweeperSD.iml" filepath="$PROJECT_DIR$/.idea/modules/SweeperSD.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SweeperSD.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SweeperSD.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/parkingapplication/SweeperSD.parkingapplication.iml" filepath="$PROJECT_DIR$/.idea/modules/parkingapplication/SweeperSD.parkingapplication.iml" />
     </modules>
   </component>
 </project>

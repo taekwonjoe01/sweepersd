@@ -2,20 +2,19 @@ package com.example.joseph.sweepersd.archived.presentation.manualalarms;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.limits.Limit;
 import com.example.joseph.sweepersd.archived.model.limits.LimitParser;
 import com.example.joseph.sweepersd.archived.model.watchzone.SweepingAddress;
 import com.example.joseph.sweepersd.archived.model.watchzone.SweepingDate;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZoneUtils;
+import com.hutchins.tbd.R;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -25,6 +24,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by joseph on 9/7/16.

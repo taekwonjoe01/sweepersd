@@ -9,7 +9,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.joseph.sweepersd.R;
+import com.hutchins.tbd.R;
 
 /**
  * Created by joseph on 5/18/17.

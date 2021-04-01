@@ -35,15 +35,18 @@ android {
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/res/menu'] } }
     productFlavors {
     }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.github.taekwonjoe01.BetterJetpackNav:navcore:2.0.0-rc2'
-    implementation 'com.github.taekwonjoe01.BetterJetpackNav:navui:2.0.0-rc2'
+    implementation 'com.github.taekwonjoe01.BetterJetpackNav:navcore:3.0.0-rc02'
+    implementation 'com.github.taekwonjoe01.BetterJetpackNav:navui:3.0.0-rc02'
 
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.0.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.0.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.4'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.3.4'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

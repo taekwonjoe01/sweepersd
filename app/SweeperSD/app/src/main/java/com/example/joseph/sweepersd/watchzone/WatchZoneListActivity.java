@@ -1,13 +1,7 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import androidx.lifecycle.LiveData;
 import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SimpleItemAnimator;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,17 +9,24 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.utils.ChangeSet;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelsObserver;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.hutchins.tbd.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.LiveData;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 public class WatchZoneListActivity extends WatchZoneBaseActivity implements
         AddressValidatorManager.ValidatorProgressListener{

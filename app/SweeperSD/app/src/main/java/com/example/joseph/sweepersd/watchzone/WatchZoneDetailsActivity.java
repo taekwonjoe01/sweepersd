@@ -1,16 +1,12 @@
 package com.example.joseph.sweepersd.watchzone;
 
-import androidx.lifecycle.Observer;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.tabs.TabLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabAdapter;
 import com.example.joseph.sweepersd.utils.WrapContentTabViewPager;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
@@ -19,12 +15,17 @@ import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.material.tabs.TabLayout;
 import com.google.maps.android.SphericalUtil;
+import com.hutchins.tbd.R;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Map;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
 
 public class WatchZoneDetailsActivity extends WatchZoneBaseActivity {
     private static final String TAG = WatchZoneDetailsActivity.class.getSimpleName();

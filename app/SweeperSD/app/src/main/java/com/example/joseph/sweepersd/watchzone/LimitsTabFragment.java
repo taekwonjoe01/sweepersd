@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.example.joseph.sweepersd.LimitViewAdapter;
-import com.example.joseph.sweepersd.R;
+import com.hutchins.tbd.R;
 import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.utils.ChangeSet;

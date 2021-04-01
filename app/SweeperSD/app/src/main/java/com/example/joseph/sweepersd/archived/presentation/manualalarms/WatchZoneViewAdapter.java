@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,18 +14,20 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZoneManager;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZoneUpdateManager;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZoneUtils;
 import com.google.android.gms.maps.model.LatLng;
+import com.hutchins.tbd.R;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Adapter for showing manual Alarms.

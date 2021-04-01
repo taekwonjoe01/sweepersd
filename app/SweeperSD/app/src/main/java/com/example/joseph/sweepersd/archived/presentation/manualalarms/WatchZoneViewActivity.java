@@ -3,21 +3,22 @@ package com.example.joseph.sweepersd.archived.presentation.manualalarms;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SimpleItemAnimator;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.AddressValidatorManager;
 import com.example.joseph.sweepersd.watchzone.WatchZoneViewItemDecoration;
 import com.google.android.gms.maps.model.LatLng;
+import com.hutchins.tbd.R;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 public class WatchZoneViewActivity extends AppCompatActivity implements
         AddressValidatorManager.ValidatorProgressListener{

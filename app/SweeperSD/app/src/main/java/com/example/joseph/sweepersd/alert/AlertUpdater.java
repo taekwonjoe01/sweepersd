@@ -4,9 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import androidx.core.app.NotificationCompat;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.alert.geofence.WatchZoneFence;
 import com.example.joseph.sweepersd.utils.Notifications;
 import com.example.joseph.sweepersd.watchzone.WatchZoneListActivity;
@@ -14,6 +12,7 @@ import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZone;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModel;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
+import com.hutchins.tbd.R;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -22,6 +21,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import androidx.core.app.NotificationCompat;
 
 public class AlertUpdater {
     private final Context mApplicationContext;

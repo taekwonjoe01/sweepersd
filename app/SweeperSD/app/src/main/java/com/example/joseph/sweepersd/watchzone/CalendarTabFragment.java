@@ -2,13 +2,10 @@ package com.example.joseph.sweepersd.watchzone;
 
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.TabFragment;
 import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
@@ -17,6 +14,7 @@ import com.example.joseph.sweepersd.watchzone.model.LimitScheduleDate;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneLimitsObserver;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneModelRepository;
 import com.example.joseph.sweepersd.watchzone.model.WatchZoneUtils;
+import com.hutchins.tbd.R;
 import com.roomorama.caldroid.CaldroidFragment;
 
 import java.util.ArrayList;
@@ -27,6 +25,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentTransaction;
 
 public class CalendarTabFragment extends TabFragment {
 

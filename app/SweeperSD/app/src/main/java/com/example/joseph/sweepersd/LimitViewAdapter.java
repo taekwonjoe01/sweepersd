@@ -1,7 +1,5 @@
 package com.example.joseph.sweepersd;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +8,7 @@ import android.widget.TextView;
 import com.example.joseph.sweepersd.limit.LimitModel;
 import com.example.joseph.sweepersd.limit.LimitParser;
 import com.example.joseph.sweepersd.limit.LimitSchedule;
+import com.hutchins.tbd.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class LimitViewAdapter extends RecyclerView.Adapter<LimitViewAdapter.ViewHolder> {
     private static final String TAG = LimitViewAdapter.class.getSimpleName();

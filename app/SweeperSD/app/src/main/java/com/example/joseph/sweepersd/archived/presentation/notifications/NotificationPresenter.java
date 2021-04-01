@@ -4,13 +4,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import androidx.core.app.NotificationCompat;
 
-import com.example.joseph.sweepersd.R;
 import com.example.joseph.sweepersd.archived.model.watchzone.WatchZone;
 import com.example.joseph.sweepersd.archived.presentation.manualalarms.WatchZoneViewActivity;
+import com.hutchins.tbd.R;
 
 import org.apache.commons.lang3.text.WordUtils;
+
+import androidx.core.app.NotificationCompat;
 
 /**
  * Created by joseph on 4/7/16.
