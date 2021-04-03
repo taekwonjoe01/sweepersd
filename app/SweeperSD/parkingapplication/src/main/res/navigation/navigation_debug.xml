@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/debug_main_screen"
-        android:name="com.hutchins.parkingapplication.DebugMainScreen"
+        android:name="com.hutchins.parkingapplication.debugui.DebugMainScreen"
         android:label="Debug Main Screen" >
         <action
             android:id="@+id/action_debug_main_screen_to_debugSelectDeviceScreen"
@@ -13,6 +13,6 @@
     </fragment>
     <fragment
         android:id="@+id/debugSelectDeviceScreen"
-        android:name="com.hutchins.parkingapplication.DebugSelectDeviceScreen"
+        android:name="com.hutchins.parkingapplication.debugui.DebugSelectDeviceScreen"
         android:label="DebugSelectDeviceScreen" />
 </navigation>

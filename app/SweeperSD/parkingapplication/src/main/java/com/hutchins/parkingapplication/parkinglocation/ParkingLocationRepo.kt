@@ -1,7 +1,6 @@
 package com.hutchins.parkingapplication.parkinglocation
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import kotlinx.coroutines.flow.Flow
 
@@ -12,7 +11,6 @@ object ParkingLocationRepo {
     lateinit var applicationContext: Context
 
     private val parkingLocationDatabase: ParkingLocationDatabase by lazy {
-        Log.e("Joey", "Creating database")
         Room.databaseBuilder(
                 applicationContext,
                 ParkingLocationDatabase::class.java, "parkingLocationDatabase"

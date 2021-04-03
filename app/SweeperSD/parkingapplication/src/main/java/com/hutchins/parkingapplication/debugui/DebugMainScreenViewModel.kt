@@ -1,4 +1,4 @@
-package com.hutchins.parkingapplication
+package com.hutchins.parkingapplication.debugui
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

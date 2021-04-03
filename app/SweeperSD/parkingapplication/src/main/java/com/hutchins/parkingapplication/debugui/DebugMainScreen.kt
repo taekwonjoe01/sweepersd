@@ -1,4 +1,4 @@
-package com.hutchins.parkingapplication
+package com.hutchins.parkingapplication.debugui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.hutchins.navui.jetpack.JetpackScreenFragment
+import com.hutchins.parkingapplication.DebugMainScreenDirections
 import com.hutchins.parkingapplication.databinding.DebugMainScreenBinding
 import com.hutchins.parkingapplication.permissions.LocationPermissionHelper
 import com.hutchins.parkingapplication.permissions.LocationPermissionState
@@ -38,6 +39,8 @@ class DebugMainScreen : JetpackScreenFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         viewModel.checkBluetoothPermissionsDelegate = LocationPermissionHelper(requireContext())
         viewModel.permissionStateLiveData.observe(viewLifecycleOwner, {
             binding.permissionStateTextView.text = when (it) {
@@ -60,7 +63,6 @@ class DebugMainScreen : JetpackScreenFragment() {
         viewModel.numParkingLocationsLiveData.observe(viewLifecycleOwner, {
             binding.numParkingLocationsTextView.text = it.toString()
         })
-        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun onStart() {

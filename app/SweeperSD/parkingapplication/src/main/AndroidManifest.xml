@@ -24,7 +24,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".DebugActivity">
+            android:name=".debugui.DebugActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

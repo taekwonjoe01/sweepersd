@@ -1,7 +1,6 @@
-package com.hutchins.parkingapplication
+package com.hutchins.parkingapplication.debugui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hutchins.navui.jetpack.JetpackScreenFragment
+import com.hutchins.parkingapplication.R
 import com.hutchins.parkingapplication.bluetooth.PairedBluetoothDevice
 import com.hutchins.parkingapplication.databinding.DebugSelectDeviceScreenBinding
 import kotlinx.coroutines.Dispatchers
@@ -44,8 +44,6 @@ class DebugSelectDeviceScreen : JetpackScreenFragment() {
         viewModel.availableDevicesLiveData.observe(viewLifecycleOwner, {
             adapter.devices = it
             adapter.notifyDataSetChanged()
-
-            Log.e("Joey", it.toString())
         })
     }
 }
@@ -56,7 +54,6 @@ class BluetoothDeviceAdapter(val itemClickListener: OnPairedBluetoothDeviceSelec
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): MyHolder {
-        Log.e("Joey", "onCreateViewHolder")
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
                 .inflate(R.layout.layout_select_device_list_item, viewGroup, false)
@@ -71,7 +68,6 @@ class BluetoothDeviceAdapter(val itemClickListener: OnPairedBluetoothDeviceSelec
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        Log.e("Joey", "devices size is ${devices.size}")
         return devices.size
     }
 
@@ -81,7 +77,6 @@ class MyHolder(private val view: View) : RecyclerView.ViewHolder(view) {
     val deviceNameTextView: AppCompatTextView = view.findViewById(R.id.deviceNameTextView)
 
     fun bind(device: PairedBluetoothDevice, clickListener: OnPairedBluetoothDeviceSelectedListener) {
-        Log.e("Joey", "bind")
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         deviceNameTextView.text = device.name

@@ -24,11 +24,8 @@ class ParkingLocationService : Service() {
     @Suppress("SpellCheckingInspection")
     @SuppressLint("MissingPermission") // Because it is being checked, the linter just can't see it!
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.e("Joey", "ParkingLocationService onStartCommand ${intent?.action}")
-
-
         if (LocationPermissionHelper(this).getLocationPermissionState() == LocationPermissionState.GRANTED) {
-
+            Log.i(TAG, "ParkingLocationService permission is granted. Starting location request...")
             val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
             val cancellationTokenSource = CancellationTokenSource()
 
@@ -39,11 +36,11 @@ class ParkingLocationService : Service() {
                     GlobalScope.launch(Dispatchers.IO) {
                         val record = ParkingLocationRecord.fromLocation(it)
                         ParkingLocationRepo.addParkingLocationRecord(record)
-                        Log.e("Joey", "Location is $record")
+                        Log.i(TAG, "Location is $record")
                         stopSelf()
                     }
                 } ?: kotlin.run {
-                    Log.e("Joey", "Failed to get location??")
+                    Log.w(TAG, "Failed to get location??")
                     stopSelf()
                 }
             }
@@ -56,8 +53,7 @@ class ParkingLocationService : Service() {
         return null
     }
 
-    override fun onDestroy() {
-        Log.e("Joey", "ParkingLocationService onDestroy")
-        super.onDestroy()
+    companion object {
+        const val TAG = "ParkingLocationService"
     }
 }

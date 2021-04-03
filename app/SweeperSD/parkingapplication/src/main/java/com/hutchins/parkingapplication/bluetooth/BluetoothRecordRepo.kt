@@ -1,8 +1,6 @@
 package com.hutchins.parkingapplication.bluetooth
 
 import android.content.Context
-import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.room.Room
 import kotlinx.coroutines.flow.Flow
 
@@ -13,7 +11,6 @@ object BluetoothRecordRepo {
     lateinit var applicationContext: Context
 
     private val bluetoothRecordDatabase: BluetoothRecordDatabase by lazy {
-        Log.e("Joey", "Creating database")
         Room.databaseBuilder(
             applicationContext,
             BluetoothRecordDatabase::class.java, "bluetoothRecordDatabase"

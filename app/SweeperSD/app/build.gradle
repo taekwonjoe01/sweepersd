@@ -5,7 +5,7 @@ apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '26.0.3'
+    buildToolsVersion "30.0.0"
     defaultConfig {
         applicationId "com.example.joseph.sweepersd"
         minSdkVersion 26
@@ -15,9 +15,8 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
-
-    dataBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding true
     }
 
     buildTypes {
@@ -34,9 +33,6 @@ android {
 
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/res/menu'] } }
     productFlavors {
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
     }
 }
 

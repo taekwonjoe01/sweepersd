@@ -77,7 +77,7 @@
 <!--            android:permission="android.permission.BIND_JOB_SERVICE"-->
 <!--            android:exported="false" />-->
         <activity
-            android:name="com.hutchins.tbd.com.hutchins.parkingapplication.DebugActivity"
+            android:name="com.hutchins.tbd.com.hutchins.parkingapplication.debugui.DebugActivity"
             android:label="@string/title_activity_debug">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

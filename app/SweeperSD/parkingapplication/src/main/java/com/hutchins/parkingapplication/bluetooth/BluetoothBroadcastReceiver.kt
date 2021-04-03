@@ -17,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 class BluetoothBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.e("Joey", "onReceive")
         when (intent.action) {
             BluetoothAdapter.ACTION_STATE_CHANGED -> {
                 val bluetoothAdapterEvent = when (val adapterState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)) {
@@ -59,14 +58,14 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
                     val shouldStopService = BluetoothRecordRepo.getSelectedPairedBluetoothDevice().first()?.pairedBluetoothDevice?.name == bluetoothDevice.name ?: true
                     if (shouldStopService) {
                         // send message to service to stop itself.
-                        Log.e("Joey", "calling startService to actually stop the service.")
+                        Log.i(TAG, "Starting ParkingLocationService")
 //                        context.startForegroundService(Intent(context, DrivingService::class.java).apply { setAction("Stop Service") })
                         context.startService(Intent(context, ParkingLocationService::class.java))
                     }
                 }
             }
             BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED -> {
-                Log.e("Joey", "ACTION_CONNECTION_STATE_CHANGED ${intent.extras}")
+                Log.d(TAG, "ACTION_CONNECTION_STATE_CHANGED ${intent.extras}")
 //                val connectionState = when (val state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1)) {
 //                    BluetoothAdapter.STATE_CONNECTED -> "Connected"
 //                    BluetoothAdapter.STATE_CONNECTING -> "Connecting"
