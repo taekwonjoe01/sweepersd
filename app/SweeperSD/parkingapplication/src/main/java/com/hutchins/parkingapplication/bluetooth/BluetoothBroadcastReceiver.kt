@@ -8,6 +8,7 @@ import android.content.Intent
 import android.util.Log
 import com.hutchins.parkingapplication.ParkingLocationService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -40,8 +41,8 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
                     BluetoothRecordRepo.addBluetoothDeviceRecord(record)
                 }
                 runBlocking(Dispatchers.IO) {
-                    BluetoothRecordRepo.getSelectedPairedBluetoothDevice()?.let {
-                        if (it.name == bluetoothDevice.name) {
+                    BluetoothRecordRepo.getSelectedPairedBluetoothDevice().first()?.let {
+                        if (it.pairedBluetoothDevice.name == bluetoothDevice.name) {
                             //Log.e("Joey", "calling startForegroundService.")
 //                            context.startForegroundService(Intent(context, DrivingService::class.java))
                         }
@@ -55,7 +56,7 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
                     BluetoothRecordRepo.addBluetoothDeviceRecord(record)
                 }
                 runBlocking(Dispatchers.IO) {
-                    val shouldStopService = BluetoothRecordRepo.getSelectedPairedBluetoothDevice()?.name == bluetoothDevice.name ?: true
+                    val shouldStopService = BluetoothRecordRepo.getSelectedPairedBluetoothDevice().first()?.pairedBluetoothDevice?.name == bluetoothDevice.name ?: true
                     if (shouldStopService) {
                         // send message to service to stop itself.
                         Log.e("Joey", "calling startService to actually stop the service.")

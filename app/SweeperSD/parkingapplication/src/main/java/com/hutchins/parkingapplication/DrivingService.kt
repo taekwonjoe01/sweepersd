@@ -1,6 +1,5 @@
 package com.hutchins.parkingapplication
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,16 +7,16 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.hutchins.parkingapplication.permissions.LocationPermissionHelper
+import com.hutchins.parkingapplication.permissions.LocationPermissionState
 
 /**
  * Created by joeyhutchins on 3/25/21.
@@ -82,17 +81,8 @@ class DrivingService : Service() {
         val locationRequest = LocationRequest.create()
         locationRequest.interval = 15000L
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-//        fusedLocationProviderClient.locationAvailability. {
+        if (LocationPermissionHelper(this).getLocationPermissionState() == LocationPermissionState.GRANTED) {
+            //        fusedLocationProviderClient.locationAvailability. {
 //            if (it.isLocationAvailable) {
 //
 //            } else {
@@ -108,6 +98,7 @@ class DrivingService : Service() {
 //                super.onLocationResult(p0)
 //            }
 //        })
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

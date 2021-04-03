@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by joeyhutchins on 3/10/21.
@@ -11,7 +12,7 @@ import androidx.room.Query
 @Dao
 interface BluetoothDeviceRecordDao {
     @get:Query("SELECT * FROM bluetoothDeviceEventRecords")
-    val bluetoothDeviceRecords: List<BluetoothDeviceEventRecord>
+    val bluetoothDeviceRecords: Flow<List<BluetoothDeviceEventRecord>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertBluetoothDeviceRecord(bluetoothAdapterRecord: BluetoothDeviceEventRecord): Long

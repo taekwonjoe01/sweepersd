@@ -2,7 +2,9 @@ package com.hutchins.parkingapplication.bluetooth
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.room.Room
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by joeyhutchins on 3/10/21.
@@ -18,7 +20,7 @@ object BluetoothRecordRepo {
         ).build()
     }
 
-    suspend fun getBluetoothAdapterRecords(): List<BluetoothAdapterRecord> {
+    suspend fun getBluetoothAdapterRecords(): Flow<List<BluetoothAdapterRecord>> {
         return bluetoothRecordDatabase.bluetoothAdapterRecordDao().bluetoothAdapterRecords
     }
 
@@ -26,7 +28,7 @@ object BluetoothRecordRepo {
         return bluetoothRecordDatabase.bluetoothAdapterRecordDao().insertBluetoothAdapterRecord(bluetoothAdapterRecord)
     }
 
-    suspend fun getBluetoothDeviceRecords(): List<BluetoothDeviceEventRecord> {
+    suspend fun getBluetoothDeviceRecords(): Flow<List<BluetoothDeviceEventRecord>> {
         return bluetoothRecordDatabase.bluetoothDeviceRecordDao().bluetoothDeviceRecords
     }
 
@@ -34,8 +36,8 @@ object BluetoothRecordRepo {
         return bluetoothRecordDatabase.bluetoothDeviceRecordDao().insertBluetoothDeviceRecord(bluetoothDeviceRecord)
     }
 
-    suspend fun getSelectedPairedBluetoothDevice(): PairedBluetoothDevice? {
-        return bluetoothRecordDatabase.selectedBluetoothDeviceRecordDao().selectedPairedBluetoothDeviceRecord?.pairedBluetoothDevice
+    suspend fun getSelectedPairedBluetoothDevice(): Flow<PairedBluetoothDeviceRecord?> {
+        return bluetoothRecordDatabase.selectedBluetoothDeviceRecordDao().selectedPairedBluetoothDeviceRecord
     }
 
     suspend fun setSelectedPairedBluetoothDevice(pairedBluetoothDevice: PairedBluetoothDevice): Long {

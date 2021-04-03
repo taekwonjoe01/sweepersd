@@ -3,6 +3,7 @@ package com.hutchins.parkingapplication.parkinglocation
 import android.content.Context
 import android.util.Log
 import androidx.room.Room
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by joeyhutchins on 3/27/21.
@@ -18,7 +19,7 @@ object ParkingLocationRepo {
         ).build()
     }
 
-    suspend fun getParkingLocationRecords(): List<ParkingLocationRecord> {
+    suspend fun getParkingLocationRecords(): Flow<List<ParkingLocationRecord>> {
         return parkingLocationDatabase.parkingLocationDao().parkingLocationRecords
     }
 
@@ -26,7 +27,7 @@ object ParkingLocationRepo {
         return parkingLocationDatabase.parkingLocationDao().addParkingLocationRecord(parkingLocationRecord)
     }
 
-    suspend fun getLastParkingLocationRecord(): ParkingLocationRecord? {
+    suspend fun getLastParkingLocationRecord(): Flow<ParkingLocationRecord?> {
         return parkingLocationDatabase.parkingLocationDao().lastParkingLocationRecord
     }
 }

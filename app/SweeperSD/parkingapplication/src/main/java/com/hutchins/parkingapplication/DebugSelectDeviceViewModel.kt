@@ -6,7 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.hutchins.parkingapplication.bluetooth.BluetoothRecordRepo
 import com.hutchins.parkingapplication.bluetooth.PairedBluetoothDevice
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -25,8 +27,8 @@ class DebugSelectDeviceViewModel : ViewModel() {
             Log.e("Joey", "${bondedDevice.address} ${bondedDevice.name} ${bondedDevice.bondState}")
         }
 
-        GlobalScope.launch {
-            Log.e("Joey", "number of records: ${BluetoothRecordRepo.getBluetoothAdapterRecords().size}")
+        GlobalScope.launch(Dispatchers.IO) {
+            Log.e("Joey", "number of records: ${BluetoothRecordRepo.getBluetoothAdapterRecords().first().size}")
         }
 
         val pairedBluetoothDevices = bondedDevices.map {

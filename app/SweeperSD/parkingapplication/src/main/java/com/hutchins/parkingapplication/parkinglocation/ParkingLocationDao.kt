@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by joeyhutchins on 3/27/21.
@@ -11,11 +12,11 @@ import androidx.room.Query
 @Dao
 interface ParkingLocationDao {
     @get:Query("SELECT * FROM parkingLocationRecords ORDER BY timestamp DESC LIMIT 1")
-    val lastParkingLocationRecord: ParkingLocationRecord?
+    val lastParkingLocationRecord: Flow<ParkingLocationRecord?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addParkingLocationRecord(parkingLocationRecord: ParkingLocationRecord): Long
 
     @get:Query("SELECT * FROM parkingLocationRecords")
-    val parkingLocationRecords: List<ParkingLocationRecord>
+    val parkingLocationRecords: Flow<List<ParkingLocationRecord>>
 }
