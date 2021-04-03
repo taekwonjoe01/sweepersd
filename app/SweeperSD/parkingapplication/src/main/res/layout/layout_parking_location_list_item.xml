@@ -9,7 +9,7 @@
         android:padding="2dp">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/deviceNameTextView"
+            android:id="@+id/parkingLocationDateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"

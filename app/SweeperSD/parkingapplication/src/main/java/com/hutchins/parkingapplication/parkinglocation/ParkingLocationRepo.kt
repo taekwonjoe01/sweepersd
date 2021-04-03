@@ -21,6 +21,10 @@ object ParkingLocationRepo {
         return parkingLocationDatabase.parkingLocationDao().parkingLocationRecords
     }
 
+    suspend fun getParkingLocationRecord(recordId: Long): Flow<ParkingLocationRecord?> {
+        return parkingLocationDatabase.parkingLocationDao().getParkingLocationRecord(recordId)
+    }
+
     suspend fun addParkingLocationRecord(parkingLocationRecord: ParkingLocationRecord): Long {
         return parkingLocationDatabase.parkingLocationDao().addParkingLocationRecord(parkingLocationRecord)
     }

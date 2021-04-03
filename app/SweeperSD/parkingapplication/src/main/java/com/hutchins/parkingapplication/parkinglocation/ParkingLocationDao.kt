@@ -19,4 +19,7 @@ interface ParkingLocationDao {
 
     @get:Query("SELECT * FROM parkingLocationRecords")
     val parkingLocationRecords: Flow<List<ParkingLocationRecord>>
+
+    @Query("SELECT * FROM parkingLocationRecords WHERE recordId = :recordId")
+    fun getParkingLocationRecord(recordId: Long): Flow<ParkingLocationRecord>
 }

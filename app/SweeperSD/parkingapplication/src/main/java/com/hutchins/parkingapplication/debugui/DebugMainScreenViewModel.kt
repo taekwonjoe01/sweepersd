@@ -19,9 +19,9 @@ class DebugMainScreenViewModel : ViewModel() {
             emit(it?.pairedBluetoothDevice?.name ?: "")
         }
     }
-    val lastParkingLocationDateLiveData = liveData {
+    val lastParkingLocationLiveData = liveData {
         ParkingLocationRepo.getLastParkingLocationRecord().collect {
-            emit(it?.timestamp)
+            emit(it)
         }
     }
     val numParkingLocationsLiveData = liveData {

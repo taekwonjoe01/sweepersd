@@ -6,13 +6,36 @@
     <fragment
         android:id="@+id/debug_main_screen"
         android:name="com.hutchins.parkingapplication.debugui.DebugMainScreen"
-        android:label="Debug Main Screen" >
+        android:label="Debug" >
         <action
             android:id="@+id/action_debug_main_screen_to_debugSelectDeviceScreen"
             app:destination="@id/debugSelectDeviceScreen" />
+        <action
+            android:id="@+id/action_debug_main_screen_to_debugParkingLocationDetailsScreen"
+            app:destination="@id/debugParkingLocationDetailsScreen" />
+        <action
+            android:id="@+id/action_debug_main_screen_to_debugParkingLocationListScreen"
+            app:destination="@id/debugParkingLocationListScreen" />
     </fragment>
     <fragment
         android:id="@+id/debugSelectDeviceScreen"
         android:name="com.hutchins.parkingapplication.debugui.DebugSelectDeviceScreen"
-        android:label="DebugSelectDeviceScreen" />
+        android:label="Select Bluetooth Device" >
+    </fragment>
+    <fragment
+        android:id="@+id/debugParkingLocationDetailsScreen"
+        android:name="com.hutchins.parkingapplication.debugui.DebugParkingLocationDetailsScreen"
+        android:label="Parking Location Details" >
+        <argument
+            android:name="parkingLocationRecordId"
+            app:argType="long" />
+    </fragment>
+    <fragment
+        android:id="@+id/debugParkingLocationListScreen"
+        android:name="com.hutchins.parkingapplication.debugui.DebugParkingLocationListScreen"
+        android:label="Recorded Parking Locations" >
+        <action
+            android:id="@+id/action_debugParkingLocationListScreen_to_debugParkingLocationDetailsScreen"
+            app:destination="@id/debugParkingLocationDetailsScreen" />
+    </fragment>
 </navigation>

@@ -60,7 +60,7 @@ public class DebugActivity extends AppCompatActivity
         PreferenceManager.setDefaultValues(this, R.xml.pref_notification, true);
         PreferenceManager.setDefaultValues(this, R.xml.pref_advanced_settings, true);
 
-        setContentView(R.layout.activity_debug);
+        //setContentView(R.layout.activity_debug);
 
         /*mLaunchMapsButton = (Button) findViewById(R.id.launch_maps);
         mSendParkedActivity = (Button) findViewById(R.id.sendParked);

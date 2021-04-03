@@ -11,5 +11,7 @@ class SweeperSDApplication : Application() {
 
         BluetoothRecordRepo.applicationContext = this
         ParkingLocationRepo.applicationContext = this
+
+        // TODO: Add better logging infrastructure. Want to report warnings/errors to crashlytics or similar.
     }
 }
