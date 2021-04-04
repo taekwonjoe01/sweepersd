@@ -2,6 +2,7 @@ package com.hutchins.parkingapplication.debugui
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatTextView
@@ -45,6 +46,19 @@ class DebugParkingLocationListScreen: JetpackScreenFragment() {
             adapter.parkingLocations = it
             adapter.notifyDataSetChanged()
         })
+    }
+
+    override fun onActionItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.seeAllLocationsOnMapMenuItem -> {
+                viewModel.parkingLocationsLiveData.value?.let { records ->
+                    val recordIds = records.map { it.recordId }
+                    findNavController().navigate(DebugParkingLocationListScreenDirections.actionDebugParkingLocationListScreenToDebugMapScreen(recordIds.toLongArray()))
+                }
+                return true
+            }
+        }
+        return super.onActionItemSelected(item)
     }
 }
 

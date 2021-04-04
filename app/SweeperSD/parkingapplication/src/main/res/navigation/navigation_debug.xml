@@ -29,6 +29,9 @@
         <argument
             android:name="parkingLocationRecordId"
             app:argType="long" />
+        <action
+            android:id="@+id/action_debugParkingLocationDetailsScreen_to_debugMapScreen"
+            app:destination="@id/debugMapScreen" />
     </fragment>
     <fragment
         android:id="@+id/debugParkingLocationListScreen"
@@ -37,5 +40,26 @@
         <action
             android:id="@+id/action_debugParkingLocationListScreen_to_debugParkingLocationDetailsScreen"
             app:destination="@id/debugParkingLocationDetailsScreen" />
+
+        <argument
+            android:name="@string/navigation_toolbar_action_menu"
+            app:argType="reference"
+            android:defaultValue="@menu/action_menu_parking_location_list_screen"/>
+        <action
+            android:id="@+id/action_debugParkingLocationListScreen_to_debugMapScreen"
+            app:destination="@id/debugMapScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/debugMapScreen"
+        android:name="com.hutchins.parkingapplication.debugui.DebugMapScreen"
+        android:label="" >
+        <argument
+            android:name="parkingLocationRecordIds"
+            app:argType="long[]" />
+
+        <argument
+            android:name="@string/navigation_toolbar_visibility"
+            app:argType="reference"
+            android:defaultValue="@integer/navigation_toolbar_visibility_gone"/>
     </fragment>
 </navigation>

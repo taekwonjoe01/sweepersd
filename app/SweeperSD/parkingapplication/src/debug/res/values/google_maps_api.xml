@@ -1,0 +1,5 @@
+<resources>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyAeety-9wJOsVhs_XBQQy-7LwX78sEdSQE
+    </string>
+</resources>

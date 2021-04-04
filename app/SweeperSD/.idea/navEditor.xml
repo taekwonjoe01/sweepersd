@@ -8,14 +8,35 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
+                  <entry key="debugMapScreen">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="733" />
+                            <option name="y" value="351" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="debugParkingLocationDetailsScreen">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="500" />
-                            <option name="y" value="410" />
+                            <option name="x" value="485" />
+                            <option name="y" value="342" />
                           </Point>
+                        </option>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_debugParkingLocationDetailsScreen_to_debugMapScreen">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
                         </option>
                       </LayoutPositions>
                     </value>

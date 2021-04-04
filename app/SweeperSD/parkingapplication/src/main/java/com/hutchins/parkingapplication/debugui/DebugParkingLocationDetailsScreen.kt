@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.hutchins.navui.jetpack.JetpackScreenFragment
 import com.hutchins.parkingapplication.databinding.DebugParkingLocationDetailsScreenBinding
@@ -24,7 +25,11 @@ class DebugParkingLocationDetailsScreen : JetpackScreenFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = DebugParkingLocationDetailsScreenBinding.inflate(inflater, container, false).apply {
-
+            seeLocationOnMapButton.setOnClickListener {
+                viewModel.parkingLocationRecordLiveData.value?.let {
+                    findNavController().navigate(DebugParkingLocationDetailsScreenDirections.actionDebugParkingLocationDetailsScreenToDebugMapScreen(longArrayOf(it.recordId)))
+                }
+            }
         }
         return binding.root
     }
