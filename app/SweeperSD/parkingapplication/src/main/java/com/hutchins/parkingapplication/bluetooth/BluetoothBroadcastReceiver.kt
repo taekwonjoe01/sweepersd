@@ -60,7 +60,7 @@ class BluetoothBroadcastReceiver : BroadcastReceiver() {
                         // send message to service to stop itself.
                         Log.i(TAG, "Starting ParkingLocationService")
 //                        context.startForegroundService(Intent(context, DrivingService::class.java).apply { setAction("Stop Service") })
-                        context.startService(Intent(context, ParkingLocationService::class.java))
+                        context.startForegroundService(Intent(context, ParkingLocationService::class.java))
                     }
                 }
             }
