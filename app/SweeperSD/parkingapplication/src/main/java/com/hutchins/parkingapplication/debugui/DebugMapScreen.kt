@@ -1,6 +1,7 @@
 package com.hutchins.parkingapplication.debugui
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,7 +65,7 @@ class DebugMapScreen: JetpackScreenFragment(), OnMapReadyCallback {
             for (marker in markers) {
                 googleMap.addMarker(marker)
             }
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64.0f, resources.displayMetrics).toInt()))
         })
     }
 }
