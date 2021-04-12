@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.collect
 class DebugParkingLocationListScreenViewModel: ViewModel() {
     val parkingLocationsLiveData = liveData {
         ParkingLocationRepo.getParkingLocationRecords().collect {
-            emit(it)
+            emit(it.reversed())
         }
     }
 }
