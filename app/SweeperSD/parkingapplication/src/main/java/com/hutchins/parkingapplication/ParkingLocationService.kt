@@ -37,12 +37,12 @@ class ParkingLocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         start()
+        getParkingLocation()
 
         return START_STICKY
     }
 
     @Suppress("SpellCheckingInspection")
-    @SuppressLint("MissingPermission") // Because it is being checked, the linter just can't see it!
     private fun start() {
         val pendingIntent: PendingIntent =
                 Intent(this, DebugMainScreen::class.java).let { notificationIntent ->
@@ -70,7 +70,10 @@ class ParkingLocationService : Service() {
         } else {
             startForeground(1, notification)
         }
+    }
 
+    @SuppressLint("MissingPermission") // Because it is being checked, the linter just can't see it!
+    private fun getParkingLocation() {
         if (LocationPermissionHelper(this).getLocationPermissionState() == LocationPermissionState.GRANTED) {
             Log.i(TAG, "ParkingLocationService permission is granted. Starting location request...")
             val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
